@@ -142,13 +142,18 @@ partial class MainForm
         _toolCombo.DropDownStyle = ComboBoxStyle.DropDownList;
         _toolCombo.Width = 220;
 
-        ConfigureTopButton(_runButton, 90);
-        ConfigureTopButton(_saveSettingsButton, 116);
-        ConfigureTopButton(_installContextMenuButton, 138);
-        ConfigureTopButton(_uninstallContextMenuButton, 138);
+        _runButton.Height = 28;
+        _runButton.Width = 90;
+        _saveSettingsButton.Height = 28;
+        _saveSettingsButton.Width = 116;
+        _installContextMenuButton.Height = 28;
+        _installContextMenuButton.Width = 138;
+        _uninstallContextMenuButton.Height = 28;
+        _uninstallContextMenuButton.Width = 138;
 
         _mainSplit.Dock = DockStyle.Fill;
         _mainSplit.FixedPanel = FixedPanel.Panel1;
+        _mainSplit.Size = new Size(980, 656);
         _mainSplit.SplitterDistance = 410;
         _mainSplit.Panel1.Controls.Add(_pathList);
         _mainSplit.Panel1.Controls.Add(_dropTargetsLabel);
@@ -173,10 +178,14 @@ partial class MainForm
         _pathButtonPanel.Controls.Add(_removeSelectedButton);
         _pathButtonPanel.Controls.Add(_clearButton);
 
-        ConfigureBottomButton(_addFilesButton, 82);
-        ConfigureBottomButton(_addFolderButton, 82);
-        ConfigureBottomButton(_removeSelectedButton, 104);
-        ConfigureBottomButton(_clearButton, 72);
+        _addFilesButton.Height = 28;
+        _addFilesButton.Width = 82;
+        _addFolderButton.Height = 28;
+        _addFolderButton.Width = 82;
+        _removeSelectedButton.Height = 28;
+        _removeSelectedButton.Width = 104;
+        _clearButton.Height = 28;
+        _clearButton.Width = 72;
 
         _settingsPanel.AutoScroll = true;
         _settingsPanel.Dock = DockStyle.Fill;
@@ -242,27 +251,114 @@ partial class MainForm
         _templateGroup.Controls.Add(_templateFallbackBox);
         _templateGroup.Controls.Add(_saveTemplateButton);
 
-        ConfigureLabel(_templateLabel, 16, 28, 78);
-        ConfigureCombo(_templateCombo, 96, 24, 250);
-        ConfigureButton(_newTemplateButton, 354, 23, 56);
-        ConfigureButton(_deleteTemplateButton, 416, 23, 56);
-        ConfigureLabel(_idLabel, 16, 62, 78);
-        ConfigureTextBox(_templateIdBox, 96, 58, 376);
-        ConfigureLabel(_nameLabel, 16, 94, 78);
-        ConfigureTextBox(_templateNameBox, 96, 90, 376);
-        ConfigureLabel(_descriptionLabel, 16, 126, 78);
-        ConfigureTextBox(_templateDescriptionBox, 96, 122, 376);
-        ConfigureLabel(_sourceLabel, 16, 158, 78);
-        ConfigureCombo(_templateSourceCombo, 96, 154, 130);
-        ConfigureLabel(_transformLabel, 238, 158, 78);
-        ConfigureCombo(_templateTransformCombo, 318, 154, 154);
-        ConfigureLabel(_languageLabel, 16, 190, 78);
-        ConfigureCombo(_templateLanguageCombo, 96, 186, 130);
-        ConfigureLabel(_formatLabel, 238, 190, 78);
-        ConfigureTextBox(_templateFormatBox, 318, 186, 154);
-        ConfigureLabel(_fallbackLabel, 16, 222, 78);
-        ConfigureTextBox(_templateFallbackBox, 96, 218, 130);
-        ConfigureButton(_saveTemplateButton, 318, 246, 154);
+        _templateLabel.Left = 16;
+        _templateLabel.Top = 28;
+        _templateLabel.Width = 78;
+        _templateLabel.Height = 22;
+        _templateLabel.TextAlign = ContentAlignment.MiddleLeft;
+
+        _templateCombo.DropDownStyle = ComboBoxStyle.DropDownList;
+        _templateCombo.Left = 96;
+        _templateCombo.Top = 24;
+        _templateCombo.Width = 250;
+
+        _newTemplateButton.Left = 354;
+        _newTemplateButton.Top = 23;
+        _newTemplateButton.Width = 56;
+        _newTemplateButton.Height = 28;
+
+        _deleteTemplateButton.Left = 416;
+        _deleteTemplateButton.Top = 23;
+        _deleteTemplateButton.Width = 56;
+        _deleteTemplateButton.Height = 28;
+
+        _idLabel.Left = 16;
+        _idLabel.Top = 62;
+        _idLabel.Width = 78;
+        _idLabel.Height = 22;
+        _idLabel.TextAlign = ContentAlignment.MiddleLeft;
+
+        _templateIdBox.Left = 96;
+        _templateIdBox.Top = 58;
+        _templateIdBox.Width = 376;
+
+        _nameLabel.Left = 16;
+        _nameLabel.Top = 94;
+        _nameLabel.Width = 78;
+        _nameLabel.Height = 22;
+        _nameLabel.TextAlign = ContentAlignment.MiddleLeft;
+
+        _templateNameBox.Left = 96;
+        _templateNameBox.Top = 90;
+        _templateNameBox.Width = 376;
+
+        _descriptionLabel.Left = 16;
+        _descriptionLabel.Top = 126;
+        _descriptionLabel.Width = 78;
+        _descriptionLabel.Height = 22;
+        _descriptionLabel.TextAlign = ContentAlignment.MiddleLeft;
+
+        _templateDescriptionBox.Left = 96;
+        _templateDescriptionBox.Top = 122;
+        _templateDescriptionBox.Width = 376;
+
+        _sourceLabel.Left = 16;
+        _sourceLabel.Top = 158;
+        _sourceLabel.Width = 78;
+        _sourceLabel.Height = 22;
+        _sourceLabel.TextAlign = ContentAlignment.MiddleLeft;
+
+        _templateSourceCombo.DropDownStyle = ComboBoxStyle.DropDownList;
+        _templateSourceCombo.Left = 96;
+        _templateSourceCombo.Top = 154;
+        _templateSourceCombo.Width = 130;
+
+        _transformLabel.Left = 238;
+        _transformLabel.Top = 158;
+        _transformLabel.Width = 78;
+        _transformLabel.Height = 22;
+        _transformLabel.TextAlign = ContentAlignment.MiddleLeft;
+
+        _templateTransformCombo.DropDownStyle = ComboBoxStyle.DropDownList;
+        _templateTransformCombo.Left = 318;
+        _templateTransformCombo.Top = 154;
+        _templateTransformCombo.Width = 154;
+
+        _languageLabel.Left = 16;
+        _languageLabel.Top = 190;
+        _languageLabel.Width = 78;
+        _languageLabel.Height = 22;
+        _languageLabel.TextAlign = ContentAlignment.MiddleLeft;
+
+        _templateLanguageCombo.DropDownStyle = ComboBoxStyle.DropDownList;
+        _templateLanguageCombo.Left = 96;
+        _templateLanguageCombo.Top = 186;
+        _templateLanguageCombo.Width = 130;
+
+        _formatLabel.Left = 238;
+        _formatLabel.Top = 190;
+        _formatLabel.Width = 78;
+        _formatLabel.Height = 22;
+        _formatLabel.TextAlign = ContentAlignment.MiddleLeft;
+
+        _templateFormatBox.Left = 318;
+        _templateFormatBox.Top = 186;
+        _templateFormatBox.Width = 154;
+
+        _fallbackLabel.Left = 16;
+        _fallbackLabel.Top = 222;
+        _fallbackLabel.Width = 78;
+        _fallbackLabel.Height = 22;
+        _fallbackLabel.TextAlign = ContentAlignment.MiddleLeft;
+
+        _templateFallbackBox.Left = 96;
+        _templateFallbackBox.Top = 218;
+        _templateFallbackBox.Width = 130;
+
+        _saveTemplateButton.Left = 318;
+        _saveTemplateButton.Top = 246;
+        _saveTemplateButton.Width = 154;
+        _saveTemplateButton.Height = 28;
 
         _statusGroup.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
         _statusGroup.Left = 10;
@@ -306,47 +402,4 @@ partial class MainForm
         ResumeLayout(false);
     }
 
-    private static void ConfigureTopButton(Button button, int width)
-    {
-        button.Height = 28;
-        button.Width = width;
-    }
-
-    private static void ConfigureBottomButton(Button button, int width)
-    {
-        button.Height = 28;
-        button.Width = width;
-    }
-
-    private static void ConfigureButton(Button button, int left, int top, int width)
-    {
-        button.Left = left;
-        button.Top = top;
-        button.Width = width;
-        button.Height = 28;
-    }
-
-    private static void ConfigureLabel(Label label, int left, int top, int width)
-    {
-        label.Left = left;
-        label.Top = top;
-        label.Width = width;
-        label.Height = 22;
-        label.TextAlign = ContentAlignment.MiddleLeft;
-    }
-
-    private static void ConfigureTextBox(TextBox textBox, int left, int top, int width)
-    {
-        textBox.Left = left;
-        textBox.Top = top;
-        textBox.Width = width;
-    }
-
-    private static void ConfigureCombo(ComboBox combo, int left, int top, int width)
-    {
-        combo.DropDownStyle = ComboBoxStyle.DropDownList;
-        combo.Left = left;
-        combo.Top = top;
-        combo.Width = width;
-    }
 }

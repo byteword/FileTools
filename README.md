@@ -67,6 +67,7 @@ src\FileTools.App\Ui\MainForm.resx
 ```
 
 Keep layout/control declarations in `MainForm.Designer.cs`, and keep runtime behavior and localized text binding in `MainForm.cs`.
+Form-level culture resources such as `Ui\MainForm.ko.resx` are intentionally excluded from the build; add UI strings only to `Resources\Strings*.resx`.
 
 ## Build Requirement
 

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Windows.Forms;
 
 namespace FileTools;
@@ -20,7 +21,13 @@ internal sealed partial class MainForm : Form
 
     private void InitializeRuntimeBindings()
     {
-        Load += (_, _) => LoadState();
+        Load += (_, _) =>
+        {
+            if (!IsDesignerHosted())
+            {
+                LoadState();
+            }
+        };
         DragEnter += FileDrop_DragEnter;
         DragDrop += FileDrop_DragDrop;
 
@@ -113,6 +120,7 @@ internal sealed partial class MainForm : Form
         _formatLabel.Text = Localizer.Get("LabelFormat");
         _fallbackLabel.Text = Localizer.Get("LabelFallback");
         _saveTemplateButton.Text = Localizer.Get("ButtonSaveTemplate");
+        _statusBox.Text = Localizer.Get("InitialStatus");
     }
 
     private void LoadState()
@@ -422,6 +430,11 @@ internal sealed partial class MainForm : Form
         where T : struct
     {
         return combo.SelectedItem is ComboOption<T> option ? option.Value : null;
+    }
+
+    private static bool IsDesignerHosted()
+    {
+        return LicenseManager.UsageMode == LicenseUsageMode.Designtime;
     }
 
     private static void SelectComboValue<T>(ComboBox combo, T value)
