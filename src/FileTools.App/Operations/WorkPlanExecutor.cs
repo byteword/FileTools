@@ -66,6 +66,7 @@ internal sealed class WorkPlanExecutor
                 return runner.Run(ToolMode.FolderStructure, [path]);
             case WorkPlanStepKind.FolderUnwrap:
                 settings.FolderStructureOperation = step.FolderOperation;
+                settings.FolderUnwrapNameMismatchMode = step.FolderUnwrapNameMismatchMode;
                 return runner.Run(ToolMode.FolderStructure, [path]);
             case WorkPlanStepKind.AutoRelocation:
                 settings.AutoRelocationTemplateId = string.IsNullOrWhiteSpace(step.AutoRelocationTemplateId)
@@ -80,22 +81,25 @@ internal sealed class WorkPlanExecutor
         }
     }
 
-    private static string? PredictNextPath(WorkPlanStep step, string path)
+    private string? PredictNextPath(WorkPlanStep step, string path)
     {
         return step.Kind switch
         {
             WorkPlanStepKind.FileNameCorrection => PredictRenamePath(path),
             WorkPlanStepKind.FolderWrap => PredictWrapPath(path),
-            WorkPlanStepKind.FolderUnwrap => PredictUnwrapPath(path, step.FolderOperation),
+            WorkPlanStepKind.FolderUnwrap => PredictUnwrapPath(
+                path,
+                step.FolderOperation,
+                step.FolderUnwrapNameMismatchMode),
             _ => null
         };
     }
 
-    private static string? PredictRenamePath(string path)
+    private string? PredictRenamePath(string path)
     {
         try
         {
-            var preview = new RenamePlanner().CreatePlan([path]).FirstOrDefault();
+            var preview = new RenamePlanner(CreateFileNameCorrector()).CreatePlan([path]).FirstOrDefault();
             return preview is { Status: RenamePreviewStatus.Ready or RenamePreviewStatus.Conflict } &&
                    !PathComparer.Equals(preview.OriginalPath, preview.SuggestedPath)
                 ? preview.SuggestedPath
@@ -124,7 +128,10 @@ internal sealed class WorkPlanExecutor
         return Path.Combine(parent, folderName, Path.GetFileName(path));
     }
 
-    private static string? PredictUnwrapPath(string path, FolderStructureOperation operation)
+    private static string? PredictUnwrapPath(
+        string path,
+        FolderStructureOperation operation,
+        FolderUnwrapNameMismatchMode mismatchMode)
     {
         if (!Directory.Exists(path))
         {
@@ -155,6 +162,43 @@ internal sealed class WorkPlanExecutor
             return null;
         }
 
-        return Path.Combine(dir.Parent.FullName, files[0].Name);
+        return Path.Combine(dir.Parent.FullName, ResolveUnwrappedFileName(dir.Name, files[0].Name, mismatchMode));
+    }
+
+    private static string ResolveUnwrappedFileName(
+        string folderName,
+        string fileName,
+        FolderUnwrapNameMismatchMode mismatchMode)
+    {
+        var fileStem = Path.GetFileNameWithoutExtension(fileName);
+        if (string.Equals(folderName, fileStem, StringComparison.OrdinalIgnoreCase))
+        {
+            return fileName;
+        }
+
+        var extension = Path.GetExtension(fileName);
+        return mismatchMode switch
+        {
+            FolderUnwrapNameMismatchMode.UseFolderName =>
+                WindowsFileNameSafety.MakeSafeFileName(folderName + extension),
+            FolderUnwrapNameMismatchMode.PrefixFolderName =>
+                WindowsFileNameSafety.MakeSafeFileName(folderName + "-" + fileStem + extension),
+            _ => fileName
+        };
+    }
+
+    private KoreanFileNameCorrector CreateFileNameCorrector()
+    {
+        if (!_baseSettings.RenameUseDictionary)
+        {
+            return new KoreanFileNameCorrector();
+        }
+
+        var dictionary = RenameDictionaryStore.Load();
+        return new KoreanFileNameCorrector(new CorrectionOptions
+        {
+            RenameDictionary = dictionary.Replacements,
+            CommonPhrases = dictionary.CommonPhrases.ToArray()
+        });
     }
 }

@@ -7,10 +7,12 @@ internal sealed class PlanStepDialog : Form
 {
     private readonly WorkPlanStep _step;
     private readonly ComboBox _folderOperationCombo = new();
+    private readonly ComboBox _folderMismatchCombo = new();
     private readonly ComboBox _templateCombo = new();
     private readonly TextBox _manualRootBox = new();
     private readonly Label _descriptionLabel = new();
     private readonly Label _folderOperationLabel = new();
+    private readonly Label _folderMismatchLabel = new();
     private readonly Label _templateLabel = new();
     private readonly Label _manualRootLabel = new();
     private readonly Button _browseButton = new();
@@ -28,7 +30,7 @@ internal sealed class PlanStepDialog : Form
         };
         StartPosition = FormStartPosition.CenterParent;
         Width = 520;
-        Height = 260;
+        Height = 300;
         MinimizeBox = false;
         MaximizeBox = false;
         FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -73,11 +75,22 @@ internal sealed class PlanStepDialog : Form
         };
         panel.Controls.Add(_folderOperationCombo);
 
-        ConfigureLabel(_templateLabel, Localizer.Get("LabelTemplate"), 16, 106);
+        ConfigureLabel(_folderMismatchLabel, Localizer.Get("LabelFolderUnwrapMismatch"), 16, 106);
+        panel.Controls.Add(_folderMismatchLabel);
+        _folderMismatchCombo.DropDownStyle = ComboBoxStyle.DropDownList;
+        _folderMismatchCombo.Left = 150;
+        _folderMismatchCombo.Top = 104;
+        _folderMismatchCombo.Width = 340;
+        _folderMismatchCombo.DataSource = Enum.GetValues<FolderUnwrapNameMismatchMode>()
+            .Select(mode => new ComboOption<FolderUnwrapNameMismatchMode>(ToolModeText.GetDisplayName(mode), mode))
+            .ToArray();
+        panel.Controls.Add(_folderMismatchCombo);
+
+        ConfigureLabel(_templateLabel, Localizer.Get("LabelTemplate"), 16, 70);
         panel.Controls.Add(_templateLabel);
         _templateCombo.DropDownStyle = ComboBoxStyle.DropDownList;
         _templateCombo.Left = 150;
-        _templateCombo.Top = 104;
+        _templateCombo.Top = 68;
         _templateCombo.Width = 340;
         _templateCombo.DataSource = AutoRelocationTemplateStore.LoadTemplates()
             .Select(template => new ComboOption<string>(
@@ -86,14 +99,14 @@ internal sealed class PlanStepDialog : Form
             .ToArray();
         panel.Controls.Add(_templateCombo);
 
-        ConfigureLabel(_manualRootLabel, Localizer.Get("LabelManualTargetRoot"), 16, 142);
+        ConfigureLabel(_manualRootLabel, Localizer.Get("LabelManualTargetRoot"), 16, 106);
         panel.Controls.Add(_manualRootLabel);
         _manualRootBox.Left = 150;
-        _manualRootBox.Top = 140;
+        _manualRootBox.Top = 104;
         _manualRootBox.Width = 260;
         _browseButton.Text = Localizer.Get("ButtonBrowse");
         _browseButton.Left = 408;
-        _browseButton.Top = 138;
+        _browseButton.Top = 102;
         _browseButton.Width = 80;
         _browseButton.Height = 26;
         _browseButton.Click += (_, _) => BrowseManualRoot();
@@ -105,7 +118,7 @@ internal sealed class PlanStepDialog : Form
             Text = "OK",
             DialogResult = DialogResult.OK,
             Left = 314,
-            Top = 184,
+            Top = 224,
             Width = 86
         };
         var cancelButton = new Button
@@ -113,7 +126,7 @@ internal sealed class PlanStepDialog : Form
             Text = Localizer.Get("ButtonCancel"),
             DialogResult = DialogResult.Cancel,
             Left = 404,
-            Top = 184,
+            Top = 224,
             Width = 86
         };
         panel.Controls.Add(okButton);
@@ -128,6 +141,8 @@ internal sealed class PlanStepDialog : Form
         var isAutoRelocation = _step.Kind == WorkPlanStepKind.AutoRelocation;
         _folderOperationLabel.Visible = isFolderUnwrap;
         _folderOperationCombo.Visible = isFolderUnwrap;
+        _folderMismatchLabel.Visible = isFolderUnwrap;
+        _folderMismatchCombo.Visible = isFolderUnwrap;
         _templateLabel.Visible = isAutoRelocation;
         _templateCombo.Visible = isAutoRelocation;
         _manualRootLabel.Visible = isAutoRelocation;
@@ -156,6 +171,7 @@ internal sealed class PlanStepDialog : Form
     private void LoadValues(FileToolsSettings settings)
     {
         SelectComboValue(_folderOperationCombo, _step.FolderOperation);
+        SelectComboValue(_folderMismatchCombo, _step.FolderUnwrapNameMismatchMode);
         SelectComboValue(_templateCombo, string.IsNullOrWhiteSpace(_step.AutoRelocationTemplateId)
             ? settings.AutoRelocationTemplateId
             : _step.AutoRelocationTemplateId);
@@ -167,6 +183,11 @@ internal sealed class PlanStepDialog : Form
         if (_folderOperationCombo.SelectedItem is ComboOption<FolderStructureOperation> folderOperation)
         {
             _step.FolderOperation = folderOperation.Value;
+        }
+
+        if (_folderMismatchCombo.SelectedItem is ComboOption<FolderUnwrapNameMismatchMode> mismatchMode)
+        {
+            _step.FolderUnwrapNameMismatchMode = mismatchMode.Value;
         }
 
         if (_templateCombo.SelectedItem is ComboOption<string> template)

@@ -14,6 +14,7 @@ FileTools provides three current-user ContextMenu actions for selected files and
 2. **폴더 wrapping / unwrapping**
    - In automatic mode, selected files are wrapped into same-stem folders.
    - Selected folders are unwrapped when they are single-file folders, otherwise direct child files are moved up.
+   - Single-file folder unwrapping can keep the original filename, rename to the folder name, or rename to `folder-file`.
    - Existing destination files are not overwritten.
 
 3. **폴더 자동 재배치**
@@ -40,12 +41,19 @@ The standalone window supports:
 - Opening a separate tabbed settings window for defaults, rename options, AutoRelocation defaults, folder options, and Explorer ContextMenu registration.
 
 The settings window owns operational defaults and Explorer ContextMenu installation/removal. ContextMenu registration can be grouped or expanded, and individual ContextMenu actions can be enabled or disabled.
-AutoRelocation template editing and rename dictionary editing are reserved for separate dialogs so the settings tabs stay compact.
+Folder wrapping/unwrapping and AutoRelocation commands can be selected independently for Explorer registration. Pressing OK in the settings window saves the options and synchronizes the current-user ContextMenu registration, even if the Install/Remove buttons are not pressed.
+
+Separate dialogs are available for:
+
+- Rename replacement dictionary entries (`source -> replacement`).
+- Rename common phrase dictionary entries used by the filename correction scorer.
+- AutoRelocation template editing for the current lightweight template model.
 
 Settings and templates are stored under:
 
 ```text
 %APPDATA%\FileTools
+%APPDATA%\FileTools\rename-dictionary.json
 %APPDATA%\FileTools\Relocate
 ```
 
@@ -124,7 +132,7 @@ MSI options:
 - `Grouped Context Menu`: default. Shows one `FileTools` menu with subcommands.
 - `Expanded Context Menu`: shows `FileTools 열기` and all tool commands directly.
 
-The grouped menu is the default. In the feature selection page, select `Expanded Context Menu` to install the direct entries instead. If both grouped and expanded features are selected, the installer conditions prefer expanded entries.
+The grouped menu is the default. In the feature selection page, select `Expanded Context Menu` to install the direct entries instead. If both grouped and expanded features are selected, the installer conditions prefer expanded entries. The MSI installs the default command set; after first launch, use FileTools settings to choose individual folder wrapping/unwrapping and AutoRelocation commands.
 
 `FileTools.sln` intentionally contains only the app project so Visual Studio can load it without WiX tooling. The MSI project is isolated in `installer\FileTools.Installer.sln`; build it with `build_msi.ps1` or open that solution in Visual Studio with a WiX v4-compatible extension such as HeatWave.
 
@@ -189,7 +197,15 @@ FileTools.exe /open "%1"
 FileTools.exe /context FileNameCorrection "%1"
 FileTools.exe /context FolderStructure "%1"
 FileTools.exe /context AutoRelocation "%1"
+FileTools.exe /context FolderWrapFiles "%1"
+FileTools.exe /context FolderUnwrapSameNameSingleFile "%1"
+FileTools.exe /context FolderUnwrapSingleFile "%1"
+FileTools.exe /context FolderMoveInnerFilesUp "%1"
+FileTools.exe /context AutoRelocationCurrentFolder "%1"
+FileTools.exe /context AutoRelocationChooseTarget "%1"
 ```
+
+The first three `/context` commands are kept for backward compatibility. New registrations use ordered command keys so filename correction appears first, folder wrapping/unwrapping commands second, AutoRelocation commands third, and `Open FileTools` last.
 
 Explorer often starts one process per selected item. FileTools waits briefly, merges those selected paths through a temporary queue, runs the selected operation, and exits automatically. If any exception occurs, an error summary is shown.
 

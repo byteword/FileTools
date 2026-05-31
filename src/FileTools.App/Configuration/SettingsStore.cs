@@ -7,6 +7,8 @@ internal sealed class FileToolsSettings
 {
     public FolderStructureOperation FolderStructureOperation { get; set; } = FolderStructureOperation.Auto;
 
+    public FolderUnwrapNameMismatchMode FolderUnwrapNameMismatchMode { get; set; } = FolderUnwrapNameMismatchMode.KeepFileName;
+
     public string AutoRelocationTemplateId { get; set; } = AutoRelocationTemplateDefaults.DefaultTemplateId;
 
     public string? AutoRelocationTargetRootPath { get; set; }
@@ -21,7 +23,19 @@ internal sealed class FileToolsSettings
 
     public bool ContextMenuFolderStructure { get; set; } = true;
 
+    public bool ContextMenuFolderWrapFiles { get; set; } = true;
+
+    public bool ContextMenuFolderUnwrapSameNameSingleFile { get; set; } = true;
+
+    public bool ContextMenuFolderUnwrapSingleFile { get; set; } = true;
+
+    public bool ContextMenuFolderMoveInnerFilesUp { get; set; } = true;
+
     public bool ContextMenuAutoRelocation { get; set; } = true;
+
+    public bool ContextMenuAutoRelocationCurrentFolder { get; set; } = true;
+
+    public bool ContextMenuAutoRelocationChooseTarget { get; set; } = true;
 
     public bool RenameReviewBeforeApply { get; set; } = true;
 
@@ -32,17 +46,28 @@ internal sealed class FileToolsSettings
         return mode switch
         {
             ToolMode.FileNameCorrection => ContextMenuFileNameCorrection,
-            ToolMode.FolderStructure => ContextMenuFolderStructure,
-            ToolMode.AutoRelocation => ContextMenuAutoRelocation,
+            ToolMode.FolderStructure => ContextMenuFolderStructure && IsAnyContextMenuFolderOperationEnabled,
+            ToolMode.AutoRelocation => ContextMenuAutoRelocation && IsAnyContextMenuAutoRelocationOperationEnabled,
             _ => false
         };
     }
+
+    public bool IsAnyContextMenuFolderOperationEnabled =>
+        ContextMenuFolderWrapFiles ||
+        ContextMenuFolderUnwrapSameNameSingleFile ||
+        ContextMenuFolderUnwrapSingleFile ||
+        ContextMenuFolderMoveInnerFilesUp;
+
+    public bool IsAnyContextMenuAutoRelocationOperationEnabled =>
+        ContextMenuAutoRelocationCurrentFolder ||
+        ContextMenuAutoRelocationChooseTarget;
 
     public FileToolsSettings Clone()
     {
         return new FileToolsSettings
         {
             FolderStructureOperation = FolderStructureOperation,
+            FolderUnwrapNameMismatchMode = FolderUnwrapNameMismatchMode,
             AutoRelocationTemplateId = AutoRelocationTemplateId,
             AutoRelocationTargetRootPath = AutoRelocationTargetRootPath,
             RegisterContextMenu = RegisterContextMenu,
@@ -50,7 +75,13 @@ internal sealed class FileToolsSettings
             ContextMenuOpenApp = ContextMenuOpenApp,
             ContextMenuFileNameCorrection = ContextMenuFileNameCorrection,
             ContextMenuFolderStructure = ContextMenuFolderStructure,
+            ContextMenuFolderWrapFiles = ContextMenuFolderWrapFiles,
+            ContextMenuFolderUnwrapSameNameSingleFile = ContextMenuFolderUnwrapSameNameSingleFile,
+            ContextMenuFolderUnwrapSingleFile = ContextMenuFolderUnwrapSingleFile,
+            ContextMenuFolderMoveInnerFilesUp = ContextMenuFolderMoveInnerFilesUp,
             ContextMenuAutoRelocation = ContextMenuAutoRelocation,
+            ContextMenuAutoRelocationCurrentFolder = ContextMenuAutoRelocationCurrentFolder,
+            ContextMenuAutoRelocationChooseTarget = ContextMenuAutoRelocationChooseTarget,
             RenameReviewBeforeApply = RenameReviewBeforeApply,
             RenameUseDictionary = RenameUseDictionary
         };

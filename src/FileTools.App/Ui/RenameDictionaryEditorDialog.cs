@@ -1,0 +1,194 @@
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace FileTools;
+
+internal sealed class RenameDictionaryEditorDialog : Form
+{
+    private readonly BindingList<RenameDictionaryEntry> _entries;
+    private readonly ListBox _list = new();
+    private readonly TextBox _sourceBox = new();
+    private readonly TextBox _replacementBox = new();
+
+    public RenameDictionaryEditorDialog(IEnumerable<RenameDictionaryEntry> entries)
+    {
+        _entries = new BindingList<RenameDictionaryEntry>(entries
+            .Where(static entry => !string.IsNullOrWhiteSpace(entry.Source))
+            .Select(static entry => new RenameDictionaryEntry
+            {
+                Source = entry.Source.Trim(),
+                Replacement = entry.Replacement.Trim()
+            })
+            .ToList());
+
+        Text = Localizer.Get("DialogRenameDictionaryTitle");
+        StartPosition = FormStartPosition.CenterParent;
+        Width = 620;
+        Height = 450;
+        MinimizeBox = false;
+        MaximizeBox = false;
+        FormBorderStyle = FormBorderStyle.FixedDialog;
+
+        BuildLayout();
+    }
+
+    public IReadOnlyList<RenameDictionaryEntry> Entries => _entries
+        .Where(static entry => !string.IsNullOrWhiteSpace(entry.Source))
+        .Select(static entry => new RenameDictionaryEntry
+        {
+            Source = entry.Source.Trim(),
+            Replacement = entry.Replacement.Trim()
+        })
+        .DistinctBy(static entry => entry.Source, StringComparer.OrdinalIgnoreCase)
+        .ToArray();
+
+    private void BuildLayout()
+    {
+        var root = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            Padding = new Padding(12),
+            ColumnCount = 1,
+            RowCount = 5
+        };
+        root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
+        Controls.Add(root);
+
+        _list.Dock = DockStyle.Fill;
+        _list.DataSource = _entries;
+        _list.SelectedIndexChanged += (_, _) => LoadSelectedEntry();
+        root.Controls.Add(_list, 0, 0);
+
+        root.Controls.Add(CreateTextRow(Localizer.Get("LabelSourceText"), _sourceBox), 0, 1);
+        root.Controls.Add(CreateTextRow(Localizer.Get("LabelReplacementText"), _replacementBox), 0, 2);
+
+        var editButtons = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            WrapContents = false
+        };
+        var addButton = new Button { Text = Localizer.Get("ButtonAdd"), Width = 90, Height = 30 };
+        var updateButton = new Button { Text = Localizer.Get("ButtonUpdate"), Width = 90, Height = 30 };
+        var deleteButton = new Button { Text = Localizer.Get("ButtonDelete"), Width = 90, Height = 30 };
+        addButton.Click += (_, _) => AddEntry();
+        updateButton.Click += (_, _) => UpdateEntry();
+        deleteButton.Click += (_, _) => DeleteEntry();
+        editButtons.Controls.Add(addButton);
+        editButtons.Controls.Add(updateButton);
+        editButtons.Controls.Add(deleteButton);
+        root.Controls.Add(editButtons, 0, 3);
+
+        var dialogButtons = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            FlowDirection = FlowDirection.RightToLeft,
+            WrapContents = false
+        };
+        var okButton = new Button { Text = "OK", DialogResult = DialogResult.OK, Width = 90 };
+        var cancelButton = new Button { Text = Localizer.Get("ButtonCancel"), DialogResult = DialogResult.Cancel, Width = 90 };
+        dialogButtons.Controls.Add(cancelButton);
+        dialogButtons.Controls.Add(okButton);
+        root.Controls.Add(dialogButtons, 0, 4);
+
+        AcceptButton = okButton;
+        CancelButton = cancelButton;
+    }
+
+    private static Control CreateTextRow(string labelText, TextBox textBox)
+    {
+        var panel = new Panel { Dock = DockStyle.Fill };
+        panel.Controls.Add(new Label
+        {
+            Text = labelText,
+            Left = 0,
+            Top = 8,
+            Width = 150,
+            Height = 24,
+            TextAlign = ContentAlignment.MiddleLeft
+        });
+        textBox.Left = 158;
+        textBox.Top = 6;
+        textBox.Width = 390;
+        panel.Controls.Add(textBox);
+        return panel;
+    }
+
+    private void LoadSelectedEntry()
+    {
+        if (_list.SelectedItem is not RenameDictionaryEntry entry)
+        {
+            _sourceBox.Text = "";
+            _replacementBox.Text = "";
+            return;
+        }
+
+        _sourceBox.Text = entry.Source;
+        _replacementBox.Text = entry.Replacement;
+    }
+
+    private void AddEntry()
+    {
+        var entry = CreateEntryFromFields();
+        if (entry is null || HasDuplicateSource(entry.Source, exceptIndex: -1))
+        {
+            return;
+        }
+
+        _entries.Add(entry);
+        _list.SelectedItem = entry;
+    }
+
+    private void UpdateEntry()
+    {
+        if (_list.SelectedIndex < 0)
+        {
+            AddEntry();
+            return;
+        }
+
+        var entry = CreateEntryFromFields();
+        if (entry is null || HasDuplicateSource(entry.Source, _list.SelectedIndex))
+        {
+            return;
+        }
+
+        var index = _list.SelectedIndex;
+        _entries[index] = entry;
+        _list.SelectedIndex = index;
+    }
+
+    private void DeleteEntry()
+    {
+        if (_list.SelectedIndex >= 0)
+        {
+            _entries.RemoveAt(_list.SelectedIndex);
+        }
+    }
+
+    private RenameDictionaryEntry? CreateEntryFromFields()
+    {
+        var source = _sourceBox.Text.Trim();
+        if (source.Length == 0)
+        {
+            return null;
+        }
+
+        return new RenameDictionaryEntry
+        {
+            Source = source,
+            Replacement = _replacementBox.Text.Trim()
+        };
+    }
+
+    private bool HasDuplicateSource(string source, int exceptIndex)
+    {
+        return _entries
+            .Where((_, index) => index != exceptIndex)
+            .Any(entry => string.Equals(entry.Source, source, StringComparison.OrdinalIgnoreCase));
+    }
+}

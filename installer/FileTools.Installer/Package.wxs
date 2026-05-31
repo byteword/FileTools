@@ -50,88 +50,120 @@
           KeyPath="yes" />
       </Component>
 
-      <Component Id="ContextMenuExpandedFilesComponent" Guid="8cc3397d-bccc-4f6a-8fb8-8145e67904ca" Condition="&amp;ContextMenuExpandedFeature=3">
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_Open" Type="string" Value="FileTools 열기" KeyPath="yes" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_Open" Name="MUIVerb" Type="string" Value="FileTools 열기" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_Open" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_Open" Name="MultiSelectModel" Type="string" Value="Player" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_Open\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /open &quot;%1&quot;" />
+      <Component Id="ContextMenuExpandedFilesComponent" Guid="d905f5af-190d-4c7f-a85e-774ecd31f746" Condition="&amp;ContextMenuExpandedFeature=3">
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_01_NameCorrection" Type="string" Value="파일이름 자동 교정" KeyPath="yes" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_01_NameCorrection" Name="MUIVerb" Type="string" Value="파일이름 자동 교정" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_01_NameCorrection" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_01_NameCorrection" Name="MultiSelectModel" Type="string" Value="Player" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_01_NameCorrection\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FileNameCorrection &quot;%1&quot;" />
 
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_NameCorrection" Type="string" Value="파일이름 자동 교정" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_NameCorrection" Name="MUIVerb" Type="string" Value="파일이름 자동 교정" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_NameCorrection" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_NameCorrection" Name="MultiSelectModel" Type="string" Value="Player" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_NameCorrection\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FileNameCorrection &quot;%1&quot;" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_02_FolderWrapFiles" Type="string" Value="파일 wrapping" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_02_FolderWrapFiles" Name="MUIVerb" Type="string" Value="파일 wrapping" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_02_FolderWrapFiles" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_02_FolderWrapFiles" Name="MultiSelectModel" Type="string" Value="Player" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_02_FolderWrapFiles\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FolderWrapFiles &quot;%1&quot;" />
 
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_FolderStructure" Type="string" Value="폴더 wrapping / unwrapping" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_FolderStructure" Name="MUIVerb" Type="string" Value="폴더 wrapping / unwrapping" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_FolderStructure" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_FolderStructure" Name="MultiSelectModel" Type="string" Value="Player" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_FolderStructure\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FolderStructure &quot;%1&quot;" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_06_AutoRelocationCurrentFolder" Type="string" Value="현재 폴더에서 자동 재배치" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_06_AutoRelocationCurrentFolder" Name="MUIVerb" Type="string" Value="현재 폴더에서 자동 재배치" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_06_AutoRelocationCurrentFolder" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_06_AutoRelocationCurrentFolder" Name="MultiSelectModel" Type="string" Value="Player" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_06_AutoRelocationCurrentFolder\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context AutoRelocationCurrentFolder &quot;%1&quot;" />
 
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_AutoRelocation" Type="string" Value="폴더 자동 재배치" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_AutoRelocation" Name="MUIVerb" Type="string" Value="폴더 자동 재배치" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_AutoRelocation" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_AutoRelocation" Name="MultiSelectModel" Type="string" Value="Player" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_AutoRelocation\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context AutoRelocation &quot;%1&quot;" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_07_AutoRelocationChooseTarget" Type="string" Value="선택한 폴더로 자동 재배치" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_07_AutoRelocationChooseTarget" Name="MUIVerb" Type="string" Value="선택한 폴더로 자동 재배치" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_07_AutoRelocationChooseTarget" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_07_AutoRelocationChooseTarget" Name="MultiSelectModel" Type="string" Value="Player" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_07_AutoRelocationChooseTarget\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context AutoRelocationChooseTarget &quot;%1&quot;" />
+
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_99_Open" Type="string" Value="FileTools 열기" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_99_Open" Name="MUIVerb" Type="string" Value="FileTools 열기" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_99_Open" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_99_Open" Name="MultiSelectModel" Type="string" Value="Player" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_99_Open\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /open &quot;%1&quot;" />
       </Component>
 
-      <Component Id="ContextMenuExpandedDirectoriesComponent" Guid="7dc4187b-8d7f-49c5-92ad-334c222f3731" Condition="&amp;ContextMenuExpandedFeature=3">
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_Open" Type="string" Value="FileTools 열기" KeyPath="yes" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_Open" Name="MUIVerb" Type="string" Value="FileTools 열기" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_Open" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_Open" Name="MultiSelectModel" Type="string" Value="Player" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_Open\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /open &quot;%1&quot;" />
+      <Component Id="ContextMenuExpandedDirectoriesComponent" Guid="d31ff423-ff85-46d1-81d7-26da1ca93cc8" Condition="&amp;ContextMenuExpandedFeature=3">
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_01_NameCorrection" Type="string" Value="파일이름 자동 교정" KeyPath="yes" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_01_NameCorrection" Name="MUIVerb" Type="string" Value="파일이름 자동 교정" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_01_NameCorrection" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_01_NameCorrection" Name="MultiSelectModel" Type="string" Value="Player" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_01_NameCorrection\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FileNameCorrection &quot;%1&quot;" />
 
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_NameCorrection" Type="string" Value="파일이름 자동 교정" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_NameCorrection" Name="MUIVerb" Type="string" Value="파일이름 자동 교정" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_NameCorrection" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_NameCorrection" Name="MultiSelectModel" Type="string" Value="Player" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_NameCorrection\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FileNameCorrection &quot;%1&quot;" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_03_FolderUnwrapSameName" Type="string" Value="같은 이름 단일 파일 폴더 unwrapping" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_03_FolderUnwrapSameName" Name="MUIVerb" Type="string" Value="같은 이름 단일 파일 폴더 unwrapping" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_03_FolderUnwrapSameName" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_03_FolderUnwrapSameName" Name="MultiSelectModel" Type="string" Value="Player" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_03_FolderUnwrapSameName\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FolderUnwrapSameNameSingleFile &quot;%1&quot;" />
 
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_FolderStructure" Type="string" Value="폴더 wrapping / unwrapping" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_FolderStructure" Name="MUIVerb" Type="string" Value="폴더 wrapping / unwrapping" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_FolderStructure" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_FolderStructure" Name="MultiSelectModel" Type="string" Value="Player" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_FolderStructure\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FolderStructure &quot;%1&quot;" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_04_FolderUnwrapSingleFile" Type="string" Value="단일 파일 폴더 unwrapping" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_04_FolderUnwrapSingleFile" Name="MUIVerb" Type="string" Value="단일 파일 폴더 unwrapping" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_04_FolderUnwrapSingleFile" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_04_FolderUnwrapSingleFile" Name="MultiSelectModel" Type="string" Value="Player" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_04_FolderUnwrapSingleFile\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FolderUnwrapSingleFile &quot;%1&quot;" />
 
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_AutoRelocation" Type="string" Value="폴더 자동 재배치" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_AutoRelocation" Name="MUIVerb" Type="string" Value="폴더 자동 재배치" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_AutoRelocation" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_AutoRelocation" Name="MultiSelectModel" Type="string" Value="Player" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_AutoRelocation\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context AutoRelocation &quot;%1&quot;" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_05_FolderMoveInnerFilesUp" Type="string" Value="폴더 내부 파일 상위로 이동" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_05_FolderMoveInnerFilesUp" Name="MUIVerb" Type="string" Value="폴더 내부 파일 상위로 이동" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_05_FolderMoveInnerFilesUp" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_05_FolderMoveInnerFilesUp" Name="MultiSelectModel" Type="string" Value="Player" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_05_FolderMoveInnerFilesUp\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FolderMoveInnerFilesUp &quot;%1&quot;" />
+
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_06_AutoRelocationCurrentFolder" Type="string" Value="현재 폴더에서 자동 재배치" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_06_AutoRelocationCurrentFolder" Name="MUIVerb" Type="string" Value="현재 폴더에서 자동 재배치" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_06_AutoRelocationCurrentFolder" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_06_AutoRelocationCurrentFolder" Name="MultiSelectModel" Type="string" Value="Player" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_06_AutoRelocationCurrentFolder\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context AutoRelocationCurrentFolder &quot;%1&quot;" />
+
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_07_AutoRelocationChooseTarget" Type="string" Value="선택한 폴더로 자동 재배치" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_07_AutoRelocationChooseTarget" Name="MUIVerb" Type="string" Value="선택한 폴더로 자동 재배치" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_07_AutoRelocationChooseTarget" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_07_AutoRelocationChooseTarget" Name="MultiSelectModel" Type="string" Value="Player" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_07_AutoRelocationChooseTarget\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context AutoRelocationChooseTarget &quot;%1&quot;" />
+
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_99_Open" Type="string" Value="FileTools 열기" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_99_Open" Name="MUIVerb" Type="string" Value="FileTools 열기" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_99_Open" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_99_Open" Name="MultiSelectModel" Type="string" Value="Player" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_99_Open\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /open &quot;%1&quot;" />
       </Component>
 
-      <Component Id="ContextMenuGroupedFilesComponent" Guid="5b1d2933-c866-4ed4-9670-03477580c79a" Condition="&amp;ContextMenuExpandedFeature&lt;&gt;3">
+      <Component Id="ContextMenuGroupedFilesComponent" Guid="842b2a81-b217-43a1-bec5-4d3457bd234d" Condition="&amp;ContextMenuExpandedFeature&lt;&gt;3">
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools" Type="string" Value="FileTools" KeyPath="yes" />
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools" Name="MUIVerb" Type="string" Value="FileTools" />
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools" Name="MultiSelectModel" Type="string" Value="Player" />
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools" Name="SubCommands" Type="string" Value="" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\Open" Type="string" Value="FileTools 열기" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\Open\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /open &quot;%1&quot;" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FileNameCorrection" Type="string" Value="파일이름 자동 교정" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FileNameCorrection\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FileNameCorrection &quot;%1&quot;" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FolderStructure" Type="string" Value="폴더 wrapping / unwrapping" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FolderStructure\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FolderStructure &quot;%1&quot;" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\AutoRelocation" Type="string" Value="폴더 자동 재배치" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\AutoRelocation\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context AutoRelocation &quot;%1&quot;" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FileTools_01_NameCorrection" Type="string" Value="파일이름 자동 교정" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FileTools_01_NameCorrection\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FileNameCorrection &quot;%1&quot;" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FileTools_02_FolderWrapFiles" Type="string" Value="파일 wrapping" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FileTools_02_FolderWrapFiles\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FolderWrapFiles &quot;%1&quot;" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FileTools_06_AutoRelocationCurrentFolder" Type="string" Value="현재 폴더에서 자동 재배치" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FileTools_06_AutoRelocationCurrentFolder\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context AutoRelocationCurrentFolder &quot;%1&quot;" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FileTools_07_AutoRelocationChooseTarget" Type="string" Value="선택한 폴더로 자동 재배치" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FileTools_07_AutoRelocationChooseTarget\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context AutoRelocationChooseTarget &quot;%1&quot;" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FileTools_99_Open" Type="string" Value="FileTools 열기" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FileTools_99_Open\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /open &quot;%1&quot;" />
       </Component>
 
-      <Component Id="ContextMenuGroupedDirectoriesComponent" Guid="cd0b615c-c213-49b0-a734-6fa1e7070902" Condition="&amp;ContextMenuExpandedFeature&lt;&gt;3">
+      <Component Id="ContextMenuGroupedDirectoriesComponent" Guid="3ab862d5-b794-4a7f-8c0f-176a4352a48f" Condition="&amp;ContextMenuExpandedFeature&lt;&gt;3">
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools" Type="string" Value="FileTools" KeyPath="yes" />
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools" Name="MUIVerb" Type="string" Value="FileTools" />
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools" Name="MultiSelectModel" Type="string" Value="Player" />
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools" Name="SubCommands" Type="string" Value="" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\Open" Type="string" Value="FileTools 열기" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\Open\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /open &quot;%1&quot;" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileNameCorrection" Type="string" Value="파일이름 자동 교정" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileNameCorrection\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FileNameCorrection &quot;%1&quot;" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FolderStructure" Type="string" Value="폴더 wrapping / unwrapping" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FolderStructure\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FolderStructure &quot;%1&quot;" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\AutoRelocation" Type="string" Value="폴더 자동 재배치" />
-        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\AutoRelocation\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context AutoRelocation &quot;%1&quot;" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_01_NameCorrection" Type="string" Value="파일이름 자동 교정" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_01_NameCorrection\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FileNameCorrection &quot;%1&quot;" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_03_FolderUnwrapSameName" Type="string" Value="같은 이름 단일 파일 폴더 unwrapping" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_03_FolderUnwrapSameName\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FolderUnwrapSameNameSingleFile &quot;%1&quot;" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_04_FolderUnwrapSingleFile" Type="string" Value="단일 파일 폴더 unwrapping" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_04_FolderUnwrapSingleFile\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FolderUnwrapSingleFile &quot;%1&quot;" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_05_FolderMoveInnerFilesUp" Type="string" Value="폴더 내부 파일 상위로 이동" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_05_FolderMoveInnerFilesUp\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context FolderMoveInnerFilesUp &quot;%1&quot;" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_06_AutoRelocationCurrentFolder" Type="string" Value="현재 폴더에서 자동 재배치" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_06_AutoRelocationCurrentFolder\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context AutoRelocationCurrentFolder &quot;%1&quot;" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_07_AutoRelocationChooseTarget" Type="string" Value="선택한 폴더로 자동 재배치" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_07_AutoRelocationChooseTarget\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context AutoRelocationChooseTarget &quot;%1&quot;" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_99_Open" Type="string" Value="FileTools 열기" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_99_Open\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /open &quot;%1&quot;" />
       </Component>
     </DirectoryRef>
 

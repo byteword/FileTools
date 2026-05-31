@@ -32,6 +32,8 @@ internal sealed class WorkPlanStep
 
     public FolderStructureOperation FolderOperation { get; set; } = FolderStructureOperation.UnwrapSameNameSingleFile;
 
+    public FolderUnwrapNameMismatchMode FolderUnwrapNameMismatchMode { get; set; } = FolderUnwrapNameMismatchMode.KeepFileName;
+
     public string? AutoRelocationTemplateId { get; set; }
 
     public string? ManualTargetRootPath { get; set; }
@@ -40,7 +42,7 @@ internal sealed class WorkPlanStep
     {
         WorkPlanStepKind.FileNameCorrection => ToolModeText.GetDisplayName(ToolMode.FileNameCorrection),
         WorkPlanStepKind.FolderWrap => ToolModeText.GetDisplayName(FolderStructureOperation.WrapFiles),
-        WorkPlanStepKind.FolderUnwrap => ToolModeText.GetDisplayName(FolderOperation),
+        WorkPlanStepKind.FolderUnwrap => FormatFolderUnwrapName(),
         WorkPlanStepKind.AutoRelocation => FormatAutoRelocationName(),
         _ => Kind.ToString()
     };
@@ -58,5 +60,15 @@ internal sealed class WorkPlanStep
         return string.IsNullOrWhiteSpace(ManualTargetRootPath)
             ? $"{ToolModeText.GetDisplayName(ToolMode.AutoRelocation)} ({template})"
             : $"{ToolModeText.GetDisplayName(ToolMode.AutoRelocation)} ({template} -> {ManualTargetRootPath})";
+    }
+
+    private string FormatFolderUnwrapName()
+    {
+        if (FolderOperation != FolderStructureOperation.UnwrapSingleFileFolder)
+        {
+            return ToolModeText.GetDisplayName(FolderOperation);
+        }
+
+        return $"{ToolModeText.GetDisplayName(FolderOperation)} ({ToolModeText.GetDisplayName(FolderUnwrapNameMismatchMode)})";
     }
 }

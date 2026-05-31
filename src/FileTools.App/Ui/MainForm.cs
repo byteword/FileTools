@@ -184,7 +184,8 @@ public sealed partial class MainForm : Form
         var step = new WorkPlanStep
         {
             Kind = WorkPlanStepKind.FolderUnwrap,
-            FolderOperation = FolderStructureOperation.UnwrapSameNameSingleFile
+            FolderOperation = FolderStructureOperation.UnwrapSameNameSingleFile,
+            FolderUnwrapNameMismatchMode = _settings.FolderUnwrapNameMismatchMode
         };
         return EditStep(step) ? step : null;
     }

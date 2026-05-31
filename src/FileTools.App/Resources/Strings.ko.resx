@@ -68,6 +68,11 @@
   <data name="FolderOperationUnwrapSameName" xml:space="preserve"><value>같은 이름 단일 파일 폴더 unwrapping</value></data>
   <data name="FolderOperationUnwrapSingleFile" xml:space="preserve"><value>단일 파일 폴더 unwrapping</value></data>
   <data name="FolderOperationMoveInnerFilesUp" xml:space="preserve"><value>폴더 내부 파일 상위로 이동</value></data>
+  <data name="FolderUnwrapMismatchKeepFileName" xml:space="preserve"><value>파일명 유지</value></data>
+  <data name="FolderUnwrapMismatchUseFolderName" xml:space="preserve"><value>폴더명으로 변경</value></data>
+  <data name="FolderUnwrapMismatchPrefixFolderName" xml:space="preserve"><value>폴더명-파일명으로 변경</value></data>
+  <data name="ContextCommandAutoRelocationCurrentFolder" xml:space="preserve"><value>현재 폴더에서 자동 재배치</value></data>
+  <data name="ContextCommandAutoRelocationChooseTarget" xml:space="preserve"><value>선택한 폴더로 자동 재배치</value></data>
   <data name="ContextMenuLayoutGrouped" xml:space="preserve"><value>묶음형: FileTools 하위 메뉴</value></data>
   <data name="ContextMenuLayoutExpanded" xml:space="preserve"><value>펼침형: 기능을 각각 표시</value></data>
   <data name="MainFormTitle" xml:space="preserve"><value>FileTools 설정 및 작업</value></data>
@@ -88,7 +93,10 @@
   <data name="GroupOperationResult" xml:space="preserve"><value>작업 결과</value></data>
   <data name="LabelTemplate" xml:space="preserve"><value>템플릿</value></data>
   <data name="ButtonNew" xml:space="preserve"><value>새로</value></data>
+  <data name="ButtonAdd" xml:space="preserve"><value>추가</value></data>
+  <data name="ButtonUpdate" xml:space="preserve"><value>수정</value></data>
   <data name="ButtonDelete" xml:space="preserve"><value>삭제</value></data>
+  <data name="ButtonClose" xml:space="preserve"><value>닫기</value></data>
   <data name="LabelId" xml:space="preserve"><value>ID</value></data>
   <data name="LabelName" xml:space="preserve"><value>이름</value></data>
   <data name="LabelDescription" xml:space="preserve"><value>설명</value></data>
@@ -106,6 +114,7 @@
   <data name="NewTemplateDisplayName" xml:space="preserve"><value>새 템플릿</value></data>
   <data name="TemplateSavedFormat" xml:space="preserve"><value>템플릿을 저장했습니다.&#x0D;&#x0A;{0}</value></data>
   <data name="DefaultTemplateCannotDelete" xml:space="preserve"><value>Default 템플릿은 삭제할 수 없습니다.</value></data>
+  <data name="DefaultTemplateCannotRename" xml:space="preserve"><value>Default 템플릿 ID는 변경할 수 없습니다.</value></data>
   <data name="DeleteTemplateQuestion" xml:space="preserve"><value>선택한 템플릿을 삭제할까요?</value></data>
   <data name="ContextMenuInstalledFormat" xml:space="preserve"><value>ContextMenu를 설치했습니다.&#x0D;&#x0A;{0}</value></data>
   <data name="ContextMenuInstalledDialogFormat" xml:space="preserve"><value>ContextMenu를 설치했습니다.&#x0D;&#x0A;&#x0D;&#x0A;{0}</value></data>
@@ -121,6 +130,7 @@
   <data name="DefaultRelocationTemplateName" xml:space="preserve"><value>제목 초성 분류</value></data>
   <data name="DefaultRelocationTemplateDescription" xml:space="preserve"><value>직번 태그는 자동 처리에서 제외하고, 제목 초성으로 1단계 폴더를 만듭니다.</value></data>
   <data name="TemplateIdInvalid" xml:space="preserve"><value>템플릿 ID가 비어 있거나 파일명으로 사용할 수 없습니다.</value></data>
+  <data name="TemplateIdAlreadyExistsFormat" xml:space="preserve"><value>{0} 템플릿 ID는 이미 사용 중입니다.</value></data>
   <data name="SkipPrefix" xml:space="preserve"><value>SKIP: </value></data>
   <data name="GroupWorkPlan" xml:space="preserve"><value>작업 플랜</value></data>
   <data name="ButtonSettings" xml:space="preserve"><value>설정</value></data>
@@ -157,10 +167,25 @@
   <data name="CheckRenameReviewBeforeApply" xml:space="preserve"><value>모호한 이름변경 후보는 적용 전에 검토</value></data>
   <data name="CheckRenameUseDictionary" xml:space="preserve"><value>사용 가능한 경우 이름변경 사전 사용</value></data>
   <data name="ButtonEditRenameDictionary" xml:space="preserve"><value>이름변경 사전 편집...</value></data>
-  <data name="FutureRenameDictionaryMessage" xml:space="preserve"><value>이름변경 사전 편집기는 별도 다이얼로그로 추가할 예정입니다.</value></data>
+  <data name="ButtonEditCommonPhrases" xml:space="preserve"><value>자주 쓰는 문구 편집...</value></data>
+  <data name="DialogRenameDictionaryTitle" xml:space="preserve"><value>이름변경 사전</value></data>
+  <data name="DialogCommonPhrasesTitle" xml:space="preserve"><value>자주 쓰는 문구 사전</value></data>
+  <data name="LabelSourceText" xml:space="preserve"><value>원본 문구</value></data>
+  <data name="LabelReplacementText" xml:space="preserve"><value>변경 문구</value></data>
+  <data name="LabelCommonPhrase" xml:space="preserve"><value>문구</value></data>
   <data name="LabelDefaultTemplate" xml:space="preserve"><value>기본 템플릿</value></data>
   <data name="ButtonEditTemplates" xml:space="preserve"><value>템플릿 편집...</value></data>
-  <data name="FutureTemplateEditorMessage" xml:space="preserve"><value>자동 재배치 템플릿 편집기는 별도 다이얼로그로 추가할 예정입니다.</value></data>
+  <data name="DialogTemplateEditorTitle" xml:space="preserve"><value>자동 재배치 템플릿 편집기</value></data>
+  <data name="GroupTemplateGeneral" xml:space="preserve"><value>템플릿</value></data>
+  <data name="GroupPathRule" xml:space="preserve"><value>기본 경로 규칙</value></data>
+  <data name="GroupPrefilter" xml:space="preserve"><value>기본 사전 필터</value></data>
+  <data name="CheckEnablePrefilter" xml:space="preserve"><value>사전 필터 사용</value></data>
+  <data name="LabelOperator" xml:space="preserve"><value>연산자</value></data>
+  <data name="LabelValue" xml:space="preserve"><value>값</value></data>
+  <data name="LabelAction" xml:space="preserve"><value>동작</value></data>
+  <data name="LabelTargetFolder" xml:space="preserve"><value>대상 폴더</value></data>
   <data name="LabelDefaultFolderOperation" xml:space="preserve"><value>기본 폴더 작업</value></data>
+  <data name="LabelFolderUnwrapMismatch" xml:space="preserve"><value>단일파일 불일치</value></data>
+  <data name="GroupAutoRelocationContextMenu" xml:space="preserve"><value>자동 재배치 Context Menu 명령</value></data>
   <data name="FolderOptionsFutureMessage" xml:space="preserve"><value>폴더 감싸기/벗기기 옵션은 향후 확장을 위해 이 탭에 유지합니다.</value></data>
 </root>

@@ -34,7 +34,7 @@ internal sealed class FileToolRunner
     private OperationResult RunFileNameCorrection(IReadOnlyList<string> paths)
     {
         var result = new OperationResult();
-        var planner = new RenamePlanner();
+        var planner = new RenamePlanner(CreateFileNameCorrector());
         IReadOnlyList<RenamePreview> plan;
 
         try
@@ -198,7 +198,7 @@ internal sealed class FileToolRunner
         FileToolsEnvironment.Log("WRAP", filePath + " -> " + targetPath);
     }
 
-    private static bool UnwrapSingleFileFolder(string folderPath, bool sameNameOnly, OperationResult result)
+    private bool UnwrapSingleFileFolder(string folderPath, bool sameNameOnly, OperationResult result)
     {
         result.AddCandidate();
         if (!CanUnwrapSingleFileFolder(folderPath, sameNameOnly, out var dir, out var file, out var reason))
@@ -207,10 +207,11 @@ internal sealed class FileToolRunner
             return false;
         }
 
-        var targetPath = Path.Combine(dir.Parent!.FullName, file.Name);
+        var targetFileName = ResolveUnwrappedFileName(dir.Name, file.Name);
+        var targetPath = Path.Combine(dir.Parent!.FullName, targetFileName);
         if (File.Exists(targetPath) || Directory.Exists(targetPath))
         {
-            result.AddSkipped(file.Name + " 대상 경로 이미 존재");
+            result.AddSkipped(targetFileName + " 대상 경로 이미 존재");
             return false;
         }
 
@@ -220,9 +221,28 @@ internal sealed class FileToolRunner
             Directory.Delete(dir.FullName, recursive: false);
         }
 
-        result.AddApplied(dir.Name + "\\" + file.Name + " -> " + file.Name);
+        result.AddApplied(dir.Name + "\\" + file.Name + " -> " + targetFileName);
         FileToolsEnvironment.Log("UNWRAP", file.FullName + " -> " + targetPath);
         return true;
+    }
+
+    private string ResolveUnwrappedFileName(string folderName, string fileName)
+    {
+        var fileStem = Path.GetFileNameWithoutExtension(fileName);
+        if (string.Equals(folderName, fileStem, StringComparison.OrdinalIgnoreCase))
+        {
+            return fileName;
+        }
+
+        var extension = Path.GetExtension(fileName);
+        return _settings.FolderUnwrapNameMismatchMode switch
+        {
+            FolderUnwrapNameMismatchMode.UseFolderName =>
+                WindowsFileNameSafety.MakeSafeFileName(folderName + extension),
+            FolderUnwrapNameMismatchMode.PrefixFolderName =>
+                WindowsFileNameSafety.MakeSafeFileName(folderName + "-" + fileStem + extension),
+            _ => fileName
+        };
     }
 
     private static bool CanUnwrapSingleFileFolder(
@@ -322,7 +342,7 @@ internal sealed class FileToolRunner
             return result;
         }
 
-        var corrector = new KoreanFileNameCorrector();
+        var corrector = CreateFileNameCorrector();
         var targetRootOverride = string.IsNullOrWhiteSpace(_settings.AutoRelocationTargetRootPath)
             ? null
             : Path.GetFullPath(_settings.AutoRelocationTargetRootPath);
@@ -503,4 +523,19 @@ internal sealed class FileToolRunner
     private sealed record RelocationContextWithRoot(
         string RootFolder,
         AutoRelocationItemContext Context);
+
+    private KoreanFileNameCorrector CreateFileNameCorrector()
+    {
+        if (!_settings.RenameUseDictionary)
+        {
+            return new KoreanFileNameCorrector();
+        }
+
+        var dictionary = RenameDictionaryStore.Load();
+        return new KoreanFileNameCorrector(new CorrectionOptions
+        {
+            RenameDictionary = dictionary.Replacements,
+            CommonPhrases = dictionary.CommonPhrases.ToArray()
+        });
+    }
 }

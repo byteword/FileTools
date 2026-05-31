@@ -83,7 +83,7 @@ internal static class Program
 
     private static void RunFromContextMenu(string[] args)
     {
-        if (args.Length < 2 || !Enum.TryParse(args[0], ignoreCase: true, out ToolMode mode))
+        if (args.Length < 2 || !TryParseContextCommand(args[0], out var command))
         {
             FileToolsEnvironment.Log("CONTEXT", "Invalid arguments: " + string.Join(" | ", args));
             return;
@@ -97,10 +97,10 @@ internal static class Program
         }
 
         Directory.CreateDirectory(FileToolsEnvironment.QueueDir);
-        var queueFile = Path.Combine(FileToolsEnvironment.QueueDir, mode + ".txt");
+        var queueFile = Path.Combine(FileToolsEnvironment.QueueDir, command + ".txt");
         AppendQueue(queueFile, path);
 
-        using var mutex = new Mutex(initiallyOwned: false, name: "Local\\" + FileToolsEnvironment.AppName + "_" + mode);
+        using var mutex = new Mutex(initiallyOwned: false, name: "Local\\" + FileToolsEnvironment.AppName + "_" + command);
         if (!mutex.WaitOne(0))
         {
             return;
@@ -110,15 +110,20 @@ internal static class Program
         {
             Thread.Sleep(1300);
             var paths = ReadAndClearQueue(queueFile);
-            var result = new FileToolRunner(SettingsStore.Load()).Run(mode, paths);
+            var result = ExecuteContextCommand(command, paths);
+            if (result is null)
+            {
+                return;
+            }
+
             FileToolsEnvironment.Log(
                 "CONTEXT",
-                $"{mode}: target={result.CandidateCount}, applied={result.AppliedCount}, skipped={result.SkippedCount}, errors={result.Errors.Count}");
+                $"{command}: target={result.CandidateCount}, applied={result.AppliedCount}, skipped={result.SkippedCount}, errors={result.Errors.Count}");
 
             if (result.HasErrors)
             {
                 MessageBox.Show(
-                    result.ToUserMessage(ToolModeText.GetDisplayName(mode)),
+                    result.ToUserMessage(ToolModeText.GetDisplayName(command)),
                     FileToolsEnvironment.AppName,
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
@@ -134,6 +139,94 @@ internal static class Program
             {
             }
         }
+    }
+
+    private static bool TryParseContextCommand(string value, out ContextMenuCommand command)
+    {
+        if (Enum.TryParse(value, ignoreCase: true, out command) &&
+            Enum.IsDefined(command))
+        {
+            return true;
+        }
+
+        if (!Enum.TryParse(value, ignoreCase: true, out ToolMode mode) ||
+            !Enum.IsDefined(mode))
+        {
+            return false;
+        }
+
+        command = mode switch
+        {
+            ToolMode.FileNameCorrection => ContextMenuCommand.FileNameCorrection,
+            ToolMode.FolderStructure => ContextMenuCommand.FolderStructure,
+            ToolMode.AutoRelocation => ContextMenuCommand.AutoRelocation,
+            _ => default
+        };
+        return true;
+    }
+
+    private static OperationResult? ExecuteContextCommand(ContextMenuCommand command, IReadOnlyList<string> paths)
+    {
+        if (command == ContextMenuCommand.OpenApp)
+        {
+            Application.Run(new MainForm(paths));
+            return null;
+        }
+
+        var settings = SettingsStore.Load();
+        var mode = command switch
+        {
+            ContextMenuCommand.FileNameCorrection => ToolMode.FileNameCorrection,
+            ContextMenuCommand.FolderStructure => ToolMode.FolderStructure,
+            ContextMenuCommand.FolderWrapFiles => ToolMode.FolderStructure,
+            ContextMenuCommand.FolderUnwrapSameNameSingleFile => ToolMode.FolderStructure,
+            ContextMenuCommand.FolderUnwrapSingleFile => ToolMode.FolderStructure,
+            ContextMenuCommand.FolderMoveInnerFilesUp => ToolMode.FolderStructure,
+            ContextMenuCommand.AutoRelocation => ToolMode.AutoRelocation,
+            ContextMenuCommand.AutoRelocationCurrentFolder => ToolMode.AutoRelocation,
+            ContextMenuCommand.AutoRelocationChooseTarget => ToolMode.AutoRelocation,
+            _ => ToolMode.FileNameCorrection
+        };
+
+        switch (command)
+        {
+            case ContextMenuCommand.FolderWrapFiles:
+                settings.FolderStructureOperation = FolderStructureOperation.WrapFiles;
+                break;
+            case ContextMenuCommand.FolderUnwrapSameNameSingleFile:
+                settings.FolderStructureOperation = FolderStructureOperation.UnwrapSameNameSingleFile;
+                break;
+            case ContextMenuCommand.FolderUnwrapSingleFile:
+                settings.FolderStructureOperation = FolderStructureOperation.UnwrapSingleFileFolder;
+                break;
+            case ContextMenuCommand.FolderMoveInnerFilesUp:
+                settings.FolderStructureOperation = FolderStructureOperation.MoveInnerFilesUp;
+                break;
+            case ContextMenuCommand.AutoRelocationCurrentFolder:
+                settings.AutoRelocationTargetRootPath = null;
+                break;
+            case ContextMenuCommand.AutoRelocationChooseTarget:
+                var targetRoot = ChooseRelocationTargetRoot();
+                if (string.IsNullOrWhiteSpace(targetRoot))
+                {
+                    return null;
+                }
+
+                settings.AutoRelocationTargetRootPath = targetRoot;
+                break;
+        }
+
+        return new FileToolRunner(settings).Run(mode, paths);
+    }
+
+    private static string? ChooseRelocationTargetRoot()
+    {
+        using var dialog = new FolderBrowserDialog
+        {
+            Description = Localizer.Get("ManualTargetRootDialogDescription"),
+            UseDescriptionForTitle = true
+        };
+        return dialog.ShowDialog() == DialogResult.OK ? dialog.SelectedPath : null;
     }
 
     private static void OpenFromContextMenu(string[] args)
@@ -188,17 +281,15 @@ internal static class Program
 
         var legacyMode = args[0];
         var path = args[1];
-        var settings = SettingsStore.Load();
-        settings.FolderStructureOperation = legacyMode switch
+        var command = legacyMode switch
         {
-            "SameNameSingleFile" => FolderStructureOperation.UnwrapSameNameSingleFile,
-            "SingleFileFolder" => FolderStructureOperation.UnwrapSingleFileFolder,
-            "MoveAllInnerFiles" => FolderStructureOperation.MoveInnerFilesUp,
-            _ => settings.FolderStructureOperation
+            "SameNameSingleFile" => ContextMenuCommand.FolderUnwrapSameNameSingleFile,
+            "SingleFileFolder" => ContextMenuCommand.FolderUnwrapSingleFile,
+            "MoveAllInnerFiles" => ContextMenuCommand.FolderMoveInnerFilesUp,
+            _ => ContextMenuCommand.FolderStructure
         };
 
-        SettingsStore.Save(settings);
-        RunFromContextMenu([nameof(ToolMode.FolderStructure), path]);
+        RunFromContextMenu([command.ToString(), path]);
     }
 
     private static void AppendQueue(string queueFile, string path)

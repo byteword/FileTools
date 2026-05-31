@@ -68,6 +68,11 @@
   <data name="FolderOperationUnwrapSameName" xml:space="preserve"><value>Unwrap same-name single-file folders</value></data>
   <data name="FolderOperationUnwrapSingleFile" xml:space="preserve"><value>Unwrap single-file folders</value></data>
   <data name="FolderOperationMoveInnerFilesUp" xml:space="preserve"><value>Move inner files up</value></data>
+  <data name="FolderUnwrapMismatchKeepFileName" xml:space="preserve"><value>Keep file name</value></data>
+  <data name="FolderUnwrapMismatchUseFolderName" xml:space="preserve"><value>Rename to folder name</value></data>
+  <data name="FolderUnwrapMismatchPrefixFolderName" xml:space="preserve"><value>Rename to folder-file name</value></data>
+  <data name="ContextCommandAutoRelocationCurrentFolder" xml:space="preserve"><value>Auto relocate in current folder</value></data>
+  <data name="ContextCommandAutoRelocationChooseTarget" xml:space="preserve"><value>Auto relocate to selected folder</value></data>
   <data name="ContextMenuLayoutGrouped" xml:space="preserve"><value>Grouped: FileTools submenu</value></data>
   <data name="ContextMenuLayoutExpanded" xml:space="preserve"><value>Expanded: show each command directly</value></data>
   <data name="MainFormTitle" xml:space="preserve"><value>FileTools settings and tasks</value></data>
@@ -88,7 +93,10 @@
   <data name="GroupOperationResult" xml:space="preserve"><value>Operation result</value></data>
   <data name="LabelTemplate" xml:space="preserve"><value>Template</value></data>
   <data name="ButtonNew" xml:space="preserve"><value>New</value></data>
+  <data name="ButtonAdd" xml:space="preserve"><value>Add</value></data>
+  <data name="ButtonUpdate" xml:space="preserve"><value>Update</value></data>
   <data name="ButtonDelete" xml:space="preserve"><value>Delete</value></data>
+  <data name="ButtonClose" xml:space="preserve"><value>Close</value></data>
   <data name="LabelId" xml:space="preserve"><value>ID</value></data>
   <data name="LabelName" xml:space="preserve"><value>Name</value></data>
   <data name="LabelDescription" xml:space="preserve"><value>Description</value></data>
@@ -106,6 +114,7 @@
   <data name="NewTemplateDisplayName" xml:space="preserve"><value>New template</value></data>
   <data name="TemplateSavedFormat" xml:space="preserve"><value>Template saved.&#x0D;&#x0A;{0}</value></data>
   <data name="DefaultTemplateCannotDelete" xml:space="preserve"><value>The Default template cannot be deleted.</value></data>
+  <data name="DefaultTemplateCannotRename" xml:space="preserve"><value>The Default template ID cannot be renamed.</value></data>
   <data name="DeleteTemplateQuestion" xml:space="preserve"><value>Delete the selected template?</value></data>
   <data name="ContextMenuInstalledFormat" xml:space="preserve"><value>ContextMenu installed.&#x0D;&#x0A;{0}</value></data>
   <data name="ContextMenuInstalledDialogFormat" xml:space="preserve"><value>ContextMenu installed.&#x0D;&#x0A;&#x0D;&#x0A;{0}</value></data>
@@ -121,6 +130,7 @@
   <data name="DefaultRelocationTemplateName" xml:space="preserve"><value>Title initial buckets</value></data>
   <data name="DefaultRelocationTemplateDescription" xml:space="preserve"><value>Separates review-only direct-translation tags and creates first-level folders from title initials.</value></data>
   <data name="TemplateIdInvalid" xml:space="preserve"><value>Template ID cannot be blank or contain invalid file name characters.</value></data>
+  <data name="TemplateIdAlreadyExistsFormat" xml:space="preserve"><value>The {0} template ID is already in use.</value></data>
   <data name="SkipPrefix" xml:space="preserve"><value>SKIP: </value></data>
   <data name="GroupWorkPlan" xml:space="preserve"><value>Work plan</value></data>
   <data name="ButtonSettings" xml:space="preserve"><value>Settings</value></data>
@@ -157,10 +167,25 @@
   <data name="CheckRenameReviewBeforeApply" xml:space="preserve"><value>Review ambiguous rename candidates before applying</value></data>
   <data name="CheckRenameUseDictionary" xml:space="preserve"><value>Use rename dictionary when available</value></data>
   <data name="ButtonEditRenameDictionary" xml:space="preserve"><value>Edit rename dictionary...</value></data>
-  <data name="FutureRenameDictionaryMessage" xml:space="preserve"><value>The rename dictionary editor will be added as a separate dialog.</value></data>
+  <data name="ButtonEditCommonPhrases" xml:space="preserve"><value>Edit common phrases...</value></data>
+  <data name="DialogRenameDictionaryTitle" xml:space="preserve"><value>Rename dictionary</value></data>
+  <data name="DialogCommonPhrasesTitle" xml:space="preserve"><value>Common phrase dictionary</value></data>
+  <data name="LabelSourceText" xml:space="preserve"><value>Source text</value></data>
+  <data name="LabelReplacementText" xml:space="preserve"><value>Replacement text</value></data>
+  <data name="LabelCommonPhrase" xml:space="preserve"><value>Phrase</value></data>
   <data name="LabelDefaultTemplate" xml:space="preserve"><value>Default template</value></data>
   <data name="ButtonEditTemplates" xml:space="preserve"><value>Edit templates...</value></data>
-  <data name="FutureTemplateEditorMessage" xml:space="preserve"><value>The auto relocation template editor will be added as a separate dialog.</value></data>
+  <data name="DialogTemplateEditorTitle" xml:space="preserve"><value>Auto relocation template editor</value></data>
+  <data name="GroupTemplateGeneral" xml:space="preserve"><value>Template</value></data>
+  <data name="GroupPathRule" xml:space="preserve"><value>Primary path rule</value></data>
+  <data name="GroupPrefilter" xml:space="preserve"><value>Primary prefilter</value></data>
+  <data name="CheckEnablePrefilter" xml:space="preserve"><value>Enable prefilter</value></data>
+  <data name="LabelOperator" xml:space="preserve"><value>Operator</value></data>
+  <data name="LabelValue" xml:space="preserve"><value>Value</value></data>
+  <data name="LabelAction" xml:space="preserve"><value>Action</value></data>
+  <data name="LabelTargetFolder" xml:space="preserve"><value>Target folder</value></data>
   <data name="LabelDefaultFolderOperation" xml:space="preserve"><value>Default folder operation</value></data>
+  <data name="LabelFolderUnwrapMismatch" xml:space="preserve"><value>Single-file mismatch</value></data>
+  <data name="GroupAutoRelocationContextMenu" xml:space="preserve"><value>Auto relocation context commands</value></data>
   <data name="FolderOptionsFutureMessage" xml:space="preserve"><value>Folder wrapping and unwrapping options are intentionally kept here for future expansion.</value></data>
 </root>

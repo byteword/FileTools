@@ -235,7 +235,9 @@ internal static class AutoRelocationTemplateStore
                    StringComparison.OrdinalIgnoreCase));
     }
 
-    public static AutoRelocationTemplateFile SaveTemplate(AutoRelocationTemplateDocument document)
+    public static AutoRelocationTemplateFile SaveTemplate(
+        AutoRelocationTemplateDocument document,
+        string? previousTemplateId = null)
     {
         ArgumentNullException.ThrowIfNull(document);
         var id = NormalizeTemplateId(document.Id);
@@ -247,10 +249,33 @@ internal static class AutoRelocationTemplateStore
         Directory.CreateDirectory(TemplateRootPath);
         var normalized = NormalizeDocument(document, id);
         var targetPath = GetTemplateFilePath(id);
+        var previousId = string.IsNullOrWhiteSpace(previousTemplateId)
+            ? null
+            : NormalizeTemplateId(previousTemplateId);
+        var previousPath = string.IsNullOrWhiteSpace(previousId) ? null : GetTemplateFilePath(previousId);
+        if (string.Equals(previousId, AutoRelocationTemplateDefaults.DefaultTemplateId, StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(previousId, id, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(Localizer.Get("DefaultTemplateCannotRename"));
+        }
+
+        if (File.Exists(targetPath) &&
+            !string.Equals(targetPath, previousPath, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(Localizer.Format("TemplateIdAlreadyExistsFormat", id));
+        }
+
         File.WriteAllText(
             targetPath,
             JsonSerializer.Serialize(normalized, AutoRelocationTemplateDefaults.JsonOptions),
             Encoding.UTF8);
+        if (!string.IsNullOrWhiteSpace(previousPath) &&
+            !string.Equals(previousPath, targetPath, StringComparison.OrdinalIgnoreCase) &&
+            File.Exists(previousPath))
+        {
+            File.Delete(previousPath);
+        }
+
         return new AutoRelocationTemplateFile(normalized, targetPath);
     }
 
@@ -301,6 +326,32 @@ internal static class AutoRelocationTemplateStore
             normalized.IndexOfAny(Path.GetInvalidFileNameChars()) < 0 &&
             !string.Equals(normalized, ".", StringComparison.Ordinal) &&
             !string.Equals(normalized, "..", StringComparison.Ordinal);
+    }
+
+    public static string CreateUniqueTemplateId(string displayName, IEnumerable<string> existingIds)
+    {
+        var baseId = NormalizeTemplateId(displayName);
+        if (string.IsNullOrWhiteSpace(baseId))
+        {
+            baseId = "New template";
+        }
+
+        var existingSet = existingIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        if (!existingSet.Contains(baseId))
+        {
+            return baseId;
+        }
+
+        for (var index = 2; index < 10_000; index++)
+        {
+            var candidate = $"{baseId} {index}";
+            if (!existingSet.Contains(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        return $"{baseId} {DateTimeOffset.UtcNow:yyyyMMddHHmmss}";
     }
 
     private static string GetTemplateFilePath(string templateId)

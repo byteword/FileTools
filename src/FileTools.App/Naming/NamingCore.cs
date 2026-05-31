@@ -17,6 +17,10 @@ internal sealed record CorrectionOptions
         "외전",
         "직번"
     ];
+
+    public IReadOnlyList<RenameDictionaryEntry> RenameDictionary { get; init; } = [];
+
+    public string[] CommonPhrases { get; init; } = [];
 }
 
 internal sealed record FileNameParts
@@ -100,7 +104,7 @@ internal sealed partial class KoreanFileNameCorrector
     {
         _options = options ?? new CorrectionOptions();
         _knownTags = new HashSet<string>(_options.KnownTags, StringComparer.OrdinalIgnoreCase);
-        _obfuscatedHangulCandidateGenerator = new ObfuscatedHangulCandidateGenerator();
+        _obfuscatedHangulCandidateGenerator = new ObfuscatedHangulCandidateGenerator(new KoreanLexicon(_options.CommonPhrases));
     }
 
     public RenamePreview CreatePreview(string path)
@@ -243,7 +247,29 @@ internal sealed partial class KoreanFileNameCorrector
             reasons.Add("UTF-8/Latin-1 깨짐 후보 복구");
         }
 
+        result = ApplyRenameDictionary(result, reasons);
         return NormalizeSeparators(result);
+    }
+
+    private string ApplyRenameDictionary(string value, List<string> reasons)
+    {
+        var result = value;
+        foreach (var entry in _options.RenameDictionary)
+        {
+            if (string.IsNullOrWhiteSpace(entry.Source))
+            {
+                continue;
+            }
+
+            var next = result.Replace(entry.Source.Trim(), entry.Replacement.Trim(), StringComparison.OrdinalIgnoreCase);
+            if (!string.Equals(result, next, StringComparison.Ordinal))
+            {
+                reasons.Add($"사용자 사전 적용: {entry.Source} -> {entry.Replacement}");
+                result = next;
+            }
+        }
+
+        return result;
     }
 
     private static string? TryRecoverUtf8AsLatin1(string value)
