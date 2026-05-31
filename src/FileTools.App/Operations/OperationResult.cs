@@ -26,7 +26,7 @@ internal sealed class OperationResult
     public void AddSkipped(string message)
     {
         SkippedCount++;
-        Messages.Add("SKIP: " + message);
+        Messages.Add(Localizer.Get("SkipPrefix") + message);
     }
 
     public void AddError(string message)
@@ -49,15 +49,15 @@ internal sealed class OperationResult
         var builder = new StringBuilder();
         builder.AppendLine(title);
         builder.AppendLine();
-        builder.AppendLine($"대상: {CandidateCount}");
-        builder.AppendLine($"적용: {AppliedCount}");
-        builder.AppendLine($"건너뜀: {SkippedCount}");
-        builder.AppendLine($"오류: {Errors.Count}");
+        builder.AppendLine(Localizer.Format("ResultTargetCount", CandidateCount));
+        builder.AppendLine(Localizer.Format("ResultAppliedCount", AppliedCount));
+        builder.AppendLine(Localizer.Format("ResultSkippedCount", SkippedCount));
+        builder.AppendLine(Localizer.Format("ResultErrorCount", Errors.Count));
 
         if (Errors.Count > 0)
         {
             builder.AppendLine();
-            builder.AppendLine("오류:");
+            builder.AppendLine(Localizer.Get("ResultErrorsHeader"));
             foreach (var error in Errors.Take(20))
             {
                 builder.AppendLine("- " + error);
@@ -67,7 +67,7 @@ internal sealed class OperationResult
         if (Messages.Count > 0)
         {
             builder.AppendLine();
-            builder.AppendLine("작업:");
+            builder.AppendLine(Localizer.Get("ResultOperationsHeader"));
             foreach (var message in Messages.Take(30))
             {
                 builder.AppendLine("- " + message);

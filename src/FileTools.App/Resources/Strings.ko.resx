@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppName" xml:space="preserve"><value>FileTools</value></data>
+  <data name="ToolOpenApp" xml:space="preserve"><value>FileTools 열기</value></data>
+  <data name="ToolFileNameCorrection" xml:space="preserve"><value>파일이름 자동 교정</value></data>
+  <data name="ToolFolderStructure" xml:space="preserve"><value>폴더 wrapping / unwrapping</value></data>
+  <data name="ToolAutoRelocation" xml:space="preserve"><value>폴더 자동 재배치</value></data>
+  <data name="FolderOperationAuto" xml:space="preserve"><value>자동: 파일은 wrapping, 폴더는 unwrapping</value></data>
+  <data name="FolderOperationWrapFiles" xml:space="preserve"><value>파일 wrapping</value></data>
+  <data name="FolderOperationUnwrapSameName" xml:space="preserve"><value>같은 이름 단일 파일 폴더 unwrapping</value></data>
+  <data name="FolderOperationUnwrapSingleFile" xml:space="preserve"><value>단일 파일 폴더 unwrapping</value></data>
+  <data name="FolderOperationMoveInnerFilesUp" xml:space="preserve"><value>폴더 내부 파일 상위로 이동</value></data>
+  <data name="ContextMenuLayoutGrouped" xml:space="preserve"><value>묶음형: FileTools 하위 메뉴</value></data>
+  <data name="ContextMenuLayoutExpanded" xml:space="preserve"><value>펼침형: 기능을 각각 표시</value></data>
+  <data name="MainFormTitle" xml:space="preserve"><value>FileTools 설정 및 작업</value></data>
+  <data name="LabelTask" xml:space="preserve"><value>작업</value></data>
+  <data name="ButtonRun" xml:space="preserve"><value>실행</value></data>
+  <data name="ButtonSaveSettings" xml:space="preserve"><value>설정 저장</value></data>
+  <data name="ButtonInstallContextMenu" xml:space="preserve"><value>ContextMenu 설치</value></data>
+  <data name="ButtonUninstallContextMenu" xml:space="preserve"><value>ContextMenu 제거</value></data>
+  <data name="GroupDropTargets" xml:space="preserve"><value>드래그앤드롭 대상</value></data>
+  <data name="ButtonAddFiles" xml:space="preserve"><value>파일 추가</value></data>
+  <data name="ButtonAddFolder" xml:space="preserve"><value>폴더 추가</value></data>
+  <data name="ButtonRemoveSelected" xml:space="preserve"><value>선택 제거</value></data>
+  <data name="ButtonClear" xml:space="preserve"><value>비우기</value></data>
+  <data name="GroupFolderStructure" xml:space="preserve"><value>폴더 wrapping / unwrapping</value></data>
+  <data name="GroupContextMenu" xml:space="preserve"><value>ContextMenu</value></data>
+  <data name="CheckRegisterContextMenu" xml:space="preserve"><value>Explorer ContextMenu 등록</value></data>
+  <data name="GroupAutoRelocationTemplates" xml:space="preserve"><value>자동 재배치 템플릿</value></data>
+  <data name="GroupOperationResult" xml:space="preserve"><value>작업 결과</value></data>
+  <data name="LabelTemplate" xml:space="preserve"><value>템플릿</value></data>
+  <data name="ButtonNew" xml:space="preserve"><value>새로</value></data>
+  <data name="ButtonDelete" xml:space="preserve"><value>삭제</value></data>
+  <data name="LabelId" xml:space="preserve"><value>ID</value></data>
+  <data name="LabelName" xml:space="preserve"><value>이름</value></data>
+  <data name="LabelDescription" xml:space="preserve"><value>설명</value></data>
+  <data name="LabelSource" xml:space="preserve"><value>Source</value></data>
+  <data name="LabelTransform" xml:space="preserve"><value>Transform</value></data>
+  <data name="LabelLanguage" xml:space="preserve"><value>Language</value></data>
+  <data name="LabelFormat" xml:space="preserve"><value>Format</value></data>
+  <data name="LabelFallback" xml:space="preserve"><value>Fallback</value></data>
+  <data name="ButtonSaveTemplate" xml:space="preserve"><value>템플릿 저장</value></data>
+  <data name="InitialStatus" xml:space="preserve"><value>파일 또는 폴더를 왼쪽 목록으로 드래그앤드롭한 뒤 작업을 실행합니다.</value></data>
+  <data name="SettingsSavedFormat" xml:space="preserve"><value>설정을 저장했습니다.&#x0D;&#x0A;{0}</value></data>
+  <data name="NoTargetsMessage" xml:space="preserve"><value>처리할 파일 또는 폴더를 추가하세요.</value></data>
+  <data name="OpenFilesDialogTitle" xml:space="preserve"><value>처리할 파일 선택</value></data>
+  <data name="OpenFolderDialogDescription" xml:space="preserve"><value>처리할 폴더 선택</value></data>
+  <data name="NewTemplateDisplayName" xml:space="preserve"><value>새 템플릿</value></data>
+  <data name="TemplateSavedFormat" xml:space="preserve"><value>템플릿을 저장했습니다.&#x0D;&#x0A;{0}</value></data>
+  <data name="DefaultTemplateCannotDelete" xml:space="preserve"><value>Default 템플릿은 삭제할 수 없습니다.</value></data>
+  <data name="DeleteTemplateQuestion" xml:space="preserve"><value>선택한 템플릿을 삭제할까요?</value></data>
+  <data name="ContextMenuInstalledFormat" xml:space="preserve"><value>ContextMenu를 설치했습니다.&#x0D;&#x0A;{0}</value></data>
+  <data name="ContextMenuInstalledDialogFormat" xml:space="preserve"><value>ContextMenu를 설치했습니다.&#x0D;&#x0A;&#x0D;&#x0A;{0}</value></data>
+  <data name="ContextMenuRemoved" xml:space="preserve"><value>ContextMenu를 제거했습니다.</value></data>
+  <data name="CannotLocateExecutable" xml:space="preserve"><value>현재 실행 파일 경로를 찾을 수 없습니다.</value></data>
+  <data name="InvalidSelectionValue" xml:space="preserve"><value>선택값을 읽을 수 없습니다.</value></data>
+  <data name="ResultTargetCount" xml:space="preserve"><value>대상: {0}</value></data>
+  <data name="ResultAppliedCount" xml:space="preserve"><value>적용: {0}</value></data>
+  <data name="ResultSkippedCount" xml:space="preserve"><value>건너뜀: {0}</value></data>
+  <data name="ResultErrorCount" xml:space="preserve"><value>오류: {0}</value></data>
+  <data name="ResultErrorsHeader" xml:space="preserve"><value>오류:</value></data>
+  <data name="ResultOperationsHeader" xml:space="preserve"><value>작업:</value></data>
+  <data name="DefaultRelocationTemplateName" xml:space="preserve"><value>제목 초성 분류</value></data>
+  <data name="DefaultRelocationTemplateDescription" xml:space="preserve"><value>직번 태그는 자동 처리에서 제외하고, 제목 초성으로 1단계 폴더를 만듭니다.</value></data>
+  <data name="TemplateIdInvalid" xml:space="preserve"><value>템플릿 ID가 비어 있거나 파일명으로 사용할 수 없습니다.</value></data>
+  <data name="SkipPrefix" xml:space="preserve"><value>SKIP: </value></data>
+</root>

@@ -47,6 +47,27 @@ Settings and templates are stored under:
 
 If `%APPDATA%` is not writable, FileTools falls back to `FileToolsData` next to the executable.
 
+## UI Localization
+
+The app UI follows the system UI culture through .NET `CurrentUICulture`.
+English is the neutral/default resource, and Korean is provided as a satellite resource.
+Unsupported UI cultures fall back to English.
+
+```text
+src\FileTools.App\Resources\Strings.resx
+src\FileTools.App\Resources\Strings.ko.resx
+```
+
+`MainForm` is split into a WinForms Designer-friendly partial class:
+
+```text
+src\FileTools.App\Ui\MainForm.cs
+src\FileTools.App\Ui\MainForm.Designer.cs
+src\FileTools.App\Ui\MainForm.resx
+```
+
+Keep layout/control declarations in `MainForm.Designer.cs`, and keep runtime behavior and localized text binding in `MainForm.cs`.
+
 ## Build Requirement
 
 - Windows

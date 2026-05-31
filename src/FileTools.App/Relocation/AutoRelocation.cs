@@ -19,8 +19,8 @@ internal static class AutoRelocationTemplateDefaults
         return new AutoRelocationTemplateDocument
         {
             Id = DefaultTemplateId,
-            DisplayName = "제목 초성 분류",
-            Description = "직번 태그는 자동 처리에서 제외하고, 제목 초성으로 1단계 폴더를 만듭니다.",
+            DisplayName = Localizer.Get("DefaultRelocationTemplateName"),
+            Description = Localizer.Get("DefaultRelocationTemplateDescription"),
             Prefilters =
             [
                 new AutoRelocationPrefilterRule
@@ -241,7 +241,7 @@ internal static class AutoRelocationTemplateStore
         var id = NormalizeTemplateId(document.Id);
         if (!IsValidTemplateId(id))
         {
-            throw new InvalidOperationException("템플릿 ID가 비어 있거나 파일명으로 사용할 수 없습니다.");
+            throw new InvalidOperationException(Localizer.Get("TemplateIdInvalid"));
         }
 
         Directory.CreateDirectory(TemplateRootPath);

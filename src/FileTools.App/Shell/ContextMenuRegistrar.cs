@@ -31,7 +31,7 @@ internal static class ContextMenuRegistrar
     {
         if (string.IsNullOrWhiteSpace(executablePath) || !File.Exists(executablePath))
         {
-            throw new InvalidOperationException("실행 파일 경로를 찾을 수 없습니다.");
+            throw new InvalidOperationException(Localizer.Get("CannotLocateExecutable"));
         }
 
         Directory.CreateDirectory(FileToolsEnvironment.AppDataDir);

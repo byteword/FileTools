@@ -60,12 +60,12 @@ internal static class Program
         var exe = Environment.ProcessPath;
         if (string.IsNullOrWhiteSpace(exe))
         {
-            throw new InvalidOperationException("현재 실행 파일 경로를 찾을 수 없습니다.");
+            throw new InvalidOperationException(Localizer.Get("CannotLocateExecutable"));
         }
 
         var installedPath = ContextMenuRegistrar.Install(exe, SettingsStore.Load());
         MessageBox.Show(
-            "ContextMenu를 설치했습니다.\n\n" + installedPath,
+            Localizer.Format("ContextMenuInstalledDialogFormat", installedPath),
             FileToolsEnvironment.AppName,
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);
@@ -75,7 +75,7 @@ internal static class Program
     {
         ContextMenuRegistrar.Uninstall();
         MessageBox.Show(
-            "ContextMenu를 제거했습니다.",
+            Localizer.Get("ContextMenuRemoved"),
             FileToolsEnvironment.AppName,
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);

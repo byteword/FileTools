@@ -1,27 +1,10 @@
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace FileTools;
 
-internal sealed class MainForm : Form
+internal sealed partial class MainForm : Form
 {
-    private readonly ComboBox _toolCombo = new();
-    private readonly ComboBox _folderOperationCombo = new();
-    private readonly CheckBox _contextMenuEnabledCheckBox = new();
-    private readonly ComboBox _contextMenuLayoutCombo = new();
-    private readonly ListBox _pathList = new();
-    private readonly TextBox _statusBox = new();
-    private readonly ComboBox _templateCombo = new();
-    private readonly TextBox _templateIdBox = new();
-    private readonly TextBox _templateNameBox = new();
-    private readonly TextBox _templateDescriptionBox = new();
-    private readonly ComboBox _templateSourceCombo = new();
-    private readonly ComboBox _templateTransformCombo = new();
-    private readonly ComboBox _templateLanguageCombo = new();
-    private readonly TextBox _templateFormatBox = new();
-    private readonly TextBox _templateFallbackBox = new();
     private readonly string[] _initialPaths;
-
     private FileToolsSettings _settings = new();
     private List<AutoRelocationTemplateFile> _templates = [];
     private AutoRelocationTemplateFile? _selectedTemplate;
@@ -30,231 +13,106 @@ internal sealed class MainForm : Form
     public MainForm(IEnumerable<string>? initialPaths = null)
     {
         _initialPaths = initialPaths?.ToArray() ?? [];
-        Text = "FileTools 설정 및 작업";
-        StartPosition = FormStartPosition.CenterScreen;
-        Width = 980;
-        Height = 700;
-        MinimumSize = new Size(860, 580);
-        AllowDrop = true;
+        InitializeComponent();
+        InitializeRuntimeBindings();
+        ApplyLocalization();
+    }
 
-        BuildLayout();
+    private void InitializeRuntimeBindings()
+    {
         Load += (_, _) => LoadState();
         DragEnter += FileDrop_DragEnter;
         DragDrop += FileDrop_DragDrop;
+
+        _runButton.Click += (_, _) => RunSelectedTool();
+        _saveSettingsButton.Click += (_, _) => SaveSettingsFromUi();
+        _installContextMenuButton.Click += (_, _) => InstallContextMenu();
+        _uninstallContextMenuButton.Click += (_, _) => UninstallContextMenu();
+        _addFilesButton.Click += (_, _) => AddFiles();
+        _addFolderButton.Click += (_, _) => AddFolder();
+        _removeSelectedButton.Click += (_, _) => RemoveSelectedPaths();
+        _clearButton.Click += (_, _) => ClearPaths();
+        _newTemplateButton.Click += (_, _) => CreateNewTemplate();
+        _deleteTemplateButton.Click += (_, _) => DeleteSelectedTemplate();
+        _saveTemplateButton.Click += (_, _) => SaveTemplate();
+        _templateCombo.SelectedIndexChanged += (_, _) => LoadSelectedTemplateIntoEditor();
+
+        _pathList.DragEnter += FileDrop_DragEnter;
+        _pathList.DragDrop += FileDrop_DragDrop;
+
+        ResetOptionSources();
     }
 
-    private void BuildLayout()
+    private void ResetOptionSources()
     {
-        var topPanel = new FlowLayoutPanel
-        {
-            Dock = DockStyle.Top,
-            Height = 44,
-            Padding = new Padding(8, 8, 8, 4),
-            FlowDirection = FlowDirection.LeftToRight,
-            WrapContents = false
-        };
+        var selectedTool = TryGetComboValue<ToolMode>(_toolCombo);
+        var selectedFolderOperation = TryGetComboValue<FolderStructureOperation>(_folderOperationCombo);
+        var selectedContextMenuLayout = TryGetComboValue<ContextMenuLayout>(_contextMenuLayoutCombo);
+        var selectedSource = TryGetComboValue<AutoRelocationValueSource>(_templateSourceCombo);
+        var selectedTransform = TryGetComboValue<AutoRelocationValueTransform>(_templateTransformCombo);
+        var selectedLanguage = TryGetComboValue<AutoRelocationLanguageProfile>(_templateLanguageCombo);
 
-        _toolCombo.Width = 220;
-        _toolCombo.DropDownStyle = ComboBoxStyle.DropDownList;
         _toolCombo.DataSource = Enum.GetValues<ToolMode>()
             .Select(mode => new ComboOption<ToolMode>(ToolModeText.GetDisplayName(mode), mode))
             .ToArray();
-
-        var runButton = CreateButton("실행", RunSelectedTool);
-        var saveButton = CreateButton("설정 저장", SaveSettingsFromUi);
-        var installButton = CreateButton("ContextMenu 설치", InstallContextMenu);
-        var uninstallButton = CreateButton("ContextMenu 제거", UninstallContextMenu);
-
-        topPanel.Controls.Add(CreateInlineLabel("작업"));
-        topPanel.Controls.Add(_toolCombo);
-        topPanel.Controls.Add(runButton);
-        topPanel.Controls.Add(saveButton);
-        topPanel.Controls.Add(installButton);
-        topPanel.Controls.Add(uninstallButton);
-        Controls.Add(topPanel);
-
-        var split = new SplitContainer
-        {
-            Dock = DockStyle.Fill,
-            SplitterDistance = 410,
-            FixedPanel = FixedPanel.Panel1
-        };
-        Controls.Add(split);
-
-        BuildPathPanel(split.Panel1);
-        BuildSettingsPanel(split.Panel2);
-    }
-
-    private void BuildPathPanel(Control parent)
-    {
-        var label = new Label
-        {
-            Text = "드래그앤드롭 대상",
-            Dock = DockStyle.Top,
-            Height = 28,
-            Padding = new Padding(8, 7, 0, 0)
-        };
-        parent.Controls.Add(label);
-
-        _pathList.Dock = DockStyle.Fill;
-        _pathList.HorizontalScrollbar = true;
-        _pathList.AllowDrop = true;
-        _pathList.SelectionMode = SelectionMode.MultiExtended;
-        _pathList.DragEnter += FileDrop_DragEnter;
-        _pathList.DragDrop += FileDrop_DragDrop;
-        parent.Controls.Add(_pathList);
-
-        var bottom = new FlowLayoutPanel
-        {
-            Dock = DockStyle.Bottom,
-            Height = 44,
-            Padding = new Padding(8, 6, 8, 6),
-            WrapContents = false
-        };
-        bottom.Controls.Add(CreateButton("파일 추가", AddFiles));
-        bottom.Controls.Add(CreateButton("폴더 추가", AddFolder));
-        bottom.Controls.Add(CreateButton("선택 제거", RemoveSelectedPaths));
-        bottom.Controls.Add(CreateButton("비우기", ClearPaths));
-        parent.Controls.Add(bottom);
-    }
-
-    private void BuildSettingsPanel(Control parent)
-    {
-        var panel = new Panel
-        {
-            Dock = DockStyle.Fill,
-            AutoScroll = true,
-            Padding = new Padding(10)
-        };
-        parent.Controls.Add(panel);
-
-        var folderGroup = new GroupBox
-        {
-            Text = "폴더 wrapping / unwrapping",
-            Left = 10,
-            Top = 8,
-            Width = 500,
-            Height = 78,
-            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
-        };
-        _folderOperationCombo.Left = 16;
-        _folderOperationCombo.Top = 30;
-        _folderOperationCombo.Width = 450;
-        _folderOperationCombo.DropDownStyle = ComboBoxStyle.DropDownList;
         _folderOperationCombo.DataSource = Enum.GetValues<FolderStructureOperation>()
             .Select(operation => new ComboOption<FolderStructureOperation>(
                 ToolModeText.GetDisplayName(operation),
                 operation))
             .ToArray();
-        folderGroup.Controls.Add(_folderOperationCombo);
-        panel.Controls.Add(folderGroup);
-
-        var contextMenuGroup = new GroupBox
-        {
-            Text = "ContextMenu",
-            Left = 10,
-            Top = 96,
-            Width = 500,
-            Height = 92,
-            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
-        };
-        _contextMenuEnabledCheckBox.Text = "Explorer ContextMenu 등록";
-        _contextMenuEnabledCheckBox.Left = 16;
-        _contextMenuEnabledCheckBox.Top = 28;
-        _contextMenuEnabledCheckBox.Width = 220;
-        contextMenuGroup.Controls.Add(_contextMenuEnabledCheckBox);
-
-        _contextMenuLayoutCombo.Left = 16;
-        _contextMenuLayoutCombo.Top = 56;
-        _contextMenuLayoutCombo.Width = 450;
-        _contextMenuLayoutCombo.DropDownStyle = ComboBoxStyle.DropDownList;
         _contextMenuLayoutCombo.DataSource = Enum.GetValues<ContextMenuLayout>()
             .Select(layout => new ComboOption<ContextMenuLayout>(
                 ToolModeText.GetDisplayName(layout),
                 layout))
             .ToArray();
-        contextMenuGroup.Controls.Add(_contextMenuLayoutCombo);
-        panel.Controls.Add(contextMenuGroup);
+        _templateSourceCombo.DataSource = Enum.GetValues<AutoRelocationValueSource>()
+            .Select(value => new ComboOption<AutoRelocationValueSource>(value.ToString(), value))
+            .ToArray();
+        _templateTransformCombo.DataSource = Enum.GetValues<AutoRelocationValueTransform>()
+            .Select(value => new ComboOption<AutoRelocationValueTransform>(value.ToString(), value))
+            .ToArray();
+        _templateLanguageCombo.DataSource = Enum.GetValues<AutoRelocationLanguageProfile>()
+            .Select(value => new ComboOption<AutoRelocationLanguageProfile>(value.ToString(), value))
+            .ToArray();
 
-        var templateGroup = new GroupBox
-        {
-            Text = "자동 재배치 템플릿",
-            Left = 10,
-            Top = 198,
-            Width = 500,
-            Height = 300,
-            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
-        };
-        panel.Controls.Add(templateGroup);
-
-        AddTemplateControls(templateGroup);
-
-        var statusGroup = new GroupBox
-        {
-            Text = "작업 결과",
-            Left = 10,
-            Top = 508,
-            Width = 500,
-            Height = 210,
-            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom
-        };
-        _statusBox.Multiline = true;
-        _statusBox.ScrollBars = ScrollBars.Both;
-        _statusBox.WordWrap = false;
-        _statusBox.ReadOnly = true;
-        _statusBox.Left = 12;
-        _statusBox.Top = 24;
-        _statusBox.Width = 468;
-        _statusBox.Height = 170;
-        _statusBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
-        statusGroup.Controls.Add(_statusBox);
-        panel.Controls.Add(statusGroup);
+        SelectComboValue(_toolCombo, selectedTool ?? ToolMode.FileNameCorrection);
+        SelectComboValue(_folderOperationCombo, selectedFolderOperation ?? FolderStructureOperation.Auto);
+        SelectComboValue(_contextMenuLayoutCombo, selectedContextMenuLayout ?? ContextMenuLayout.Grouped);
+        SelectComboValue(_templateSourceCombo, selectedSource ?? AutoRelocationValueSource.Title);
+        SelectComboValue(_templateTransformCombo, selectedTransform ?? AutoRelocationValueTransform.InitialBucket);
+        SelectComboValue(_templateLanguageCombo, selectedLanguage ?? AutoRelocationLanguageProfile.KoreanEnglish);
     }
 
-    private void AddTemplateControls(Control parent)
+    private void ApplyLocalization()
     {
-        parent.Controls.Add(CreateLabel("템플릿", 16, 28));
-        _templateCombo.Left = 96;
-        _templateCombo.Top = 24;
-        _templateCombo.Width = 250;
-        _templateCombo.DropDownStyle = ComboBoxStyle.DropDownList;
-        _templateCombo.SelectedIndexChanged += (_, _) => LoadSelectedTemplateIntoEditor();
-        parent.Controls.Add(_templateCombo);
-
-        parent.Controls.Add(CreateButton("새로", CreateNewTemplate, 354, 23, 56));
-        parent.Controls.Add(CreateButton("삭제", DeleteSelectedTemplate, 416, 23, 56));
-
-        parent.Controls.Add(CreateLabel("ID", 16, 62));
-        ConfigureTextBox(_templateIdBox, 96, 58, 376, parent);
-
-        parent.Controls.Add(CreateLabel("이름", 16, 94));
-        ConfigureTextBox(_templateNameBox, 96, 90, 376, parent);
-
-        parent.Controls.Add(CreateLabel("설명", 16, 126));
-        ConfigureTextBox(_templateDescriptionBox, 96, 122, 376, parent);
-
-        parent.Controls.Add(CreateLabel("Source", 16, 158));
-        ConfigureCombo(_templateSourceCombo, 96, 154, 130, Enum.GetValues<AutoRelocationValueSource>()
-            .Select(value => new ComboOption<AutoRelocationValueSource>(value.ToString(), value))
-            .ToArray(), parent);
-
-        parent.Controls.Add(CreateLabel("Transform", 238, 158));
-        ConfigureCombo(_templateTransformCombo, 318, 154, 154, Enum.GetValues<AutoRelocationValueTransform>()
-            .Select(value => new ComboOption<AutoRelocationValueTransform>(value.ToString(), value))
-            .ToArray(), parent);
-
-        parent.Controls.Add(CreateLabel("Language", 16, 190));
-        ConfigureCombo(_templateLanguageCombo, 96, 186, 130, Enum.GetValues<AutoRelocationLanguageProfile>()
-            .Select(value => new ComboOption<AutoRelocationLanguageProfile>(value.ToString(), value))
-            .ToArray(), parent);
-
-        parent.Controls.Add(CreateLabel("Format", 238, 190));
-        ConfigureTextBox(_templateFormatBox, 318, 186, 154, parent);
-
-        parent.Controls.Add(CreateLabel("Fallback", 16, 222));
-        ConfigureTextBox(_templateFallbackBox, 96, 218, 130, parent);
-
-        parent.Controls.Add(CreateButton("템플릿 저장", SaveTemplate, 318, 246, 154));
+        Text = Localizer.Get("MainFormTitle");
+        _taskLabel.Text = Localizer.Get("LabelTask");
+        _runButton.Text = Localizer.Get("ButtonRun");
+        _saveSettingsButton.Text = Localizer.Get("ButtonSaveSettings");
+        _installContextMenuButton.Text = Localizer.Get("ButtonInstallContextMenu");
+        _uninstallContextMenuButton.Text = Localizer.Get("ButtonUninstallContextMenu");
+        _dropTargetsLabel.Text = Localizer.Get("GroupDropTargets");
+        _addFilesButton.Text = Localizer.Get("ButtonAddFiles");
+        _addFolderButton.Text = Localizer.Get("ButtonAddFolder");
+        _removeSelectedButton.Text = Localizer.Get("ButtonRemoveSelected");
+        _clearButton.Text = Localizer.Get("ButtonClear");
+        _folderGroup.Text = Localizer.Get("GroupFolderStructure");
+        _contextMenuGroup.Text = Localizer.Get("GroupContextMenu");
+        _contextMenuEnabledCheckBox.Text = Localizer.Get("CheckRegisterContextMenu");
+        _templateGroup.Text = Localizer.Get("GroupAutoRelocationTemplates");
+        _statusGroup.Text = Localizer.Get("GroupOperationResult");
+        _templateLabel.Text = Localizer.Get("LabelTemplate");
+        _newTemplateButton.Text = Localizer.Get("ButtonNew");
+        _deleteTemplateButton.Text = Localizer.Get("ButtonDelete");
+        _idLabel.Text = Localizer.Get("LabelId");
+        _nameLabel.Text = Localizer.Get("LabelName");
+        _descriptionLabel.Text = Localizer.Get("LabelDescription");
+        _sourceLabel.Text = Localizer.Get("LabelSource");
+        _transformLabel.Text = Localizer.Get("LabelTransform");
+        _languageLabel.Text = Localizer.Get("LabelLanguage");
+        _formatLabel.Text = Localizer.Get("LabelFormat");
+        _fallbackLabel.Text = Localizer.Get("LabelFallback");
+        _saveTemplateButton.Text = Localizer.Get("ButtonSaveTemplate");
     }
 
     private void LoadState()
@@ -265,7 +123,7 @@ internal sealed class MainForm : Form
         SelectComboValue(_contextMenuLayoutCombo, _settings.ContextMenuLayout);
         RefreshTemplates(_settings.AutoRelocationTemplateId);
         AddPaths(_initialPaths);
-        _statusBox.Text = "파일 또는 폴더를 왼쪽 목록으로 드래그앤드롭한 뒤 작업을 실행합니다.";
+        _statusBox.Text = Localizer.Get("InitialStatus");
     }
 
     private void RefreshTemplates(string? preferredId)
@@ -347,7 +205,7 @@ internal sealed class MainForm : Form
             ? template.Value
             : AutoRelocationTemplateDefaults.DefaultTemplateId;
         SettingsStore.Save(_settings);
-        _statusBox.Text = "설정을 저장했습니다.\r\n" + SettingsStore.SettingsPath;
+        _statusBox.Text = Localizer.Format("SettingsSavedFormat", SettingsStore.SettingsPath);
     }
 
     private void RunSelectedTool()
@@ -356,8 +214,11 @@ internal sealed class MainForm : Form
         var paths = _pathList.Items.Cast<string>().ToArray();
         if (paths.Length == 0)
         {
-            MessageBox.Show("처리할 파일 또는 폴더를 추가하세요.", FileToolsEnvironment.AppName,
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(
+                Localizer.Get("NoTargetsMessage"),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
             return;
         }
 
@@ -378,7 +239,7 @@ internal sealed class MainForm : Form
         {
             Multiselect = true,
             CheckFileExists = true,
-            Title = "처리할 파일 선택"
+            Title = Localizer.Get("OpenFilesDialogTitle")
         };
         if (dialog.ShowDialog(this) == DialogResult.OK)
         {
@@ -390,7 +251,7 @@ internal sealed class MainForm : Form
     {
         using var dialog = new FolderBrowserDialog
         {
-            Description = "처리할 폴더 선택",
+            Description = Localizer.Get("OpenFolderDialogDescription"),
             UseDescriptionForTitle = true
         };
         if (dialog.ShowDialog(this) == DialogResult.OK)
@@ -420,7 +281,7 @@ internal sealed class MainForm : Form
         var document = new AutoRelocationTemplateDocument
         {
             Id = id,
-            DisplayName = "새 템플릿",
+            DisplayName = Localizer.Get("NewTemplateDisplayName"),
             Description = "",
             Prefilters = defaultDocument.Prefilters,
             PathRules = defaultDocument.PathRules
@@ -457,7 +318,7 @@ internal sealed class MainForm : Form
             _settings.AutoRelocationTemplateId = saved.Document.Id;
             SettingsStore.Save(_settings);
             RefreshTemplates(saved.Document.Id);
-            _statusBox.Text = "템플릿을 저장했습니다.\r\n" + saved.FilePath;
+            _statusBox.Text = Localizer.Format("TemplateSavedFormat", saved.FilePath);
         }
         catch (Exception ex)
         {
@@ -474,13 +335,19 @@ internal sealed class MainForm : Form
 
         if (string.Equals(_selectedTemplate.Document.Id, AutoRelocationTemplateDefaults.DefaultTemplateId, StringComparison.OrdinalIgnoreCase))
         {
-            MessageBox.Show("Default 템플릿은 삭제할 수 없습니다.", FileToolsEnvironment.AppName,
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(
+                Localizer.Get("DefaultTemplateCannotDelete"),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
             return;
         }
 
-        if (MessageBox.Show("선택한 템플릿을 삭제할까요?", FileToolsEnvironment.AppName,
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+        if (MessageBox.Show(
+                Localizer.Get("DeleteTemplateQuestion"),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question) != DialogResult.Yes)
         {
             return;
         }
@@ -498,7 +365,7 @@ internal sealed class MainForm : Form
             var exe = Environment.ProcessPath ?? "";
             SaveSettingsFromUi();
             var installedPath = ContextMenuRegistrar.Install(exe, _settings);
-            _statusBox.Text = "ContextMenu를 설치했습니다.\r\n" + installedPath;
+            _statusBox.Text = Localizer.Format("ContextMenuInstalledFormat", installedPath);
             MessageBox.Show(_statusBox.Text, FileToolsEnvironment.AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception ex)
@@ -510,7 +377,7 @@ internal sealed class MainForm : Form
     private void UninstallContextMenu()
     {
         ContextMenuRegistrar.Uninstall();
-        _statusBox.Text = "ContextMenu를 제거했습니다.";
+        _statusBox.Text = Localizer.Get("ContextMenuRemoved");
         MessageBox.Show(_statusBox.Text, FileToolsEnvironment.AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
@@ -543,76 +410,18 @@ internal sealed class MainForm : Form
         }
     }
 
-    private static Button CreateButton(string text, Action action)
-    {
-        var button = new Button
-        {
-            Text = text,
-            Width = 116,
-            Height = 28
-        };
-        button.Click += (_, _) => action();
-        return button;
-    }
-
-    private static Button CreateButton(string text, Action action, int left, int top, int width)
-    {
-        var button = CreateButton(text, action);
-        button.Left = left;
-        button.Top = top;
-        button.Width = width;
-        return button;
-    }
-
-    private static Label CreateInlineLabel(string text)
-    {
-        return new Label
-        {
-            Text = text,
-            Width = 36,
-            Height = 28,
-            TextAlign = ContentAlignment.MiddleLeft
-        };
-    }
-
-    private static Label CreateLabel(string text, int left, int top)
-    {
-        return new Label
-        {
-            Text = text,
-            Left = left,
-            Top = top,
-            Width = 78,
-            Height = 22,
-            TextAlign = ContentAlignment.MiddleLeft
-        };
-    }
-
-    private static void ConfigureTextBox(TextBox textBox, int left, int top, int width, Control parent)
-    {
-        textBox.Left = left;
-        textBox.Top = top;
-        textBox.Width = width;
-        parent.Controls.Add(textBox);
-    }
-
-    private static void ConfigureCombo<T>(ComboBox combo, int left, int top, int width, ComboOption<T>[] options, Control parent)
-        where T : notnull
-    {
-        combo.Left = left;
-        combo.Top = top;
-        combo.Width = width;
-        combo.DropDownStyle = ComboBoxStyle.DropDownList;
-        combo.DataSource = options;
-        parent.Controls.Add(combo);
-    }
-
     private static T GetComboValue<T>(ComboBox combo)
         where T : notnull
     {
         return combo.SelectedItem is ComboOption<T> option
             ? option.Value
-            : throw new InvalidOperationException("선택값을 읽을 수 없습니다.");
+            : throw new InvalidOperationException(Localizer.Get("InvalidSelectionValue"));
+    }
+
+    private static T? TryGetComboValue<T>(ComboBox combo)
+        where T : struct
+    {
+        return combo.SelectedItem is ComboOption<T> option ? option.Value : null;
     }
 
     private static void SelectComboValue<T>(ComboBox combo, T value)
