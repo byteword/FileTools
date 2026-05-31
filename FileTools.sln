@@ -5,11 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileTools.App", "src\FileTools.App\FileTools.App.csproj", "{7654761B-6DCA-4789-94CC-EEE37652F0D3}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "installer", "installer", "{1860D2E4-5C43-71D5-59A5-599A4DE1DF67}"
-EndProject
-Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "FileTools.Installer", "installer\FileTools.Installer\FileTools.Installer.wixproj", "{33552B90-A7D8-41E0-8032-4D28D94C430E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileTools.App", "src\FileTools.App\FileTools.App.csproj", "{3E3AC88E-C656-489E-8FF5-F1B56544C5E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,36 +17,23 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7654761B-6DCA-4789-94CC-EEE37652F0D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7654761B-6DCA-4789-94CC-EEE37652F0D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7654761B-6DCA-4789-94CC-EEE37652F0D3}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{7654761B-6DCA-4789-94CC-EEE37652F0D3}.Debug|x64.Build.0 = Debug|Any CPU
-		{7654761B-6DCA-4789-94CC-EEE37652F0D3}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{7654761B-6DCA-4789-94CC-EEE37652F0D3}.Debug|x86.Build.0 = Debug|Any CPU
-		{7654761B-6DCA-4789-94CC-EEE37652F0D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7654761B-6DCA-4789-94CC-EEE37652F0D3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7654761B-6DCA-4789-94CC-EEE37652F0D3}.Release|x64.ActiveCfg = Release|Any CPU
-		{7654761B-6DCA-4789-94CC-EEE37652F0D3}.Release|x64.Build.0 = Release|Any CPU
-		{7654761B-6DCA-4789-94CC-EEE37652F0D3}.Release|x86.ActiveCfg = Release|Any CPU
-		{7654761B-6DCA-4789-94CC-EEE37652F0D3}.Release|x86.Build.0 = Release|Any CPU
-		{33552B90-A7D8-41E0-8032-4D28D94C430E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{33552B90-A7D8-41E0-8032-4D28D94C430E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{33552B90-A7D8-41E0-8032-4D28D94C430E}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{33552B90-A7D8-41E0-8032-4D28D94C430E}.Debug|x64.Build.0 = Debug|Any CPU
-		{33552B90-A7D8-41E0-8032-4D28D94C430E}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{33552B90-A7D8-41E0-8032-4D28D94C430E}.Debug|x86.Build.0 = Debug|Any CPU
-		{33552B90-A7D8-41E0-8032-4D28D94C430E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{33552B90-A7D8-41E0-8032-4D28D94C430E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{33552B90-A7D8-41E0-8032-4D28D94C430E}.Release|x64.ActiveCfg = Release|Any CPU
-		{33552B90-A7D8-41E0-8032-4D28D94C430E}.Release|x64.Build.0 = Release|Any CPU
-		{33552B90-A7D8-41E0-8032-4D28D94C430E}.Release|x86.ActiveCfg = Release|Any CPU
-		{33552B90-A7D8-41E0-8032-4D28D94C430E}.Release|x86.Build.0 = Release|Any CPU
+		{3E3AC88E-C656-489E-8FF5-F1B56544C5E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E3AC88E-C656-489E-8FF5-F1B56544C5E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E3AC88E-C656-489E-8FF5-F1B56544C5E7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3E3AC88E-C656-489E-8FF5-F1B56544C5E7}.Debug|x64.Build.0 = Debug|Any CPU
+		{3E3AC88E-C656-489E-8FF5-F1B56544C5E7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3E3AC88E-C656-489E-8FF5-F1B56544C5E7}.Debug|x86.Build.0 = Debug|Any CPU
+		{3E3AC88E-C656-489E-8FF5-F1B56544C5E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E3AC88E-C656-489E-8FF5-F1B56544C5E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E3AC88E-C656-489E-8FF5-F1B56544C5E7}.Release|x64.ActiveCfg = Release|Any CPU
+		{3E3AC88E-C656-489E-8FF5-F1B56544C5E7}.Release|x64.Build.0 = Release|Any CPU
+		{3E3AC88E-C656-489E-8FF5-F1B56544C5E7}.Release|x86.ActiveCfg = Release|Any CPU
+		{3E3AC88E-C656-489E-8FF5-F1B56544C5E7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{7654761B-6DCA-4789-94CC-EEE37652F0D3} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
-		{33552B90-A7D8-41E0-8032-4D28D94C430E} = {1860D2E4-5C43-71D5-59A5-599A4DE1DF67}
+		{3E3AC88E-C656-489E-8FF5-F1B56544C5E7} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

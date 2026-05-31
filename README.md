@@ -75,7 +75,7 @@ src\FileTools.App\bin\Release\net8.0-windows\win-x64\publish\FileTools.exe
 The MSI installer uses WiX Toolset SDK-style project files. The first build restores the WiX SDK and UI extension packages.
 
 ```powershell
-dotnet build .\installer\FileTools.Installer\FileTools.Installer.wixproj -c Release
+.\build_msi.ps1
 ```
 
 Output:
@@ -99,6 +99,8 @@ MSI options:
 
 The grouped menu is the default. In the feature selection page, select `Expanded Context Menu` to install the direct entries instead. If both grouped and expanded features are selected, the installer conditions prefer expanded entries.
 
+`FileTools.sln` intentionally contains only the app project so Visual Studio can load it without WiX tooling. The MSI project is isolated in `installer\FileTools.Installer.sln`; build it with `build_msi.ps1` or open that solution in Visual Studio with a WiX v4-compatible extension such as HeatWave.
+
 ## Project Layout
 
 ```text
@@ -112,7 +114,8 @@ src\FileTools.App
 └─ Ui
 
 installer\FileTools.Installer
-└─ WiX MSI package project
+├─ FileTools.Installer.sln
+└─ FileTools.Installer
 ```
 
 ## Install ContextMenu
