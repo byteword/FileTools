@@ -18,7 +18,7 @@ internal static class AutoRelocationTemplateDefaults
     [
         AutoRelocationValueSource.FileName,
         AutoRelocationValueSource.FileExtension,
-        AutoRelocationValueSource.FileType,
+        AutoRelocationValueSource.KnownFileKind,
         AutoRelocationValueSource.Title,
         AutoRelocationValueSource.EpisodeRange,
         AutoRelocationValueSource.SizeBytes,
@@ -53,6 +53,7 @@ internal static class AutoRelocationTemplateDefaults
             ? source
             : source switch
             {
+                AutoRelocationValueSource.FileType => AutoRelocationValueSource.KnownFileKind,
                 AutoRelocationValueSource.OriginalTitle => AutoRelocationValueSource.FileName,
                 AutoRelocationValueSource.Author => AutoRelocationValueSource.FileName,
                 AutoRelocationValueSource.Tags => AutoRelocationValueSource.FileName,
@@ -132,6 +133,7 @@ internal enum AutoRelocationValueSource
 {
     FileName,
     FileExtension,
+    KnownFileKind,
     FileType,
     Title,
     EpisodeRange,
@@ -198,50 +200,106 @@ internal sealed record AutoRelocationTemplateFile(
 
 internal static class AutoRelocationFileTypeClassifier
 {
-    private static readonly HashSet<string> VideoExtensions = CreateSet(
-        ".avi", ".m2ts", ".m4v", ".mkv", ".mov", ".mp4", ".mpeg", ".mpg", ".ts", ".webm", ".wmv");
-
-    private static readonly HashSet<string> AudioExtensions = CreateSet(
-        ".aac", ".aiff", ".alac", ".flac", ".m4a", ".mp3", ".ogg", ".opus", ".wav", ".wma");
-
-    private static readonly HashSet<string> ImageExtensions = CreateSet(
-        ".avif", ".bmp", ".gif", ".heic", ".heif", ".jpeg", ".jpg", ".png", ".tif", ".tiff", ".webp");
-
-    private static readonly HashSet<string> DocumentExtensions = CreateSet(
-        ".csv", ".doc", ".docx", ".epub", ".hwp", ".hwpx", ".md", ".odt", ".pdf", ".ppt", ".pptx", ".rtf", ".txt", ".xls", ".xlsx");
+    private const string FolderKind = "Folder";
+    private const string ArchiveKind = "Archive";
+    private const string ImageKind = "Image";
+    private const string VideoKind = "Video";
+    private const string MusicKind = "Music";
+    private const string TextKind = "Text";
+    private const string DocumentKind = "Document";
+    private const string ProgramKind = "Program";
+    private const string OtherKind = "Other";
 
     private static readonly HashSet<string> ArchiveExtensions = CreateSet(
-        ".7z", ".bz2", ".cab", ".cb7", ".cbr", ".cbz", ".gz", ".rar", ".tar", ".tgz", ".xz", ".zip");
+        ".7z", ".ace", ".arj", ".bz", ".bz2", ".cab", ".cb7", ".cbr", ".cbt", ".cbz",
+        ".cpio", ".dmg", ".gz", ".gzip", ".iso", ".lha", ".lzh", ".rar", ".tar",
+        ".tbz", ".tbz2", ".tgz", ".txz", ".xz", ".z", ".zip", ".zipx");
+
+    private static readonly HashSet<string> ImageExtensions = CreateSet(
+        ".ai", ".arw", ".avif", ".bmp", ".cr2", ".cur", ".dds", ".dib", ".dng",
+        ".gif", ".heic", ".heif", ".ico", ".jfif", ".jpeg", ".jpg", ".jxl", ".nef",
+        ".orf", ".png", ".psd", ".raw", ".rw2", ".svg", ".tga", ".tif", ".tiff", ".webp");
+
+    private static readonly HashSet<string> VideoExtensions = CreateSet(
+        ".3g2", ".3gp", ".asf", ".avi", ".divx", ".flv", ".m2t", ".m2ts", ".m4v",
+        ".mkv", ".mov", ".mp4", ".mpeg", ".mpg", ".mts", ".ogv", ".rm", ".rmvb",
+        ".ts", ".vob", ".webm", ".wmv");
+
+    private static readonly HashSet<string> SubtitleExtensions = CreateSet(
+        ".ass", ".idx", ".sami", ".smi", ".srt", ".ssa", ".sub", ".sup", ".usf", ".vtt");
+
+    private static readonly HashSet<string> MusicExtensions = CreateSet(
+        ".aac", ".ac3", ".aif", ".aifc", ".aiff", ".alac", ".amr", ".ape", ".au",
+        ".dts", ".flac", ".m4a", ".mid", ".midi", ".mka", ".mp3", ".mpc", ".oga",
+        ".ogg", ".opus", ".ra", ".wav", ".weba", ".wma");
+
+    private static readonly HashSet<string> TextExtensions = CreateSet(
+        ".cfg", ".conf", ".css", ".csv", ".htm", ".html", ".ini", ".json", ".log",
+        ".markdown", ".md", ".nfo", ".properties", ".sql", ".text", ".toml", ".tsv",
+        ".txt", ".xml", ".yaml", ".yml");
+
+    private static readonly HashSet<string> DocumentExtensions = CreateSet(
+        ".azw", ".azw3", ".doc", ".docm", ".docx", ".dot", ".dotx", ".epub", ".hwp",
+        ".hwpx", ".key", ".mobi", ".numbers", ".odp", ".ods", ".odt", ".pages", ".pdf",
+        ".pot", ".potx", ".pps", ".ppsx", ".ppt", ".pptm", ".pptx", ".rtf", ".tex",
+        ".xls", ".xlsb", ".xlsm", ".xlsx", ".xlt", ".xltx");
+
+    private static readonly HashSet<string> ProgramExtensions = CreateSet(
+        ".apk", ".appx", ".appxbundle", ".bat", ".bin", ".class", ".cmd", ".com",
+        ".cpl", ".deb", ".dll", ".drv", ".efi", ".exe", ".gadget", ".ipa", ".jar",
+        ".js", ".jse", ".lnk", ".lua", ".msi", ".msp", ".msix", ".ocx", ".php",
+        ".pkg", ".pl", ".ps1", ".psd1", ".psm1", ".py", ".pyw", ".rb", ".reg",
+        ".rpm", ".run", ".scr", ".sh", ".sys", ".vb", ".vbe", ".vbs", ".wsf", ".wsh");
 
     public static string GetFileType(string path)
     {
+        return GetKnownFileKind(path);
+    }
+
+    public static string GetKnownFileKind(string path)
+    {
         if (Directory.Exists(path))
         {
-            return "Folder";
+            return FolderKind;
         }
 
         var extension = Path.GetExtension(path);
-        if (VideoExtensions.Contains(extension))
+        if (ArchiveExtensions.Contains(extension))
         {
-            return "Video";
-        }
-
-        if (AudioExtensions.Contains(extension))
-        {
-            return "Audio";
+            return ArchiveKind;
         }
 
         if (ImageExtensions.Contains(extension))
         {
-            return "Image";
+            return ImageKind;
+        }
+
+        if (VideoExtensions.Contains(extension) || SubtitleExtensions.Contains(extension))
+        {
+            return VideoKind;
+        }
+
+        if (MusicExtensions.Contains(extension))
+        {
+            return MusicKind;
+        }
+
+        if (TextExtensions.Contains(extension))
+        {
+            return TextKind;
         }
 
         if (DocumentExtensions.Contains(extension))
         {
-            return "Document";
+            return DocumentKind;
         }
 
-        return ArchiveExtensions.Contains(extension) ? "Archive" : "Other";
+        if (ProgramExtensions.Contains(extension))
+        {
+            return ProgramKind;
+        }
+
+        return OtherKind;
     }
 
     private static HashSet<string> CreateSet(params string[] values)
@@ -654,8 +712,13 @@ internal sealed class AutoRelocationPlanBuilder
             AutoRelocationValueSource.FileName => new AutoRelocationResolvedValue(fileStem),
             AutoRelocationValueSource.FileExtension => new AutoRelocationResolvedValue(
                 GetProperty(item, "fileExtension") ?? GetFileExtension(item.SourcePath)),
+            AutoRelocationValueSource.KnownFileKind => new AutoRelocationResolvedValue(
+                GetProperty(item, "knownFileKind") ??
+                GetProperty(item, "fileKind") ??
+                GetProperty(item, "fileType") ??
+                AutoRelocationFileTypeClassifier.GetKnownFileKind(item.SourcePath)),
             AutoRelocationValueSource.FileType => new AutoRelocationResolvedValue(
-                GetProperty(item, "fileType") ?? AutoRelocationFileTypeClassifier.GetFileType(item.SourcePath)),
+                GetProperty(item, "fileType") ?? AutoRelocationFileTypeClassifier.GetKnownFileKind(item.SourcePath)),
             AutoRelocationValueSource.Title => new AutoRelocationResolvedValue(GetProperty(item, "title") ?? fileStem),
             AutoRelocationValueSource.EpisodeRange => CreateEpisodeRangeValue(GetProperty(item, "episodeRange") ?? ""),
             AutoRelocationValueSource.OriginalTitle => new AutoRelocationResolvedValue(

@@ -399,12 +399,15 @@ internal sealed class FileToolRunner
         {
             var preview = corrector.CreatePreview(path);
             var fileNameStem = GetRelocationFileNameStem(path);
+            var knownFileKind = AutoRelocationFileTypeClassifier.GetKnownFileKind(path);
             var properties = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
             {
                 ["fileName"] = Path.GetFileName(path),
                 ["fileNameStem"] = fileNameStem,
                 ["fileExtension"] = GetRelocationFileExtension(path),
-                ["fileType"] = AutoRelocationFileTypeClassifier.GetFileType(path),
+                ["knownFileKind"] = knownFileKind,
+                ["fileKind"] = knownFileKind,
+                ["fileType"] = knownFileKind,
                 ["title"] = preview.Parts.Title,
                 ["originalTitle"] = fileNameStem,
                 ["episodeRange"] = preview.Parts.EpisodeRange

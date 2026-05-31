@@ -50,15 +50,25 @@ Separate dialogs are available for:
 
 - Rename replacement dictionary entries (`source -> replacement`).
 - Rename common phrase dictionary entries used by the filename correction scorer.
-- AutoRelocation template editing. Path rule steps are evaluated in order, so a template can produce paths such as `{FileType}\[{Initial}]\{EpisodeRange}`.
+- AutoRelocation template editing. Path rule steps are evaluated in order, so a template can produce paths such as `{KnownFileKind}\[{Initial}]\{EpisodeRange}`.
 
 AutoRelocation templates intentionally use only file-derived values:
 
 - File name stem.
 - File extension.
-- File type: `Folder`, `Video`, `Audio`, `Image`, `Document`, `Archive`, `Other`.
+- Known file kind from common extensions: `Folder`, `Archive`, `Image`, `Video`, `Music`, `Text`, `Document`, `Program`, `Other`.
 - Parsed title and episode range from the file or folder name.
 - Size, created time, and modified time.
+
+The known file kind source is separate from the raw extension source. It groups common extensions into broad folders:
+
+- `Archive`: compressed/archive and disk-image style files such as `zip`, `rar`, `7z`, `tar`, `gz`, `cbz`, `cbr`, `iso`.
+- `Image`: image/design/raw formats such as `jpg`, `png`, `gif`, `webp`, `heic`, `svg`, `psd`, `ico`.
+- `Video`: video files and subtitle sidecars such as `mp4`, `mkv`, `avi`, `mov`, `webm`, `srt`, `ass`, `vtt`.
+- `Music`: audio/music files such as `mp3`, `flac`, `wav`, `m4a`, `ogg`, `opus`, `wma`.
+- `Text`: plain text and structured text such as `txt`, `md`, `log`, `csv`, `json`, `xml`, `yaml`, `ini`.
+- `Document`: PDF, Office, OpenDocument, ebook, and HWP formats such as `pdf`, `docx`, `xlsx`, `pptx`, `odt`, `epub`, `hwp`, `hwpx`.
+- `Program`: executable, installer, script, package, and library files such as `exe`, `msi`, `bat`, `ps1`, `js`, `jar`, `dll`, `apk`.
 
 Settings and templates are stored under:
 
