@@ -16,8 +16,16 @@ internal enum FolderStructureOperation
     MoveInnerFilesUp
 }
 
+internal enum ContextMenuLayout
+{
+    Grouped,
+    Expanded
+}
+
 internal static class ToolModeText
 {
+    public const string OpenAppDisplayName = "FileTools 열기";
+
     public static string GetDisplayName(ToolMode mode) => mode switch
     {
         ToolMode.FileNameCorrection => "파일이름 자동 교정",
@@ -34,5 +42,12 @@ internal static class ToolModeText
         FolderStructureOperation.UnwrapSingleFileFolder => "단일 파일 폴더 unwrapping",
         FolderStructureOperation.MoveInnerFilesUp => "폴더 내부 파일 상위로 이동",
         _ => operation.ToString()
+    };
+
+    public static string GetDisplayName(ContextMenuLayout layout) => layout switch
+    {
+        ContextMenuLayout.Grouped => "묶음형: FileTools 하위 메뉴",
+        ContextMenuLayout.Expanded => "펼침형: 기능을 각각 표시",
+        _ => layout.ToString()
     };
 }

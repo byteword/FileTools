@@ -8,6 +8,10 @@ internal sealed class FileToolsSettings
     public FolderStructureOperation FolderStructureOperation { get; set; } = FolderStructureOperation.Auto;
 
     public string AutoRelocationTemplateId { get; set; } = AutoRelocationTemplateDefaults.DefaultTemplateId;
+
+    public bool RegisterContextMenu { get; set; } = true;
+
+    public ContextMenuLayout ContextMenuLayout { get; set; } = ContextMenuLayout.Grouped;
 }
 
 internal static class SettingsStore

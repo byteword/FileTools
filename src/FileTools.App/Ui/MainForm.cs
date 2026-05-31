@@ -7,6 +7,8 @@ internal sealed class MainForm : Form
 {
     private readonly ComboBox _toolCombo = new();
     private readonly ComboBox _folderOperationCombo = new();
+    private readonly CheckBox _contextMenuEnabledCheckBox = new();
+    private readonly ComboBox _contextMenuLayoutCombo = new();
     private readonly ListBox _pathList = new();
     private readonly TextBox _statusBox = new();
     private readonly ComboBox _templateCombo = new();
@@ -18,14 +20,16 @@ internal sealed class MainForm : Form
     private readonly ComboBox _templateLanguageCombo = new();
     private readonly TextBox _templateFormatBox = new();
     private readonly TextBox _templateFallbackBox = new();
+    private readonly string[] _initialPaths;
 
     private FileToolsSettings _settings = new();
     private List<AutoRelocationTemplateFile> _templates = [];
     private AutoRelocationTemplateFile? _selectedTemplate;
     private bool _loadingTemplate;
 
-    public MainForm()
+    public MainForm(IEnumerable<string>? initialPaths = null)
     {
+        _initialPaths = initialPaths?.ToArray() ?? [];
         Text = "FileTools 설정 및 작업";
         StartPosition = FormStartPosition.CenterScreen;
         Width = 980;
@@ -145,11 +149,38 @@ internal sealed class MainForm : Form
         folderGroup.Controls.Add(_folderOperationCombo);
         panel.Controls.Add(folderGroup);
 
+        var contextMenuGroup = new GroupBox
+        {
+            Text = "ContextMenu",
+            Left = 10,
+            Top = 96,
+            Width = 500,
+            Height = 92,
+            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+        };
+        _contextMenuEnabledCheckBox.Text = "Explorer ContextMenu 등록";
+        _contextMenuEnabledCheckBox.Left = 16;
+        _contextMenuEnabledCheckBox.Top = 28;
+        _contextMenuEnabledCheckBox.Width = 220;
+        contextMenuGroup.Controls.Add(_contextMenuEnabledCheckBox);
+
+        _contextMenuLayoutCombo.Left = 16;
+        _contextMenuLayoutCombo.Top = 56;
+        _contextMenuLayoutCombo.Width = 450;
+        _contextMenuLayoutCombo.DropDownStyle = ComboBoxStyle.DropDownList;
+        _contextMenuLayoutCombo.DataSource = Enum.GetValues<ContextMenuLayout>()
+            .Select(layout => new ComboOption<ContextMenuLayout>(
+                ToolModeText.GetDisplayName(layout),
+                layout))
+            .ToArray();
+        contextMenuGroup.Controls.Add(_contextMenuLayoutCombo);
+        panel.Controls.Add(contextMenuGroup);
+
         var templateGroup = new GroupBox
         {
             Text = "자동 재배치 템플릿",
             Left = 10,
-            Top = 96,
+            Top = 198,
             Width = 500,
             Height = 300,
             Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
@@ -162,7 +193,7 @@ internal sealed class MainForm : Form
         {
             Text = "작업 결과",
             Left = 10,
-            Top = 406,
+            Top = 508,
             Width = 500,
             Height = 210,
             Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom
@@ -230,7 +261,10 @@ internal sealed class MainForm : Form
     {
         _settings = SettingsStore.Load();
         SelectComboValue(_folderOperationCombo, _settings.FolderStructureOperation);
+        _contextMenuEnabledCheckBox.Checked = _settings.RegisterContextMenu;
+        SelectComboValue(_contextMenuLayoutCombo, _settings.ContextMenuLayout);
         RefreshTemplates(_settings.AutoRelocationTemplateId);
+        AddPaths(_initialPaths);
         _statusBox.Text = "파일 또는 폴더를 왼쪽 목록으로 드래그앤드롭한 뒤 작업을 실행합니다.";
     }
 
@@ -307,6 +341,8 @@ internal sealed class MainForm : Form
     private void SaveSettingsFromUi()
     {
         _settings.FolderStructureOperation = GetComboValue<FolderStructureOperation>(_folderOperationCombo);
+        _settings.RegisterContextMenu = _contextMenuEnabledCheckBox.Checked;
+        _settings.ContextMenuLayout = GetComboValue<ContextMenuLayout>(_contextMenuLayoutCombo);
         _settings.AutoRelocationTemplateId = _templateCombo.SelectedItem is ComboOption<string> template
             ? template.Value
             : AutoRelocationTemplateDefaults.DefaultTemplateId;
@@ -460,7 +496,8 @@ internal sealed class MainForm : Form
         try
         {
             var exe = Environment.ProcessPath ?? "";
-            var installedPath = ContextMenuRegistrar.Install(exe);
+            SaveSettingsFromUi();
+            var installedPath = ContextMenuRegistrar.Install(exe, _settings);
             _statusBox.Text = "ContextMenu를 설치했습니다.\r\n" + installedPath;
             MessageBox.Show(_statusBox.Text, FileToolsEnvironment.AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }

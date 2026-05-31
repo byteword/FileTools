@@ -4,6 +4,9 @@ namespace FileTools;
 
 internal static class ContextMenuRegistrar
 {
+    private const string GroupedMenuKeyName = "FileTools";
+    private const string OpenMenuKeyName = "FileTools_Open";
+
     private static readonly (string KeyName, ToolMode Mode)[] Menus =
     [
         ("FileTools_NameCorrection", ToolMode.FileNameCorrection),
@@ -24,7 +27,7 @@ internal static class ContextMenuRegistrar
         "FolderUnwrap_MoveAll"
     ];
 
-    public static string Install(string executablePath)
+    public static string Install(string executablePath, FileToolsSettings settings)
     {
         if (string.IsNullOrWhiteSpace(executablePath) || !File.Exists(executablePath))
         {
@@ -35,32 +38,97 @@ internal static class ContextMenuRegistrar
         var installedPath = Path.Combine(FileToolsEnvironment.AppDataDir, "FileTools.exe");
         CopyRuntimeFiles(executablePath, installedPath);
 
+        RemoveAllContextMenuKeys();
+        RemoveLegacyFolderUnwrapKeys();
+
+        if (!settings.RegisterContextMenu)
+        {
+            return installedPath;
+        }
+
         foreach (var baseKey in BaseKeys)
         {
-            foreach (var menu in Menus)
+            if (settings.ContextMenuLayout == ContextMenuLayout.Expanded)
             {
-                CreateMenu(baseKey, menu.KeyName, ToolModeText.GetDisplayName(menu.Mode), installedPath, menu.Mode);
+                CreateExpandedMenus(baseKey, installedPath);
+            }
+            else
+            {
+                CreateGroupedMenu(baseKey, installedPath);
             }
         }
 
-        RemoveLegacyFolderUnwrapKeys();
         return installedPath;
     }
 
     public static void Uninstall()
     {
-        foreach (var baseKey in BaseKeys)
-        {
-            foreach (var menu in Menus)
-            {
-                DeleteMenu(baseKey, menu.KeyName);
-            }
-        }
-
+        RemoveAllContextMenuKeys();
         RemoveLegacyFolderUnwrapKeys();
     }
 
-    private static void CreateMenu(
+    private static void CreateExpandedMenus(string baseKey, string exePath)
+    {
+        CreateOpenMenu(baseKey, OpenMenuKeyName, ToolModeText.OpenAppDisplayName, exePath);
+        foreach (var menu in Menus)
+        {
+            CreateToolMenu(baseKey, menu.KeyName, ToolModeText.GetDisplayName(menu.Mode), exePath, menu.Mode);
+        }
+    }
+
+    private static void CreateGroupedMenu(string baseKey, string exePath)
+    {
+        using var key = Registry.CurrentUser.CreateSubKey(baseKey + "\\" + GroupedMenuKeyName);
+        if (key is null)
+        {
+            throw new InvalidOperationException("레지스트리 키 생성 실패: " + baseKey + "\\" + GroupedMenuKeyName);
+        }
+
+        key.SetValue("", FileToolsEnvironment.AppName, RegistryValueKind.String);
+        key.SetValue("MUIVerb", FileToolsEnvironment.AppName, RegistryValueKind.String);
+        key.SetValue("Icon", exePath, RegistryValueKind.String);
+        key.SetValue("MultiSelectModel", "Player", RegistryValueKind.String);
+        key.SetValue("SubCommands", "", RegistryValueKind.String);
+
+        CreateOpenMenu(baseKey + "\\" + GroupedMenuKeyName + @"\shell", "Open", ToolModeText.OpenAppDisplayName, exePath);
+        foreach (var menu in Menus)
+        {
+            CreateToolMenu(
+                baseKey + "\\" + GroupedMenuKeyName + @"\shell",
+                menu.Mode.ToString(),
+                ToolModeText.GetDisplayName(menu.Mode),
+                exePath,
+                menu.Mode);
+        }
+    }
+
+    private static void CreateOpenMenu(
+        string baseKey,
+        string keyName,
+        string menuText,
+        string exePath)
+    {
+        using var key = Registry.CurrentUser.CreateSubKey(baseKey + "\\" + keyName);
+        if (key is null)
+        {
+            throw new InvalidOperationException("레지스트리 키 생성 실패: " + baseKey + "\\" + keyName);
+        }
+
+        key.SetValue("", menuText, RegistryValueKind.String);
+        key.SetValue("MUIVerb", menuText, RegistryValueKind.String);
+        key.SetValue("Icon", exePath, RegistryValueKind.String);
+        key.SetValue("MultiSelectModel", "Player", RegistryValueKind.String);
+
+        using var cmd = key.CreateSubKey("command");
+        if (cmd is null)
+        {
+            throw new InvalidOperationException("레지스트리 command 키 생성 실패: " + keyName);
+        }
+
+        cmd.SetValue("", $"\"{exePath}\" /open \"%1\"", RegistryValueKind.String);
+    }
+
+    private static void CreateToolMenu(
         string baseKey,
         string keyName,
         string menuText,
@@ -74,6 +142,7 @@ internal static class ContextMenuRegistrar
         }
 
         key.SetValue("", menuText, RegistryValueKind.String);
+        key.SetValue("MUIVerb", menuText, RegistryValueKind.String);
         key.SetValue("Icon", exePath, RegistryValueKind.String);
         key.SetValue("MultiSelectModel", "Player", RegistryValueKind.String);
 
@@ -132,6 +201,19 @@ internal static class ContextMenuRegistrar
         catch (Exception ex)
         {
             FileToolsEnvironment.Log("UNINSTALL", ex.Message);
+        }
+    }
+
+    private static void RemoveAllContextMenuKeys()
+    {
+        foreach (var baseKey in BaseKeys)
+        {
+            DeleteMenu(baseKey, OpenMenuKeyName);
+            DeleteMenu(baseKey, GroupedMenuKeyName);
+            foreach (var menu in Menus)
+            {
+                DeleteMenu(baseKey, menu.KeyName);
+            }
         }
     }
 

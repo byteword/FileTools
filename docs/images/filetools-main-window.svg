@@ -34,32 +34,37 @@
   <rect x="440" y="96" width="470" height="26" rx="3" fill="#ffffff" stroke="#aeb4bd"/>
   <text x="452" y="114" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">자동: 파일은 wrapping, 폴더는 unwrapping</text>
 
-  <rect x="424" y="150" width="520" height="292" fill="#ffffff" stroke="#d6dae2"/>
-  <text x="440" y="176" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" fill="#20242a">자동 재배치 템플릿</text>
-  <text x="440" y="211" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#5b6472">템플릿</text>
-  <rect x="520" y="192" width="260" height="26" rx="3" fill="#ffffff" stroke="#aeb4bd"/>
-  <text x="532" y="211" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">제목 초성 분류 (Default)</text>
-  <rect x="790" y="192" width="56" height="26" rx="3" fill="#ffffff" stroke="#aeb4bd"/>
-  <text x="807" y="211" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">새로</text>
-  <rect x="854" y="192" width="56" height="26" rx="3" fill="#ffffff" stroke="#aeb4bd"/>
-  <text x="871" y="211" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">삭제</text>
-  <text x="440" y="248" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#5b6472">ID</text>
-  <rect x="520" y="229" width="390" height="26" rx="3" fill="#ffffff" stroke="#aeb4bd"/>
-  <text x="532" y="248" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Default</text>
-  <text x="440" y="285" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#5b6472">Source</text>
-  <rect x="520" y="266" width="130" height="26" rx="3" fill="#ffffff" stroke="#aeb4bd"/>
-  <text x="532" y="285" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Title</text>
-  <text x="670" y="285" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#5b6472">Transform</text>
-  <rect x="750" y="266" width="160" height="26" rx="3" fill="#ffffff" stroke="#aeb4bd"/>
-  <text x="762" y="285" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">InitialBucket</text>
-  <text x="440" y="322" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#5b6472">Format</text>
-  <rect x="520" y="303" width="130" height="26" rx="3" fill="#ffffff" stroke="#aeb4bd"/>
-  <text x="532" y="322" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">[{value}]</text>
-  <rect x="750" y="352" width="160" height="30" rx="3" fill="#e9eef6" stroke="#aeb4bd"/>
-  <text x="795" y="372" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">템플릿 저장</text>
+  <rect x="424" y="150" width="520" height="88" fill="#ffffff" stroke="#d6dae2"/>
+  <text x="440" y="176" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" fill="#20242a">ContextMenu</text>
+  <rect x="440" y="190" width="14" height="14" fill="#ffffff" stroke="#7c8796"/>
+  <path d="M442 196 L447 202 L454 190" fill="none" stroke="#1f6feb" stroke-width="2"/>
+  <text x="462" y="202" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Explorer ContextMenu 등록</text>
+  <rect x="440" y="208" width="470" height="24" rx="3" fill="#ffffff" stroke="#aeb4bd"/>
+  <text x="452" y="225" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">묶음형: FileTools 하위 메뉴</text>
 
-  <rect x="424" y="458" width="520" height="100" fill="#ffffff" stroke="#d6dae2"/>
-  <text x="440" y="484" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" fill="#20242a">작업 결과</text>
-  <rect x="440" y="496" width="470" height="44" fill="#fcfcfd" stroke="#c9ced8"/>
-  <text x="452" y="523" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#5b6472">대상 / 적용 / 건너뜀 / 오류 요약 표시</text>
+  <rect x="424" y="252" width="520" height="220" fill="#ffffff" stroke="#d6dae2"/>
+  <text x="440" y="278" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" fill="#20242a">자동 재배치 템플릿</text>
+  <text x="440" y="313" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#5b6472">템플릿</text>
+  <rect x="520" y="294" width="260" height="26" rx="3" fill="#ffffff" stroke="#aeb4bd"/>
+  <text x="532" y="313" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">제목 초성 분류 (Default)</text>
+  <rect x="790" y="294" width="56" height="26" rx="3" fill="#ffffff" stroke="#aeb4bd"/>
+  <text x="807" y="313" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">새로</text>
+  <rect x="854" y="294" width="56" height="26" rx="3" fill="#ffffff" stroke="#aeb4bd"/>
+  <text x="871" y="313" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">삭제</text>
+  <text x="440" y="350" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#5b6472">ID</text>
+  <rect x="520" y="331" width="390" height="26" rx="3" fill="#ffffff" stroke="#aeb4bd"/>
+  <text x="532" y="350" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Default</text>
+  <text x="440" y="387" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#5b6472">Source</text>
+  <rect x="520" y="368" width="130" height="26" rx="3" fill="#ffffff" stroke="#aeb4bd"/>
+  <text x="532" y="387" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Title</text>
+  <text x="670" y="387" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#5b6472">Transform</text>
+  <rect x="750" y="368" width="160" height="26" rx="3" fill="#ffffff" stroke="#aeb4bd"/>
+  <text x="762" y="387" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">InitialBucket</text>
+  <rect x="750" y="422" width="160" height="30" rx="3" fill="#e9eef6" stroke="#aeb4bd"/>
+  <text x="795" y="442" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">템플릿 저장</text>
+
+  <rect x="424" y="488" width="520" height="70" fill="#ffffff" stroke="#d6dae2"/>
+  <text x="440" y="514" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" fill="#20242a">작업 결과</text>
+  <rect x="440" y="526" width="470" height="20" fill="#fcfcfd" stroke="#c9ced8"/>
+  <text x="452" y="541" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#5b6472">대상 / 적용 / 건너뜀 / 오류 요약 표시</text>
 </svg>

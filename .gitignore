@@ -1,6 +1,8 @@
 bin/
 obj/
 .vs/
+.mcp/
+artifacts/
 FileToolsData/
 *.user
 *.suo

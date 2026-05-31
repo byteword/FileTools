@@ -1,0 +1,22 @@
+<Project Sdk="WixToolset.Sdk/4.0.6">
+  <PropertyGroup>
+    <OutputName>FileTools</OutputName>
+    <OutputType>Package</OutputType>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <ProductVersion>1.0.0</ProductVersion>
+    <SuppressIces>ICE91</SuppressIces>
+    <AppPublishDir>$(MSBuildThisFileDirectory)..\..\artifacts\publish\FileTools-win-x64\</AppPublishDir>
+    <DefineConstants>AppPublishDir=$(AppPublishDir);ProductVersion=$(ProductVersion)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" Version="4.0.6" />
+  </ItemGroup>
+
+  <Target Name="PublishFileToolsApp" BeforeTargets="CoreCompile">
+    <MSBuild
+      Projects="$(MSBuildThisFileDirectory)..\..\src\FileTools.App\FileTools.App.csproj"
+      Targets="Publish"
+      Properties="Configuration=$(Configuration);RuntimeIdentifier=win-x64;SelfContained=true;PublishSingleFile=true;PublishDir=$(AppPublishDir)" />
+  </Target>
+</Project>

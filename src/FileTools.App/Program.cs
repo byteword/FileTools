@@ -33,6 +33,12 @@ internal static class Program
                     return;
                 }
 
+                if (verb is "/open" or "--open")
+                {
+                    OpenFromContextMenu(args.Skip(1).ToArray());
+                    return;
+                }
+
                 if (verb is "/run" or "--run")
                 {
                     RunLegacyContextMenu(args.Skip(1).ToArray());
@@ -57,7 +63,7 @@ internal static class Program
             throw new InvalidOperationException("현재 실행 파일 경로를 찾을 수 없습니다.");
         }
 
-        var installedPath = ContextMenuRegistrar.Install(exe);
+        var installedPath = ContextMenuRegistrar.Install(exe, SettingsStore.Load());
         MessageBox.Show(
             "ContextMenu를 설치했습니다.\n\n" + installedPath,
             FileToolsEnvironment.AppName,
@@ -117,6 +123,49 @@ internal static class Program
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
+        }
+        finally
+        {
+            try
+            {
+                mutex.ReleaseMutex();
+            }
+            catch
+            {
+            }
+        }
+    }
+
+    private static void OpenFromContextMenu(string[] args)
+    {
+        if (args.Length == 0)
+        {
+            Application.Run(new MainForm());
+            return;
+        }
+
+        var path = args[0].Trim('"');
+        if (!File.Exists(path) && !Directory.Exists(path))
+        {
+            Application.Run(new MainForm());
+            return;
+        }
+
+        Directory.CreateDirectory(FileToolsEnvironment.QueueDir);
+        var queueFile = Path.Combine(FileToolsEnvironment.QueueDir, "Open.txt");
+        AppendQueue(queueFile, path);
+
+        using var mutex = new Mutex(initiallyOwned: false, name: "Local\\" + FileToolsEnvironment.AppName + "_Open");
+        if (!mutex.WaitOne(0))
+        {
+            return;
+        }
+
+        try
+        {
+            Thread.Sleep(1300);
+            var paths = ReadAndClearQueue(queueFile);
+            Application.Run(new MainForm(paths));
         }
         finally
         {

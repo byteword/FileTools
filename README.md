@@ -70,6 +70,35 @@ Output:
 src\FileTools.App\bin\Release\net8.0-windows\win-x64\publish\FileTools.exe
 ```
 
+## Build MSI
+
+The MSI installer uses WiX Toolset SDK-style project files. The first build restores the WiX SDK and UI extension packages.
+
+```powershell
+dotnet build .\installer\FileTools.Installer\FileTools.Installer.wixproj -c Release
+```
+
+Output:
+
+```text
+installer\FileTools.Installer\bin\Release\FileTools.msi
+```
+
+The MSI publishes FileTools as a self-contained `win-x64` single-file app and installs it per-user under:
+
+```text
+%LOCALAPPDATA%\Programs\FileTools
+```
+
+MSI options:
+
+- `FileTools`: application and Start Menu shortcut.
+- `Explorer Context Menu`: optional ContextMenu registration.
+- `Grouped Context Menu`: default. Shows one `FileTools` menu with subcommands.
+- `Expanded Context Menu`: shows `FileTools 열기` and all tool commands directly.
+
+The grouped menu is the default. In the feature selection page, select `Expanded Context Menu` to install the direct entries instead. If both grouped and expanded features are selected, the installer conditions prefer expanded entries.
+
 ## Project Layout
 
 ```text
@@ -81,6 +110,9 @@ src\FileTools.App
 ├─ Relocation
 ├─ Shell
 └─ Ui
+
+installer\FileTools.Installer
+└─ WiX MSI package project
 ```
 
 ## Install ContextMenu
@@ -123,6 +155,7 @@ Or:
 Registered commands:
 
 ```text
+FileTools.exe /open "%1"
 FileTools.exe /context FileNameCorrection "%1"
 FileTools.exe /context FolderStructure "%1"
 FileTools.exe /context AutoRelocation "%1"
