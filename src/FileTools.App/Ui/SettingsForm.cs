@@ -94,8 +94,7 @@ internal sealed class SettingsForm : Form
         panel.Controls.Add(_registerContextMenuCheckBox);
         panel.Controls.Add(CreateComboRow(Localizer.Get("LabelContextMenuLayout"), _contextMenuLayoutCombo));
         panel.Controls.Add(CreateGroup(Localizer.Get("GroupContextMenuTasks"),
-            _contextMenuRenameCheckBox,
-            _contextMenuOpenCheckBox));
+            _contextMenuRenameCheckBox));
         panel.Controls.Add(CreateGroup(Localizer.Get("GroupFolderStructure"),
             _contextMenuFolderWrapCheckBox,
             _contextMenuFolderUnwrapSameNameCheckBox,
@@ -104,6 +103,8 @@ internal sealed class SettingsForm : Form
         panel.Controls.Add(CreateGroup(Localizer.Get("GroupAutoRelocationContextMenu"),
             _contextMenuRelocationCurrentCheckBox,
             _contextMenuRelocationChooseTargetCheckBox));
+        panel.Controls.Add(CreateGroup(Localizer.Get("GroupApplicationContextMenu"),
+            _contextMenuOpenCheckBox));
 
         var installPanel = new FlowLayoutPanel
         {

@@ -14,6 +14,8 @@
 
     <Property Id="INSTALLLEVEL" Value="1" />
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <Property Id="ARPPRODUCTICON" Value="FileToolsAppIcon" />
+    <Icon Id="FileToolsAppIcon" SourceFile="$(var.AppIconPath)" />
     <ui:WixUI Id="WixUI_FeatureTree" />
 
     <StandardDirectory Id="LocalAppDataFolder">
@@ -79,6 +81,8 @@
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_99_Open" Name="MUIVerb" Type="string" Value="FileTools 열기" />
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_99_Open" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_99_Open" Name="MultiSelectModel" Type="string" Value="Player" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_99_Open" Name="SeparatorBefore" Type="string" Value="" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_99_Open" Name="Position" Type="string" Value="Bottom" />
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_99_Open\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /open &quot;%1&quot;" />
       </Component>
 
@@ -123,6 +127,8 @@
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_99_Open" Name="MUIVerb" Type="string" Value="FileTools 열기" />
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_99_Open" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_99_Open" Name="MultiSelectModel" Type="string" Value="Player" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_99_Open" Name="SeparatorBefore" Type="string" Value="" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_99_Open" Name="Position" Type="string" Value="Bottom" />
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_99_Open\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /open &quot;%1&quot;" />
       </Component>
 
@@ -141,6 +147,8 @@
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FileTools_07_AutoRelocationChooseTarget" Type="string" Value="선택한 폴더로 자동 재배치" />
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FileTools_07_AutoRelocationChooseTarget\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context AutoRelocationChooseTarget &quot;%1&quot;" />
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FileTools_99_Open" Type="string" Value="FileTools 열기" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FileTools_99_Open" Name="SeparatorBefore" Type="string" Value="" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FileTools_99_Open" Name="Position" Type="string" Value="Bottom" />
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\shell\FileTools_99_Open\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /open &quot;%1&quot;" />
       </Component>
 
@@ -163,6 +171,8 @@
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_07_AutoRelocationChooseTarget" Type="string" Value="선택한 폴더로 자동 재배치" />
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_07_AutoRelocationChooseTarget\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /context AutoRelocationChooseTarget &quot;%1&quot;" />
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_99_Open" Type="string" Value="FileTools 열기" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_99_Open" Name="SeparatorBefore" Type="string" Value="" />
+        <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_99_Open" Name="Position" Type="string" Value="Bottom" />
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools\shell\FileTools_99_Open\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /open &quot;%1&quot;" />
       </Component>
     </DirectoryRef>

@@ -9,6 +9,7 @@
     <RootNamespace>FileTools</RootNamespace>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Resources\FileToolsIcon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Remove="Ui\MainForm.*.resx" />

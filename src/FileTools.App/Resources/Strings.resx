@@ -164,6 +164,7 @@
   <data name="TabFolderStructure" xml:space="preserve"><value>Folder Structure</value></data>
   <data name="LabelContextMenuLayout" xml:space="preserve"><value>Menu layout</value></data>
   <data name="GroupContextMenuTasks" xml:space="preserve"><value>Context menu tasks</value></data>
+  <data name="GroupApplicationContextMenu" xml:space="preserve"><value>Application command</value></data>
   <data name="CheckRenameReviewBeforeApply" xml:space="preserve"><value>Review ambiguous rename candidates before applying</value></data>
   <data name="CheckRenameUseDictionary" xml:space="preserve"><value>Use rename dictionary when available</value></data>
   <data name="ButtonEditRenameDictionary" xml:space="preserve"><value>Edit rename dictionary...</value></data>

@@ -54,7 +54,9 @@ internal static class ContextMenuRegistrar
             "FileTools_99_Open",
             ContextMenuCommand.OpenApp,
             ContextMenuTargetKind.File | ContextMenuTargetKind.Directory,
-            settings => settings.ContextMenuOpenApp)
+            settings => settings.ContextMenuOpenApp,
+            SeparatorBefore: true,
+            PositionBottom: true)
     ];
 
     private static readonly string[] LegacyKeys =
@@ -166,6 +168,15 @@ internal static class ContextMenuRegistrar
         key.SetValue("MUIVerb", menuText, RegistryValueKind.String);
         key.SetValue("Icon", exePath, RegistryValueKind.String);
         key.SetValue("MultiSelectModel", "Player", RegistryValueKind.String);
+        if (definition.SeparatorBefore)
+        {
+            key.SetValue("SeparatorBefore", "", RegistryValueKind.String);
+        }
+
+        if (definition.PositionBottom)
+        {
+            key.SetValue("Position", "Bottom", RegistryValueKind.String);
+        }
 
         using var cmd = key.CreateSubKey("command");
         if (cmd is null)
@@ -262,5 +273,7 @@ internal static class ContextMenuRegistrar
         string KeyName,
         ContextMenuCommand Command,
         ContextMenuTargetKind TargetKinds,
-        Func<FileToolsSettings, bool> IsEnabled);
+        Func<FileToolsSettings, bool> IsEnabled,
+        bool SeparatorBefore = false,
+        bool PositionBottom = false);
 }

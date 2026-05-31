@@ -164,6 +164,7 @@
   <data name="TabFolderStructure" xml:space="preserve"><value>폴더 구조</value></data>
   <data name="LabelContextMenuLayout" xml:space="preserve"><value>메뉴 방식</value></data>
   <data name="GroupContextMenuTasks" xml:space="preserve"><value>Context Menu 작업</value></data>
+  <data name="GroupApplicationContextMenu" xml:space="preserve"><value>앱 실행 명령</value></data>
   <data name="CheckRenameReviewBeforeApply" xml:space="preserve"><value>모호한 이름변경 후보는 적용 전에 검토</value></data>
   <data name="CheckRenameUseDictionary" xml:space="preserve"><value>사용 가능한 경우 이름변경 사전 사용</value></data>
   <data name="ButtonEditRenameDictionary" xml:space="preserve"><value>이름변경 사전 편집...</value></data>

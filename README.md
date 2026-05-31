@@ -23,6 +23,7 @@ FileTools provides three current-user ContextMenu actions for selected files and
    - Template prefilters can skip review-only items during automatic execution.
 
 The Explorer command only starts the executable. It queues selected items briefly, merges Explorer's per-item invocations, performs the work automatically, and exits silently when there are no errors.
+The non-processing **FileTools 열기 / Open FileTools** command is registered after a separator and requested at the bottom of the Explorer menu so it is not grouped with automatic file operations.
 
 ## Standalone UI
 
@@ -42,6 +43,7 @@ The standalone window supports:
 
 The settings window owns operational defaults and Explorer ContextMenu installation/removal. ContextMenu registration can be grouped or expanded, and individual ContextMenu actions can be enabled or disabled.
 Folder wrapping/unwrapping and AutoRelocation commands can be selected independently for Explorer registration. Pressing OK in the settings window saves the options and synchronizes the current-user ContextMenu registration, even if the Install/Remove buttons are not pressed.
+The app icon is stored as transparent PNG and multi-size ICO assets under `src\FileTools.App\Resources`; the EXE and MSI product metadata both use the ICO.
 
 Separate dialogs are available for:
 

@@ -6,7 +6,8 @@
     <ProductVersion>1.0.0</ProductVersion>
     <SuppressIces>ICE91</SuppressIces>
     <AppPublishDir>$(MSBuildThisFileDirectory)..\..\artifacts\publish\FileTools-win-x64\</AppPublishDir>
-    <DefineConstants>AppPublishDir=$(AppPublishDir);ProductVersion=$(ProductVersion)</DefineConstants>
+    <AppIconPath>$(MSBuildThisFileDirectory)..\..\src\FileTools.App\Resources\FileToolsIcon.ico</AppIconPath>
+    <DefineConstants>AppPublishDir=$(AppPublishDir);ProductVersion=$(ProductVersion);AppIconPath=$(AppIconPath)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
