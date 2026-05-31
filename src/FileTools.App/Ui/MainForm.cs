@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace FileTools;
 
-internal sealed partial class MainForm : Form
+public sealed partial class MainForm : Form
 {
     private readonly string[] _initialPaths;
     private FileToolsSettings _settings = new();
@@ -11,7 +11,12 @@ internal sealed partial class MainForm : Form
     private AutoRelocationTemplateFile? _selectedTemplate;
     private bool _loadingTemplate;
 
-    public MainForm(IEnumerable<string>? initialPaths = null)
+    public MainForm()
+        : this(null)
+    {
+    }
+
+    public MainForm(IEnumerable<string>? initialPaths)
     {
         _initialPaths = initialPaths?.ToArray() ?? [];
         InitializeComponent();
@@ -59,6 +64,14 @@ internal sealed partial class MainForm : Form
         var selectedTransform = TryGetComboValue<AutoRelocationValueTransform>(_templateTransformCombo);
         var selectedLanguage = TryGetComboValue<AutoRelocationLanguageProfile>(_templateLanguageCombo);
 
+        ClearDesignerComboItems(
+            _toolCombo,
+            _folderOperationCombo,
+            _contextMenuLayoutCombo,
+            _templateSourceCombo,
+            _templateTransformCombo,
+            _templateLanguageCombo);
+
         _toolCombo.DataSource = Enum.GetValues<ToolMode>()
             .Select(mode => new ComboOption<ToolMode>(ToolModeText.GetDisplayName(mode), mode))
             .ToArray();
@@ -88,6 +101,16 @@ internal sealed partial class MainForm : Form
         SelectComboValue(_templateSourceCombo, selectedSource ?? AutoRelocationValueSource.Title);
         SelectComboValue(_templateTransformCombo, selectedTransform ?? AutoRelocationValueTransform.InitialBucket);
         SelectComboValue(_templateLanguageCombo, selectedLanguage ?? AutoRelocationLanguageProfile.KoreanEnglish);
+    }
+
+    private static void ClearDesignerComboItems(params ComboBox[] combos)
+    {
+        foreach (var combo in combos)
+        {
+            combo.DataSource = null;
+            combo.Items.Clear();
+            combo.Text = "";
+        }
     }
 
     private void ApplyLocalization()
