@@ -9,9 +9,52 @@ internal sealed class FileToolsSettings
 
     public string AutoRelocationTemplateId { get; set; } = AutoRelocationTemplateDefaults.DefaultTemplateId;
 
+    public string? AutoRelocationTargetRootPath { get; set; }
+
     public bool RegisterContextMenu { get; set; } = true;
 
     public ContextMenuLayout ContextMenuLayout { get; set; } = ContextMenuLayout.Grouped;
+
+    public bool ContextMenuOpenApp { get; set; } = true;
+
+    public bool ContextMenuFileNameCorrection { get; set; } = true;
+
+    public bool ContextMenuFolderStructure { get; set; } = true;
+
+    public bool ContextMenuAutoRelocation { get; set; } = true;
+
+    public bool RenameReviewBeforeApply { get; set; } = true;
+
+    public bool RenameUseDictionary { get; set; } = true;
+
+    public bool IsContextMenuToolEnabled(ToolMode mode)
+    {
+        return mode switch
+        {
+            ToolMode.FileNameCorrection => ContextMenuFileNameCorrection,
+            ToolMode.FolderStructure => ContextMenuFolderStructure,
+            ToolMode.AutoRelocation => ContextMenuAutoRelocation,
+            _ => false
+        };
+    }
+
+    public FileToolsSettings Clone()
+    {
+        return new FileToolsSettings
+        {
+            FolderStructureOperation = FolderStructureOperation,
+            AutoRelocationTemplateId = AutoRelocationTemplateId,
+            AutoRelocationTargetRootPath = AutoRelocationTargetRootPath,
+            RegisterContextMenu = RegisterContextMenu,
+            ContextMenuLayout = ContextMenuLayout,
+            ContextMenuOpenApp = ContextMenuOpenApp,
+            ContextMenuFileNameCorrection = ContextMenuFileNameCorrection,
+            ContextMenuFolderStructure = ContextMenuFolderStructure,
+            ContextMenuAutoRelocation = ContextMenuAutoRelocation,
+            RenameReviewBeforeApply = RenameReviewBeforeApply,
+            RenameUseDictionary = RenameUseDictionary
+        };
+    }
 }
 
 internal static class SettingsStore

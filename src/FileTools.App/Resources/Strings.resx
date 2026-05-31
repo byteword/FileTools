@@ -122,4 +122,45 @@
   <data name="DefaultRelocationTemplateDescription" xml:space="preserve"><value>Separates review-only direct-translation tags and creates first-level folders from title initials.</value></data>
   <data name="TemplateIdInvalid" xml:space="preserve"><value>Template ID cannot be blank or contain invalid file name characters.</value></data>
   <data name="SkipPrefix" xml:space="preserve"><value>SKIP: </value></data>
+  <data name="GroupWorkPlan" xml:space="preserve"><value>Work plan</value></data>
+  <data name="ButtonSettings" xml:space="preserve"><value>Settings</value></data>
+  <data name="ButtonAddRenameStep" xml:space="preserve"><value>Add rename</value></data>
+  <data name="ButtonAddWrapStep" xml:space="preserve"><value>Add wrap</value></data>
+  <data name="ButtonAddUnwrapStep" xml:space="preserve"><value>Add unwrap</value></data>
+  <data name="ButtonAddRelocationStep" xml:space="preserve"><value>Add relocation</value></data>
+  <data name="ButtonRemoveStep" xml:space="preserve"><value>Remove step</value></data>
+  <data name="ButtonExecutePlan" xml:space="preserve"><value>Run plan</value></data>
+  <data name="InitialPlanStatus" xml:space="preserve"><value>Add targets on the left, add actions on the right, then run the plan.</value></data>
+  <data name="NoSelectedTargetMessage" xml:space="preserve"><value>Select a target before adding an action.</value></data>
+  <data name="NoPlanStepsMessage" xml:space="preserve"><value>Add at least one action to a target before running the plan.</value></data>
+  <data name="PlanExecutionTitle" xml:space="preserve"><value>Plan execution</value></data>
+  <data name="DialogRenameTitle" xml:space="preserve"><value>Rename action</value></data>
+  <data name="DialogFolderWrapTitle" xml:space="preserve"><value>Folder wrap action</value></data>
+  <data name="DialogFolderUnwrapTitle" xml:space="preserve"><value>Folder unwrap action</value></data>
+  <data name="DialogAutoRelocationTitle" xml:space="preserve"><value>Auto relocation action</value></data>
+  <data name="LabelFolderOperation" xml:space="preserve"><value>Folder operation</value></data>
+  <data name="LabelManualTargetRoot" xml:space="preserve"><value>Manual target root</value></data>
+  <data name="ButtonBrowse" xml:space="preserve"><value>Browse...</value></data>
+  <data name="ButtonCancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="RenameStepDescription" xml:space="preserve"><value>Creates a filename correction action. Ambiguous items are skipped by the current safe runner.</value></data>
+  <data name="FolderWrapStepDescription" xml:space="preserve"><value>Creates a folder wrapping action for files.</value></data>
+  <data name="FolderUnwrapStepDescription" xml:space="preserve"><value>Select how folder contents are moved upward.</value></data>
+  <data name="AutoRelocationStepDescription" xml:space="preserve"><value>Select the relocation template and optional target root for this action.</value></data>
+  <data name="ManualTargetRootDialogDescription" xml:space="preserve"><value>Select a manual target root folder</value></data>
+  <data name="SettingsFormTitle" xml:space="preserve"><value>FileTools settings</value></data>
+  <data name="TabContextMenu" xml:space="preserve"><value>Context Menu</value></data>
+  <data name="TabRename" xml:space="preserve"><value>Rename</value></data>
+  <data name="TabAutoRelocation" xml:space="preserve"><value>Auto Relocation</value></data>
+  <data name="TabFolderStructure" xml:space="preserve"><value>Folder Structure</value></data>
+  <data name="LabelContextMenuLayout" xml:space="preserve"><value>Menu layout</value></data>
+  <data name="GroupContextMenuTasks" xml:space="preserve"><value>Context menu tasks</value></data>
+  <data name="CheckRenameReviewBeforeApply" xml:space="preserve"><value>Review ambiguous rename candidates before applying</value></data>
+  <data name="CheckRenameUseDictionary" xml:space="preserve"><value>Use rename dictionary when available</value></data>
+  <data name="ButtonEditRenameDictionary" xml:space="preserve"><value>Edit rename dictionary...</value></data>
+  <data name="FutureRenameDictionaryMessage" xml:space="preserve"><value>The rename dictionary editor will be added as a separate dialog.</value></data>
+  <data name="LabelDefaultTemplate" xml:space="preserve"><value>Default template</value></data>
+  <data name="ButtonEditTemplates" xml:space="preserve"><value>Edit templates...</value></data>
+  <data name="FutureTemplateEditorMessage" xml:space="preserve"><value>The auto relocation template editor will be added as a separate dialog.</value></data>
+  <data name="LabelDefaultFolderOperation" xml:space="preserve"><value>Default folder operation</value></data>
+  <data name="FolderOptionsFutureMessage" xml:space="preserve"><value>Folder wrapping and unwrapping options are intentionally kept here for future expansion.</value></data>
 </root>

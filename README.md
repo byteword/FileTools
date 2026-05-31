@@ -25,7 +25,7 @@ The Explorer command only starts the executable. It queues selected items briefl
 
 ## Standalone UI
 
-Run `FileTools.exe` without arguments to open the settings and drag-and-drop window.
+Run `FileTools.exe` without arguments to open the drag-and-drop work plan window.
 
 ![FileTools standalone window](docs/images/filetools-main-window.svg)
 
@@ -33,10 +33,14 @@ The standalone window supports:
 
 - Drag and drop files/folders into the target list.
 - Manual file/folder selection.
-- Selecting one of the three tools and running it directly.
-- Changing the folder wrapping/unwrapping mode.
-- Creating, editing, saving, and deleting AutoRelocation templates.
-- Installing or removing Explorer ContextMenu entries.
+- Adding multiple planned actions to each target before changing files.
+- Chaining filename correction, folder wrapping, folder unwrapping, and AutoRelocation actions.
+- Double-clicking a planned action to reopen the matching action dialog.
+- Running all target plans in order with one command.
+- Opening a separate tabbed settings window for defaults, rename options, AutoRelocation defaults, folder options, and Explorer ContextMenu registration.
+
+The settings window owns operational defaults and Explorer ContextMenu installation/removal. ContextMenu registration can be grouped or expanded, and individual ContextMenu actions can be enabled or disabled.
+AutoRelocation template editing and rename dictionary editing are reserved for separate dialogs so the settings tabs stay compact.
 
 Settings and templates are stored under:
 

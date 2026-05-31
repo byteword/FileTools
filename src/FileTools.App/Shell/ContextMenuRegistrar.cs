@@ -50,11 +50,11 @@ internal static class ContextMenuRegistrar
         {
             if (settings.ContextMenuLayout == ContextMenuLayout.Expanded)
             {
-                CreateExpandedMenus(baseKey, installedPath);
+                CreateExpandedMenus(baseKey, installedPath, settings);
             }
             else
             {
-                CreateGroupedMenu(baseKey, installedPath);
+                CreateGroupedMenu(baseKey, installedPath, settings);
             }
         }
 
@@ -67,17 +67,29 @@ internal static class ContextMenuRegistrar
         RemoveLegacyFolderUnwrapKeys();
     }
 
-    private static void CreateExpandedMenus(string baseKey, string exePath)
+    private static void CreateExpandedMenus(string baseKey, string exePath, FileToolsSettings settings)
     {
-        CreateOpenMenu(baseKey, OpenMenuKeyName, ToolModeText.OpenAppDisplayName, exePath);
-        foreach (var menu in Menus)
+        if (settings.ContextMenuOpenApp)
+        {
+            CreateOpenMenu(baseKey, OpenMenuKeyName, ToolModeText.OpenAppDisplayName, exePath);
+        }
+
+        foreach (var menu in Menus.Where(menu => settings.IsContextMenuToolEnabled(menu.Mode)))
         {
             CreateToolMenu(baseKey, menu.KeyName, ToolModeText.GetDisplayName(menu.Mode), exePath, menu.Mode);
         }
     }
 
-    private static void CreateGroupedMenu(string baseKey, string exePath)
+    private static void CreateGroupedMenu(string baseKey, string exePath, FileToolsSettings settings)
     {
+        var enabledMenus = Menus
+            .Where(menu => settings.IsContextMenuToolEnabled(menu.Mode))
+            .ToArray();
+        if (!settings.ContextMenuOpenApp && enabledMenus.Length == 0)
+        {
+            return;
+        }
+
         using var key = Registry.CurrentUser.CreateSubKey(baseKey + "\\" + GroupedMenuKeyName);
         if (key is null)
         {
@@ -90,8 +102,12 @@ internal static class ContextMenuRegistrar
         key.SetValue("MultiSelectModel", "Player", RegistryValueKind.String);
         key.SetValue("SubCommands", "", RegistryValueKind.String);
 
-        CreateOpenMenu(baseKey + "\\" + GroupedMenuKeyName + @"\shell", "Open", ToolModeText.OpenAppDisplayName, exePath);
-        foreach (var menu in Menus)
+        if (settings.ContextMenuOpenApp)
+        {
+            CreateOpenMenu(baseKey + "\\" + GroupedMenuKeyName + @"\shell", "Open", ToolModeText.OpenAppDisplayName, exePath);
+        }
+
+        foreach (var menu in enabledMenus)
         {
             CreateToolMenu(
                 baseKey + "\\" + GroupedMenuKeyName + @"\shell",

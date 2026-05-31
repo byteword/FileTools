@@ -323,8 +323,12 @@ internal sealed class FileToolRunner
         }
 
         var corrector = new KoreanFileNameCorrector();
+        var targetRootOverride = string.IsNullOrWhiteSpace(_settings.AutoRelocationTargetRootPath)
+            ? null
+            : Path.GetFullPath(_settings.AutoRelocationTargetRootPath);
+
         var grouped = paths
-            .Select(path => CreateRelocationContext(path, corrector, result))
+            .Select(path => CreateRelocationContext(path, corrector, result, targetRootOverride))
             .Where(static item => item is not null)
             .Cast<RelocationContextWithRoot>()
             .GroupBy(static item => item.RootFolder, PathComparer);
@@ -360,7 +364,8 @@ internal sealed class FileToolRunner
     private static RelocationContextWithRoot? CreateRelocationContext(
         string path,
         KoreanFileNameCorrector corrector,
-        OperationResult result)
+        OperationResult result,
+        string? targetRootOverride)
     {
         result.AddCandidate();
         var parent = Path.GetDirectoryName(path);
@@ -389,7 +394,7 @@ internal sealed class FileToolRunner
             var sizeBytes = File.Exists(path) ? new FileInfo(path).Length : 0;
 
             return new RelocationContextWithRoot(
-                parent,
+                targetRootOverride ?? parent,
                 new AutoRelocationItemContext(
                     path,
                     properties,
