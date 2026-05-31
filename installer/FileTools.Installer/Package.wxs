@@ -17,6 +17,7 @@
     <Property Id="ARPPRODUCTICON" Value="FileToolsAppIcon" />
     <Icon Id="FileToolsAppIcon" SourceFile="$(var.AppIconPath)" />
     <ui:WixUI Id="WixUI_FeatureTree" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.LicenseRtfPath)" />
 
     <StandardDirectory Id="LocalAppDataFolder">
       <Directory Id="ProgramsFolder" Name="Programs">

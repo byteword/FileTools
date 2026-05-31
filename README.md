@@ -243,3 +243,7 @@ Explorer often starts one process per selected item. FileTools waits briefly, me
 ```text
 %TEMP%\FileTools.log
 ```
+
+## License
+
+FileTools is licensed under the MIT License. See `LICENSE`.
