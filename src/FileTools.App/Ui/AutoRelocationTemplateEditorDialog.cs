@@ -9,6 +9,7 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
     private readonly TextBox _idBox = new();
     private readonly TextBox _nameBox = new();
     private readonly TextBox _descriptionBox = new();
+    private readonly ListBox _pathRuleList = new();
     private readonly ComboBox _pathSourceCombo = new();
     private readonly ComboBox _pathTransformCombo = new();
     private readonly ComboBox _pathLanguageCombo = new();
@@ -20,8 +21,11 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
     private readonly TextBox _prefilterValueBox = new();
     private readonly ComboBox _prefilterActionCombo = new();
     private readonly TextBox _prefilterTargetBox = new();
+    private readonly List<AutoRelocationPathRule> _pathRules = [];
 
     private bool _loading;
+    private bool _loadingPathRule;
+    private int _currentPathRuleIndex = -1;
     private string? _loadedTemplateId;
     private AutoRelocationTemplateDocument? _loadedDocument;
 
@@ -29,9 +33,9 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
     {
         Text = Localizer.Get("DialogTemplateEditorTitle");
         StartPosition = FormStartPosition.CenterParent;
-        Width = 840;
-        Height = 620;
-        MinimumSize = new Size(760, 520);
+        Width = 1080;
+        Height = 700;
+        MinimumSize = new Size(920, 600);
 
         BuildLayout();
         BindCombos();
@@ -47,7 +51,7 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
             ColumnCount = 2,
             RowCount = 2
         };
-        root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 240));
+        root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 250));
         root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
@@ -119,12 +123,7 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
             CreateTextRow(Localizer.Get("LabelName"), _nameBox),
             CreateTextRow(Localizer.Get("LabelDescription"), _descriptionBox)));
 
-        panel.Controls.Add(CreateGroup(Localizer.Get("GroupPathRule"),
-            CreateComboRow(Localizer.Get("LabelSource"), _pathSourceCombo),
-            CreateComboRow(Localizer.Get("LabelTransform"), _pathTransformCombo),
-            CreateComboRow(Localizer.Get("LabelLanguage"), _pathLanguageCombo),
-            CreateTextRow(Localizer.Get("LabelFormat"), _pathFormatBox),
-            CreateTextRow(Localizer.Get("LabelFallback"), _pathFallbackBox)));
+        panel.Controls.Add(BuildPathRulesGroup());
 
         panel.Controls.Add(CreateGroup(Localizer.Get("GroupPrefilter"),
             CreateCheckRow(_prefilterEnabledCheckBox, Localizer.Get("CheckEnablePrefilter")),
@@ -146,12 +145,98 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
         return panel;
     }
 
+    private Control BuildPathRulesGroup()
+    {
+        var group = new GroupBox
+        {
+            Text = Localizer.Get("GroupPathRules"),
+            Width = 760,
+            Height = 252,
+            Padding = new Padding(12)
+        };
+
+        var layout = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 2,
+            RowCount = 1
+        };
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 280));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        group.Controls.Add(layout);
+
+        var left = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 2
+        };
+        left.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        left.RowStyles.Add(new RowStyle(SizeType.Absolute, 66));
+        layout.Controls.Add(left, 0, 0);
+
+        _pathRuleList.Dock = DockStyle.Fill;
+        _pathRuleList.DisplayMember = nameof(PathRuleListItem.DisplayText);
+        _pathRuleList.SelectedIndexChanged += (_, _) => SelectPathRule(_pathRuleList.SelectedIndex);
+        left.Controls.Add(_pathRuleList, 0, 0);
+
+        var buttons = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            WrapContents = true
+        };
+        var addButton = new Button { Text = Localizer.Get("ButtonAdd"), Width = 62, Height = 28 };
+        var deleteButton = new Button { Text = Localizer.Get("ButtonDelete"), Width = 62, Height = 28 };
+        var upButton = new Button { Text = Localizer.Get("ButtonMoveUp"), Width = 62, Height = 28 };
+        var downButton = new Button { Text = Localizer.Get("ButtonMoveDown"), Width = 62, Height = 28 };
+        addButton.Click += (_, _) => AddPathRule();
+        deleteButton.Click += (_, _) => DeleteSelectedPathRule();
+        upButton.Click += (_, _) => MoveSelectedPathRule(-1);
+        downButton.Click += (_, _) => MoveSelectedPathRule(1);
+        buttons.Controls.Add(addButton);
+        buttons.Controls.Add(deleteButton);
+        buttons.Controls.Add(upButton);
+        buttons.Controls.Add(downButton);
+        left.Controls.Add(buttons, 0, 1);
+
+        var detail = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 6,
+            Padding = new Padding(10, 0, 0, 0)
+        };
+        for (var i = 0; i < 5; i++)
+        {
+            detail.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
+        }
+
+        detail.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
+        detail.Controls.Add(CreateCompactComboRow(Localizer.Get("LabelSource"), _pathSourceCombo), 0, 0);
+        detail.Controls.Add(CreateCompactComboRow(Localizer.Get("LabelTransform"), _pathTransformCombo), 0, 1);
+        detail.Controls.Add(CreateCompactComboRow(Localizer.Get("LabelLanguage"), _pathLanguageCombo), 0, 2);
+        detail.Controls.Add(CreateCompactTextRow(Localizer.Get("LabelFormat"), _pathFormatBox), 0, 3);
+        detail.Controls.Add(CreateCompactTextRow(Localizer.Get("LabelFallback"), _pathFallbackBox), 0, 4);
+
+        var updateButton = new Button
+        {
+            Text = Localizer.Get("ButtonUpdate"),
+            Width = 110,
+            Height = 28
+        };
+        updateButton.Click += (_, _) => UpdateSelectedPathRule();
+        detail.Controls.Add(updateButton, 0, 5);
+        layout.Controls.Add(detail, 1, 0);
+
+        return group;
+    }
+
     private void BindCombos()
     {
-        BindEnumCombo(_pathSourceCombo, AutoRelocationValueSource.Title);
+        BindEnumCombo(_pathSourceCombo, AutoRelocationTemplateDefaults.FileDerivedValueSources, AutoRelocationValueSource.Title);
         BindEnumCombo(_pathTransformCombo, AutoRelocationValueTransform.InitialBucket);
         BindEnumCombo(_pathLanguageCombo, AutoRelocationLanguageProfile.KoreanEnglish);
-        BindEnumCombo(_prefilterSourceCombo, AutoRelocationValueSource.Tags);
+        BindEnumCombo(_prefilterSourceCombo, AutoRelocationTemplateDefaults.FileDerivedValueSources, AutoRelocationValueSource.FileName);
         BindEnumCombo(_prefilterOperatorCombo, AutoRelocationFilterOperator.Contains);
         BindEnumCombo(_prefilterActionCombo, AutoRelocationPrefilterAction.ReviewOnly);
     }
@@ -198,21 +283,123 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
         _nameBox.Text = document.DisplayName;
         _descriptionBox.Text = document.Description ?? "";
 
-        var pathRule = document.PathRules.FirstOrDefault() ??
-            AutoRelocationTemplateDefaults.CreateDefaultTemplate().PathRules[0];
-        SelectComboValue(_pathSourceCombo, pathRule.Source);
-        SelectComboValue(_pathTransformCombo, pathRule.Transform);
-        SelectComboValue(_pathLanguageCombo, pathRule.Language);
-        _pathFormatBox.Text = pathRule.Format;
-        _pathFallbackBox.Text = pathRule.FallbackFolderName;
+        _pathRules.Clear();
+        _pathRules.AddRange(document.PathRules.Count == 0
+            ? [CreateDefaultPathRule()]
+            : document.PathRules.Select(ClonePathRule));
+        RefreshPathRuleList(0);
 
         var prefilter = document.Prefilters.FirstOrDefault();
         _prefilterEnabledCheckBox.Checked = prefilter?.Enabled ?? false;
-        SelectComboValue(_prefilterSourceCombo, prefilter?.Source ?? AutoRelocationValueSource.Tags);
+        SelectComboValue(_prefilterSourceCombo, prefilter?.Source ?? AutoRelocationValueSource.FileName);
         SelectComboValue(_prefilterOperatorCombo, prefilter?.Operator ?? AutoRelocationFilterOperator.Contains);
         _prefilterValueBox.Text = prefilter?.Value ?? "";
         SelectComboValue(_prefilterActionCombo, prefilter?.Action ?? AutoRelocationPrefilterAction.ReviewOnly);
         _prefilterTargetBox.Text = prefilter?.TargetFolderName ?? "";
+    }
+
+    private void SelectPathRule(int nextIndex)
+    {
+        if (_loadingPathRule)
+        {
+            return;
+        }
+
+        SaveCurrentPathRule();
+        LoadPathRuleFields(nextIndex);
+    }
+
+    private void LoadPathRuleFields(int index)
+    {
+        _loadingPathRule = true;
+        _currentPathRuleIndex = index >= 0 && index < _pathRules.Count ? index : -1;
+
+        var rule = _currentPathRuleIndex >= 0
+            ? _pathRules[_currentPathRuleIndex]
+            : CreateDefaultPathRule();
+        SelectComboValue(_pathSourceCombo, rule.Source);
+        SelectComboValue(_pathTransformCombo, rule.Transform);
+        SelectComboValue(_pathLanguageCombo, rule.Language);
+        _pathFormatBox.Text = rule.Format;
+        _pathFallbackBox.Text = rule.FallbackFolderName;
+        _loadingPathRule = false;
+    }
+
+    private void SaveCurrentPathRule()
+    {
+        if (_loadingPathRule || _currentPathRuleIndex < 0 || _currentPathRuleIndex >= _pathRules.Count)
+        {
+            return;
+        }
+
+        _pathRules[_currentPathRuleIndex] = CreatePathRuleFromFields();
+    }
+
+    private void RefreshPathRuleList(int selectedIndex)
+    {
+        _loadingPathRule = true;
+        _pathRuleList.DataSource = null;
+        _pathRuleList.DataSource = _pathRules
+            .Select((rule, index) => new PathRuleListItem(index, rule))
+            .ToArray();
+        _loadingPathRule = false;
+
+        if (_pathRules.Count == 0)
+        {
+            LoadPathRuleFields(-1);
+            return;
+        }
+
+        var index = Math.Clamp(selectedIndex, 0, _pathRules.Count - 1);
+        _pathRuleList.SelectedIndex = index;
+        LoadPathRuleFields(index);
+    }
+
+    private void AddPathRule()
+    {
+        SaveCurrentPathRule();
+        _pathRules.Add(CreateDefaultPathRule());
+        RefreshPathRuleList(_pathRules.Count - 1);
+    }
+
+    private void DeleteSelectedPathRule()
+    {
+        if (_currentPathRuleIndex < 0 || _currentPathRuleIndex >= _pathRules.Count)
+        {
+            return;
+        }
+
+        _pathRules.RemoveAt(_currentPathRuleIndex);
+        if (_pathRules.Count == 0)
+        {
+            _pathRules.Add(CreateDefaultPathRule());
+        }
+
+        RefreshPathRuleList(Math.Min(_currentPathRuleIndex, _pathRules.Count - 1));
+    }
+
+    private void MoveSelectedPathRule(int direction)
+    {
+        if (_currentPathRuleIndex < 0 || _currentPathRuleIndex >= _pathRules.Count)
+        {
+            return;
+        }
+
+        SaveCurrentPathRule();
+        var nextIndex = _currentPathRuleIndex + direction;
+        if (nextIndex < 0 || nextIndex >= _pathRules.Count)
+        {
+            return;
+        }
+
+        (_pathRules[_currentPathRuleIndex], _pathRules[nextIndex]) = (_pathRules[nextIndex], _pathRules[_currentPathRuleIndex]);
+        RefreshPathRuleList(nextIndex);
+    }
+
+    private void UpdateSelectedPathRule()
+    {
+        SaveCurrentPathRule();
+        RefreshPathRuleList(_currentPathRuleIndex);
     }
 
     private void CreateNewTemplate()
@@ -222,13 +409,12 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
             .ToArray();
         var displayName = Localizer.Get("NewTemplateDisplayName");
         var id = AutoRelocationTemplateStore.CreateUniqueTemplateId(displayName, existingIds);
-        var defaultRule = AutoRelocationTemplateDefaults.CreateDefaultTemplate().PathRules[0];
         _templateList.ClearSelected();
         LoadDocument(new AutoRelocationTemplateDocument
         {
             Id = id,
             DisplayName = displayName,
-            PathRules = [defaultRule]
+            PathRules = [CreateDefaultPathRule()]
         });
         _loadedTemplateId = null;
         _loadedDocument = null;
@@ -286,21 +472,11 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
 
     private AutoRelocationTemplateDocument CreateDocumentFromFields()
     {
+        SaveCurrentPathRule();
         var id = AutoRelocationTemplateStore.NormalizeTemplateId(_idBox.Text);
-        var pathRule = new AutoRelocationPathRule
-        {
-            Source = GetComboValue(_pathSourceCombo, AutoRelocationValueSource.Title),
-            Transform = GetComboValue(_pathTransformCombo, AutoRelocationValueTransform.InitialBucket),
-            Language = GetComboValue(_pathLanguageCombo, AutoRelocationLanguageProfile.KoreanEnglish),
-            Format = string.IsNullOrWhiteSpace(_pathFormatBox.Text) ? "{value}" : _pathFormatBox.Text.Trim(),
-            FallbackFolderName = string.IsNullOrWhiteSpace(_pathFallbackBox.Text) ? "[ETC]" : _pathFallbackBox.Text.Trim()
-        };
-
-        var pathRules = new List<AutoRelocationPathRule> { pathRule };
-        if (_loadedDocument is not null)
-        {
-            pathRules.AddRange(_loadedDocument.PathRules.Skip(1));
-        }
+        var pathRules = _pathRules.Count == 0
+            ? [CreateDefaultPathRule()]
+            : _pathRules.Select(ClonePathRule).ToList();
 
         var prefilters = new List<AutoRelocationPrefilterRule>();
         if (_prefilterEnabledCheckBox.Checked)
@@ -308,7 +484,7 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
             prefilters.Add(new AutoRelocationPrefilterRule
             {
                 Enabled = true,
-                Source = GetComboValue(_prefilterSourceCombo, AutoRelocationValueSource.Tags),
+                Source = GetComboValue(_prefilterSourceCombo, AutoRelocationValueSource.FileName),
                 Operator = GetComboValue(_prefilterOperatorCombo, AutoRelocationFilterOperator.Contains),
                 Value = _prefilterValueBox.Text.Trim(),
                 Action = GetComboValue(_prefilterActionCombo, AutoRelocationPrefilterAction.ReviewOnly),
@@ -333,12 +509,43 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
         };
     }
 
+    private AutoRelocationPathRule CreatePathRuleFromFields()
+    {
+        return new AutoRelocationPathRule
+        {
+            Source = GetComboValue(_pathSourceCombo, AutoRelocationValueSource.Title),
+            Transform = GetComboValue(_pathTransformCombo, AutoRelocationValueTransform.InitialBucket),
+            Language = GetComboValue(_pathLanguageCombo, AutoRelocationLanguageProfile.KoreanEnglish),
+            Format = string.IsNullOrWhiteSpace(_pathFormatBox.Text) ? "{value}" : _pathFormatBox.Text.Trim(),
+            FallbackFolderName = string.IsNullOrWhiteSpace(_pathFallbackBox.Text) ? "[ETC]" : _pathFallbackBox.Text.Trim()
+        };
+    }
+
+    private static AutoRelocationPathRule CreateDefaultPathRule()
+    {
+        return ClonePathRule(AutoRelocationTemplateDefaults.CreateDefaultTemplate().PathRules[0]);
+    }
+
+    private static AutoRelocationPathRule ClonePathRule(AutoRelocationPathRule rule)
+    {
+        return new AutoRelocationPathRule
+        {
+            Enabled = rule.Enabled,
+            Source = AutoRelocationTemplateDefaults.NormalizeValueSource(rule.Source),
+            Transform = rule.Transform,
+            Language = rule.Language,
+            Format = string.IsNullOrWhiteSpace(rule.Format) ? "{value}" : rule.Format.Trim(),
+            FallbackFolderName = string.IsNullOrWhiteSpace(rule.FallbackFolderName) ? "[ETC]" : rule.FallbackFolderName.Trim(),
+            Options = rule.Options
+        };
+    }
+
     private static GroupBox CreateGroup(string text, params Control[] controls)
     {
         var group = new GroupBox
         {
             Text = text,
-            Width = 540,
+            Width = 760,
             Height = 32 + controls.Length * 36,
             Padding = new Padding(12)
         };
@@ -357,38 +564,76 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
 
     private static Control CreateTextRow(string labelText, TextBox textBox)
     {
-        var panel = new Panel { Width = 500, Height = 32 };
+        var panel = new Panel { Width = 720, Height = 32 };
         panel.Controls.Add(new Label
         {
             Text = labelText,
             Left = 0,
             Top = 5,
-            Width = 150,
+            Width = 170,
             Height = 24,
             TextAlign = ContentAlignment.MiddleLeft
         });
-        textBox.Left = 160;
+        textBox.Left = 180;
         textBox.Top = 3;
-        textBox.Width = 310;
+        textBox.Width = 500;
         panel.Controls.Add(textBox);
         return panel;
     }
 
     private static Control CreateComboRow(string labelText, ComboBox combo)
     {
-        var panel = new Panel { Width = 500, Height = 32 };
+        var panel = new Panel { Width = 720, Height = 32 };
         panel.Controls.Add(new Label
         {
             Text = labelText,
             Left = 0,
             Top = 5,
-            Width = 150,
+            Width = 170,
             Height = 24,
             TextAlign = ContentAlignment.MiddleLeft
         });
-        combo.Left = 160;
+        combo.Left = 180;
         combo.Top = 3;
-        combo.Width = 310;
+        combo.Width = 500;
+        panel.Controls.Add(combo);
+        return panel;
+    }
+
+    private static Control CreateCompactTextRow(string labelText, TextBox textBox)
+    {
+        var panel = new Panel { Width = 430, Height = 32 };
+        panel.Controls.Add(new Label
+        {
+            Text = labelText,
+            Left = 0,
+            Top = 5,
+            Width = 110,
+            Height = 24,
+            TextAlign = ContentAlignment.MiddleLeft
+        });
+        textBox.Left = 120;
+        textBox.Top = 3;
+        textBox.Width = 280;
+        panel.Controls.Add(textBox);
+        return panel;
+    }
+
+    private static Control CreateCompactComboRow(string labelText, ComboBox combo)
+    {
+        var panel = new Panel { Width = 430, Height = 32 };
+        panel.Controls.Add(new Label
+        {
+            Text = labelText,
+            Left = 0,
+            Top = 5,
+            Width = 110,
+            Height = 24,
+            TextAlign = ContentAlignment.MiddleLeft
+        });
+        combo.Left = 120;
+        combo.Top = 3;
+        combo.Width = 280;
         panel.Controls.Add(combo);
         return panel;
     }
@@ -396,7 +641,7 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
     private static Control CreateCheckRow(CheckBox checkBox, string text)
     {
         checkBox.Text = text;
-        checkBox.Width = 470;
+        checkBox.Width = 700;
         checkBox.Height = 28;
         return checkBox;
     }
@@ -404,8 +649,14 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
     private static void BindEnumCombo<T>(ComboBox combo, T selectedValue)
         where T : struct, Enum
     {
+        BindEnumCombo(combo, Enum.GetValues<T>(), selectedValue);
+    }
+
+    private static void BindEnumCombo<T>(ComboBox combo, IEnumerable<T> values, T selectedValue)
+        where T : struct, Enum
+    {
         combo.DropDownStyle = ComboBoxStyle.DropDownList;
-        combo.DataSource = Enum.GetValues<T>()
+        combo.DataSource = values
             .Select(static value => new ComboOption<T>(value.ToString(), value))
             .ToArray();
         SelectComboValue(combo, selectedValue);
@@ -438,5 +689,11 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
     private sealed record TemplateListItem(AutoRelocationTemplateFile File)
     {
         public string DisplayText => $"{File.Document.DisplayName} ({File.Document.Id})";
+    }
+
+    private sealed record PathRuleListItem(int Index, AutoRelocationPathRule Rule)
+    {
+        public string DisplayText =>
+            $"{Index + 1}. {Rule.Source} / {Rule.Transform} / {Rule.Format}";
     }
 }

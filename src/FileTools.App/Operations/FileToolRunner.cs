@@ -398,14 +398,16 @@ internal sealed class FileToolRunner
         try
         {
             var preview = corrector.CreatePreview(path);
+            var fileNameStem = GetRelocationFileNameStem(path);
             var properties = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
             {
+                ["fileName"] = Path.GetFileName(path),
+                ["fileNameStem"] = fileNameStem,
+                ["fileExtension"] = GetRelocationFileExtension(path),
+                ["fileType"] = AutoRelocationFileTypeClassifier.GetFileType(path),
                 ["title"] = preview.Parts.Title,
-                ["originalTitle"] = Path.GetFileNameWithoutExtension(path),
-                ["author"] = preview.Parts.Author,
-                ["tags"] = string.Join(' ', preview.Parts.Tags),
-                ["seriesStatus"] = preview.Parts.Tags.FirstOrDefault(static tag =>
-                    tag.Contains("완결", StringComparison.OrdinalIgnoreCase))
+                ["originalTitle"] = fileNameStem,
+                ["episodeRange"] = preview.Parts.EpisodeRange
             };
 
             var info = File.Exists(path)
@@ -428,6 +430,18 @@ internal sealed class FileToolRunner
             result.AddError(path + " | 자동 재배치 대상 분석 실패: " + ex.Message);
             return null;
         }
+    }
+
+    private static string GetRelocationFileNameStem(string path)
+    {
+        return Directory.Exists(path)
+            ? Path.GetFileName(path)
+            : Path.GetFileNameWithoutExtension(path);
+    }
+
+    private static string GetRelocationFileExtension(string path)
+    {
+        return File.Exists(path) ? Path.GetExtension(path).TrimStart('.') : "";
     }
 
     private static void ApplyRelocationItem(AutoRelocationPlanItem item, OperationResult result)

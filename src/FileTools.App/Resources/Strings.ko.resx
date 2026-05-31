@@ -128,7 +128,7 @@
   <data name="ResultErrorsHeader" xml:space="preserve"><value>오류:</value></data>
   <data name="ResultOperationsHeader" xml:space="preserve"><value>작업:</value></data>
   <data name="DefaultRelocationTemplateName" xml:space="preserve"><value>제목 초성 분류</value></data>
-  <data name="DefaultRelocationTemplateDescription" xml:space="preserve"><value>직번 태그는 자동 처리에서 제외하고, 제목 초성으로 1단계 폴더를 만듭니다.</value></data>
+  <data name="DefaultRelocationTemplateDescription" xml:space="preserve"><value>파일 또는 폴더 이름에서 추출한 제목 초성으로 1단계 폴더를 만듭니다.</value></data>
   <data name="TemplateIdInvalid" xml:space="preserve"><value>템플릿 ID가 비어 있거나 파일명으로 사용할 수 없습니다.</value></data>
   <data name="TemplateIdAlreadyExistsFormat" xml:space="preserve"><value>{0} 템플릿 ID는 이미 사용 중입니다.</value></data>
   <data name="SkipPrefix" xml:space="preserve"><value>SKIP: </value></data>
@@ -178,8 +178,11 @@
   <data name="ButtonEditTemplates" xml:space="preserve"><value>템플릿 편집...</value></data>
   <data name="DialogTemplateEditorTitle" xml:space="preserve"><value>자동 재배치 템플릿 편집기</value></data>
   <data name="GroupTemplateGeneral" xml:space="preserve"><value>템플릿</value></data>
-  <data name="GroupPathRule" xml:space="preserve"><value>기본 경로 규칙</value></data>
+  <data name="GroupPathRule" xml:space="preserve"><value>선택한 경로 단계</value></data>
+  <data name="GroupPathRules" xml:space="preserve"><value>경로 규칙 단계</value></data>
   <data name="GroupPrefilter" xml:space="preserve"><value>기본 사전 필터</value></data>
+  <data name="ButtonMoveUp" xml:space="preserve"><value>위로</value></data>
+  <data name="ButtonMoveDown" xml:space="preserve"><value>아래로</value></data>
   <data name="CheckEnablePrefilter" xml:space="preserve"><value>사전 필터 사용</value></data>
   <data name="LabelOperator" xml:space="preserve"><value>연산자</value></data>
   <data name="LabelValue" xml:space="preserve"><value>값</value></data>

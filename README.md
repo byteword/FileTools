@@ -20,7 +20,8 @@ FileTools provides three current-user ContextMenu actions for selected files and
 3. **폴더 자동 재배치**
    - Uses lightweight AutoRelocation templates derived from `ImageArchiveManager`.
    - Default template moves items into title-initial buckets such as `[ㄱ]`, `[A]`, and `[0A]`.
-   - Template prefilters can skip review-only items during automatic execution.
+   - Templates can build multi-level paths by chaining ordered path-rule steps.
+   - Template fields are limited to values available from the file, folder, or parsed file name.
 
 The Explorer command only starts the executable. It queues selected items briefly, merges Explorer's per-item invocations, performs the work automatically, and exits silently when there are no errors.
 The non-processing **FileTools 열기 / Open FileTools** command is registered after a separator and requested at the bottom of the Explorer menu so it is not grouped with automatic file operations.
@@ -49,7 +50,15 @@ Separate dialogs are available for:
 
 - Rename replacement dictionary entries (`source -> replacement`).
 - Rename common phrase dictionary entries used by the filename correction scorer.
-- AutoRelocation template editing for the current lightweight template model.
+- AutoRelocation template editing. Path rule steps are evaluated in order, so a template can produce paths such as `{FileType}\[{Initial}]\{EpisodeRange}`.
+
+AutoRelocation templates intentionally use only file-derived values:
+
+- File name stem.
+- File extension.
+- File type: `Folder`, `Video`, `Audio`, `Image`, `Document`, `Archive`, `Other`.
+- Parsed title and episode range from the file or folder name.
+- Size, created time, and modified time.
 
 Settings and templates are stored under:
 

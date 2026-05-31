@@ -128,7 +128,7 @@
   <data name="ResultErrorsHeader" xml:space="preserve"><value>Errors:</value></data>
   <data name="ResultOperationsHeader" xml:space="preserve"><value>Operations:</value></data>
   <data name="DefaultRelocationTemplateName" xml:space="preserve"><value>Title initial buckets</value></data>
-  <data name="DefaultRelocationTemplateDescription" xml:space="preserve"><value>Separates review-only direct-translation tags and creates first-level folders from title initials.</value></data>
+  <data name="DefaultRelocationTemplateDescription" xml:space="preserve"><value>Creates first-level folders from title initials parsed from the file or folder name.</value></data>
   <data name="TemplateIdInvalid" xml:space="preserve"><value>Template ID cannot be blank or contain invalid file name characters.</value></data>
   <data name="TemplateIdAlreadyExistsFormat" xml:space="preserve"><value>The {0} template ID is already in use.</value></data>
   <data name="SkipPrefix" xml:space="preserve"><value>SKIP: </value></data>
@@ -178,8 +178,11 @@
   <data name="ButtonEditTemplates" xml:space="preserve"><value>Edit templates...</value></data>
   <data name="DialogTemplateEditorTitle" xml:space="preserve"><value>Auto relocation template editor</value></data>
   <data name="GroupTemplateGeneral" xml:space="preserve"><value>Template</value></data>
-  <data name="GroupPathRule" xml:space="preserve"><value>Primary path rule</value></data>
+  <data name="GroupPathRule" xml:space="preserve"><value>Selected path step</value></data>
+  <data name="GroupPathRules" xml:space="preserve"><value>Path rule steps</value></data>
   <data name="GroupPrefilter" xml:space="preserve"><value>Primary prefilter</value></data>
+  <data name="ButtonMoveUp" xml:space="preserve"><value>Up</value></data>
+  <data name="ButtonMoveDown" xml:space="preserve"><value>Down</value></data>
   <data name="CheckEnablePrefilter" xml:space="preserve"><value>Enable prefilter</value></data>
   <data name="LabelOperator" xml:space="preserve"><value>Operator</value></data>
   <data name="LabelValue" xml:space="preserve"><value>Value</value></data>

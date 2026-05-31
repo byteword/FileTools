@@ -8,11 +8,23 @@ namespace FileTools;
 
 internal static class AutoRelocationTemplateDefaults
 {
-    public const int SchemaVersion = 1;
+    public const int SchemaVersion = 2;
     public const string DefaultTemplateId = "Default";
     public const string TemplateFileExtension = ".json";
 
     public static JsonSerializerOptions JsonOptions { get; } = CreateJsonOptions();
+
+    public static IReadOnlyList<AutoRelocationValueSource> FileDerivedValueSources { get; } =
+    [
+        AutoRelocationValueSource.FileName,
+        AutoRelocationValueSource.FileExtension,
+        AutoRelocationValueSource.FileType,
+        AutoRelocationValueSource.Title,
+        AutoRelocationValueSource.EpisodeRange,
+        AutoRelocationValueSource.SizeBytes,
+        AutoRelocationValueSource.ModifiedAt,
+        AutoRelocationValueSource.CreatedAt
+    ];
 
     public static AutoRelocationTemplateDocument CreateDefaultTemplate()
     {
@@ -21,16 +33,6 @@ internal static class AutoRelocationTemplateDefaults
             Id = DefaultTemplateId,
             DisplayName = Localizer.Get("DefaultRelocationTemplateName"),
             Description = Localizer.Get("DefaultRelocationTemplateDescription"),
-            Prefilters =
-            [
-                new AutoRelocationPrefilterRule
-                {
-                    Source = AutoRelocationValueSource.Tags,
-                    Operator = AutoRelocationFilterOperator.Contains,
-                    Value = "직번",
-                    Action = AutoRelocationPrefilterAction.ReviewOnly
-                }
-            ],
             PathRules =
             [
                 new AutoRelocationPathRule
@@ -43,6 +45,21 @@ internal static class AutoRelocationTemplateDefaults
                 }
             ]
         };
+    }
+
+    public static AutoRelocationValueSource NormalizeValueSource(AutoRelocationValueSource source)
+    {
+        return FileDerivedValueSources.Contains(source)
+            ? source
+            : source switch
+            {
+                AutoRelocationValueSource.OriginalTitle => AutoRelocationValueSource.FileName,
+                AutoRelocationValueSource.Author => AutoRelocationValueSource.FileName,
+                AutoRelocationValueSource.Tags => AutoRelocationValueSource.FileName,
+                AutoRelocationValueSource.SeriesStatus => AutoRelocationValueSource.FileName,
+                AutoRelocationValueSource.ImageCount => AutoRelocationValueSource.FileName,
+                _ => AutoRelocationValueSource.FileName
+            };
     }
 
     private static JsonSerializerOptions CreateJsonOptions()
@@ -76,7 +93,7 @@ internal sealed class AutoRelocationTemplateDocument
 internal sealed class AutoRelocationPrefilterRule
 {
     public bool Enabled { get; init; } = true;
-    public AutoRelocationValueSource Source { get; init; } = AutoRelocationValueSource.Tags;
+    public AutoRelocationValueSource Source { get; init; } = AutoRelocationValueSource.FileName;
     public AutoRelocationFilterOperator Operator { get; init; } = AutoRelocationFilterOperator.Contains;
     public string Value { get; init; } = "";
     public AutoRelocationPrefilterAction Action { get; init; } = AutoRelocationPrefilterAction.ReviewOnly;
@@ -114,7 +131,10 @@ internal sealed class AutoRelocationNumberRange
 internal enum AutoRelocationValueSource
 {
     FileName,
+    FileExtension,
+    FileType,
     Title,
+    EpisodeRange,
     OriginalTitle,
     Author,
     Tags,
@@ -175,6 +195,60 @@ internal enum AutoRelocationDatePart
 internal sealed record AutoRelocationTemplateFile(
     AutoRelocationTemplateDocument Document,
     string FilePath);
+
+internal static class AutoRelocationFileTypeClassifier
+{
+    private static readonly HashSet<string> VideoExtensions = CreateSet(
+        ".avi", ".m2ts", ".m4v", ".mkv", ".mov", ".mp4", ".mpeg", ".mpg", ".ts", ".webm", ".wmv");
+
+    private static readonly HashSet<string> AudioExtensions = CreateSet(
+        ".aac", ".aiff", ".alac", ".flac", ".m4a", ".mp3", ".ogg", ".opus", ".wav", ".wma");
+
+    private static readonly HashSet<string> ImageExtensions = CreateSet(
+        ".avif", ".bmp", ".gif", ".heic", ".heif", ".jpeg", ".jpg", ".png", ".tif", ".tiff", ".webp");
+
+    private static readonly HashSet<string> DocumentExtensions = CreateSet(
+        ".csv", ".doc", ".docx", ".epub", ".hwp", ".hwpx", ".md", ".odt", ".pdf", ".ppt", ".pptx", ".rtf", ".txt", ".xls", ".xlsx");
+
+    private static readonly HashSet<string> ArchiveExtensions = CreateSet(
+        ".7z", ".bz2", ".cab", ".cb7", ".cbr", ".cbz", ".gz", ".rar", ".tar", ".tgz", ".xz", ".zip");
+
+    public static string GetFileType(string path)
+    {
+        if (Directory.Exists(path))
+        {
+            return "Folder";
+        }
+
+        var extension = Path.GetExtension(path);
+        if (VideoExtensions.Contains(extension))
+        {
+            return "Video";
+        }
+
+        if (AudioExtensions.Contains(extension))
+        {
+            return "Audio";
+        }
+
+        if (ImageExtensions.Contains(extension))
+        {
+            return "Image";
+        }
+
+        if (DocumentExtensions.Contains(extension))
+        {
+            return "Document";
+        }
+
+        return ArchiveExtensions.Contains(extension) ? "Archive" : "Other";
+    }
+
+    private static HashSet<string> CreateSet(params string[] values)
+    {
+        return values.ToHashSet(StringComparer.OrdinalIgnoreCase);
+    }
+}
 
 internal static class AutoRelocationTemplateStore
 {
@@ -365,6 +439,11 @@ internal static class AutoRelocationTemplateStore
         AutoRelocationTemplateDocument document,
         string id)
     {
+        if (IsLegacyDefaultDocument(document, id))
+        {
+            document = AutoRelocationTemplateDefaults.CreateDefaultTemplate();
+        }
+
         return new AutoRelocationTemplateDocument
         {
             SchemaVersion = AutoRelocationTemplateDefaults.SchemaVersion,
@@ -376,7 +455,7 @@ internal static class AutoRelocationTemplateStore
             Prefilters = document.Prefilters.Select(static rule => new AutoRelocationPrefilterRule
             {
                 Enabled = rule.Enabled,
-                Source = rule.Source,
+                Source = AutoRelocationTemplateDefaults.NormalizeValueSource(rule.Source),
                 Operator = rule.Operator,
                 Value = rule.Value.Trim(),
                 Action = rule.Action,
@@ -387,7 +466,7 @@ internal static class AutoRelocationTemplateStore
             PathRules = document.PathRules.Select(static rule => new AutoRelocationPathRule
             {
                 Enabled = rule.Enabled,
-                Source = rule.Source,
+                Source = AutoRelocationTemplateDefaults.NormalizeValueSource(rule.Source),
                 Transform = rule.Transform,
                 Language = rule.Language,
                 Format = string.IsNullOrWhiteSpace(rule.Format) ? "{value}" : rule.Format.Trim(),
@@ -397,6 +476,15 @@ internal static class AutoRelocationTemplateStore
                 Options = rule.Options
             }).ToList()
         };
+    }
+
+    private static bool IsLegacyDefaultDocument(AutoRelocationTemplateDocument document, string id)
+    {
+        return document.SchemaVersion < AutoRelocationTemplateDefaults.SchemaVersion &&
+            string.Equals(NormalizeTemplateId(id), AutoRelocationTemplateDefaults.DefaultTemplateId, StringComparison.OrdinalIgnoreCase) &&
+            document.Prefilters.Any(static rule =>
+                rule.Source == AutoRelocationValueSource.Tags &&
+                rule.Value.Contains("직번", StringComparison.OrdinalIgnoreCase));
     }
 }
 
@@ -560,11 +648,16 @@ internal sealed class AutoRelocationPlanBuilder
 
     private static AutoRelocationResolvedValue ResolveValue(AutoRelocationValueSource source, AutoRelocationItemContext item)
     {
-        var fileStem = Path.GetFileNameWithoutExtension(item.SourcePath);
+        var fileStem = GetProperty(item, "fileNameStem") ?? GetFileNameStem(item.SourcePath);
         return source switch
         {
             AutoRelocationValueSource.FileName => new AutoRelocationResolvedValue(fileStem),
+            AutoRelocationValueSource.FileExtension => new AutoRelocationResolvedValue(
+                GetProperty(item, "fileExtension") ?? GetFileExtension(item.SourcePath)),
+            AutoRelocationValueSource.FileType => new AutoRelocationResolvedValue(
+                GetProperty(item, "fileType") ?? AutoRelocationFileTypeClassifier.GetFileType(item.SourcePath)),
             AutoRelocationValueSource.Title => new AutoRelocationResolvedValue(GetProperty(item, "title") ?? fileStem),
+            AutoRelocationValueSource.EpisodeRange => CreateEpisodeRangeValue(GetProperty(item, "episodeRange") ?? ""),
             AutoRelocationValueSource.OriginalTitle => new AutoRelocationResolvedValue(
                 GetProperty(item, "originalTitle") ?? GetProperty(item, "title") ?? fileStem),
             AutoRelocationValueSource.Author => new AutoRelocationResolvedValue(GetProperty(item, "author") ?? ""),
@@ -588,6 +681,24 @@ internal sealed class AutoRelocationPlanBuilder
                 item.CreatedAt),
             _ => new AutoRelocationResolvedValue("")
         };
+    }
+
+    private static string GetFileNameStem(string path)
+    {
+        return Directory.Exists(path)
+            ? Path.GetFileName(path)
+            : Path.GetFileNameWithoutExtension(path);
+    }
+
+    private static string GetFileExtension(string path)
+    {
+        return File.Exists(path) ? Path.GetExtension(path).TrimStart('.') : "";
+    }
+
+    private static AutoRelocationResolvedValue CreateEpisodeRangeValue(string value)
+    {
+        var text = value.Trim();
+        return new AutoRelocationResolvedValue(text, TryParseFirstNumber(text), null);
     }
 
     private static string TransformValue(
@@ -753,6 +864,12 @@ internal sealed class AutoRelocationPlanBuilder
         return double.TryParse(value, NumberStyles.Float, CultureInfo.CurrentCulture, out var currentCultureNumber)
             ? currentCultureNumber
             : null;
+    }
+
+    private static double? TryParseFirstNumber(string value)
+    {
+        var match = Regex.Match(value, @"\d+(?:\.\d+)?", RegexOptions.CultureInvariant);
+        return match.Success ? TryParseNumber(match.Value) : null;
     }
 
     private static DateTime? TryParseDate(string value)
