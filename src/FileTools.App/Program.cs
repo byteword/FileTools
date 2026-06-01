@@ -63,7 +63,12 @@ internal static class Program
             throw new InvalidOperationException(Localizer.Get("CannotLocateExecutable"));
         }
 
-        var installedPath = ContextMenuRegistrar.Install(exe, SettingsStore.Load());
+        var settings = SettingsStore.Load();
+        settings.RegisterContextMenu = true;
+
+        var installedPath = ContextMenuRegistrar.Install(exe, settings);
+        SettingsStore.Save(settings);
+
         MessageBox.Show(
             Localizer.Format("ContextMenuInstalledDialogFormat", installedPath),
             FileToolsEnvironment.AppName,
@@ -74,6 +79,11 @@ internal static class Program
     private static void UninstallContextMenu()
     {
         ContextMenuRegistrar.Uninstall();
+
+        var settings = SettingsStore.Load();
+        settings.RegisterContextMenu = false;
+        SettingsStore.Save(settings);
+
         MessageBox.Show(
             Localizer.Get("ContextMenuRemoved"),
             FileToolsEnvironment.AppName,

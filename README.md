@@ -2,7 +2,7 @@
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
-Current version: `1.0.1.0`.
+Current version: `1.0.1.2`.
 
 ## Features
 
@@ -162,7 +162,7 @@ MSI options:
 
 The MSI installs the native `FileTools.ShellExt.dll` as a current-user COM ExplorerCommand handler. After first launch, use FileTools settings to choose individual folder wrapping/unwrapping and AutoRelocation commands. Legacy static registry components are kept disabled for fallback development only.
 
-`FileTools.sln` intentionally contains only the app project so `dotnet build FileTools.sln` stays available without Visual C++ MSBuild. The ShellExt project is built by `build_msi.ps1` and `publish_and_install.ps1`. The MSI project is isolated in `installer\FileTools.Installer.sln`; build it with `build_msi.ps1` or open that solution in Visual Studio with a WiX v4-compatible extension such as HeatWave.
+Use `dotnet build src\FileTools.App\FileTools.App.csproj` for an app-only build. `FileTools.sln` includes the native ShellExt project, so building the full solution requires Visual Studio MSBuild with the C++ workload. The ShellExt project is built by `build_msi.ps1` and `publish_and_install.ps1`. The MSI project is isolated in `installer\FileTools.Installer.sln`; build it with `build_msi.ps1` or open that solution in Visual Studio with a WiX v4-compatible extension such as HeatWave.
 
 ## Project Layout
 
@@ -198,6 +198,8 @@ Or run the published executable:
 .\FileTools.exe /install
 ```
 
+The explicit `/install` command enables `RegisterContextMenu` even if the saved settings currently have Explorer registration turned off.
+
 This writes only to current-user registry keys:
 
 ```text
@@ -220,6 +222,27 @@ Or:
 ```powershell
 .\FileTools.exe /uninstall
 ```
+
+The explicit `/uninstall` command removes the Explorer registration and saves `RegisterContextMenu` as disabled.
+
+## Clean ContextMenu Registration
+
+If Explorer still does not show the FileTools menu after install, inspect and clean current-user registration leftovers:
+
+```powershell
+.\cleanup_context_menu.ps1 -WhatIf
+```
+
+Run the cleanup:
+
+```powershell
+.\cleanup_context_menu.ps1
+```
+
+Optional flags:
+
+- `-RemoveInstalledFiles`: also removes `%APPDATA%\FileTools`, including copied binaries, settings, and templates.
+- `-RestartExplorer`: restarts Explorer after cleanup.
 
 ## ContextMenu Behavior
 
