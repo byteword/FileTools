@@ -45,7 +45,7 @@ public sealed partial class MainForm : Form
         _removeTargetButton.Click += (_, _) => RemoveSelectedTarget();
         _clearTargetsButton.Click += (_, _) => ClearTargets();
         _settingsButton.Click += (_, _) => OpenSettings();
-        _addRenameButton.Click += (_, _) => AddStep(CreateRenameStep());
+        _addRenameButton.Click += (_, _) => AddRenameSteps();
         _addWrapButton.Click += (_, _) => AddStep(CreateWrapStep());
         _addUnwrapButton.Click += (_, _) => AddStep(CreateUnwrapStep());
         _addRelocationButton.Click += (_, _) => AddStep(CreateAutoRelocationStep());
@@ -147,8 +147,8 @@ public sealed partial class MainForm : Form
             return;
         }
 
-        var target = GetSelectedTarget();
-        if (target is null)
+        var targets = GetSelectedTargets().ToArray();
+        if (targets.Length == 0)
         {
             MessageBox.Show(
                 Localizer.Get("NoSelectedTargetMessage"),
@@ -158,15 +158,58 @@ public sealed partial class MainForm : Form
             return;
         }
 
-        target.Steps.Add(step);
+        foreach (var target in targets)
+        {
+            target.Steps.Add(ReferenceEquals(target, targets[0]) ? step : step.Clone());
+        }
+
         RefreshPlanList();
-        _planList.SelectedIndex = target.Steps.Count - 1;
+        var displayedTarget = GetSelectedTarget();
+        if (displayedTarget?.Steps.Count > 0)
+        {
+            _planList.SelectedIndex = displayedTarget.Steps.Count - 1;
+        }
     }
 
-    private WorkPlanStep? CreateRenameStep()
+    private void AddRenameSteps()
     {
-        var step = new WorkPlanStep { Kind = WorkPlanStepKind.FileNameCorrection };
-        return EditStep(step) ? step : null;
+        var targets = GetSelectedTargets().ToArray();
+        if (targets.Length == 0)
+        {
+            MessageBox.Show(
+                Localizer.Get("NoSelectedTargetMessage"),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            return;
+        }
+
+        var selectedNames = RenameReviewDialog.EditPlanSteps(this, targets.Select(static target => target.Path), _settings);
+        if (selectedNames is null)
+        {
+            return;
+        }
+
+        foreach (var target in targets)
+        {
+            if (!selectedNames.TryGetValue(target.Path, out var fileName))
+            {
+                continue;
+            }
+
+            target.Steps.Add(new WorkPlanStep
+            {
+                Kind = WorkPlanStepKind.FileNameCorrection,
+                ManualRenameFileName = fileName
+            });
+        }
+
+        RefreshPlanList();
+        var displayedTarget = GetSelectedTarget();
+        if (displayedTarget?.Steps.Count > 0)
+        {
+            _planList.SelectedIndex = displayedTarget.Steps.Count - 1;
+        }
     }
 
     private WorkPlanStep? CreateWrapStep()
@@ -202,7 +245,8 @@ public sealed partial class MainForm : Form
 
     private void EditSelectedStep()
     {
-        if (_planList.SelectedItem is not WorkPlanStep step)
+        var step = GetSelectedStep();
+        if (step is null)
         {
             return;
         }
@@ -215,6 +259,11 @@ public sealed partial class MainForm : Form
 
     private bool EditStep(WorkPlanStep step)
     {
+        if (step.Kind == WorkPlanStepKind.FileNameCorrection && GetSelectedTarget() is { } target)
+        {
+            return RenameReviewDialog.EditPlanStep(this, target.Path, step, _settings);
+        }
+
         using var dialog = new PlanStepDialog(step, _settings);
         return dialog.ShowDialog(this) == DialogResult.OK;
     }
@@ -222,7 +271,8 @@ public sealed partial class MainForm : Form
     private void RemoveSelectedStep()
     {
         var target = GetSelectedTarget();
-        if (target is null || _planList.SelectedItem is not WorkPlanStep step)
+        var step = GetSelectedStep();
+        if (target is null || step is null)
         {
             return;
         }
@@ -265,13 +315,32 @@ public sealed partial class MainForm : Form
 
     private void RefreshPlanList()
     {
+        var target = GetSelectedTarget();
         _planList.DataSource = null;
-        _planList.DataSource = GetSelectedTarget()?.Steps;
+        _planList.DataSource = target?.Steps
+            .Select(step => new PlanStepListItem(target, step, _settings))
+            .ToArray();
     }
 
     private WorkTargetPlan? GetSelectedTarget()
     {
         return _targetList.SelectedItem as WorkTargetPlan;
+    }
+
+    private IEnumerable<WorkTargetPlan> GetSelectedTargets()
+    {
+        return _targetList.SelectedItems
+            .OfType<WorkTargetPlan>();
+    }
+
+    private WorkPlanStep? GetSelectedStep()
+    {
+        return _planList.SelectedItem switch
+        {
+            WorkPlanStep step => step,
+            PlanStepListItem item => item.Step,
+            _ => null
+        };
     }
 
     private void FileDrop_DragEnter(object? sender, DragEventArgs e)
@@ -294,19 +363,84 @@ public sealed partial class MainForm : Form
         var existing = _targets
             .Select(static target => target.Path)
             .ToHashSet(OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
+        var selectedTargets = new List<WorkTargetPlan>();
 
         foreach (var path in paths.Where(static path => File.Exists(path) || Directory.Exists(path)))
         {
             var fullPath = Path.GetFullPath(path);
-            if (existing.Add(fullPath))
+            var target = _targets.FirstOrDefault(item => string.Equals(
+                item.Path,
+                fullPath,
+                OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal));
+            if (target is null && existing.Add(fullPath))
             {
-                _targets.Add(new WorkTargetPlan(fullPath));
+                target = new WorkTargetPlan(fullPath);
+                _targets.Add(target);
+            }
+
+            if (target is not null && !selectedTargets.Contains(target))
+            {
+                selectedTargets.Add(target);
             }
         }
+
+        if (selectedTargets.Count == 0)
+        {
+            return;
+        }
+
+        _targetList.ClearSelected();
+        foreach (var target in selectedTargets)
+        {
+            var index = _targets.IndexOf(target);
+            if (index >= 0)
+            {
+                _targetList.SetSelected(index, true);
+            }
+        }
+
+        RefreshPlanList();
     }
 
     private static bool IsDesignerHosted()
     {
         return LicenseManager.UsageMode == LicenseUsageMode.Designtime;
+    }
+
+    private sealed class PlanStepListItem
+    {
+        private readonly WorkTargetPlan _target;
+        private readonly FileToolsSettings _settings;
+
+        public PlanStepListItem(WorkTargetPlan target, WorkPlanStep step, FileToolsSettings settings)
+        {
+            _target = target;
+            Step = step;
+            _settings = settings;
+        }
+
+        public WorkPlanStep Step { get; }
+
+        public override string ToString()
+        {
+            if (Step.Kind != WorkPlanStepKind.FileNameCorrection)
+            {
+                return Step.DisplayName;
+            }
+
+            try
+            {
+                var preview = string.IsNullOrWhiteSpace(Step.ManualRenameFileName)
+                    ? RenameOperations.CreatePlan([_target.Path], _settings).FirstOrDefault()
+                    : RenameOperations.CreateManualPreview(_target.Path, Step.ManualRenameFileName, _settings);
+                return preview is null
+                    ? Step.DisplayName
+                    : $"{Step.DisplayName}: {preview.OriginalFileName} -> {preview.SuggestedFileName}";
+            }
+            catch
+            {
+                return Step.DisplayName;
+            }
+        }
     }
 }

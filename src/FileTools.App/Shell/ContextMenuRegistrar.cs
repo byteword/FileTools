@@ -5,7 +5,11 @@ namespace FileTools;
 internal static class ContextMenuRegistrar
 {
     private const string GroupedMenuKeyName = "FileTools";
+    private const string ExtendedSubCommandsKeyName = "ExtendedSubCommandsKey";
     private const string LegacyOpenMenuKeyName = "FileTools_Open";
+    private const string ShellExtensionDllName = "FileTools.ShellExt.dll";
+    private const string ShellExtensionClassId = "{716e7cc4-5941-4362-8aca-d38c62817de9}";
+    private const int ExplorerCommandSeparatorBefore = 0x20;
 
     private static readonly ContextMenuBaseKey[] BaseKeys =
     [
@@ -33,6 +37,16 @@ internal static class ContextMenuRegistrar
         new(
             "FileTools_04_FolderUnwrapSingleFile",
             ContextMenuCommand.FolderUnwrapSingleFile,
+            ContextMenuTargetKind.Directory,
+            settings => settings.ContextMenuFolderStructure && settings.ContextMenuFolderUnwrapSingleFile),
+        new(
+            "FileTools_04a_FolderUnwrapUseFolderName",
+            ContextMenuCommand.FolderUnwrapUseFolderName,
+            ContextMenuTargetKind.Directory,
+            settings => settings.ContextMenuFolderStructure && settings.ContextMenuFolderUnwrapSingleFile),
+        new(
+            "FileTools_04b_FolderUnwrapKeepFileName",
+            ContextMenuCommand.FolderUnwrapKeepFileName,
             ContextMenuTargetKind.Directory,
             settings => settings.ContextMenuFolderStructure && settings.ContextMenuFolderUnwrapSingleFile),
         new(
@@ -67,7 +81,9 @@ internal static class ContextMenuRegistrar
         LegacyOpenMenuKeyName,
         "FolderUnwrap_SameName",
         "FolderUnwrap_SingleFile",
-        "FolderUnwrap_MoveAll"
+        "FolderUnwrap_MoveAll",
+        "FileTools_04a_FolderUnwrapUseFolderName",
+        "FileTools_04b_FolderUnwrapKeepFileName"
     ];
 
     public static string Install(string executablePath, FileToolsSettings settings)
@@ -85,6 +101,13 @@ internal static class ContextMenuRegistrar
 
         if (!settings.RegisterContextMenu)
         {
+            return installedPath;
+        }
+
+        var shellExtensionPath = Path.Combine(Path.GetDirectoryName(installedPath) ?? "", ShellExtensionDllName);
+        if (File.Exists(shellExtensionPath))
+        {
+            CreateShellExtensionRegistration(shellExtensionPath, installedPath, settings);
             return installedPath;
         }
 
@@ -130,16 +153,15 @@ internal static class ContextMenuRegistrar
             throw new InvalidOperationException("레지스트리 키 생성 실패: " + baseKey.RegistryPath + "\\" + GroupedMenuKeyName);
         }
 
-        key.SetValue("", FileToolsEnvironment.AppName, RegistryValueKind.String);
+        key.DeleteValue("", throwOnMissingValue: false);
         key.SetValue("MUIVerb", FileToolsEnvironment.AppName, RegistryValueKind.String);
         key.SetValue("Icon", exePath, RegistryValueKind.String);
         key.SetValue("MultiSelectModel", "Player", RegistryValueKind.String);
-        key.SetValue("SubCommands", "", RegistryValueKind.String);
 
-        var shellBase = baseKey.RegistryPath + "\\" + GroupedMenuKeyName + @"\shell";
+        var shellBase = baseKey.RegistryPath + "\\" + GroupedMenuKeyName + "\\" + ExtendedSubCommandsKeyName + @"\Shell";
         foreach (var definition in enabledMenus)
         {
-            CreateCommandMenu(shellBase, definition, exePath);
+            CreateCommandMenu(shellBase, definition, exePath, useExplorerCommandFlags: true);
         }
     }
 
@@ -155,7 +177,8 @@ internal static class ContextMenuRegistrar
     private static void CreateCommandMenu(
         string baseKey,
         ContextMenuCommandDefinition definition,
-        string exePath)
+        string exePath,
+        bool useExplorerCommandFlags = false)
     {
         using var key = Registry.CurrentUser.CreateSubKey(baseKey + "\\" + definition.KeyName);
         if (key is null)
@@ -170,10 +193,17 @@ internal static class ContextMenuRegistrar
         key.SetValue("MultiSelectModel", "Player", RegistryValueKind.String);
         if (definition.SeparatorBefore)
         {
-            key.SetValue("SeparatorBefore", "", RegistryValueKind.String);
+            if (useExplorerCommandFlags)
+            {
+                key.SetValue("CommandFlags", ExplorerCommandSeparatorBefore, RegistryValueKind.DWord);
+            }
+            else
+            {
+                key.SetValue("SeparatorBefore", "", RegistryValueKind.String);
+            }
         }
 
-        if (definition.PositionBottom)
+        if (definition.PositionBottom && !useExplorerCommandFlags)
         {
             key.SetValue("Position", "Bottom", RegistryValueKind.String);
         }
@@ -213,7 +243,7 @@ internal static class ContextMenuRegistrar
             return;
         }
 
-        foreach (var companionFile in new[] { "FileTools.dll", "FileTools.deps.json", "FileTools.runtimeconfig.json" })
+        foreach (var companionFile in new[] { "FileTools.dll", "FileTools.deps.json", "FileTools.runtimeconfig.json", ShellExtensionDllName })
         {
             var source = Path.Combine(sourceDirectory, companionFile);
             if (!File.Exists(source))
@@ -245,6 +275,7 @@ internal static class ContextMenuRegistrar
 
     private static void RemoveAllContextMenuKeys()
     {
+        RemoveShellExtensionRegistration();
         foreach (var baseKey in BaseKeys)
         {
             DeleteMenu(baseKey.RegistryPath, GroupedMenuKeyName);
@@ -258,6 +289,61 @@ internal static class ContextMenuRegistrar
                 DeleteMenu(baseKey.RegistryPath, keyName);
             }
         }
+    }
+
+    private static void CreateShellExtensionRegistration(string shellExtensionPath, string exePath, FileToolsSettings settings)
+    {
+        using (var clsid = Registry.CurrentUser.CreateSubKey(@"Software\Classes\CLSID\" + ShellExtensionClassId))
+        {
+            clsid?.SetValue("", "FileTools Shell Extension", RegistryValueKind.String);
+        }
+
+        using (var inproc = Registry.CurrentUser.CreateSubKey(@"Software\Classes\CLSID\" + ShellExtensionClassId + @"\InprocServer32"))
+        {
+            inproc?.SetValue("", shellExtensionPath, RegistryValueKind.String);
+            inproc?.SetValue("ThreadingModel", "Apartment", RegistryValueKind.String);
+        }
+
+        using (var options = Registry.CurrentUser.CreateSubKey(@"Software\FileTools\ContextMenu"))
+        {
+            if (options is not null)
+            {
+                options.SetValue(nameof(FileToolsSettings.ContextMenuOpenApp), settings.ContextMenuOpenApp ? 1 : 0, RegistryValueKind.DWord);
+                options.SetValue(nameof(FileToolsSettings.ContextMenuFileNameCorrection), settings.ContextMenuFileNameCorrection ? 1 : 0, RegistryValueKind.DWord);
+                options.SetValue(nameof(FileToolsSettings.ContextMenuFolderWrapFiles), settings.ContextMenuFolderWrapFiles ? 1 : 0, RegistryValueKind.DWord);
+                options.SetValue(nameof(FileToolsSettings.ContextMenuFolderUnwrapSameNameSingleFile), settings.ContextMenuFolderUnwrapSameNameSingleFile ? 1 : 0, RegistryValueKind.DWord);
+                options.SetValue(nameof(FileToolsSettings.ContextMenuFolderUnwrapSingleFile), settings.ContextMenuFolderUnwrapSingleFile ? 1 : 0, RegistryValueKind.DWord);
+                options.SetValue(nameof(FileToolsSettings.ContextMenuFolderMoveInnerFilesUp), settings.ContextMenuFolderMoveInnerFilesUp ? 1 : 0, RegistryValueKind.DWord);
+                options.SetValue(nameof(FileToolsSettings.ContextMenuAutoRelocationCurrentFolder), settings.ContextMenuAutoRelocationCurrentFolder ? 1 : 0, RegistryValueKind.DWord);
+                options.SetValue(nameof(FileToolsSettings.ContextMenuAutoRelocationChooseTarget), settings.ContextMenuAutoRelocationChooseTarget ? 1 : 0, RegistryValueKind.DWord);
+            }
+        }
+
+        foreach (var baseKey in BaseKeys)
+        {
+            if (!GetEnabledDefinitions(baseKey.TargetKind, settings).Any())
+            {
+                continue;
+            }
+
+            using var key = Registry.CurrentUser.CreateSubKey(baseKey.RegistryPath + "\\" + GroupedMenuKeyName);
+            if (key is null)
+            {
+                throw new InvalidOperationException("레지스트리 키 생성 실패: " + baseKey.RegistryPath + "\\" + GroupedMenuKeyName);
+            }
+
+            key.DeleteValue("", throwOnMissingValue: false);
+            key.SetValue("MUIVerb", FileToolsEnvironment.AppName, RegistryValueKind.String);
+            key.SetValue("Icon", exePath, RegistryValueKind.String);
+            key.SetValue("MultiSelectModel", "Player", RegistryValueKind.String);
+            key.SetValue("ExplorerCommandHandler", ShellExtensionClassId, RegistryValueKind.String);
+        }
+    }
+
+    private static void RemoveShellExtensionRegistration()
+    {
+        Registry.CurrentUser.DeleteSubKeyTree(@"Software\Classes\CLSID\" + ShellExtensionClassId, throwOnMissingSubKey: false);
+        Registry.CurrentUser.DeleteSubKeyTree(@"Software\FileTools\ContextMenu", throwOnMissingSubKey: false);
     }
 
     [Flags]

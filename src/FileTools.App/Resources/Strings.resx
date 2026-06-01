@@ -152,7 +152,7 @@
   <data name="LabelManualTargetRoot" xml:space="preserve"><value>Manual target root</value></data>
   <data name="ButtonBrowse" xml:space="preserve"><value>Browse...</value></data>
   <data name="ButtonCancel" xml:space="preserve"><value>Cancel</value></data>
-  <data name="RenameStepDescription" xml:space="preserve"><value>Creates a filename correction action. Ambiguous items are skipped by the current safe runner.</value></data>
+  <data name="RenameStepDescription" xml:space="preserve"><value>Review and edit the target filename before the plan runs.</value></data>
   <data name="FolderWrapStepDescription" xml:space="preserve"><value>Creates a folder wrapping action for files.</value></data>
   <data name="FolderUnwrapStepDescription" xml:space="preserve"><value>Select how folder contents are moved upward.</value></data>
   <data name="AutoRelocationStepDescription" xml:space="preserve"><value>Select the relocation template and optional target root for this action.</value></data>
@@ -191,5 +191,14 @@
   <data name="LabelDefaultFolderOperation" xml:space="preserve"><value>Default folder operation</value></data>
   <data name="LabelFolderUnwrapMismatch" xml:space="preserve"><value>Single-file mismatch</value></data>
   <data name="GroupAutoRelocationContextMenu" xml:space="preserve"><value>Auto relocation context commands</value></data>
+  <data name="ContextCommandFolderUnwrapUseFolderName" xml:space="preserve"><value>Unwrap using folder name</value></data>
+  <data name="ContextCommandFolderUnwrapKeepFileName" xml:space="preserve"><value>Unwrap using file name</value></data>
+  <data name="ButtonApply" xml:space="preserve"><value>Apply</value></data>
+  <data name="ColumnOriginalName" xml:space="preserve"><value>Original name</value></data>
+  <data name="ColumnSuggestedName" xml:space="preserve"><value>New name</value></data>
+  <data name="ColumnRenameStatus" xml:space="preserve"><value>Status</value></data>
+  <data name="ColumnRenameReason" xml:space="preserve"><value>Reason</value></data>
+  <data name="RenameInvalidNameMessage" xml:space="preserve"><value>Enter a valid new name for every item.</value></data>
+  <data name="RenameDuplicateNameMessage" xml:space="preserve"><value>Two or more items target the same name.</value></data>
   <data name="FolderOptionsFutureMessage" xml:space="preserve"><value>Folder wrapping and unwrapping options are intentionally kept here for future expansion.</value></data>
 </root>

@@ -33,67 +33,16 @@ internal sealed class FileToolRunner
 
     private OperationResult RunFileNameCorrection(IReadOnlyList<string> paths)
     {
-        var result = new OperationResult();
-        var planner = new RenamePlanner(CreateFileNameCorrector());
-        IReadOnlyList<RenamePreview> plan;
-
         try
         {
-            plan = planner.CreatePlan(paths);
+            return RenameOperations.Apply(RenameOperations.CreatePlan(paths, _settings));
         }
         catch (Exception ex)
         {
+            var result = new OperationResult();
             result.AddError("파일명 교정 계획 생성 실패: " + ex.Message);
             return result;
         }
-
-        foreach (var preview in plan)
-        {
-            result.AddCandidate();
-            try
-            {
-                if (preview.Status == RenamePreviewStatus.Unchanged)
-                {
-                    result.AddSkipped(preview.OriginalFileName + " 변경 없음");
-                    continue;
-                }
-
-                if (preview.Status == RenamePreviewStatus.NeedsReview || preview.Status == RenamePreviewStatus.Skipped)
-                {
-                    result.AddSkipped(preview.OriginalFileName + " 검토 필요");
-                    continue;
-                }
-
-                if (PathComparer.Equals(preview.OriginalPath, preview.SuggestedPath))
-                {
-                    result.AddSkipped(preview.OriginalFileName + " 대상 경로 동일");
-                    continue;
-                }
-
-                if (Directory.Exists(preview.OriginalPath))
-                {
-                    Directory.Move(preview.OriginalPath, preview.SuggestedPath);
-                }
-                else if (File.Exists(preview.OriginalPath))
-                {
-                    File.Move(preview.OriginalPath, preview.SuggestedPath);
-                }
-                else
-                {
-                    result.AddSkipped(preview.OriginalFileName + " 원본 없음");
-                    continue;
-                }
-
-                result.AddApplied($"{preview.OriginalFileName} -> {preview.SuggestedFileName}");
-                FileToolsEnvironment.Log("RENAME", preview.OriginalPath + " -> " + preview.SuggestedPath);
-            }
-            catch (Exception ex)
-            {
-                result.AddError(preview.OriginalPath + " | " + ex.Message);
-            }
-        }
-
-        return result;
     }
 
     private OperationResult RunFolderStructure(IReadOnlyList<string> paths)

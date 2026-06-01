@@ -4,6 +4,8 @@ obj/
 .mcp/
 artifacts/
 FileToolsData/
+src/FileTools.ShellExt/x64/
+src/FileTools.ShellExt/FileTool.*/
 *.user
 *.suo
 *.nupkg

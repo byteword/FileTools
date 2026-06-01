@@ -34,6 +34,8 @@ internal sealed class WorkPlanStep
 
     public FolderUnwrapNameMismatchMode FolderUnwrapNameMismatchMode { get; set; } = FolderUnwrapNameMismatchMode.KeepFileName;
 
+    public string? ManualRenameFileName { get; set; }
+
     public string? AutoRelocationTemplateId { get; set; }
 
     public string? ManualTargetRootPath { get; set; }
@@ -46,6 +48,19 @@ internal sealed class WorkPlanStep
         WorkPlanStepKind.AutoRelocation => FormatAutoRelocationName(),
         _ => Kind.ToString()
     };
+
+    public WorkPlanStep Clone()
+    {
+        return new WorkPlanStep
+        {
+            Kind = Kind,
+            FolderOperation = FolderOperation,
+            FolderUnwrapNameMismatchMode = FolderUnwrapNameMismatchMode,
+            ManualRenameFileName = ManualRenameFileName,
+            AutoRelocationTemplateId = AutoRelocationTemplateId,
+            ManualTargetRootPath = ManualTargetRootPath
+        };
+    }
 
     public override string ToString()
     {

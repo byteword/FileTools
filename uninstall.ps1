@@ -15,6 +15,8 @@ if (Test-Path $exe) {
         'FileTools_02_FolderWrapFiles',
         'FileTools_03_FolderUnwrapSameName',
         'FileTools_04_FolderUnwrapSingleFile',
+        'FileTools_04a_FolderUnwrapUseFolderName',
+        'FileTools_04b_FolderUnwrapKeepFileName',
         'FileTools_05_FolderMoveInnerFilesUp',
         'FileTools_06_AutoRelocationCurrentFolder',
         'FileTools_07_AutoRelocationChooseTarget',
@@ -31,5 +33,10 @@ if (Test-Path $exe) {
         $path = Join-Path $legacyBase $name
         if (Test-Path $path) { Remove-Item $path -Recurse -Force }
     }
+
+    $clsid = 'HKCU:\Software\Classes\CLSID\{716e7cc4-5941-4362-8aca-d38c62817de9}'
+    if (Test-Path $clsid) { Remove-Item $clsid -Recurse -Force }
+    $options = 'HKCU:\Software\FileTools\ContextMenu'
+    if (Test-Path $options) { Remove-Item $options -Recurse -Force }
 }
 Write-Host 'Uninstalled.'

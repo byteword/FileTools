@@ -89,16 +89,24 @@ internal static class Program
             return;
         }
 
-        var path = args[1].Trim('"');
-        if (!File.Exists(path) && !Directory.Exists(path))
+        var paths = args
+            .Skip(1)
+            .Select(static arg => arg.Trim('"'))
+            .Where(static path => File.Exists(path) || Directory.Exists(path))
+            .Distinct(OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal)
+            .ToArray();
+        if (paths.Length == 0)
         {
-            FileToolsEnvironment.Log("CONTEXT", "Path does not exist: " + path);
+            FileToolsEnvironment.Log("CONTEXT", "No valid paths: " + string.Join(" | ", args.Skip(1)));
             return;
         }
 
         Directory.CreateDirectory(FileToolsEnvironment.QueueDir);
         var queueFile = Path.Combine(FileToolsEnvironment.QueueDir, command + ".txt");
-        AppendQueue(queueFile, path);
+        foreach (var path in paths)
+        {
+            AppendQueue(queueFile, path);
+        }
 
         using var mutex = new Mutex(initiallyOwned: false, name: "Local\\" + FileToolsEnvironment.AppName + "_" + command);
         if (!mutex.WaitOne(0))
@@ -109,8 +117,8 @@ internal static class Program
         try
         {
             Thread.Sleep(1300);
-            var paths = ReadAndClearQueue(queueFile);
-            var result = ExecuteContextCommand(command, paths);
+            var queuedPaths = ReadAndClearQueue(queueFile);
+            var result = ExecuteContextCommand(command, queuedPaths);
             if (result is null)
             {
                 return;
@@ -174,6 +182,11 @@ internal static class Program
         }
 
         var settings = SettingsStore.Load();
+        if (command == ContextMenuCommand.FileNameCorrection)
+        {
+            return RenameReviewDialog.ShowAndApply(paths, settings);
+        }
+
         var mode = command switch
         {
             ContextMenuCommand.FileNameCorrection => ToolMode.FileNameCorrection,
@@ -181,6 +194,8 @@ internal static class Program
             ContextMenuCommand.FolderWrapFiles => ToolMode.FolderStructure,
             ContextMenuCommand.FolderUnwrapSameNameSingleFile => ToolMode.FolderStructure,
             ContextMenuCommand.FolderUnwrapSingleFile => ToolMode.FolderStructure,
+            ContextMenuCommand.FolderUnwrapUseFolderName => ToolMode.FolderStructure,
+            ContextMenuCommand.FolderUnwrapKeepFileName => ToolMode.FolderStructure,
             ContextMenuCommand.FolderMoveInnerFilesUp => ToolMode.FolderStructure,
             ContextMenuCommand.AutoRelocation => ToolMode.AutoRelocation,
             ContextMenuCommand.AutoRelocationCurrentFolder => ToolMode.AutoRelocation,
@@ -198,6 +213,14 @@ internal static class Program
                 break;
             case ContextMenuCommand.FolderUnwrapSingleFile:
                 settings.FolderStructureOperation = FolderStructureOperation.UnwrapSingleFileFolder;
+                break;
+            case ContextMenuCommand.FolderUnwrapUseFolderName:
+                settings.FolderStructureOperation = FolderStructureOperation.UnwrapSingleFileFolder;
+                settings.FolderUnwrapNameMismatchMode = FolderUnwrapNameMismatchMode.UseFolderName;
+                break;
+            case ContextMenuCommand.FolderUnwrapKeepFileName:
+                settings.FolderStructureOperation = FolderStructureOperation.UnwrapSingleFileFolder;
+                settings.FolderUnwrapNameMismatchMode = FolderUnwrapNameMismatchMode.KeepFileName;
                 break;
             case ContextMenuCommand.FolderMoveInnerFilesUp:
                 settings.FolderStructureOperation = FolderStructureOperation.MoveInnerFilesUp;

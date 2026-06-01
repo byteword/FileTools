@@ -44,7 +44,7 @@ internal sealed class WorkPlanExecutor
             var predictedPath = PredictNextPath(step, currentPath);
             var result = RunStep(step, currentPath);
             aggregate.Merge(result);
-            if (!result.HasErrors && !string.IsNullOrWhiteSpace(predictedPath) &&
+            if (!result.HasErrors && result.AppliedCount > 0 && !string.IsNullOrWhiteSpace(predictedPath) &&
                 (File.Exists(predictedPath) || Directory.Exists(predictedPath)))
             {
                 currentPath = predictedPath;
@@ -60,6 +60,14 @@ internal sealed class WorkPlanExecutor
         switch (step.Kind)
         {
             case WorkPlanStepKind.FileNameCorrection:
+                if (!string.IsNullOrWhiteSpace(step.ManualRenameFileName))
+                {
+                    return RenameOperations.Apply([RenameOperations.CreateManualPreview(
+                        path,
+                        step.ManualRenameFileName,
+                        settings)]);
+                }
+
                 return runner.Run(ToolMode.FileNameCorrection, [path]);
             case WorkPlanStepKind.FolderWrap:
                 settings.FolderStructureOperation = FolderStructureOperation.WrapFiles;
@@ -85,22 +93,25 @@ internal sealed class WorkPlanExecutor
     {
         return step.Kind switch
         {
-            WorkPlanStepKind.FileNameCorrection => PredictRenamePath(path),
+            WorkPlanStepKind.FileNameCorrection => PredictRenamePath(step, path),
             WorkPlanStepKind.FolderWrap => PredictWrapPath(path),
             WorkPlanStepKind.FolderUnwrap => PredictUnwrapPath(
                 path,
                 step.FolderOperation,
                 step.FolderUnwrapNameMismatchMode),
+            WorkPlanStepKind.AutoRelocation => PredictAutoRelocationPath(step, path),
             _ => null
         };
     }
 
-    private string? PredictRenamePath(string path)
+    private string? PredictRenamePath(WorkPlanStep step, string path)
     {
         try
         {
-            var preview = new RenamePlanner(CreateFileNameCorrector()).CreatePlan([path]).FirstOrDefault();
-            return preview is { Status: RenamePreviewStatus.Ready or RenamePreviewStatus.Conflict } &&
+            var preview = !string.IsNullOrWhiteSpace(step.ManualRenameFileName)
+                ? RenameOperations.CreateManualPreview(path, step.ManualRenameFileName, _baseSettings)
+                : new RenamePlanner(CreateFileNameCorrector()).CreatePlan([path]).FirstOrDefault();
+            return preview is not null &&
                    !PathComparer.Equals(preview.OriginalPath, preview.SuggestedPath)
                 ? preview.SuggestedPath
                 : null;
@@ -125,7 +136,49 @@ internal sealed class WorkPlanExecutor
         }
 
         var folderName = WindowsFileNameSafety.MakeSafeFileName(Path.GetFileNameWithoutExtension(path));
-        return Path.Combine(parent, folderName, Path.GetFileName(path));
+        return Path.Combine(parent, folderName);
+    }
+
+    private string? PredictAutoRelocationPath(WorkPlanStep step, string path)
+    {
+        try
+        {
+            var templateId = string.IsNullOrWhiteSpace(step.AutoRelocationTemplateId)
+                ? _baseSettings.AutoRelocationTemplateId
+                : step.AutoRelocationTemplateId;
+            var template = AutoRelocationTemplateStore
+                .FindTemplateOrDefault(templateId)
+                .Document;
+            var targetRootOverride = string.IsNullOrWhiteSpace(step.ManualTargetRootPath)
+                ? null
+                : Path.GetFullPath(step.ManualTargetRootPath);
+            var context = CreateRelocationContext(path, targetRootOverride);
+            if (context is null)
+            {
+                return null;
+            }
+
+            var plan = new AutoRelocationPlanBuilder()
+                .Build(context.RootFolder, template, [context.Context]);
+            var item = plan.Items.FirstOrDefault();
+            if (item is null || item.RequiresReview)
+            {
+                return null;
+            }
+
+            var targetPath = CreateUniqueTargetPath(item.TargetPath);
+            if (PathComparer.Equals(Path.GetFullPath(path), targetPath) ||
+                IsSubPathOf(targetPath, path))
+            {
+                return null;
+            }
+
+            return targetPath;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static string? PredictUnwrapPath(
@@ -186,6 +239,104 @@ internal sealed class WorkPlanExecutor
             _ => fileName
         };
     }
+
+    private RelocationContextWithRoot? CreateRelocationContext(string path, string? targetRootOverride)
+    {
+        if (!File.Exists(path) && !Directory.Exists(path))
+        {
+            return null;
+        }
+
+        var parent = Path.GetDirectoryName(path);
+        if (string.IsNullOrWhiteSpace(parent))
+        {
+            return null;
+        }
+
+        var corrector = CreateFileNameCorrector();
+        var preview = corrector.CreatePreview(path);
+        var fileNameStem = GetRelocationFileNameStem(path);
+        var knownFileKind = AutoRelocationFileTypeClassifier.GetKnownFileKind(path);
+        var properties = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["fileName"] = Path.GetFileName(path),
+            ["fileNameStem"] = fileNameStem,
+            ["fileExtension"] = GetRelocationFileExtension(path),
+            ["knownFileKind"] = knownFileKind,
+            ["fileKind"] = knownFileKind,
+            ["fileType"] = knownFileKind,
+            ["title"] = preview.Parts.Title,
+            ["originalTitle"] = fileNameStem,
+            ["episodeRange"] = preview.Parts.EpisodeRange
+        };
+
+        var info = File.Exists(path)
+            ? new FileInfo(path) as FileSystemInfo
+            : new DirectoryInfo(path);
+        var sizeBytes = File.Exists(path) ? new FileInfo(path).Length : 0;
+
+        return new RelocationContextWithRoot(
+            targetRootOverride ?? parent,
+            new AutoRelocationItemContext(
+                path,
+                properties,
+                sizeBytes,
+                ImageCount: null,
+                info.LastWriteTime,
+                info.CreationTime));
+    }
+
+    private static string GetRelocationFileNameStem(string path)
+    {
+        return Directory.Exists(path)
+            ? Path.GetFileName(path)
+            : Path.GetFileNameWithoutExtension(path);
+    }
+
+    private static string GetRelocationFileExtension(string path)
+    {
+        return File.Exists(path) ? Path.GetExtension(path).TrimStart('.') : "";
+    }
+
+    private static string CreateUniqueTargetPath(string targetPath)
+    {
+        if (!File.Exists(targetPath) && !Directory.Exists(targetPath))
+        {
+            return targetPath;
+        }
+
+        var directory = Path.GetDirectoryName(targetPath) ?? "";
+        var name = Path.GetFileNameWithoutExtension(targetPath);
+        var extension = Path.GetExtension(targetPath);
+        for (var index = 2; index < 10_000; index++)
+        {
+            var candidate = Path.Combine(directory, $"{name} ({index}){extension}");
+            if (!File.Exists(candidate) && !Directory.Exists(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        return targetPath;
+    }
+
+    private static bool IsSubPathOf(string candidatePath, string parentPath)
+    {
+        var parentFull = Path.GetFullPath(parentPath)
+            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+            + Path.DirectorySeparatorChar;
+        var candidateFull = Path.GetFullPath(candidatePath)
+            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+            + Path.DirectorySeparatorChar;
+
+        return candidateFull.StartsWith(parentFull, OperatingSystem.IsWindows()
+            ? StringComparison.OrdinalIgnoreCase
+            : StringComparison.Ordinal);
+    }
+
+    private sealed record RelocationContextWithRoot(
+        string RootFolder,
+        AutoRelocationItemContext Context);
 
     private KoreanFileNameCorrector CreateFileNameCorrector()
     {

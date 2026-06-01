@@ -2,6 +2,8 @@
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
+Current version: `1.0.1.0`.
+
 ## Features
 
 FileTools provides three current-user ContextMenu actions for selected files and folders:
@@ -9,7 +11,7 @@ FileTools provides three current-user ContextMenu actions for selected files and
 1. **파일이름 자동 교정**
    - Uses the filename correction flow derived from `NameCorrector`.
    - Normalizes Korean jamo/Unicode, extracts title/episode/tag/author parts, makes Windows-safe names, and avoids conflicts with suffixes.
-   - Items that require human review are skipped during automatic ContextMenu execution.
+   - The rename review dialog opens before applying changes, including ContextMenu execution.
 
 2. **폴더 wrapping / unwrapping**
    - In automatic mode, selected files are wrapped into same-stem folders.
@@ -23,8 +25,8 @@ FileTools provides three current-user ContextMenu actions for selected files and
    - Templates can build multi-level paths by chaining ordered path-rule steps.
    - Template fields are limited to values available from the file, folder, or parsed file name.
 
-The Explorer command only starts the executable. It queues selected items briefly, merges Explorer's per-item invocations, performs the work automatically, and exits silently when there are no errors.
-The non-processing **FileTools 열기 / Open FileTools** command is registered after a separator and requested at the bottom of the Explorer menu so it is not grouped with automatic file operations.
+The native ShellExt only exposes Explorer menu commands and launches the executable. The executable queues selected items briefly, merges Explorer's per-item invocations, performs non-interactive work automatically, and exits silently when there are no errors.
+The non-processing **FileTools 열기 / Open FileTools** command stays in the FileTools submenu and opens the standalone planner with the selected items loaded.
 
 ## Standalone UI
 
@@ -35,16 +37,22 @@ Run `FileTools.exe` without arguments to open the drag-and-drop work plan window
 The standalone window supports:
 
 - Drag and drop files/folders into the target list.
+- Dropped or newly added targets are selected automatically. Action buttons add the configured step to every selected target, so multi-folder unwrap workflows can be prepared in one pass.
 - Manual file/folder selection.
 - Adding multiple planned actions to each target before changing files.
 - Chaining filename correction, folder wrapping, folder unwrapping, and AutoRelocation actions.
-- Double-clicking a planned action to reopen the matching action dialog.
+- Showing rename steps as `original -> new name` in the plan list.
+- Double-clicking a planned action to reopen the matching action dialog; rename steps reopen the rename review dialog.
 - Running all target plans in order with one command.
 - Opening a separate tabbed settings window for defaults, rename options, AutoRelocation defaults, folder options, and Explorer ContextMenu registration.
 
-The settings window owns operational defaults and Explorer ContextMenu installation/removal. ContextMenu registration can be grouped or expanded, and individual ContextMenu actions can be enabled or disabled.
+The settings window owns operational defaults and Explorer ContextMenu installation/removal. Native ShellExt registration uses one FileTools submenu, and individual ContextMenu actions can be enabled or disabled.
 Folder wrapping/unwrapping and AutoRelocation commands can be selected independently for Explorer registration. Pressing OK in the settings window saves the options and synchronizes the current-user ContextMenu registration, even if the Install/Remove buttons are not pressed.
 The app icon is stored as transparent PNG and multi-size ICO assets under `src\FileTools.App\Resources`; the EXE and MSI product metadata both use the ICO.
+
+The rename review dialog is used by ContextMenu rename commands and by standalone plan editing.
+
+![FileTools rename dialog](docs/images/filetools-rename-dialog.svg)
 
 Separate dialogs are available for:
 
@@ -107,6 +115,7 @@ The Designer file keeps neutral English text and placeholder combo items so Visu
 
 - Windows
 - .NET 8 SDK or newer
+- Visual Studio Build Tools with the C++ workload for `FileTools.ShellExt`
 
 ## Build
 
@@ -128,7 +137,7 @@ src\FileTools.App\bin\Release\net8.0-windows\win-x64\publish\FileTools.exe
 
 ## Build MSI
 
-The MSI installer uses WiX Toolset SDK-style project files. The first build restores the WiX SDK and UI extension packages.
+The MSI installer uses WiX Toolset SDK-style project files. The build script first builds the native ShellExt DLL with Visual Studio MSBuild, then restores/builds the WiX SDK project.
 
 ```powershell
 .\build_msi.ps1
@@ -149,13 +158,11 @@ The MSI publishes FileTools as a self-contained `win-x64` single-file app and in
 MSI options:
 
 - `FileTools`: application and Start Menu shortcut.
-- `Explorer Context Menu`: optional ContextMenu registration.
-- `Grouped Context Menu`: default. Shows one `FileTools` menu with subcommands.
-- `Expanded Context Menu`: shows `FileTools 열기` and all tool commands directly.
+- `Explorer Context Menu`: optional native ShellExt registration.
 
-The grouped menu is the default. In the feature selection page, select `Expanded Context Menu` to install the direct entries instead. If both grouped and expanded features are selected, the installer conditions prefer expanded entries. The MSI installs the default command set; after first launch, use FileTools settings to choose individual folder wrapping/unwrapping and AutoRelocation commands.
+The MSI installs the native `FileTools.ShellExt.dll` as a current-user COM ExplorerCommand handler. After first launch, use FileTools settings to choose individual folder wrapping/unwrapping and AutoRelocation commands. Legacy static registry components are kept disabled for fallback development only.
 
-`FileTools.sln` intentionally contains only the app project so Visual Studio can load it without WiX tooling. The MSI project is isolated in `installer\FileTools.Installer.sln`; build it with `build_msi.ps1` or open that solution in Visual Studio with a WiX v4-compatible extension such as HeatWave.
+`FileTools.sln` intentionally contains only the app project so `dotnet build FileTools.sln` stays available without Visual C++ MSBuild. The ShellExt project is built by `build_msi.ps1` and `publish_and_install.ps1`. The MSI project is isolated in `installer\FileTools.Installer.sln`; build it with `build_msi.ps1` or open that solution in Visual Studio with a WiX v4-compatible extension such as HeatWave.
 
 ## Project Layout
 
@@ -168,6 +175,9 @@ src\FileTools.App
 ├─ Relocation
 ├─ Shell
 └─ Ui
+
+src\FileTools.ShellExt
+└─ Native C++ ExplorerCommand shell extension
 
 installer\FileTools.Installer
 ├─ FileTools.Installer.sln
@@ -193,6 +203,8 @@ This writes only to current-user registry keys:
 ```text
 HKCU\Software\Classes\*\shell
 HKCU\Software\Classes\Directory\shell
+HKCU\Software\Classes\CLSID\{716e7cc4-5941-4362-8aca-d38c62817de9}
+HKCU\Software\FileTools\ContextMenu
 ```
 
 No administrator permission is required.
@@ -221,19 +233,21 @@ FileTools.exe /context AutoRelocation "%1"
 FileTools.exe /context FolderWrapFiles "%1"
 FileTools.exe /context FolderUnwrapSameNameSingleFile "%1"
 FileTools.exe /context FolderUnwrapSingleFile "%1"
+FileTools.exe /context FolderUnwrapUseFolderName "%1"
+FileTools.exe /context FolderUnwrapKeepFileName "%1"
 FileTools.exe /context FolderMoveInnerFilesUp "%1"
 FileTools.exe /context AutoRelocationCurrentFolder "%1"
 FileTools.exe /context AutoRelocationChooseTarget "%1"
 ```
 
-The first three `/context` commands are kept for backward compatibility. New registrations use ordered command keys so filename correction appears first, folder wrapping/unwrapping commands second, AutoRelocation commands third, and `Open FileTools` last.
+The first three `/context` commands are kept for backward compatibility. Native ShellExt decides which submenu items are visible from the selected item type. For single-file folders, it also checks whether the single file stem matches the folder name and exposes either the simple unwrap command or explicit folder-name/file-name unwrap commands.
 
-Explorer often starts one process per selected item. FileTools waits briefly, merges those selected paths through a temporary queue, runs the selected operation, and exits automatically. If any exception occurs, an error summary is shown.
+Explorer often starts one process per selected item. FileTools waits briefly, merges those selected paths through a temporary queue, runs the selected operation, and exits automatically for non-interactive commands. File name correction opens the rename review dialog before applying changes. If any exception occurs, an error summary is shown.
 
 ## Safety Behavior
 
 - Existing destination files/folders are not overwritten.
-- Automatic filename correction skips items marked as requiring review.
+- Filename correction is reviewed in a dialog before applying changes.
 - AutoRelocation applies `(2)`, `(3)` suffixes when a target already exists.
 - Folders are deleted only when empty after unwrapping/moving child files.
 - Folder unwrapping only moves direct child files; nested folder contents are not flattened.

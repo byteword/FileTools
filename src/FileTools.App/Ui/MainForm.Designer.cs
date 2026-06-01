@@ -93,6 +93,7 @@ partial class MainForm
         _targetList.Dock = DockStyle.Fill;
         _targetList.HorizontalScrollbar = true;
         _targetList.Name = "_targetList";
+        _targetList.SelectionMode = SelectionMode.MultiExtended;
 
         _targetButtonPanel.Dock = DockStyle.Bottom;
         _targetButtonPanel.Height = 44;
