@@ -11,11 +11,8 @@ internal sealed class PlanStepDialog : Form
     private readonly ComboBox _templateCombo = new();
     private readonly TextBox _manualRootBox = new();
     private readonly Label _descriptionLabel = new();
-    private readonly Label _folderOperationLabel = new();
-    private readonly Label _folderMismatchLabel = new();
-    private readonly Label _templateLabel = new();
-    private readonly Label _manualRootLabel = new();
     private readonly Button _browseButton = new();
+    private readonly ToolTip _toolTip = new();
 
     public PlanStepDialog(WorkPlanStep step, FileToolsSettings settings)
     {
@@ -29,11 +26,10 @@ internal sealed class PlanStepDialog : Form
             _ => FileToolsEnvironment.AppName
         };
         StartPosition = FormStartPosition.CenterParent;
-        Width = 520;
-        Height = 300;
+        Size = new Size(640, 320);
+        MinimumSize = new Size(560, 260);
         MinimizeBox = false;
         MaximizeBox = false;
-        FormBorderStyle = FormBorderStyle.FixedDialog;
 
         BuildLayout(settings);
         LoadValues(settings);
@@ -41,26 +37,33 @@ internal sealed class PlanStepDialog : Form
 
     private void BuildLayout(FileToolsSettings settings)
     {
-        var panel = new Panel
+        var root = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
-            Padding = new Padding(12)
+            Padding = new Padding(12),
+            ColumnCount = 1,
+            RowCount = 3
         };
-        Controls.Add(panel);
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 58));
+        root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
+        Controls.Add(root);
 
-        _descriptionLabel.Left = 16;
-        _descriptionLabel.Top = 16;
-        _descriptionLabel.Width = 470;
-        _descriptionLabel.Height = 44;
+        _descriptionLabel.Dock = DockStyle.Fill;
         _descriptionLabel.TextAlign = ContentAlignment.MiddleLeft;
-        panel.Controls.Add(_descriptionLabel);
+        root.Controls.Add(_descriptionLabel, 0, 0);
 
-        ConfigureLabel(_folderOperationLabel, Localizer.Get("LabelFolderOperation"), 16, 70);
-        panel.Controls.Add(_folderOperationLabel);
+        var fields = new TableLayoutPanel
+        {
+            Dock = DockStyle.Top,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            ColumnCount = 1,
+            RowCount = 0
+        };
+        root.Controls.Add(fields, 0, 1);
+
         _folderOperationCombo.DropDownStyle = ComboBoxStyle.DropDownList;
-        _folderOperationCombo.Left = 150;
-        _folderOperationCombo.Top = 68;
-        _folderOperationCombo.Width = 340;
         _folderOperationCombo.DataSource = new[]
         {
             new ComboOption<FolderStructureOperation>(
@@ -73,81 +76,66 @@ internal sealed class PlanStepDialog : Form
                 ToolModeText.GetDisplayName(FolderStructureOperation.MoveInnerFilesUp),
                 FolderStructureOperation.MoveInnerFilesUp)
         };
-        panel.Controls.Add(_folderOperationCombo);
 
-        ConfigureLabel(_folderMismatchLabel, Localizer.Get("LabelFolderUnwrapMismatch"), 16, 106);
-        panel.Controls.Add(_folderMismatchLabel);
         _folderMismatchCombo.DropDownStyle = ComboBoxStyle.DropDownList;
-        _folderMismatchCombo.Left = 150;
-        _folderMismatchCombo.Top = 104;
-        _folderMismatchCombo.Width = 340;
         _folderMismatchCombo.DataSource = Enum.GetValues<FolderUnwrapNameMismatchMode>()
             .Select(mode => new ComboOption<FolderUnwrapNameMismatchMode>(ToolModeText.GetDisplayName(mode), mode))
             .ToArray();
-        panel.Controls.Add(_folderMismatchCombo);
 
-        ConfigureLabel(_templateLabel, Localizer.Get("LabelTemplate"), 16, 70);
-        panel.Controls.Add(_templateLabel);
         _templateCombo.DropDownStyle = ComboBoxStyle.DropDownList;
-        _templateCombo.Left = 150;
-        _templateCombo.Top = 68;
-        _templateCombo.Width = 340;
         _templateCombo.DataSource = AutoRelocationTemplateStore.LoadTemplates()
             .Select(template => new ComboOption<string>(
                 $"{template.Document.DisplayName} ({template.Document.Id})",
                 template.Document.Id))
             .ToArray();
-        panel.Controls.Add(_templateCombo);
+        _templateCombo.SelectedIndexChanged += (_, _) => UpdateToolTips();
 
-        ConfigureLabel(_manualRootLabel, Localizer.Get("LabelManualTargetRoot"), 16, 106);
-        panel.Controls.Add(_manualRootLabel);
-        _manualRootBox.Left = 150;
-        _manualRootBox.Top = 104;
-        _manualRootBox.Width = 260;
+        _manualRootBox.TextChanged += (_, _) => UpdateToolTips();
         _browseButton.Text = Localizer.Get("ButtonBrowse");
-        _browseButton.Left = 408;
-        _browseButton.Top = 102;
-        _browseButton.Width = 80;
-        _browseButton.Height = 26;
+        _browseButton.Width = 94;
         _browseButton.Click += (_, _) => BrowseManualRoot();
-        panel.Controls.Add(_manualRootBox);
-        panel.Controls.Add(_browseButton);
+
+        if (_step.Kind == WorkPlanStepKind.FolderUnwrap)
+        {
+            AddFieldRow(fields, Localizer.Get("LabelFolderOperation"), _folderOperationCombo);
+            AddFieldRow(fields, Localizer.Get("LabelFolderUnwrapMismatch"), _folderMismatchCombo);
+        }
+        else if (_step.Kind == WorkPlanStepKind.AutoRelocation)
+        {
+            AddFieldRow(fields, Localizer.Get("LabelTemplate"), _templateCombo);
+            AddBrowseRow(fields, Localizer.Get("LabelManualTargetRoot"), _manualRootBox, _browseButton);
+        }
+
+        var buttons = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            FlowDirection = FlowDirection.RightToLeft,
+            WrapContents = false,
+            Padding = new Padding(0, 10, 0, 0)
+        };
+        root.Controls.Add(buttons, 0, 2);
 
         var okButton = new Button
         {
             Text = "OK",
             DialogResult = DialogResult.OK,
-            Left = 314,
-            Top = 224,
-            Width = 86
+            Width = 90,
+            Height = 28
         };
         var cancelButton = new Button
         {
             Text = Localizer.Get("ButtonCancel"),
             DialogResult = DialogResult.Cancel,
-            Left = 404,
-            Top = 224,
-            Width = 86
+            Width = 90,
+            Height = 28
         };
-        panel.Controls.Add(okButton);
-        panel.Controls.Add(cancelButton);
+        okButton.Click += (_, _) => SaveValues();
+        buttons.Controls.Add(cancelButton);
+        buttons.Controls.Add(okButton);
 
         AcceptButton = okButton;
         CancelButton = cancelButton;
 
-        okButton.Click += (_, _) => SaveValues();
-
-        var isFolderUnwrap = _step.Kind == WorkPlanStepKind.FolderUnwrap;
-        var isAutoRelocation = _step.Kind == WorkPlanStepKind.AutoRelocation;
-        _folderOperationLabel.Visible = isFolderUnwrap;
-        _folderOperationCombo.Visible = isFolderUnwrap;
-        _folderMismatchLabel.Visible = isFolderUnwrap;
-        _folderMismatchCombo.Visible = isFolderUnwrap;
-        _templateLabel.Visible = isAutoRelocation;
-        _templateCombo.Visible = isAutoRelocation;
-        _manualRootLabel.Visible = isAutoRelocation;
-        _manualRootBox.Visible = isAutoRelocation;
-        _browseButton.Visible = isAutoRelocation;
         _descriptionLabel.Text = _step.Kind switch
         {
             WorkPlanStepKind.FileNameCorrection => Localizer.Get("RenameStepDescription"),
@@ -158,14 +146,60 @@ internal sealed class PlanStepDialog : Form
         };
     }
 
-    private static void ConfigureLabel(Label label, string text, int left, int top)
+    private static void AddFieldRow(TableLayoutPanel parent, string labelText, Control editor)
     {
-        label.Text = text;
-        label.Left = left;
-        label.Top = top;
-        label.Width = 126;
-        label.Height = 24;
-        label.TextAlign = ContentAlignment.MiddleLeft;
+        var row = new TableLayoutPanel
+        {
+            Dock = DockStyle.Top,
+            Height = 36,
+            ColumnCount = 2,
+            RowCount = 1,
+            Margin = new Padding(0, 0, 0, 8)
+        };
+        row.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170));
+        row.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        row.Controls.Add(CreateLabel(labelText), 0, 0);
+        editor.Dock = DockStyle.Fill;
+        row.Controls.Add(editor, 1, 0);
+        AddRow(parent, row);
+    }
+
+    private static void AddBrowseRow(TableLayoutPanel parent, string labelText, TextBox textBox, Button button)
+    {
+        var row = new TableLayoutPanel
+        {
+            Dock = DockStyle.Top,
+            Height = 36,
+            ColumnCount = 3,
+            RowCount = 1,
+            Margin = new Padding(0, 0, 0, 8)
+        };
+        row.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170));
+        row.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        row.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 102));
+        row.Controls.Add(CreateLabel(labelText), 0, 0);
+        textBox.Dock = DockStyle.Fill;
+        button.Dock = DockStyle.Fill;
+        row.Controls.Add(textBox, 1, 0);
+        row.Controls.Add(button, 2, 0);
+        AddRow(parent, row);
+    }
+
+    private static Label CreateLabel(string text)
+    {
+        return new Label
+        {
+            Dock = DockStyle.Fill,
+            Text = text,
+            TextAlign = ContentAlignment.MiddleLeft
+        };
+    }
+
+    private static void AddRow(TableLayoutPanel parent, Control row)
+    {
+        var index = parent.RowCount++;
+        parent.RowStyles.Add(new RowStyle(SizeType.Absolute, row.Height + row.Margin.Vertical));
+        parent.Controls.Add(row, 0, index);
     }
 
     private void LoadValues(FileToolsSettings settings)
@@ -176,6 +210,7 @@ internal sealed class PlanStepDialog : Form
             ? settings.AutoRelocationTemplateId
             : _step.AutoRelocationTemplateId);
         _manualRootBox.Text = _step.ManualTargetRootPath ?? "";
+        UpdateToolTips();
     }
 
     private void SaveValues()
@@ -211,6 +246,12 @@ internal sealed class PlanStepDialog : Form
         {
             _manualRootBox.Text = dialog.SelectedPath;
         }
+    }
+
+    private void UpdateToolTips()
+    {
+        _toolTip.SetToolTip(_templateCombo, _templateCombo.SelectedItem?.ToString() ?? "");
+        _toolTip.SetToolTip(_manualRootBox, _manualRootBox.Text);
     }
 
     private static void SelectComboValue<T>(ComboBox combo, T value)

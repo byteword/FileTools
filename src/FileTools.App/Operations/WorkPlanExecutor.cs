@@ -15,40 +15,88 @@ internal sealed class WorkPlanExecutor
 
     public OperationResult Run(IEnumerable<WorkTargetPlan> targets)
     {
+        return Run(targets, CancellationToken.None, progress: null);
+    }
+
+    public OperationResult Run(
+        IEnumerable<WorkTargetPlan> targets,
+        CancellationToken cancellationToken,
+        IProgress<string>? progress)
+    {
         var aggregate = new OperationResult();
         foreach (var target in targets)
         {
-            RunTarget(target, aggregate);
+            if (cancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
+
+            progress?.Report(Localizer.Format("LogTargetStartingFormat", Path.GetFileName(target.Path)));
+            if (!RunTarget(target, aggregate, cancellationToken, progress))
+            {
+                break;
+            }
         }
 
         return aggregate;
     }
 
-    private void RunTarget(WorkTargetPlan target, OperationResult aggregate)
+    private bool RunTarget(
+        WorkTargetPlan target,
+        OperationResult aggregate,
+        CancellationToken cancellationToken,
+        IProgress<string>? progress)
     {
         var currentPath = target.Path;
         if (target.Steps.Count == 0)
         {
             aggregate.AddSkipped(Path.GetFileName(target.Path) + " has no planned actions");
-            return;
+            return true;
         }
 
         foreach (var step in target.Steps)
         {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return false;
+            }
+
             if (!File.Exists(currentPath) && !Directory.Exists(currentPath))
             {
                 aggregate.AddSkipped(currentPath + " no longer exists");
                 break;
             }
 
+            progress?.Report(Localizer.Format("LogStepStartingFormat", Path.GetFileName(currentPath), step.DisplayName));
             var predictedPath = PredictNextPath(step, currentPath);
             var result = RunStep(step, currentPath);
             aggregate.Merge(result);
+            ReportStepResult(result, progress);
             if (!result.HasErrors && result.AppliedCount > 0 && !string.IsNullOrWhiteSpace(predictedPath) &&
                 (File.Exists(predictedPath) || Directory.Exists(predictedPath)))
             {
                 currentPath = predictedPath;
             }
+        }
+
+        return true;
+    }
+
+    private static void ReportStepResult(OperationResult result, IProgress<string>? progress)
+    {
+        if (progress is null)
+        {
+            return;
+        }
+
+        foreach (var error in result.Errors)
+        {
+            progress.Report(Localizer.Format("LogErrorFormat", error));
+        }
+
+        foreach (var message in result.Messages)
+        {
+            progress.Report(message);
         }
     }
 

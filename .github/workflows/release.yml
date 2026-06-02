@@ -1,0 +1,133 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: Existing release tag to build, for example v1.0.1.8.
+        required: true
+        type: string
+      draft:
+        description: Create a draft GitHub Release.
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  release:
+    name: Build installer and publish release assets
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag_name }}
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build MSI and setup bootstrapper
+        shell: pwsh
+        run: ./build_msi.ps1
+
+      - name: Stage release assets
+        id: stage
+        shell: pwsh
+        run: |
+          $tag = '${{ inputs.tag_name }}'
+          $version = $tag -replace '^v', ''
+          $dist = Join-Path $PWD 'artifacts\release'
+          New-Item -ItemType Directory -Force -Path $dist | Out-Null
+
+          $setupSource = Join-Path $PWD 'installer\FileTools.Bundle\bin\Release\FileToolsSetup.exe'
+          $msiSource = Join-Path $PWD 'installer\FileTools.Installer\bin\Release\FileTools.msi'
+          $setupAsset = Join-Path $dist "FileTools-$version-win-x64-setup.exe"
+          $msiAsset = Join-Path $dist "FileTools-$version-win-x64.msi"
+
+          Copy-Item $setupSource $setupAsset -Force
+          Copy-Item $msiSource $msiAsset -Force
+
+          $files = Get-ChildItem $dist -File | Sort-Object Name
+          $checksums = foreach ($file in $files) {
+            $hash = Get-FileHash -Algorithm SHA256 $file.FullName
+            '{0}  {1}' -f $hash.Hash.ToLowerInvariant(), $file.Name
+          }
+          $checksumPath = Join-Path $dist 'checksums.txt'
+          Set-Content -Path $checksumPath -Value $checksums -Encoding ascii
+
+          $notesPath = Join-Path $dist 'release-notes.md'
+          $releaseNotes = @"
+          FileTools $tag
+
+          Assets:
+          - FileTools-$version-win-x64-setup.exe: normal installer bootstrapper.
+          - FileTools-$version-win-x64.msi: direct MSI package.
+          - checksums.txt: SHA256 hashes for the release assets.
+
+          These assets are not Authenticode-signed. Windows may show Unknown Publisher or Microsoft Defender SmartScreen warnings.
+          Verify the SHA256 hashes and GitHub artifact attestations before installing.
+          "@
+          Set-Content -Path $notesPath -Value $releaseNotes -Encoding utf8
+
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "dist=$dist" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Generate artifact attestations
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            artifacts/release/FileTools-${{ steps.stage.outputs.version }}-win-x64-setup.exe
+            artifacts/release/FileTools-${{ steps.stage.outputs.version }}-win-x64.msi
+            artifacts/release/checksums.txt
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FileTools-${{ steps.stage.outputs.version }}-release
+          path: artifacts/release/*
+          if-no-files-found: error
+
+      - name: Publish GitHub Release assets
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = '${{ inputs.tag_name }}'
+          $dist = '${{ steps.stage.outputs.dist }}'
+          $assets = Get-ChildItem $dist -File |
+            Where-Object { $_.Name -ne 'release-notes.md' } |
+            Sort-Object Name |
+            ForEach-Object { $_.FullName }
+          $notesPath = Join-Path $dist 'release-notes.md'
+
+          gh release view $tag 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag @assets --clobber
+            exit $LASTEXITCODE
+          }
+
+          $releaseArgs = @(
+            'release',
+            'create',
+            $tag,
+            '--verify-tag',
+            '--title',
+            "FileTools $tag",
+            '--notes-file',
+            $notesPath
+          )
+
+          if ('${{ inputs.draft }}' -eq 'true') {
+            $releaseArgs += '--draft'
+          }
+
+          $releaseArgs += $assets
+          gh @releaseArgs

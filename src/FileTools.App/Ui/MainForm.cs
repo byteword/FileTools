@@ -1,13 +1,25 @@
 using System.ComponentModel;
+using System.Drawing;
+using System.Globalization;
 using System.Windows.Forms;
 
 namespace FileTools;
 
 public sealed partial class MainForm : Form
 {
+    private const string TargetIconColumnName = "TargetIcon";
+    private const string TargetNameColumnName = "TargetName";
+    private const string TargetLocationColumnName = "TargetLocation";
+    private const string TargetActionsColumnName = "TargetActions";
+    private const string PlanOrderColumnName = "PlanOrder";
+    private const string PlanActionColumnName = "PlanAction";
+    private const string PlanPreviewColumnName = "PlanPreview";
+
     private readonly string[] _initialPaths;
     private readonly BindingList<WorkTargetPlan> _targets = [];
     private FileToolsSettings _settings = new();
+    private CancellationTokenSource? _executionCancellation;
+    private bool _updatingTargetGridSelection;
 
     public MainForm()
         : this(null)
@@ -34,23 +46,82 @@ public sealed partial class MainForm : Form
 
         DragEnter += FileDrop_DragEnter;
         DragDrop += FileDrop_DragDrop;
-        _targetList.DataSource = _targets;
-        _targetList.SelectedIndexChanged += (_, _) => RefreshPlanList();
-        _targetList.DragEnter += FileDrop_DragEnter;
-        _targetList.DragDrop += FileDrop_DragDrop;
-        _planList.DoubleClick += (_, _) => EditSelectedStep();
+        ConfigureTargetGrid();
+        ConfigurePlanGrid();
+        ApplyCommandImages();
 
-        _addFilesButton.Click += (_, _) => AddFiles();
-        _addFolderButton.Click += (_, _) => AddFolder();
-        _removeTargetButton.Click += (_, _) => RemoveSelectedTarget();
-        _clearTargetsButton.Click += (_, _) => ClearTargets();
-        _settingsButton.Click += (_, _) => OpenSettings();
-        _addRenameButton.Click += (_, _) => AddRenameSteps();
-        _addWrapButton.Click += (_, _) => AddStep(CreateWrapStep());
-        _addUnwrapButton.Click += (_, _) => AddStep(CreateUnwrapStep());
-        _addRelocationButton.Click += (_, _) => AddStep(CreateAutoRelocationStep());
-        _removeStepButton.Click += (_, _) => RemoveSelectedStep();
-        _executePlanButton.Click += (_, _) => ExecutePlan();
+        _targetGrid.SelectionChanged += (_, _) =>
+        {
+            if (!_updatingTargetGridSelection)
+            {
+                RefreshPlanList();
+                UpdateCommandStates();
+            }
+        };
+        _targetGrid.DragEnter += FileDrop_DragEnter;
+        _targetGrid.DragDrop += FileDrop_DragDrop;
+        _planGrid.CellDoubleClick += (_, _) => EditSelectedStep();
+        _planGrid.SelectionChanged += (_, _) => UpdateCommandStates();
+
+        _addFilesMenuItem.Click += (_, _) => AddFiles();
+        _addFolderMenuItem.Click += (_, _) => AddFolder();
+        _removeTargetMenuItem.Click += (_, _) => RemoveSelectedTarget();
+        _clearTargetsMenuItem.Click += (_, _) => ClearTargets();
+        _addRenameMenuItem.Click += (_, _) => AddRenameSteps();
+        _addWrapMenuItem.Click += (_, _) => AddStep(CreateWrapStep());
+        _addDefaultUnwrapMenuItem.Click += (_, _) => AddStep(CreateDefaultUnwrapStep());
+        _addSameNameUnwrapMenuItem.Click += (_, _) => AddStep(CreateUnwrapStep(
+            FolderStructureOperation.UnwrapSameNameSingleFile,
+            _settings.FolderUnwrapNameMismatchMode));
+        _addKeepNameUnwrapMenuItem.Click += (_, _) => AddStep(CreateUnwrapStep(
+            FolderStructureOperation.UnwrapSingleFileFolder,
+            FolderUnwrapNameMismatchMode.KeepFileName));
+        _addUseFolderNameUnwrapMenuItem.Click += (_, _) => AddStep(CreateUnwrapStep(
+            FolderStructureOperation.UnwrapSingleFileFolder,
+            FolderUnwrapNameMismatchMode.UseFolderName));
+        _addPrefixFolderNameUnwrapMenuItem.Click += (_, _) => AddStep(CreateUnwrapStep(
+            FolderStructureOperation.UnwrapSingleFileFolder,
+            FolderUnwrapNameMismatchMode.PrefixFolderName));
+        _addMoveInnerFilesUpMenuItem.Click += (_, _) => AddStep(CreateUnwrapStep(
+            FolderStructureOperation.MoveInnerFilesUp,
+            _settings.FolderUnwrapNameMismatchMode));
+        _addRelocationMenuItem.Click += (_, _) => AddStep(CreateAutoRelocationStep());
+        _removeStepMenuItem.Click += (_, _) => RemoveSelectedStep();
+        _clearStepsMenuItem.Click += (_, _) => ClearSelectedTargetSteps();
+        _runStopMenuItem.Click += (_, _) => RunOrStopPlan();
+        _openSettingsMenuItem.Click += (_, _) => OpenSettings();
+
+        _addTargetToolButton.ButtonClick += (_, _) => AddFiles();
+        _addFilesTargetMenuItem.Click += (_, _) => AddFiles();
+        _addFolderTargetMenuItem.Click += (_, _) => AddFolder();
+        _removeTargetToolButton.Click += (_, _) => RemoveSelectedTarget();
+        _moveTargetUpToolButton.Click += (_, _) => MoveSelectedTargets(-1);
+        _moveTargetDownToolButton.Click += (_, _) => MoveSelectedTargets(1);
+        _clearTargetsToolButton.Click += (_, _) => ClearTargets();
+
+        _addRenameToolButton.Click += (_, _) => AddRenameSteps();
+        _addWrapToolButton.Click += (_, _) => AddStep(CreateWrapStep());
+        _addUnwrapToolButton.ButtonClick += (_, _) => AddStep(CreateDefaultUnwrapStep());
+        _addDefaultUnwrapToolItem.Click += (_, _) => AddStep(CreateDefaultUnwrapStep());
+        _addSameNameUnwrapToolItem.Click += (_, _) => AddStep(CreateUnwrapStep(
+            FolderStructureOperation.UnwrapSameNameSingleFile,
+            _settings.FolderUnwrapNameMismatchMode));
+        _addKeepNameUnwrapToolItem.Click += (_, _) => AddStep(CreateUnwrapStep(
+            FolderStructureOperation.UnwrapSingleFileFolder,
+            FolderUnwrapNameMismatchMode.KeepFileName));
+        _addUseFolderNameUnwrapToolItem.Click += (_, _) => AddStep(CreateUnwrapStep(
+            FolderStructureOperation.UnwrapSingleFileFolder,
+            FolderUnwrapNameMismatchMode.UseFolderName));
+        _addPrefixFolderNameUnwrapToolItem.Click += (_, _) => AddStep(CreateUnwrapStep(
+            FolderStructureOperation.UnwrapSingleFileFolder,
+            FolderUnwrapNameMismatchMode.PrefixFolderName));
+        _addMoveInnerFilesUpToolItem.Click += (_, _) => AddStep(CreateUnwrapStep(
+            FolderStructureOperation.MoveInnerFilesUp,
+            _settings.FolderUnwrapNameMismatchMode));
+        _addRelocationToolButton.Click += (_, _) => AddStep(CreateAutoRelocationStep());
+        _removeStepToolButton.Click += (_, _) => RemoveSelectedStep();
+        _clearStepsToolButton.Click += (_, _) => ClearSelectedTargetSteps();
+        _runStopButton.Click += (_, _) => RunOrStopPlan();
     }
 
     private void ApplyLocalization()
@@ -58,31 +129,115 @@ public sealed partial class MainForm : Form
         Text = Localizer.Get("MainFormTitle");
         _targetsGroup.Text = Localizer.Get("GroupDropTargets");
         _planGroup.Text = Localizer.Get("GroupWorkPlan");
-        _statusGroup.Text = Localizer.Get("GroupOperationResult");
-        _addFilesButton.Text = Localizer.Get("ButtonAddFiles");
-        _addFolderButton.Text = Localizer.Get("ButtonAddFolder");
-        _removeTargetButton.Text = Localizer.Get("ButtonRemoveSelected");
-        _clearTargetsButton.Text = Localizer.Get("ButtonClear");
-        _settingsButton.Text = Localizer.Get("ButtonSettings");
-        _addRenameButton.Text = Localizer.Get("ButtonAddRenameStep");
-        _addWrapButton.Text = Localizer.Get("ButtonAddWrapStep");
-        _addUnwrapButton.Text = Localizer.Get("ButtonAddUnwrapStep");
-        _addRelocationButton.Text = Localizer.Get("ButtonAddRelocationStep");
-        _removeStepButton.Text = Localizer.Get("ButtonRemoveStep");
-        _executePlanButton.Text = Localizer.Get("ButtonExecutePlan");
-        _statusBox.Text = Localizer.Get("InitialPlanStatus");
+        _planScopeLabel.Text = Localizer.Get("PlanScopeNoSelection");
+
+        _fileMenuItem.Text = Localizer.Get("MenuFile");
+        _taskMenuItem.Text = Localizer.Get("MenuTasks");
+        _settingsMenuItem.Text = Localizer.Get("MenuSettings");
+        _addFilesMenuItem.Text = Localizer.Get("ButtonAddFiles");
+        _addFolderMenuItem.Text = Localizer.Get("ButtonAddFolder");
+        _removeTargetMenuItem.Text = Localizer.Get("ButtonRemoveSelected");
+        _clearTargetsMenuItem.Text = Localizer.Get("ButtonClear");
+        _addRenameMenuItem.Text = Localizer.Get("ButtonAddRenameStep");
+        _addWrapMenuItem.Text = Localizer.Get("ButtonAddWrapStep");
+        _addDefaultUnwrapMenuItem.Text = Localizer.Get("MenuUnwrapDefault");
+        _addSameNameUnwrapMenuItem.Text = ToolModeText.GetDisplayName(FolderStructureOperation.UnwrapSameNameSingleFile);
+        _addKeepNameUnwrapMenuItem.Text = FormatUnwrapSingleMenuText(FolderUnwrapNameMismatchMode.KeepFileName);
+        _addUseFolderNameUnwrapMenuItem.Text = FormatUnwrapSingleMenuText(FolderUnwrapNameMismatchMode.UseFolderName);
+        _addPrefixFolderNameUnwrapMenuItem.Text = FormatUnwrapSingleMenuText(FolderUnwrapNameMismatchMode.PrefixFolderName);
+        _addMoveInnerFilesUpMenuItem.Text = ToolModeText.GetDisplayName(FolderStructureOperation.MoveInnerFilesUp);
+        _addRelocationMenuItem.Text = Localizer.Get("ButtonAddRelocationStep");
+        _removeStepMenuItem.Text = Localizer.Get("ButtonRemoveStep");
+        _clearStepsMenuItem.Text = Localizer.Get("ButtonClearSteps");
+        _openSettingsMenuItem.Text = Localizer.Get("ButtonSettings");
+
+        _addTargetToolButton.Text = Localizer.Get("ButtonAdd");
+        _addTargetToolButton.ToolTipText = Localizer.Get("ToolTipAddTarget");
+        _addFilesTargetMenuItem.Text = Localizer.Get("ButtonAddFiles");
+        _addFolderTargetMenuItem.Text = Localizer.Get("ButtonAddFolder");
+        _removeTargetToolButton.Text = Localizer.Get("ButtonRemoveSelected");
+        _removeTargetToolButton.ToolTipText = Localizer.Get("ToolTipRemoveTarget");
+        _moveTargetUpToolButton.Text = Localizer.Get("ButtonMoveUp");
+        _moveTargetUpToolButton.ToolTipText = Localizer.Get("ToolTipMoveTargetUp");
+        _moveTargetDownToolButton.Text = Localizer.Get("ButtonMoveDown");
+        _moveTargetDownToolButton.ToolTipText = Localizer.Get("ToolTipMoveTargetDown");
+        _clearTargetsToolButton.Text = Localizer.Get("ButtonClear");
+        _clearTargetsToolButton.ToolTipText = Localizer.Get("ToolTipClearTargets");
+
+        _addRenameToolButton.Text = Localizer.Get("ButtonAddRenameStep");
+        _addRenameToolButton.ToolTipText = Localizer.Get("ToolTipAddRename");
+        _addWrapToolButton.Text = Localizer.Get("ButtonAddWrapStep");
+        _addWrapToolButton.ToolTipText = Localizer.Get("ToolTipAddWrap");
+        _addUnwrapToolButton.Text = Localizer.Get("ButtonAddUnwrapStep");
+        _addUnwrapToolButton.ToolTipText = Localizer.Get("ToolTipAddUnwrap");
+        _addDefaultUnwrapToolItem.Text = Localizer.Get("MenuUnwrapDefault");
+        _addSameNameUnwrapToolItem.Text = ToolModeText.GetDisplayName(FolderStructureOperation.UnwrapSameNameSingleFile);
+        _addKeepNameUnwrapToolItem.Text = FormatUnwrapSingleMenuText(FolderUnwrapNameMismatchMode.KeepFileName);
+        _addUseFolderNameUnwrapToolItem.Text = FormatUnwrapSingleMenuText(FolderUnwrapNameMismatchMode.UseFolderName);
+        _addPrefixFolderNameUnwrapToolItem.Text = FormatUnwrapSingleMenuText(FolderUnwrapNameMismatchMode.PrefixFolderName);
+        _addMoveInnerFilesUpToolItem.Text = ToolModeText.GetDisplayName(FolderStructureOperation.MoveInnerFilesUp);
+        _addRelocationToolButton.Text = Localizer.Get("ButtonAddRelocationStep");
+        _addRelocationToolButton.ToolTipText = Localizer.Get("ToolTipAddRelocation");
+        _removeStepToolButton.Text = Localizer.Get("ButtonRemoveStep");
+        _removeStepToolButton.ToolTipText = Localizer.Get("ToolTipRemoveStep");
+        _clearStepsToolButton.Text = Localizer.Get("ButtonClearSteps");
+        _clearStepsToolButton.ToolTipText = Localizer.Get("ToolTipClearSteps");
+
+        ApplyTargetGridLocalization();
+        ApplyPlanGridLocalization();
+        _logBox.Text = Localizer.Get("LogReady");
+        UpdatePlanScopeHeader(GetSelectedTarget());
+        UpdateCommandStates();
+    }
+
+    private void ApplyCommandImages()
+    {
+        _addFilesMenuItem.Image = UiIconFactory.Add;
+        _addFolderMenuItem.Image = UiIconFactory.FolderAdd;
+        _removeTargetMenuItem.Image = UiIconFactory.Remove;
+        _clearTargetsMenuItem.Image = UiIconFactory.Clear;
+        _addRenameMenuItem.Image = UiIconFactory.Rename;
+        _addWrapMenuItem.Image = UiIconFactory.Wrap;
+        _addDefaultUnwrapMenuItem.Image = UiIconFactory.Unwrap;
+        _addSameNameUnwrapMenuItem.Image = UiIconFactory.Unwrap;
+        _addKeepNameUnwrapMenuItem.Image = UiIconFactory.Unwrap;
+        _addUseFolderNameUnwrapMenuItem.Image = UiIconFactory.Unwrap;
+        _addPrefixFolderNameUnwrapMenuItem.Image = UiIconFactory.Unwrap;
+        _addMoveInnerFilesUpMenuItem.Image = UiIconFactory.MoveUp;
+        _addRelocationMenuItem.Image = UiIconFactory.Relocate;
+        _removeStepMenuItem.Image = UiIconFactory.RemoveStep;
+        _clearStepsMenuItem.Image = UiIconFactory.Clear;
+        _openSettingsMenuItem.Image = UiIconFactory.Settings;
+
+        _addTargetToolButton.Image = UiIconFactory.Add;
+        _addFilesTargetMenuItem.Image = UiIconFactory.Add;
+        _addFolderTargetMenuItem.Image = UiIconFactory.FolderAdd;
+        _removeTargetToolButton.Image = UiIconFactory.Remove;
+        _moveTargetUpToolButton.Image = UiIconFactory.MoveUp;
+        _moveTargetDownToolButton.Image = UiIconFactory.MoveDown;
+        _clearTargetsToolButton.Image = UiIconFactory.Clear;
+
+        _addRenameToolButton.Image = UiIconFactory.Rename;
+        _addWrapToolButton.Image = UiIconFactory.Wrap;
+        _addUnwrapToolButton.Image = UiIconFactory.Unwrap;
+        _addDefaultUnwrapToolItem.Image = UiIconFactory.Unwrap;
+        _addSameNameUnwrapToolItem.Image = UiIconFactory.Unwrap;
+        _addKeepNameUnwrapToolItem.Image = UiIconFactory.Unwrap;
+        _addUseFolderNameUnwrapToolItem.Image = UiIconFactory.Unwrap;
+        _addPrefixFolderNameUnwrapToolItem.Image = UiIconFactory.Unwrap;
+        _addMoveInnerFilesUpToolItem.Image = UiIconFactory.MoveUp;
+        _addRelocationToolButton.Image = UiIconFactory.Relocate;
+        _removeStepToolButton.Image = UiIconFactory.RemoveStep;
+        _clearStepsToolButton.Image = UiIconFactory.Clear;
     }
 
     private void LoadState()
     {
         _settings = SettingsStore.Load();
         AddPaths(_initialPaths);
-        if (_targets.Count > 0)
-        {
-            _targetList.SelectedIndex = 0;
-        }
-
-        _statusBox.Text = Localizer.Get("InitialPlanStatus");
+        ClearLog();
+        AppendLog(Localizer.Get("LogReady"));
+        UpdateCommandStates();
     }
 
     private void AddFiles()
@@ -114,19 +269,77 @@ public sealed partial class MainForm : Form
 
     private void RemoveSelectedTarget()
     {
-        if (_targetList.SelectedItem is not WorkTargetPlan target)
+        var targets = GetSelectedTargets().ToArray();
+        if (targets.Length == 0)
         {
             return;
         }
 
-        _targets.Remove(target);
+        foreach (var target in targets)
+        {
+            _targets.Remove(target);
+        }
+
+        RefreshTargetGrid();
         RefreshPlanList();
+        UpdateCommandStates();
+    }
+
+    private void MoveSelectedTargets(int direction)
+    {
+        var selectedTargets = GetSelectedTargets().ToArray();
+        if (selectedTargets.Length == 0 || !CanMoveSelectedTargets(direction))
+        {
+            return;
+        }
+
+        var selectedSet = selectedTargets.ToHashSet();
+        var indexes = selectedTargets
+            .Select(target => _targets.IndexOf(target))
+            .Where(static index => index >= 0)
+            .Order()
+            .ToArray();
+
+        if (direction < 0)
+        {
+            foreach (var index in indexes)
+            {
+                if (index <= 0 || selectedSet.Contains(_targets[index - 1]))
+                {
+                    continue;
+                }
+
+                var target = _targets[index];
+                _targets.RemoveAt(index);
+                _targets.Insert(index - 1, target);
+            }
+        }
+        else
+        {
+            foreach (var index in indexes.Reverse())
+            {
+                if (index >= _targets.Count - 1 || selectedSet.Contains(_targets[index + 1]))
+                {
+                    continue;
+                }
+
+                var target = _targets[index];
+                _targets.RemoveAt(index);
+                _targets.Insert(index + 1, target);
+            }
+        }
+
+        RefreshTargetGrid();
+        SelectTargetRows(selectedTargets);
+        UpdateCommandStates();
     }
 
     private void ClearTargets()
     {
         _targets.Clear();
+        _targetGrid.Rows.Clear();
         RefreshPlanList();
+        UpdateCommandStates();
     }
 
     private void OpenSettings()
@@ -136,7 +349,7 @@ public sealed partial class MainForm : Form
         {
             _settings = form.Settings;
             SettingsStore.Save(_settings);
-            _statusBox.Text = Localizer.Format("SettingsSavedFormat", SettingsStore.SettingsPath);
+            AppendLog(Localizer.Format("SettingsSavedFormat", SettingsStore.SettingsPath));
         }
     }
 
@@ -163,12 +376,15 @@ public sealed partial class MainForm : Form
             target.Steps.Add(ReferenceEquals(target, targets[0]) ? step : step.Clone());
         }
 
+        RefreshTargetGridRows();
         RefreshPlanList();
         var displayedTarget = GetSelectedTarget();
         if (displayedTarget?.Steps.Count > 0)
         {
-            _planList.SelectedIndex = displayedTarget.Steps.Count - 1;
+            SelectPlanRow(displayedTarget.Steps.Count - 1);
         }
+
+        UpdateCommandStates();
     }
 
     private void AddRenameSteps()
@@ -204,33 +420,48 @@ public sealed partial class MainForm : Form
             });
         }
 
+        RefreshTargetGridRows();
         RefreshPlanList();
         var displayedTarget = GetSelectedTarget();
         if (displayedTarget?.Steps.Count > 0)
         {
-            _planList.SelectedIndex = displayedTarget.Steps.Count - 1;
+            SelectPlanRow(displayedTarget.Steps.Count - 1);
         }
+
+        UpdateCommandStates();
     }
 
-    private WorkPlanStep? CreateWrapStep()
+    private static WorkPlanStep CreateWrapStep()
     {
-        var step = new WorkPlanStep
+        return new WorkPlanStep
         {
             Kind = WorkPlanStepKind.FolderWrap,
             FolderOperation = FolderStructureOperation.WrapFiles
         };
-        return EditStep(step) ? step : null;
     }
 
-    private WorkPlanStep? CreateUnwrapStep()
+    private WorkPlanStep CreateDefaultUnwrapStep()
     {
-        var step = new WorkPlanStep
+        var operation = _settings.FolderStructureOperation switch
+        {
+            FolderStructureOperation.UnwrapSameNameSingleFile => FolderStructureOperation.UnwrapSameNameSingleFile,
+            FolderStructureOperation.UnwrapSingleFileFolder => FolderStructureOperation.UnwrapSingleFileFolder,
+            FolderStructureOperation.MoveInnerFilesUp => FolderStructureOperation.MoveInnerFilesUp,
+            _ => FolderStructureOperation.UnwrapSameNameSingleFile
+        };
+        return CreateUnwrapStep(operation, _settings.FolderUnwrapNameMismatchMode);
+    }
+
+    private static WorkPlanStep CreateUnwrapStep(
+        FolderStructureOperation operation,
+        FolderUnwrapNameMismatchMode mismatchMode)
+    {
+        return new WorkPlanStep
         {
             Kind = WorkPlanStepKind.FolderUnwrap,
-            FolderOperation = FolderStructureOperation.UnwrapSameNameSingleFile,
-            FolderUnwrapNameMismatchMode = _settings.FolderUnwrapNameMismatchMode
+            FolderOperation = operation,
+            FolderUnwrapNameMismatchMode = mismatchMode
         };
-        return EditStep(step) ? step : null;
     }
 
     private WorkPlanStep? CreateAutoRelocationStep()
@@ -253,7 +484,9 @@ public sealed partial class MainForm : Form
 
         if (EditStep(step))
         {
+            RefreshTargetGridRows();
             RefreshPlanList();
+            UpdateCommandStates();
         }
     }
 
@@ -262,6 +495,11 @@ public sealed partial class MainForm : Form
         if (step.Kind == WorkPlanStepKind.FileNameCorrection && GetSelectedTarget() is { } target)
         {
             return RenameReviewDialog.EditPlanStep(this, target.Path, step, _settings);
+        }
+
+        if (step.Kind == WorkPlanStepKind.FolderWrap)
+        {
+            return true;
         }
 
         using var dialog = new PlanStepDialog(step, _settings);
@@ -277,11 +515,46 @@ public sealed partial class MainForm : Form
             return;
         }
 
+        var removedIndex = target.Steps.IndexOf(step);
         target.Steps.Remove(step);
+        RefreshTargetGridRows();
         RefreshPlanList();
+        SelectPlanRow(Math.Min(removedIndex, target.Steps.Count - 1));
+        UpdateCommandStates();
     }
 
-    private void ExecutePlan()
+    private void ClearSelectedTargetSteps()
+    {
+        var target = GetSelectedTarget();
+        if (target is null || target.Steps.Count == 0)
+        {
+            return;
+        }
+
+        target.Steps.Clear();
+        RefreshTargetGridRows();
+        RefreshPlanList();
+        UpdateCommandStates();
+    }
+
+    private void RunOrStopPlan()
+    {
+        if (_executionCancellation is not null)
+        {
+            if (!_executionCancellation.IsCancellationRequested)
+            {
+                _executionCancellation.Cancel();
+                AppendLog(Localizer.Get("LogStopRequested"));
+                UpdateCommandStates();
+            }
+
+            return;
+        }
+
+        _ = ExecutePlanAsync();
+    }
+
+    private async Task ExecutePlanAsync()
     {
         if (_targets.Count == 0)
         {
@@ -303,42 +576,119 @@ public sealed partial class MainForm : Form
             return;
         }
 
-        var result = new WorkPlanExecutor(_settings).Run(_targets);
-        var message = result.ToUserMessage(Localizer.Get("PlanExecutionTitle"));
-        _statusBox.Text = message;
-        MessageBox.Show(
-            message,
-            FileToolsEnvironment.AppName,
-            MessageBoxButtons.OK,
-            result.HasErrors ? MessageBoxIcon.Error : MessageBoxIcon.Information);
+        var cancellation = new CancellationTokenSource();
+        _executionCancellation = cancellation;
+        var targets = _targets.ToArray();
+        var stepCount = targets.Sum(static target => target.Steps.Count);
+        ClearLog();
+        AppendLog(Localizer.Format("LogExecutionStartingFormat", targets.Length, stepCount));
+        UpdateCommandStates();
+
+        try
+        {
+            var progress = new Progress<string>(AppendLog);
+            var result = await Task.Run(() => new WorkPlanExecutor(_settings)
+                .Run(targets, cancellation.Token, progress));
+
+            AppendLog(Localizer.Format(
+                "LogExecutionSummaryFormat",
+                result.CandidateCount,
+                result.AppliedCount,
+                result.SkippedCount,
+                result.Errors.Count));
+            AppendLog(cancellation.IsCancellationRequested
+                ? Localizer.Get("LogExecutionStopped")
+                : Localizer.Get("LogExecutionCompleted"));
+        }
+        catch (Exception ex)
+        {
+            AppendLog(Localizer.Format("LogExecutionFailedFormat", ex.Message));
+            MessageBox.Show(ex.Message, FileToolsEnvironment.AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            if (ReferenceEquals(_executionCancellation, cancellation))
+            {
+                _executionCancellation = null;
+            }
+
+            cancellation.Dispose();
+            RefreshTargetGrid();
+            RefreshPlanList();
+            UpdateCommandStates();
+        }
     }
 
     private void RefreshPlanList()
     {
         var target = GetSelectedTarget();
-        _planList.DataSource = null;
-        _planList.DataSource = target?.Steps
-            .Select(step => new PlanStepListItem(target, step, _settings))
-            .ToArray();
+        _planGrid.Rows.Clear();
+        UpdatePlanScopeHeader(target);
+        if (target is null)
+        {
+            return;
+        }
+
+        var previews = new WorkPlanPreviewBuilder(_settings).Build(target);
+        foreach (var preview in previews)
+        {
+            var rowIndex = _planGrid.Rows.Add();
+            var row = _planGrid.Rows[rowIndex];
+            row.Tag = preview;
+            row.Cells[PlanOrderColumnName].Value = preview.Number.ToString(CultureInfo.CurrentCulture);
+            row.Cells[PlanActionColumnName].Value = CreatePlanActionCellText(preview.Step);
+            row.Cells[PlanPreviewColumnName].Value = preview.PreviewText;
+
+            if (preview.HasWarning)
+            {
+                row.Cells[PlanPreviewColumnName].Style.ForeColor = Color.FromArgb(160, 73, 28);
+            }
+
+            foreach (var cell in row.Cells.Cast<DataGridViewCell>())
+            {
+                cell.ToolTipText = preview.ToolTipText;
+            }
+        }
+    }
+
+    private void UpdatePlanScopeHeader(WorkTargetPlan? displayedTarget)
+    {
+        if (displayedTarget is null)
+        {
+            _planScopeLabel.Text = Localizer.Get("PlanScopeNoSelection");
+            _planScopeLabel.ForeColor = Color.FromArgb(93, 99, 108);
+            return;
+        }
+
+        var selectedTargets = GetSelectedTargets().ToArray();
+        var selectedCount = selectedTargets.Length;
+        var selectedStepCount = selectedTargets.Sum(static target => target.Steps.Count);
+        var displayedName = GetTargetName(displayedTarget);
+        _planScopeLabel.Text = selectedCount > 1
+            ? Localizer.Format("PlanScopeSelectedFormat", displayedName, selectedCount, selectedStepCount)
+            : Localizer.Format("PlanScopeSingleFormat", displayedName, displayedTarget.Steps.Count);
+        _planScopeLabel.ForeColor = Color.FromArgb(55, 65, 81);
     }
 
     private WorkTargetPlan? GetSelectedTarget()
     {
-        return _targetList.SelectedItem as WorkTargetPlan;
+        return _targetGrid.CurrentRow?.Tag as WorkTargetPlan;
     }
 
     private IEnumerable<WorkTargetPlan> GetSelectedTargets()
     {
-        return _targetList.SelectedItems
+        return _targetGrid.SelectedRows
+            .Cast<DataGridViewRow>()
+            .OrderBy(static row => row.Index)
+            .Select(static row => row.Tag)
             .OfType<WorkTargetPlan>();
     }
 
     private WorkPlanStep? GetSelectedStep()
     {
-        return _planList.SelectedItem switch
+        return _planGrid.CurrentRow?.Tag switch
         {
-            WorkPlanStep step => step,
-            PlanStepListItem item => item.Step,
+            WorkPlanStepPreview preview => preview.Step,
             _ => null
         };
     }
@@ -352,6 +702,11 @@ public sealed partial class MainForm : Form
 
     private void FileDrop_DragDrop(object? sender, DragEventArgs e)
     {
+        if (_executionCancellation is not null)
+        {
+            return;
+        }
+
         if (e.Data?.GetData(DataFormats.FileDrop) is string[] paths)
         {
             AddPaths(paths);
@@ -389,17 +744,402 @@ public sealed partial class MainForm : Form
             return;
         }
 
-        _targetList.ClearSelected();
-        foreach (var target in selectedTargets)
+        RefreshTargetGrid();
+        SelectTargetRows(selectedTargets);
+        UpdateCommandStates();
+    }
+
+    private void ConfigureTargetGrid()
+    {
+        _targetGrid.AutoGenerateColumns = false;
+        _targetGrid.Columns.Clear();
+        _targetGrid.Columns.Add(new DataGridViewImageColumn
         {
-            var index = _targets.IndexOf(target);
-            if (index >= 0)
+            Name = TargetIconColumnName,
+            HeaderText = "",
+            ImageLayout = DataGridViewImageCellLayout.Normal,
+            SortMode = DataGridViewColumnSortMode.NotSortable,
+            Width = 30,
+            DefaultCellStyle = { Alignment = DataGridViewContentAlignment.MiddleCenter }
+        });
+        _targetGrid.Columns.Add(new DataGridViewTextBoxColumn
+        {
+            Name = TargetNameColumnName,
+            HeaderText = "Name",
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+            FillWeight = 45,
+            SortMode = DataGridViewColumnSortMode.NotSortable
+        });
+        _targetGrid.Columns.Add(new DataGridViewTextBoxColumn
+        {
+            Name = TargetLocationColumnName,
+            HeaderText = "Location",
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+            FillWeight = 55,
+            SortMode = DataGridViewColumnSortMode.NotSortable
+        });
+        _targetGrid.Columns.Add(new DataGridViewTextBoxColumn
+        {
+            Name = TargetActionsColumnName,
+            HeaderText = "Actions",
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
+            SortMode = DataGridViewColumnSortMode.NotSortable,
+            Width = 58,
+            DefaultCellStyle = { Alignment = DataGridViewContentAlignment.MiddleCenter }
+        });
+        _targetGrid.DefaultCellStyle.SelectionBackColor = SystemColors.Highlight;
+        _targetGrid.DefaultCellStyle.SelectionForeColor = SystemColors.HighlightText;
+        _targetGrid.RowTemplate.Height = 26;
+    }
+
+    private void ApplyTargetGridLocalization()
+    {
+        _targetGrid.Columns[TargetNameColumnName].HeaderText = Localizer.Get("ColumnTargetName");
+        _targetGrid.Columns[TargetLocationColumnName].HeaderText = Localizer.Get("ColumnTargetLocation");
+        _targetGrid.Columns[TargetActionsColumnName].HeaderText = Localizer.Get("ColumnTargetActions");
+    }
+
+    private void ConfigurePlanGrid()
+    {
+        _planGrid.AutoGenerateColumns = false;
+        _planGrid.Columns.Clear();
+        _planGrid.Columns.Add(new DataGridViewTextBoxColumn
+        {
+            Name = PlanOrderColumnName,
+            HeaderText = "#",
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
+            SortMode = DataGridViewColumnSortMode.NotSortable,
+            Width = 44,
+            DefaultCellStyle = { Alignment = DataGridViewContentAlignment.MiddleCenter }
+        });
+        _planGrid.Columns.Add(new DataGridViewTextBoxColumn
+        {
+            Name = PlanActionColumnName,
+            HeaderText = "Action",
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
+            SortMode = DataGridViewColumnSortMode.NotSortable,
+            Width = 150
+        });
+        _planGrid.Columns.Add(new DataGridViewTextBoxColumn
+        {
+            Name = PlanPreviewColumnName,
+            HeaderText = "Preview",
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+            SortMode = DataGridViewColumnSortMode.NotSortable
+        });
+        _planGrid.DefaultCellStyle.SelectionBackColor = SystemColors.Highlight;
+        _planGrid.DefaultCellStyle.SelectionForeColor = SystemColors.HighlightText;
+        _planGrid.RowTemplate.Height = 26;
+    }
+
+    private void ApplyPlanGridLocalization()
+    {
+        _planGrid.Columns[PlanOrderColumnName].HeaderText = Localizer.Get("ColumnPlanOrder");
+        _planGrid.Columns[PlanActionColumnName].HeaderText = Localizer.Get("ColumnPlanAction");
+        _planGrid.Columns[PlanPreviewColumnName].HeaderText = Localizer.Get("ColumnPlanPreview");
+    }
+
+    private void RefreshTargetGrid()
+    {
+        var selectedTargets = GetSelectedTargets().ToArray();
+        _updatingTargetGridSelection = true;
+        try
+        {
+            _targetGrid.Rows.Clear();
+            foreach (var target in _targets)
             {
-                _targetList.SetSelected(index, true);
+                var rowIndex = _targetGrid.Rows.Add();
+                var row = _targetGrid.Rows[rowIndex];
+                row.Tag = target;
+                UpdateTargetGridRow(row, target);
             }
+        }
+        finally
+        {
+            _updatingTargetGridSelection = false;
+        }
+
+        if (selectedTargets.Length > 0)
+        {
+            SelectTargetRows(selectedTargets);
+        }
+    }
+
+    private void RefreshTargetGridRows()
+    {
+        foreach (var row in _targetGrid.Rows.Cast<DataGridViewRow>())
+        {
+            if (row.Tag is WorkTargetPlan target)
+            {
+                UpdateTargetGridRow(row, target);
+            }
+        }
+    }
+
+    private void UpdateTargetGridRow(DataGridViewRow row, WorkTargetPlan target)
+    {
+        var isFolder = Directory.Exists(target.Path);
+        row.Cells[TargetIconColumnName].Value = FileSystemIconProvider.GetSmallIcon(target.Path, isFolder);
+        row.Cells[TargetNameColumnName].Value = GetTargetName(target);
+        row.Cells[TargetLocationColumnName].Value = GetTargetLocation(target);
+        row.Cells[TargetActionsColumnName].Value = target.Steps.Count.ToString(CultureInfo.CurrentCulture);
+
+        row.DefaultCellStyle.BackColor = isFolder
+            ? Color.FromArgb(240, 247, 255)
+            : SystemColors.Window;
+        row.Cells[TargetNameColumnName].Style.ForeColor = isFolder
+            ? Color.FromArgb(22, 82, 145)
+            : SystemColors.ControlText;
+        row.Cells[TargetActionsColumnName].Style.ForeColor = target.Steps.Count > 0
+            ? Color.FromArgb(26, 111, 66)
+            : SystemColors.GrayText;
+
+        var tooltip = CreateTargetTooltip(target);
+        foreach (var cell in row.Cells.Cast<DataGridViewCell>())
+        {
+            cell.ToolTipText = tooltip;
+        }
+    }
+
+    private void SelectTargetRows(IReadOnlyCollection<WorkTargetPlan> targets)
+    {
+        if (targets.Count == 0)
+        {
+            return;
+        }
+
+        _updatingTargetGridSelection = true;
+        try
+        {
+            _targetGrid.ClearSelection();
+            DataGridViewRow? currentRow = null;
+            foreach (var row in _targetGrid.Rows.Cast<DataGridViewRow>())
+            {
+                if (row.Tag is WorkTargetPlan target && targets.Contains(target))
+                {
+                    currentRow ??= row;
+                }
+            }
+
+            if (currentRow is not null)
+            {
+                _targetGrid.CurrentCell = currentRow.Cells[TargetNameColumnName];
+            }
+
+            foreach (var row in _targetGrid.Rows.Cast<DataGridViewRow>())
+            {
+                if (row.Tag is WorkTargetPlan target && targets.Contains(target))
+                {
+                    row.Selected = true;
+                }
+            }
+        }
+        finally
+        {
+            _updatingTargetGridSelection = false;
         }
 
         RefreshPlanList();
+    }
+
+    private void SelectPlanRow(int rowIndex)
+    {
+        if (rowIndex < 0 || rowIndex >= _planGrid.Rows.Count)
+        {
+            _planGrid.ClearSelection();
+            return;
+        }
+
+        _planGrid.ClearSelection();
+        var row = _planGrid.Rows[rowIndex];
+        row.Selected = true;
+        _planGrid.CurrentCell = row.Cells[PlanActionColumnName];
+    }
+
+    private void UpdateCommandStates()
+    {
+        var isExecuting = _executionCancellation is not null;
+        var cancellationPending = _executionCancellation?.IsCancellationRequested == true;
+        var selectedTargets = GetSelectedTargets().ToArray();
+        var hasSelectedTargets = selectedTargets.Length > 0;
+        var selectedTarget = GetSelectedTarget();
+        var hasTargets = _targets.Count > 0;
+        var anyPlannedSteps = _targets.Any(static target => target.Steps.Count > 0);
+        var canModify = !isExecuting;
+        var canRename = canModify && hasSelectedTargets && selectedTargets.All(IsExistingTarget);
+        var canWrap = canModify && hasSelectedTargets && selectedTargets.All(static target => File.Exists(target.Path));
+        var canUnwrap = canModify && hasSelectedTargets && selectedTargets.All(static target => Directory.Exists(target.Path));
+        var canRelocate = canModify && hasSelectedTargets && selectedTargets.All(IsExistingTarget);
+        var canRemoveStep = canModify && GetSelectedStep() is not null;
+        var canClearSteps = canModify && selectedTarget?.Steps.Count > 0;
+        var canRun = hasTargets && anyPlannedSteps;
+
+        _addFilesMenuItem.Enabled = canModify;
+        _addFolderMenuItem.Enabled = canModify;
+        _removeTargetMenuItem.Enabled = canModify && hasSelectedTargets;
+        _clearTargetsMenuItem.Enabled = canModify && hasTargets;
+        _addRenameMenuItem.Enabled = canRename;
+        _addWrapMenuItem.Enabled = canWrap;
+        SetUnwrapItemsEnabled(canUnwrap);
+        _addRelocationMenuItem.Enabled = canRelocate;
+        _removeStepMenuItem.Enabled = canRemoveStep;
+        _clearStepsMenuItem.Enabled = canClearSteps;
+        _runStopMenuItem.Enabled = isExecuting ? !cancellationPending : canRun;
+        _openSettingsMenuItem.Enabled = canModify;
+
+        _addTargetToolButton.Enabled = canModify;
+        _addFilesTargetMenuItem.Enabled = canModify;
+        _addFolderTargetMenuItem.Enabled = canModify;
+        _removeTargetToolButton.Enabled = canModify && hasSelectedTargets;
+        _moveTargetUpToolButton.Enabled = canModify && CanMoveSelectedTargets(-1);
+        _moveTargetDownToolButton.Enabled = canModify && CanMoveSelectedTargets(1);
+        _clearTargetsToolButton.Enabled = canModify && hasTargets;
+
+        _addRenameToolButton.Enabled = canRename;
+        _addWrapToolButton.Enabled = canWrap;
+        _addUnwrapToolButton.Enabled = canUnwrap;
+        _addRelocationToolButton.Enabled = canRelocate;
+        _removeStepToolButton.Enabled = canRemoveStep;
+        _clearStepsToolButton.Enabled = canClearSteps;
+        _runStopButton.Enabled = isExecuting ? !cancellationPending : canRun;
+
+        ApplyRunStopButtonState();
+    }
+
+    private void SetUnwrapItemsEnabled(bool enabled)
+    {
+        _addDefaultUnwrapMenuItem.Enabled = enabled;
+        _addSameNameUnwrapMenuItem.Enabled = enabled;
+        _addKeepNameUnwrapMenuItem.Enabled = enabled;
+        _addUseFolderNameUnwrapMenuItem.Enabled = enabled;
+        _addPrefixFolderNameUnwrapMenuItem.Enabled = enabled;
+        _addMoveInnerFilesUpMenuItem.Enabled = enabled;
+        _addDefaultUnwrapToolItem.Enabled = enabled;
+        _addSameNameUnwrapToolItem.Enabled = enabled;
+        _addKeepNameUnwrapToolItem.Enabled = enabled;
+        _addUseFolderNameUnwrapToolItem.Enabled = enabled;
+        _addPrefixFolderNameUnwrapToolItem.Enabled = enabled;
+        _addMoveInnerFilesUpToolItem.Enabled = enabled;
+    }
+
+    private void ApplyRunStopButtonState()
+    {
+        var isExecuting = _executionCancellation is not null;
+        var text = Localizer.Get(isExecuting ? "ButtonStop" : "ButtonRun");
+        var image = isExecuting ? UiIconFactory.Stop : UiIconFactory.Play;
+        _runStopButton.Text = text;
+        _runStopButton.Image = image;
+        _runStopMenuItem.Text = text;
+        _runStopMenuItem.Image = image;
+    }
+
+    private bool CanMoveSelectedTargets(int direction)
+    {
+        var selectedTargets = GetSelectedTargets().ToArray();
+        if (selectedTargets.Length == 0)
+        {
+            return false;
+        }
+
+        var selectedSet = selectedTargets.ToHashSet();
+        foreach (var target in selectedTargets)
+        {
+            var index = _targets.IndexOf(target);
+            if (direction < 0 && index > 0 && !selectedSet.Contains(_targets[index - 1]))
+            {
+                return true;
+            }
+
+            if (direction > 0 && index >= 0 && index < _targets.Count - 1 &&
+                !selectedSet.Contains(_targets[index + 1]))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void ClearLog()
+    {
+        _logBox.Clear();
+    }
+
+    private void AppendLog(string message)
+    {
+        if (InvokeRequired)
+        {
+            BeginInvoke((MethodInvoker)(() => AppendLog(message)));
+            return;
+        }
+
+        if (_logBox.TextLength > 0)
+        {
+            _logBox.AppendText(Environment.NewLine);
+        }
+
+        var timestamp = DateTime.Now.ToString("HH:mm:ss", CultureInfo.CurrentCulture);
+        _logBox.AppendText($"[{timestamp}] {message}");
+    }
+
+    private static string FormatUnwrapSingleMenuText(FolderUnwrapNameMismatchMode mode)
+    {
+        return Localizer.Format(
+            "MenuUnwrapSingleFormat",
+            ToolModeText.GetDisplayName(mode));
+    }
+
+    private static string CreatePlanActionCellText(WorkPlanStep step)
+    {
+        var icon = step.Kind switch
+        {
+            WorkPlanStepKind.FileNameCorrection => "\u270E",
+            WorkPlanStepKind.FolderWrap => "\u21B4",
+            WorkPlanStepKind.FolderUnwrap => "\u21B1",
+            WorkPlanStepKind.AutoRelocation => "\u21C4",
+            _ => "\u2022"
+        };
+        return icon + " " + GetPlanActionName(step);
+    }
+
+    private static string GetPlanActionName(WorkPlanStep step)
+    {
+        return step.Kind switch
+        {
+            WorkPlanStepKind.FileNameCorrection => Localizer.Get("PlanActionRename"),
+            WorkPlanStepKind.FolderWrap => Localizer.Get("PlanActionWrap"),
+            WorkPlanStepKind.FolderUnwrap => Localizer.Get("PlanActionUnwrap"),
+            WorkPlanStepKind.AutoRelocation => Localizer.Get("PlanActionRelocate"),
+            _ => step.DisplayName
+        };
+    }
+
+    private static bool IsExistingTarget(WorkTargetPlan target)
+    {
+        return File.Exists(target.Path) || Directory.Exists(target.Path);
+    }
+
+    private static string GetTargetName(WorkTargetPlan target)
+    {
+        var name = Path.GetFileName(target.Path);
+        return string.IsNullOrWhiteSpace(name) ? target.Path : name;
+    }
+
+    private static string GetTargetLocation(WorkTargetPlan target)
+    {
+        return Path.GetDirectoryName(target.Path) ?? "";
+    }
+
+    private static string CreateTargetTooltip(WorkTargetPlan target)
+    {
+        if (target.Steps.Count == 0)
+        {
+            return target.Path;
+        }
+
+        var steps = target.Steps
+            .Select((step, index) => $"{index + 1}. {step.DisplayName}");
+        return target.Path + Environment.NewLine + string.Join(Environment.NewLine, steps);
     }
 
     private static bool IsDesignerHosted()
@@ -407,40 +1147,4 @@ public sealed partial class MainForm : Form
         return LicenseManager.UsageMode == LicenseUsageMode.Designtime;
     }
 
-    private sealed class PlanStepListItem
-    {
-        private readonly WorkTargetPlan _target;
-        private readonly FileToolsSettings _settings;
-
-        public PlanStepListItem(WorkTargetPlan target, WorkPlanStep step, FileToolsSettings settings)
-        {
-            _target = target;
-            Step = step;
-            _settings = settings;
-        }
-
-        public WorkPlanStep Step { get; }
-
-        public override string ToString()
-        {
-            if (Step.Kind != WorkPlanStepKind.FileNameCorrection)
-            {
-                return Step.DisplayName;
-            }
-
-            try
-            {
-                var preview = string.IsNullOrWhiteSpace(Step.ManualRenameFileName)
-                    ? RenameOperations.CreatePlan([_target.Path], _settings).FirstOrDefault()
-                    : RenameOperations.CreateManualPreview(_target.Path, Step.ManualRenameFileName, _settings);
-                return preview is null
-                    ? Step.DisplayName
-                    : $"{Step.DisplayName}: {preview.OriginalFileName} -> {preview.SuggestedFileName}";
-            }
-            catch
-            {
-                return Step.DisplayName;
-            }
-        }
-    }
 }

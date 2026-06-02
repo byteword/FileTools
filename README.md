@@ -11,7 +11,7 @@ FileTools provides three current-user ContextMenu actions for selected files and
 1. **파일이름 자동 교정**
    - Uses the filename correction flow derived from `NameCorrector`.
    - Normalizes Korean jamo/Unicode, extracts title/episode/tag/author parts, makes Windows-safe names, and avoids conflicts with suffixes.
-   - The rename review dialog opens before applying changes, including ContextMenu execution.
+   - Rename review opens before applying changes by default, including ContextMenu execution, and can be limited to generated rows that need review or have conflicts.
 
 2. **폴더 wrapping / unwrapping**
    - In automatic mode, selected files are wrapped into same-stem folders.
@@ -32,34 +32,44 @@ The non-processing **FileTools 열기 / Open FileTools** command stays in the Fi
 
 Run `FileTools.exe` without arguments to open the drag-and-drop work plan window.
 
-![FileTools standalone window](docs/images/filetools-main-window.svg)
+![FileTools standalone window](docs/images/current-mainform-designer-layout.svg)
 
 The standalone window supports:
 
 - Drag and drop files/folders into the target list.
+- Reviewing targets in a grid with file/folder icons, parent locations, and per-target action counts.
+- Using the target toolbar to add/remove targets and move selected targets up or down in execution order.
 - Dropped or newly added targets are selected automatically. Action buttons add the configured step to every selected target, so multi-folder unwrap workflows can be prepared in one pass.
 - Manual file/folder selection.
 - Adding multiple planned actions to each target before changing files.
 - Chaining filename correction, folder wrapping, folder unwrapping, and AutoRelocation actions.
-- Showing rename steps as `original -> new name` in the plan list.
-- Double-clicking a planned action to reopen the matching action dialog; rename steps reopen the rename review dialog with per-file candidates and manual editing.
-- Running all target plans in order with one command.
-- Opening a separate tabbed settings window for defaults, rename options, AutoRelocation defaults, folder options, and Explorer ContextMenu registration.
+- Accessing file, task, and settings commands from the menu bar, while common task commands stay on the fixed task toolbar.
+- Selecting folder unwrapping variants from a split button, including the default setting, same-name folders, single-file folder name mismatch modes, and moving direct child files upward.
+- Reviewing each selected target's work plan in a grid with order, icon-labeled action kind, and expected result; rename steps show `original -> new name`.
+- Showing the currently displayed target, selected target count, and selected targets' planned step count above the work plan.
+- Showing detailed per-step options in grid row tooltips instead of dedicating a separate settings column.
+- Removing one selected step or clearing the currently displayed target's steps from the plan-side toolbar; the preview is recalculated from the remaining step chain.
+- Double-clicking a planned action to reopen the matching action dialog; rename steps reopen the rename review dialog with per-file candidates, manual editing, and skip controls.
+- Running all target plans in order with one bottom-right run/stop button and reviewing progress in the bottom log view.
+- Opening a resizable settings window with a fixed status header and collapsible option groups for Explorer ContextMenu registration, rename defaults, folder defaults, and AutoRelocation defaults.
 
 The settings window owns operational defaults and Explorer ContextMenu installation/removal. Native ShellExt registration uses one FileTools submenu, and individual ContextMenu actions can be enabled or disabled.
 Folder wrapping/unwrapping and AutoRelocation commands can be selected independently for Explorer registration. Pressing OK in the settings window saves the options and synchronizes the current-user ContextMenu registration, even if the Install/Remove buttons are not pressed.
+The settings layout notes are tracked in `docs/ux-settings-dialog-review.md`.
 The app icon is stored as transparent PNG and multi-size ICO assets under `src\FileTools.App\Resources`; the EXE and MSI product metadata both use the ICO.
 
 The rename review dialog is used by ContextMenu rename commands and by standalone plan editing.
-It lists the automatic correction result as the first candidate, keeps the original name as a candidate, and lets the selected row be edited, restored to auto/original, or skipped before applying.
+Rename review can be configured to always open before applying changes, or to open only when generated rows need review or have conflicts. The dialog uses a read-only item list plus a selected-item editor, so long target names can be edited outside the grid while extracted title, episode, author, tag, extension, candidate, and common-phrase values remain available as input aids. It summarizes total changes in the upper-right corner, emphasizes review/conflict rows, validates edited target names after each edit, and lets the selected row be restored to auto/original or skipped before applying.
 
-![FileTools rename dialog](docs/images/filetools-rename-dialog.svg)
+![FileTools rename dialog](docs/images/rename-editor-dialog-concept.svg)
+
+UX review notes for the current rename dialog are tracked in `docs/ux-rename-dialog-review.md`.
 
 Separate dialogs are available for:
 
 - Rename replacement dictionary entries (`source -> replacement`).
 - Rename common phrase dictionary entries used by the filename correction scorer.
-- AutoRelocation template editing. Path rule steps are evaluated in order, so a template can produce paths such as `{KnownFileKind}\[{Initial}]\{EpisodeRange}`.
+- AutoRelocation template editing. Path rule steps are evaluated in order, so a template can produce paths such as `{KnownFileKind}\[{Initial}]\{EpisodeRange}`. The template editor and per-step action dialogs resize for long template names, paths, and localized labels.
 
 AutoRelocation templates intentionally use only file-derived values:
 
@@ -178,6 +188,18 @@ The native ShellExt explicitly exports `DllGetClassObject`, `DllCanUnloadNow`, `
 
 Use `dotnet build src\FileTools.App\FileTools.App.csproj` for an app-only build. `FileTools.sln` is the root mixed x64 solution and includes the native ShellExt project, so building the full solution requires Visual Studio MSBuild with the C++ workload. The ShellExt project is built by `build_msi.ps1` and `publish_and_install.ps1`. The installer projects are isolated in `installer\FileTools.Installer.sln`; build them with `build_msi.ps1` or open that solution in Visual Studio with a WiX v4-compatible extension such as HeatWave.
 
+## Release
+
+GitHub Releases use a manual workflow that builds the setup bootstrapper and MSI,
+generates `checksums.txt`, and creates GitHub artifact attestations for the
+release assets.
+
+This is not Windows Authenticode signing. Release assets can be verified through
+GitHub provenance and SHA256 hashes, but Windows may still show `Unknown
+Publisher` or SmartScreen warnings.
+
+See `docs\release.md` for the release workflow and verification steps.
+
 ## Project Layout
 
 ```text
@@ -280,12 +302,12 @@ FileTools.exe /context AutoRelocationChooseTarget "%1"
 
 The first three `/context` commands are kept for backward compatibility. Native ShellExt decides which submenu items are visible from the selected item type. For single-file folders, it also checks whether the single file stem matches the folder name and exposes either the simple unwrap command or explicit folder-name/file-name unwrap commands.
 
-Explorer often starts one process per selected item. FileTools waits briefly, merges those selected paths through a temporary queue, runs the selected operation, and exits automatically for non-interactive commands. The Open FileTools command also accepts and queues every selected path so the standalone planner starts with the full selection. File name correction opens the rename review dialog before applying changes. If any exception occurs, an error summary is shown.
+Explorer often starts one process per selected item. FileTools waits briefly, merges those selected paths through a temporary queue, runs the selected operation, and exits automatically for non-interactive commands. The Open FileTools command also accepts and queues every selected path so the standalone planner starts with the full selection. File name correction opens the rename review dialog according to the configured review mode before applying changes. If any exception occurs, an error summary is shown.
 
 ## Safety Behavior
 
 - Existing destination files/folders are not overwritten.
-- Filename correction is reviewed in a dialog before applying changes.
+- Filename correction is reviewed before applying changes by default, or only when generated rows need review or have conflicts if that review mode is selected.
 - AutoRelocation applies `(2)`, `(3)` suffixes when a target already exists.
 - Folders are deleted only when empty after unwrapping/moving child files.
 - Folder unwrapping only moves direct child files; nested folder contents are not flattened.

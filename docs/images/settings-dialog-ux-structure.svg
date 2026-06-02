@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="560" viewBox="0 0 920 560" role="img" aria-labelledby="title desc">
+  <title id="title">Updated settings dialog layout</title>
+  <desc id="desc">Schematic of the updated FileTools settings dialog with a fixed status header, collapsible groups in a scrollable body, and fixed OK/Cancel buttons.</desc>
+  <rect width="920" height="560" fill="#f4f6f8"/>
+  <rect x="1" y="1" width="918" height="558" fill="none" stroke="#aeb7c2"/>
+
+  <text x="34" y="38" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="600" fill="#18212f">설정창 적용 구조</text>
+  <rect x="34" y="58" width="852" height="492" fill="#ffffff" stroke="#c8d0da"/>
+
+  <rect x="58" y="82" width="804" height="76" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="76" y="108" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" fill="#1f2937">설정 상태</text>
+  <text x="76" y="132" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#374151">Explorer 메뉴가 등록되어 있습니다. 선택된 명령은 8개입니다.</text>
+  <text x="76" y="150" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#64748b">OK를 누르면 설정 저장과 현재 셸 메뉴 상태 적용을 함께 수행합니다.</text>
+
+  <rect x="58" y="176" width="804" height="330" fill="#f4f6f8" stroke="#d9e0e8"/>
+  <text x="76" y="198" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#64748b">스크롤 영역</text>
+
+  <rect x="78" y="214" width="764" height="112" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+  <rect x="78" y="214" width="764" height="40" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <text x="96" y="239" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" fill="#111827">v  ContextMenu</text>
+  <text x="680" y="239" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#1d4ed8">등록됨 · 8개 활성</text>
+  <text x="96" y="278" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#374151">Explorer 등록 상태, 메뉴 방식, 파일/폴더/재배치/앱 실행 명령 선택</text>
+  <text x="96" y="302" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#64748b">Explorer 등록을 꺼도 명령 선택값은 유지됩니다.</text>
+
+  <rect x="78" y="340" width="764" height="84" fill="#ffffff" stroke="#059669" stroke-width="2"/>
+  <rect x="78" y="340" width="764" height="40" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
+  <text x="96" y="365" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" fill="#111827">v  이름변경</text>
+  <text x="600" y="365" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#047857">적용 전에 항상 검토 · 사전 사용</text>
+  <text x="96" y="404" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#374151">검토 방식 선택, 이름변경 사전 사용, 사전/문구 편집</text>
+
+  <rect x="78" y="438" width="764" height="40" fill="#ffffff" stroke="#d97706" stroke-width="2"/>
+  <text x="96" y="463" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" fill="#111827">&gt;  폴더 구조</text>
+  <text x="640" y="463" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#b45309">자동 · 파일명 유지</text>
+
+  <rect x="78" y="470" width="764" height="40" fill="#ffffff" stroke="#7c3aed" stroke-width="2"/>
+  <text x="96" y="495" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" fill="#111827">&gt;  자동 재배치</text>
+  <text x="620" y="495" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#6d28d9">Default template</text>
+
+  <rect x="652" y="516" width="94" height="30" fill="#ffffff" stroke="#c8d0da"/>
+  <text x="690" y="536" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f2937">OK</text>
+  <rect x="756" y="516" width="94" height="30" fill="#ffffff" stroke="#c8d0da"/>
+  <text x="786" y="536" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f2937">취소</text>
+</svg>

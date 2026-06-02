@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="700" viewBox="0 0 980 700" role="img" aria-labelledby="title desc">
+  <title id="title">Current MainForm planner layout</title>
+  <desc id="desc">Schematic of the current FileTools standalone planner UI with target grid, task toolbar, plan scope header, plan grid, plan commands, log, and run button.</desc>
+  <rect width="980" height="700" fill="#f4f6f8"/>
+  <rect x="1" y="1" width="978" height="698" fill="none" stroke="#aeb7c2"/>
+
+  <rect x="0" y="0" width="980" height="25" fill="#ffffff" stroke="#d4dae2"/>
+  <text x="14" y="18" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f2937">파일</text>
+  <text x="60" y="18" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f2937">작업</text>
+  <text x="106" y="18" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f2937">설정</text>
+
+  <rect x="0" y="25" width="410" height="675" fill="#ffffff" stroke="#c8d0da"/>
+  <text x="18" y="55" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" fill="#18212f">드래그앤드롭 대상</text>
+  <rect x="18" y="72" width="374" height="584" fill="#fbfcfd" stroke="#c8d0da"/>
+  <rect x="18" y="72" width="374" height="26" fill="#eef2f6" stroke="#c8d0da"/>
+  <text x="48" y="90" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#374151">이름</text>
+  <text x="188" y="90" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#374151">위치</text>
+  <text x="340" y="90" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#374151">작업</text>
+  <text x="32" y="124" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#4b5563">Sample 01.zip</text>
+  <text x="188" y="124" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#6b7280">D:\Work</text>
+  <text x="354" y="124" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#15803d">3</text>
+  <text x="32" y="154" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1d4f86">FolderA</text>
+  <text x="188" y="154" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#6b7280">D:\Work</text>
+  <text x="354" y="154" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#6b7280">0</text>
+  <rect x="18" y="656" width="374" height="30" fill="#ffffff" stroke="#c8d0da"/>
+  <circle cx="36" cy="671" r="8" fill="#207b43"/>
+  <text x="32" y="675" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#fff">+</text>
+  <circle cx="66" cy="671" r="8" fill="#aa3b30"/>
+  <text x="63" y="674" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#fff">-</text>
+  <path d="M95 677 L103 663 L111 677 Z" fill="#465366"/>
+  <path d="M130 663 L138 677 L146 663 Z" fill="#465366"/>
+  <path d="M168 664 L180 676 M180 664 L168 676" stroke="#7a4b28" stroke-width="3" stroke-linecap="round"/>
+
+  <rect x="410" y="25" width="570" height="675" fill="#f8fafc" stroke="#c8d0da"/>
+  <rect x="428" y="43" width="534" height="34" fill="#ffffff" stroke="#c8d0da"/>
+  <text x="448" y="65" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#374151">이름변경</text>
+  <text x="522" y="65" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#374151">감싸기</text>
+  <text x="592" y="65" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#374151">벗기기 ▼</text>
+  <text x="680" y="65" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#374151">재배치</text>
+
+  <rect x="428" y="94" width="534" height="485" fill="#ffffff" stroke="#c8d0da"/>
+  <text x="446" y="118" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" fill="#18212f">작업 플랜</text>
+  <text x="446" y="142" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#4b5563">표시 중: Sample 01.zip · 선택 대상 2개 · 선택 대상 단계 3개</text>
+  <rect x="446" y="152" width="468" height="30" fill="#ffffff" stroke="#c8d0da"/>
+  <circle cx="462" cy="167" r="8" fill="#aa3b30"/>
+  <text x="459" y="171" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#fff">-</text>
+  <text x="476" y="171" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#374151">단계 제거</text>
+  <path d="M550 161 L560 171 M560 161 L550 171" stroke="#7a4b28" stroke-width="3" stroke-linecap="round"/>
+  <text x="570" y="171" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#374151">작업 비우기</text>
+  <rect x="446" y="190" width="468" height="378" fill="#fbfcfd" stroke="#c8d0da"/>
+  <rect x="446" y="190" width="468" height="26" fill="#eef2f6" stroke="#c8d0da"/>
+  <text x="460" y="208" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#374151">순서</text>
+  <text x="526" y="208" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#374151">작업</text>
+  <text x="660" y="208" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#374151">예상 결과</text>
+  <text x="463" y="242" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#4b5563">1</text>
+  <text x="526" y="242" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f2937">&#x270E; 이름변경</text>
+  <text x="660" y="242" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#4b5563">Sample 01.zip -&gt; Sample 001.zip</text>
+  <text x="463" y="272" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#4b5563">2</text>
+  <text x="526" y="272" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f2937">&#x21B4; 감싸기</text>
+  <text x="660" y="272" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#4b5563">Sample 001.zip -&gt; Sample 001</text>
+  <text x="463" y="302" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#4b5563">3</text>
+  <text x="526" y="302" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f2937">&#x21C4; 재배치</text>
+  <text x="660" y="302" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#4b5563">Sample 001 -&gt; D:\Archive\[S]\Sample 001</text>
+
+  <rect x="428" y="596" width="414" height="82" fill="#ffffff" stroke="#c8d0da"/>
+  <text x="444" y="622" font-family="Consolas, monospace" font-size="12" fill="#4b5563">[19:24:10] 플랜 실행 시작: 대상 2개, 단계 3개.</text>
+  <text x="444" y="648" font-family="Consolas, monospace" font-size="12" fill="#4b5563">[19:24:11] Sample 01.zip에 이름변경 실행</text>
+  <text x="444" y="674" font-family="Consolas, monospace" font-size="12" fill="#4b5563">[19:24:12] 요약: 대상 2, 적용 2, 건너뜀 0, 오류 0.</text>
+  <rect x="858" y="596" width="104" height="82" rx="3" fill="#eaf3ef" stroke="#9bbfaa"/>
+  <path d="M886 622 L886 652 L914 637 Z" fill="#207b43"/>
+  <text x="918" y="641" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" fill="#1f2937">실행</text>
+</svg>

@@ -1,50 +1,49 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="500" viewBox="0 0 900 500">
-  <rect width="900" height="500" fill="#f3f3f3"/>
-  <rect x="12" y="12" width="876" height="446" fill="#ffffff" stroke="#b7bcc3"/>
-  <rect x="12" y="12" width="876" height="34" fill="#e9edf2" stroke="#b7bcc3"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="500" viewBox="0 0 940 500">
+  <rect width="940" height="500" fill="#f3f3f3"/>
+  <rect x="12" y="12" width="916" height="444" fill="#ffffff" stroke="#b7bcc3"/>
+  <rect x="12" y="12" width="916" height="34" fill="#e9edf2" stroke="#b7bcc3"/>
   <text x="24" y="34" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#20242a">Rename action</text>
+  <text x="512" y="34" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#20242a">Total 4 | Changes 3 | Review 1 | Conflicts 1 | Resolved 1</text>
 
-  <rect x="26" y="66" width="540" height="330" fill="#ffffff" stroke="#c7ccd2"/>
-  <rect x="26" y="66" width="540" height="32" fill="#f1f3f5" stroke="#c7ccd2"/>
-  <line x1="216" y1="66" x2="216" y2="396" stroke="#d3d7dc"/>
-  <line x1="394" y1="66" x2="394" y2="396" stroke="#d3d7dc"/>
-  <line x1="474" y1="66" x2="474" y2="396" stroke="#d3d7dc"/>
-  <text x="38" y="87" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Original name</text>
-  <text x="228" y="87" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">New name</text>
-  <text x="406" y="87" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Status</text>
-  <text x="486" y="87" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Reason</text>
-  <line x1="26" y1="128" x2="566" y2="128" stroke="#e1e4e8"/>
-  <line x1="26" y1="170" x2="566" y2="170" stroke="#e1e4e8"/>
-  <line x1="26" y1="212" x2="566" y2="212" stroke="#e1e4e8"/>
-  <rect x="27" y="99" width="538" height="28" fill="#eef6ff" stroke="none"/>
-  <text x="38" y="119" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">sample_001.zip</text>
-  <text x="228" y="119" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Sample 001.zip</text>
-  <text x="406" y="119" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Ready</text>
-  <text x="486" y="119" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Parsed...</text>
-  <text x="38" y="161" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">ㄱ ㅏ ㄴ ㅏ.txt</text>
-  <text x="228" y="161" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">가나.txt</text>
-  <text x="406" y="161" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Review</text>
-  <text x="486" y="161" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Candidate...</text>
+  <rect x="26" y="62" width="888" height="336" fill="#ffffff" stroke="#c7ccd2"/>
+  <rect x="26" y="62" width="888" height="32" fill="#f1f3f5" stroke="#c7ccd2"/>
+  <line x1="404" y1="62" x2="404" y2="398" stroke="#d3d7dc"/>
+  <line x1="438" y1="62" x2="438" y2="398" stroke="#d3d7dc"/>
+  <line x1="784" y1="62" x2="784" y2="398" stroke="#d3d7dc"/>
+  <text x="38" y="83" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Original name</text>
+  <text x="415" y="83" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">&gt;</text>
+  <text x="450" y="83" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">New name</text>
+  <text x="796" y="83" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Status</text>
 
-  <rect x="586" y="66" width="288" height="330" fill="#ffffff" stroke="#c7ccd2"/>
-  <text x="602" y="92" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#20242a">Selected item</text>
-  <text x="602" y="118" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">sample_001.zip</text>
-  <text x="602" y="158" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#20242a">Candidates</text>
-  <rect x="602" y="172" width="250" height="28" fill="#ffffff" stroke="#aeb5bd"/>
-  <text x="612" y="191" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Auto correction: Sample 001.zip</text>
-  <path d="M836 183 l6 6 l6 -6" fill="none" stroke="#4b5563" stroke-width="1.5"/>
-  <text x="602" y="234" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#20242a">New name</text>
-  <rect x="602" y="248" width="250" height="28" fill="#ffffff" stroke="#aeb5bd"/>
-  <text x="612" y="267" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Sample 001.zip</text>
-  <rect x="602" y="302" width="72" height="28" rx="2" fill="#e9edf2" stroke="#aeb5bd"/>
-  <rect x="682" y="302" width="72" height="28" rx="2" fill="#e9edf2" stroke="#aeb5bd"/>
-  <rect x="762" y="302" width="90" height="28" rx="2" fill="#e9edf2" stroke="#aeb5bd"/>
-  <text x="624" y="321" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Auto</text>
-  <text x="698" y="321" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Original</text>
-  <text x="793" y="321" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Skip</text>
+  <rect x="26" y="94" width="888" height="42" fill="#fff3cd"/>
+  <line x1="26" y1="136" x2="914" y2="136" stroke="#e1e4e8"/>
+  <text x="38" y="120" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#704900">Series 01.zip</text>
+  <text x="415" y="120" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#704900">&gt;</text>
+  <text x="450" y="120" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#704900">Series 01 (2).zip</text>
+  <text x="796" y="120" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#704900">Conflict</text>
 
-  <rect x="696" y="424" width="86" height="28" rx="2" fill="#e9edf2" stroke="#aeb5bd"/>
-  <rect x="788" y="424" width="86" height="28" rx="2" fill="#e9edf2" stroke="#aeb5bd"/>
-  <text x="722" y="443" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Apply</text>
-  <text x="811" y="443" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Cancel</text>
+  <rect x="26" y="136" width="888" height="42" fill="#fff9db"/>
+  <line x1="26" y1="178" x2="914" y2="178" stroke="#e1e4e8"/>
+  <text x="38" y="162" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#564100">ㄱ ㅏ ㄴ ㅏ.txt</text>
+  <text x="415" y="162" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#564100">&gt;</text>
+  <text x="450" y="162" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#564100">가나.txt</text>
+  <text x="796" y="162" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#564100">Review</text>
+
+  <rect x="26" y="178" width="888" height="42" fill="#e2f6e8"/>
+  <line x1="26" y1="220" x2="914" y2="220" stroke="#e1e4e8"/>
+  <text x="38" y="204" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#125c36">Sample.zip</text>
+  <text x="415" y="204" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#125c36">&gt;</text>
+  <text x="450" y="204" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#125c36">Sample fixed.zip</text>
+  <text x="796" y="204" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#125c36">Resolved</text>
+
+  <line x1="26" y1="262" x2="914" y2="262" stroke="#e1e4e8"/>
+  <text x="38" y="246" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">sample_001.zip</text>
+  <text x="415" y="246" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">&gt;</text>
+  <text x="450" y="246" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Sample 001.zip</text>
+  <text x="796" y="246" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Ready</text>
+
+  <rect x="726" y="416" width="96" height="28" rx="2" fill="#e9edf2" stroke="#aeb5bd"/>
+  <rect x="828" y="416" width="86" height="28" rx="2" fill="#e9edf2" stroke="#aeb5bd"/>
+  <text x="759" y="435" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Apply</text>
+  <text x="851" y="435" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#20242a">Cancel</text>
 </svg>

@@ -37,7 +37,7 @@ internal sealed class FileToolsSettings
 
     public bool ContextMenuAutoRelocationChooseTarget { get; set; } = true;
 
-    public bool RenameReviewBeforeApply { get; set; } = true;
+    public RenameReviewMode RenameReviewMode { get; set; } = RenameReviewMode.Always;
 
     public bool RenameUseDictionary { get; set; } = true;
 
@@ -82,7 +82,7 @@ internal sealed class FileToolsSettings
             ContextMenuAutoRelocation = ContextMenuAutoRelocation,
             ContextMenuAutoRelocationCurrentFolder = ContextMenuAutoRelocationCurrentFolder,
             ContextMenuAutoRelocationChooseTarget = ContextMenuAutoRelocationChooseTarget,
-            RenameReviewBeforeApply = RenameReviewBeforeApply,
+            RenameReviewMode = RenameReviewMode,
             RenameUseDictionary = RenameUseDictionary
         };
     }
