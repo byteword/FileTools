@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+  <?define DotNetDesktopRuntimeVersion = 8.0.27 ?>
+  <?define DotNetDesktopRuntimeUrl = https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/$(var.DotNetDesktopRuntimeVersion)/windowsdesktop-runtime-$(var.DotNetDesktopRuntimeVersion)-win-x64.exe ?>
+
+  <Bundle
+    Name="FileTools Setup"
+    Manufacturer="byteword"
+    Version="$(var.ProductVersion)"
+    UpgradeCode="6eaac913-dcd6-4584-9816-60f90582b79a"
+    IconSourceFile="$(var.AppIconPath)">
+
+    <BootstrapperApplication>
+      <bal:WixStandardBootstrapperApplication Theme="hyperlinkLicense" LicenseUrl="https://opensource.org/license/mit" />
+    </BootstrapperApplication>
+
+    <util:RegistrySearch
+      Id="FindDotNetDesktopRuntime8"
+      Root="HKLM"
+      Key="SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.WindowsDesktop.App"
+      Value="$(var.DotNetDesktopRuntimeVersion)"
+      Variable="DotNetDesktopRuntime8Installed"
+      Result="exists" />
+
+    <Chain>
+      <ExePackage
+        Id="DotNetDesktopRuntime8X64"
+        DisplayName="Microsoft .NET Desktop Runtime 8.0.27 (x64)"
+        Cache="keep"
+        PerMachine="yes"
+        Permanent="yes"
+        Vital="yes"
+        DetectCondition="DotNetDesktopRuntime8Installed"
+        InstallArguments="/install /quiet /norestart"
+        RepairArguments="/repair /quiet /norestart"
+        UninstallArguments="/uninstall /quiet /norestart">
+        <ExePackagePayload
+          Name="windowsdesktop-runtime-$(var.DotNetDesktopRuntimeVersion)-win-x64.exe"
+          ProductName="Microsoft Windows Desktop Runtime - 8.0.27 (x64)"
+          Description="Microsoft Windows Desktop Runtime - 8.0.27 (x64)"
+          DownloadUrl="$(var.DotNetDesktopRuntimeUrl)"
+          Hash="EAE15CC2594BDB22AFD6A7DCA1E998674E0F7CC734F65334A4D3B641A8121D3EEAF2F4E1E194A417C1A667EC0A978850C3CFFE3931F3667F11CF3E62621D5649"
+          Size="58356864"
+          Version="8.0.27.36030" />
+      </ExePackage>
+
+      <MsiPackage
+        Id="FileToolsMsi"
+        SourceFile="$(var.MsiPath)"
+        Compressed="yes"
+        bal:DisplayInternalUICondition="1"
+        Vital="yes" />
+    </Chain>
+  </Bundle>
+</Wix>

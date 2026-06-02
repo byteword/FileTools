@@ -99,12 +99,7 @@ internal static class Program
             return;
         }
 
-        var paths = args
-            .Skip(1)
-            .Select(static arg => arg.Trim('"'))
-            .Where(static path => File.Exists(path) || Directory.Exists(path))
-            .Distinct(OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal)
-            .ToArray();
+        var paths = GetExistingPaths(args.Skip(1));
         if (paths.Length == 0)
         {
             FileToolsEnvironment.Log("CONTEXT", "No valid paths: " + string.Join(" | ", args.Skip(1)));
@@ -270,8 +265,8 @@ internal static class Program
             return;
         }
 
-        var path = args[0].Trim('"');
-        if (!File.Exists(path) && !Directory.Exists(path))
+        var paths = GetExistingPaths(args);
+        if (paths.Length == 0)
         {
             Application.Run(new MainForm());
             return;
@@ -279,7 +274,10 @@ internal static class Program
 
         Directory.CreateDirectory(FileToolsEnvironment.QueueDir);
         var queueFile = Path.Combine(FileToolsEnvironment.QueueDir, "Open.txt");
-        AppendQueue(queueFile, path);
+        foreach (var path in paths)
+        {
+            AppendQueue(queueFile, path);
+        }
 
         using var mutex = new Mutex(initiallyOwned: false, name: "Local\\" + FileToolsEnvironment.AppName + "_Open");
         if (!mutex.WaitOne(0))
@@ -290,8 +288,8 @@ internal static class Program
         try
         {
             Thread.Sleep(1300);
-            var paths = ReadAndClearQueue(queueFile);
-            Application.Run(new MainForm(paths));
+            var queuedPaths = ReadAndClearQueue(queueFile);
+            Application.Run(new MainForm(queuedPaths));
         }
         finally
         {
@@ -303,6 +301,15 @@ internal static class Program
             {
             }
         }
+    }
+
+    private static string[] GetExistingPaths(IEnumerable<string> args)
+    {
+        return args
+            .Select(static arg => arg.Trim('"'))
+            .Where(static path => File.Exists(path) || Directory.Exists(path))
+            .Distinct(OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal)
+            .ToArray();
     }
 
     private static void RunLegacyContextMenu(string[] args)

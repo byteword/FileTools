@@ -116,10 +116,10 @@ internal sealed partial class KoreanFileNameCorrector
         var reasons = new List<string>();
 
         var normalizedStem = NormalizeStem(rawStem, reasons);
-        var candidates = _obfuscatedHangulCandidateGenerator.Generate(normalizedStem);
-        if (candidates.Count > 0)
+        var stemCandidates = _obfuscatedHangulCandidateGenerator.Generate(normalizedStem);
+        if (stemCandidates.Count > 0)
         {
-            reasons.Add($"왜곡 한글 복원 후보: {candidates[0].Value}");
+            reasons.Add($"왜곡 한글 복원 후보: {stemCandidates[0].Value}");
         }
 
         var parts = ParseParts(normalizedStem, extension, reasons);
@@ -140,11 +140,13 @@ internal sealed partial class KoreanFileNameCorrector
             status = RenamePreviewStatus.NeedsReview;
             reasons.Add("제목 또는 회차 추출 확인 필요");
         }
-        else if (candidates.Count > 0)
+        else if (stemCandidates.Count > 0)
         {
             status = RenamePreviewStatus.NeedsReview;
             reasons.Add("왜곡 한글 복원 후보 검수 필요");
         }
+
+        var fileNameCandidates = CreateFileNameCandidates(originalFileName, suggested, extension, stemCandidates);
 
         return new RenamePreview
         {
@@ -155,8 +157,63 @@ internal sealed partial class KoreanFileNameCorrector
             SuggestedPath = Path.Combine(directory, suggested),
             Status = status,
             Reasons = reasons.Distinct(StringComparer.Ordinal).ToArray(),
-            Candidates = candidates
+            Candidates = fileNameCandidates
         };
+    }
+
+    private static IReadOnlyList<NameCorrectionCandidate> CreateFileNameCandidates(
+        string originalFileName,
+        string suggestedFileName,
+        string extension,
+        IEnumerable<NameCorrectionCandidate> stemCandidates)
+    {
+        var candidates = new List<NameCorrectionCandidate>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        AddCandidate(suggestedFileName, 1.0, "자동 교정 결과", requiresReview: false);
+
+        foreach (var candidate in stemCandidates)
+        {
+            var fileName = ToFileNameCandidate(candidate.Value, extension);
+            AddCandidate(fileName, candidate.Score, candidate.Reason, candidate.RequiresReview);
+        }
+
+        AddCandidate(originalFileName, 0.0, "원본 이름", requiresReview: false);
+        return candidates;
+
+        void AddCandidate(string fileName, double score, string reason, bool requiresReview)
+        {
+            var safeFileName = WindowsFileNameSafety.MakeSafeFileName(fileName.Trim());
+            if (string.IsNullOrWhiteSpace(safeFileName) || !seen.Add(safeFileName))
+            {
+                return;
+            }
+
+            candidates.Add(new NameCorrectionCandidate
+            {
+                Value = safeFileName,
+                Score = score,
+                Reason = reason,
+                RequiresReview = requiresReview
+            });
+        }
+    }
+
+    private static string ToFileNameCandidate(string value, string extension)
+    {
+        var fileName = Path.GetFileName(value.Trim());
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return "";
+        }
+
+        if (string.IsNullOrWhiteSpace(extension) ||
+            string.Equals(Path.GetExtension(fileName), extension, StringComparison.OrdinalIgnoreCase))
+        {
+            return fileName;
+        }
+
+        return fileName + extension;
     }
 
     public FileNameParts ParseParts(string stem, string extension, List<string>? reasons = null)

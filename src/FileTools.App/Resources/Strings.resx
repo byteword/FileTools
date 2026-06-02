@@ -200,5 +200,19 @@
   <data name="ColumnRenameReason" xml:space="preserve"><value>Reason</value></data>
   <data name="RenameInvalidNameMessage" xml:space="preserve"><value>Enter a valid new name for every item.</value></data>
   <data name="RenameDuplicateNameMessage" xml:space="preserve"><value>Two or more items target the same name.</value></data>
+  <data name="RenameTargetExistsMessage" xml:space="preserve"><value>A target file or folder already exists.</value></data>
+  <data name="LabelRenameSelectedItem" xml:space="preserve"><value>Selected item</value></data>
+  <data name="LabelRenameCandidates" xml:space="preserve"><value>Candidates</value></data>
+  <data name="LabelRenameNewName" xml:space="preserve"><value>New name</value></data>
+  <data name="ButtonRenameUseAuto" xml:space="preserve"><value>Auto</value></data>
+  <data name="ButtonRenameKeepOriginal" xml:space="preserve"><value>Original</value></data>
+  <data name="ButtonRenameSkip" xml:space="preserve"><value>Skip</value></data>
+  <data name="RenameCandidateAuto" xml:space="preserve"><value>Auto correction</value></data>
+  <data name="RenameCandidateOriginal" xml:space="preserve"><value>Original name</value></data>
+  <data name="RenameStatusUnchanged" xml:space="preserve"><value>Unchanged</value></data>
+  <data name="RenameStatusReady" xml:space="preserve"><value>Ready</value></data>
+  <data name="RenameStatusNeedsReview" xml:space="preserve"><value>Review</value></data>
+  <data name="RenameStatusConflict" xml:space="preserve"><value>Conflict</value></data>
+  <data name="RenameStatusSkipped" xml:space="preserve"><value>Skipped</value></data>
   <data name="FolderOptionsFutureMessage" xml:space="preserve"><value>Folder wrapping and unwrapping options are intentionally kept here for future expansion.</value></data>
 </root>

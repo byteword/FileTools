@@ -3,6 +3,7 @@ $ErrorActionPreference = 'Stop'
 $solution = Join-Path $PSScriptRoot 'installer\FileTools.Installer.sln'
 $shellExtProject = Join-Path $PSScriptRoot 'src\FileTools.ShellExt\FileTools.ShellExt.vcxproj'
 $msi = Join-Path $PSScriptRoot 'installer\FileTools.Installer\bin\Release\FileTools.msi'
+$setup = Join-Path $PSScriptRoot 'installer\FileTools.Bundle\bin\Release\FileToolsSetup.exe'
 
 if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
     throw 'dotnet SDK was not found. Install .NET 8 SDK first.'
@@ -31,6 +32,9 @@ function Find-MSBuild {
 if (Test-Path $msi) {
     Remove-Item $msi -Force
 }
+if (Test-Path $setup) {
+    Remove-Item $setup -Force
+}
 
 $msbuild = Find-MSBuild
 & $msbuild $shellExtProject /p:Configuration=Release /p:Platform=x64 /m
@@ -46,5 +50,9 @@ if ($LASTEXITCODE -ne 0) {
 if (-not (Test-Path $msi)) {
     throw "MSI not found: $msi"
 }
+if (-not (Test-Path $setup)) {
+    throw "Setup bootstrapper not found: $setup"
+}
 
 Write-Host "MSI created: $msi"
+Write-Host "Setup bootstrapper created: $setup"

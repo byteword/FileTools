@@ -1,0 +1,23 @@
+<Project Sdk="WixToolset.Sdk/4.0.6">
+  <PropertyGroup>
+    <OutputName>FileToolsSetup</OutputName>
+    <OutputType>Bundle</OutputType>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <ProductVersion>1.0.1.8</ProductVersion>
+    <MsiPath>$(MSBuildThisFileDirectory)..\FileTools.Installer\bin\$(Configuration)\FileTools.msi</MsiPath>
+    <AppIconPath>$(MSBuildThisFileDirectory)..\..\src\FileTools.App\Resources\FileToolsIcon.ico</AppIconPath>
+    <DefineConstants>ProductVersion=$(ProductVersion);MsiPath=$(MsiPath);AppIconPath=$(AppIconPath)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Bal.wixext" Version="4.0.6" />
+    <PackageReference Include="WixToolset.Util.wixext" Version="4.0.6" />
+  </ItemGroup>
+
+  <Target Name="BuildFileToolsMsi" BeforeTargets="CoreCompile">
+    <MSBuild
+      Projects="$(MSBuildThisFileDirectory)..\FileTools.Installer\FileTools.Installer.wixproj"
+      Targets="Build"
+      Properties="Configuration=$(Configuration)" />
+  </Target>
+</Project>
