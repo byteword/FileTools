@@ -14,16 +14,28 @@ Scope:
 
 ## Summary
 
-The settings dialog is functionally compact and covers the current core defaults: Explorer ContextMenu registration, rename dictionary behavior, AutoRelocation default template, and folder structure defaults. The strongest UX risk is not visual density itself, but that users cannot always tell whether they are changing an app preference, an Explorer shell registration, or a per-run operation default.
+The settings dialog now uses a resizable single-panel layout with a fixed status header, a scrollable settings body, fixed OK/Cancel buttons, and collapsible option groups. It covers the current core defaults: Explorer ContextMenu registration, rename dictionary behavior, rename review mode, AutoRelocation default template, and folder structure defaults.
 
-The dialog should keep settings scoped to repeatable defaults. One-off execution choices should stay in action dialogs or the main planner. If the settings are reorganized into one vertically listed panel, the groups should be collapsible rather than a long flat list.
+The dialog keeps settings scoped to repeatable defaults. One-off execution choices stay in action dialogs or the main planner.
+
+## Implemented Layout Changes
+
+- The settings form is resizable and has a larger minimum size so labels, helper text, and combo boxes have room to breathe.
+- The top status panel is outside the scrollable body and remains visible while users scroll through option groups.
+- The status panel states whether the Explorer ContextMenu is registered and clarifies that OK saves settings and applies the shell menu state.
+- The old tabs are replaced by vertically stacked collapsible groups.
+- Each group has a title row with a small `v` / `>` marker and a compact summary of the current options.
+- Expanded group headers use group-specific colors; body content stays neutral and uses the group color as a border.
+- ContextMenu, Rename, Folder Structure, and AutoRelocation settings each have their own group.
+- Help text is placed under ambiguous rows such as menu layout, rename review mode, folder operation, mismatch handling, and default relocation template.
+- The bottom OK/Cancel row is fixed outside the scrollable settings body.
 
 ## Current Strengths
 
-- The tab split maps to the current feature areas: Context Menu, Rename, Auto Relocation, and Folder Structure.
-- Context menu commands can already be enabled independently, which is useful for reducing Explorer menu clutter.
+- Context menu commands can be enabled independently, which is useful for reducing Explorer menu clutter.
 - Rename dictionaries, common phrases, and relocation templates are reachable from the settings window without exposing their implementation files.
 - AutoRelocation and folder unwrap options are also available at the action-step level through `PlanStepDialog`, so the app already has a path for per-run overrides.
+- The collapsible group summaries make the single-panel layout scannable even when groups are collapsed.
 
 ## UX Issues
 
@@ -31,33 +43,32 @@ The dialog should keep settings scoped to repeatable defaults. One-off execution
 
 `SettingsForm` puts the registration checkbox, layout combo, command checkboxes, and Install/Remove buttons into one tab. Pressing OK also synchronizes Explorer registration through `SyncContextMenuRegistration`, so users can change system registration even if they never press Install or Remove.
 
-Recommended change:
+Implemented change:
 
-- Add a sticky status header such as `Explorer menu: registered / not registered`.
-- State that `OK` applies Explorer menu changes.
-- Disable command checkboxes when registration is off, or show that they are saved but inactive.
-- Replace separate Install/Remove buttons with one context-sensitive primary action, or move them into an advanced section.
+- A sticky status header shows registered/unregistered state and selected command count.
+- The header states that OK saves settings and applies the current shell menu state.
+- Command choices remain editable when registration is off; the header and group summary show that they are saved for future registration.
 
 The status header should sit outside the scrollable settings body. It should remain visible while vertical scrolling through option groups, because it explains the current shell-registration state and the side effect of pressing OK.
 
 ### 2. The first tab is the most technical tab
 
-The first visible tab is `Context Menu`, but many users will open settings to change operation defaults. Explorer registration is important, but it is more system-level than task-level.
+The old first tab was `Context Menu`, but many users open settings to change operation defaults. Explorer registration is important, but it is more system-level than task-level.
 
-Recommended change:
+Implemented change:
 
-- Consider a left navigation or reordered tabs: `기본값`, `Explorer 메뉴`, `사전/템플릿`, `고급`.
-- If tabs remain, keep operation defaults before shell integration unless most users primarily use Explorer.
+- The tab strip has been removed.
+- The single scrollable panel uses group headers and summaries so users can scan across all setting families without switching tabs.
 
 ### 3. Some labels need examples, not just names
 
 Options such as `단일파일 불일치`, `파일명 유지`, `폴더명으로 변경`, and `폴더명-파일명으로 변경` are correct but abstract. This setting affects actual file names and should show an example.
 
-Recommended change:
+Implemented change:
 
-- Add inline examples such as `FolderA\Image01.jpg -> Image01.jpg`, `FolderA.jpg`, or `FolderA-Image01.jpg`.
-- Add a context menu layout preview for `묶음형` vs `펼침형`.
-- Use short helper text for `현재 폴더에서 자동 재배치` versus `선택한 폴더로 자동 재배치`.
+- Inline helper text now describes the menu layout tradeoff.
+- Folder mismatch handling includes an inline example for keep, folder-name, and folder-file behavior.
+- AutoRelocation default template helper text explains where that default is used.
 
 ### 4. Rename review mode is now explicit
 
@@ -78,34 +89,36 @@ Recommended change:
 
 ### 6. Fixed dimensions may age poorly
 
-The dialog uses a fixed starting size and many hard-coded widths. Current Korean and English strings mostly fit, but new explanatory copy or longer template names will make this brittle.
+The old dialog used a fixed starting size and many hard-coded widths. Current Korean and English strings mostly fit, but new explanatory copy or longer template names made that brittle.
 
-Recommended change:
+Implemented change:
 
-- Use wider combo rows or dynamic sizing for template names.
-- Put explanatory text under each row and allow wrapping.
-- Keep the minimum size, but avoid assuming 660px row widths.
+- The form starts larger and has a larger minimum size.
+- The form remains resizable.
+- Group and row widths are recalculated from the current scroll host width to avoid horizontal scrolling.
+- Combo rows resize with the dialog.
+- Helper text sits under rows instead of forcing long labels into the row header.
 
 ### 7. A single-panel layout needs collapsible option groups
 
-If the tabbed layout is replaced or supplemented with one panel that lists every option group vertically, a flat list will become hard to scan. Collapsible groups are the better fit.
+The tabbed layout has been replaced by one panel that lists every option group vertically. Collapsible groups keep the layout scannable.
 
-Recommended behavior:
+Implemented behavior:
 
 - Each option group has a title row that remains visible when collapsed.
-- A small marker shows state: for example right-pointing chevron when collapsed and down-pointing chevron when expanded.
+- A small marker shows state: `>` when collapsed and `v` when expanded.
 - The collapsed title row should include a compact summary such as `등록됨`, `6개 활성`, `항상 검토`, or the selected template name.
 - Expanding and collapsing should be possible by clicking the title row and by keyboard focus with Enter or Space.
 - Vertical scrolling is expected, but horizontal scrolling should be avoided.
 - The bottom OK/Cancel buttons should stay fixed outside the scrollable settings body.
 
-Recommended styling:
+Implemented styling:
 
 - Give each group a distinct but restrained identity color.
 - When expanded, apply the group color to the title row background.
 - Keep the body background neutral and use the group color only for the border or a subtle side accent.
 - When collapsed, show only the title row, the marker, and the compact summary.
-- Avoid using color alone to communicate state; combine color with text, marker, or disabled control state.
+- Color is not the only state indicator; text summaries and the `>` / `v` marker carry state as well.
 
 ## Feature Granularity And Settings Additions
 
@@ -125,7 +138,6 @@ Avoid adding these as global settings for now:
 
 ## Suggested Priority
 
-1. Add a sticky Explorer registration status row and make OK/apply behavior explicit.
-2. If settings move into one vertical panel, use collapsible option groups with summaries.
-3. Add examples/previews for folder unwrap mismatch and context menu layout.
-4. Decide whether group-level context menu toggles should be surfaced.
+1. Decide whether group-level context menu toggles should be surfaced.
+2. Consider storing expanded/collapsed group state if users frequently revisit the same section.
+3. Revisit whether Install/Remove should remain separate buttons or become one context-sensitive action.

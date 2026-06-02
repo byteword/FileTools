@@ -50,15 +50,16 @@ The standalone window supports:
 - Removing one selected step or clearing the currently displayed target's steps from the plan-side toolbar; the preview is recalculated from the remaining step chain.
 - Double-clicking a planned action to reopen the matching action dialog; rename steps reopen the rename review dialog.
 - Running all target plans in order with one bottom-right run/stop button and reviewing progress in the bottom log view.
-- Opening a separate tabbed settings window for defaults, rename options, AutoRelocation defaults, folder options, and Explorer ContextMenu registration.
+- Opening a resizable settings window with a fixed status header and collapsible option groups for Explorer ContextMenu registration, rename defaults, folder defaults, and AutoRelocation defaults.
 
 The settings window owns operational defaults and Explorer ContextMenu installation/removal. Native ShellExt registration uses one FileTools submenu, and individual ContextMenu actions can be enabled or disabled.
 Folder wrapping/unwrapping and AutoRelocation commands can be selected independently for Explorer registration. Pressing OK in the settings window saves the options and synchronizes the current-user ContextMenu registration, even if the Install/Remove buttons are not pressed.
+The settings layout notes are tracked in `docs/ux-settings-dialog-review.md`.
 The app icon is stored as transparent PNG and multi-size ICO assets under `src\FileTools.App\Resources`; the EXE and MSI product metadata both use the ICO.
 
-The rename review dialog is used by ContextMenu rename commands and by standalone plan editing. Rename review can be configured to always open before applying changes, or to open only when generated rows need review or have conflicts. The dialog summarizes total changes in the upper-right corner, emphasizes review/conflict rows, and validates edited target names after each edit.
+The rename review dialog is used by ContextMenu rename commands and by standalone plan editing. Rename review can be configured to always open before applying changes, or to open only when generated rows need review or have conflicts. The dialog uses a read-only item list plus a selected-item editor, so long target names can be edited outside the grid while extracted title, episode, author, tag, extension, candidate, and common-phrase values remain available as input aids. It summarizes total changes in the upper-right corner, emphasizes review/conflict rows, and validates edited target names after each edit.
 
-![FileTools rename dialog](docs/images/filetools-rename-dialog.svg)
+![FileTools rename dialog](docs/images/rename-editor-dialog-concept.svg)
 
 UX review notes for the current rename dialog are tracked in `docs/ux-rename-dialog-review.md`.
 

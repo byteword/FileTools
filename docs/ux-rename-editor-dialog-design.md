@@ -13,6 +13,28 @@ Concept reference:
 
 ![Rename editor dialog concept](images/rename-editor-dialog-concept.svg)
 
+## Implementation Status
+
+Implemented on 2026-06-02 in `src/FileTools.App/Ui/RenameReviewDialog.cs`.
+
+The first pass keeps the existing rename operation semantics and replaces the grid-cell editor with a selected-item editor:
+
+- Read-only left grid for item selection and status.
+- Selected-item editor for original name, final new name, extracted title, episode, author, tags, and extension.
+- `원본 사용` and `자동 이름 사용` quick actions.
+- Token insertion from original filename parts, parsed parts, and generated correction candidates.
+- Read-only common phrase chips from the existing app common phrase dictionary.
+- Immediate validation, conflict highlighting, summary counts, and next-issue navigation.
+
+Not implemented in this pass:
+
+- Filter buttons.
+- Skip-current-item behavior.
+- Batch pattern application.
+- Common phrase add/remove from inside the rename dialog.
+- User-defined correction rule creation.
+- Internet dictionary or AI-assisted correction.
+
 ## Problem
 
 The current rename review dialog uses a grid as both the list and the editor. That works for simple before/after verification, but it is weak for the actual rename task:
@@ -69,9 +91,14 @@ The final filename field is the source of truth. Structured part fields update i
 
 Recommended quick actions next to these fields:
 
-- `원본 복사`: copy original full filename into the target editor
-- `추천안 복원`: restore generated suggested filename
+- `원본 사용`: copy original full filename into the target editor
+- `자동 이름 사용`: replace the target editor with the generated automatic correction result
 - `확장자 잠금`: keep the original extension unless explicitly unlocked
+
+Naming note:
+
+- Prefer `자동 이름 사용` for the button label. It is shorter and more natural than `추천안 복원`.
+- If the action needs to emphasize undoing user edits later, `자동안으로 되돌리기` is acceptable for a tooltip or menu item, but it is too long for the primary button.
 
 ### 4. Extracted Parts Editor
 
@@ -90,7 +117,7 @@ Recommended behavior:
 - Title and episode fields are normal text boxes.
 - Tags are removable chips with an add field.
 - Author is optional and can be cleared.
-- Extension is read-only by default for files and empty for folders.
+- Extension is read-only in the first implementation for files and empty for folders.
 - Every part has a small insert/copy affordance where useful.
 
 ### 5. Original Token Strip
@@ -108,22 +135,36 @@ Each token is an insert button. Clicking inserts the token at the current caret 
 
 This directly solves the "original title copy" problem without requiring manual selection inside a long filename.
 
-### 6. Suggestions and Reasons
+### 6. Common Word Set
 
-Show a compact "extraction evidence" area:
+Replace the bottom "extraction evidence" area with an app-level common word set. In the first implementation this is backed by the existing common phrase dictionary and is insert-only inside the rename dialog:
 
-- Reasons from `RenamePreview.Reasons`
-- Correction candidates from `RenamePreview.Candidates`
-- Dictionary replacements that affected the name
+- Frequently used title words, author names, tags, and domain phrases.
+- Words from the current `CommonPhrases`/lexicon configuration.
+- Recently used words from accepted rename edits. Deferred.
+- User-added words that improve future correction candidates. Deferred.
 
-Candidates should be actionable:
+Each word should be actionable:
 
-- Click candidate title to apply it to the Title field.
-- Click full candidate name to replace the final filename.
+- Click to insert into the active text field.
+- Right-click or small menu to remove from the app word set. Deferred.
+- Add button to register the current selected text as a common word. Deferred.
 
-Reasons should remain secondary. They explain why the row needs review, but they should not compete with the editor.
+Extraction reasons can still exist internally and may be useful in a diagnostic tooltip, but they should not take visible bottom-panel space in the normal editor.
 
-### 7. Validation Panel
+### 7. Correction Rule Management
+
+The editor should leave room for future user-defined rename correction rules.
+
+Recommended future rule entry points:
+
+- `규칙 추가`: create a correction rule from the current edit, such as `ㅇr -> 아` or `vol. -> 권`.
+- `이 항목에서 규칙 만들기`: compare original and accepted target names and suggest a reusable replacement.
+- `규칙 관리`: open the rename dictionary/rule editor from this dialog.
+
+Rules should remain explicit and reviewable. The app should not silently create broad rules from one edit.
+
+### 8. Validation Panel
 
 Validation should be visible near the target name:
 
@@ -135,7 +176,7 @@ Validation should be visible near the target name:
 
 The Apply/OK button remains disabled for blocking errors. Non-blocking warnings, such as extension changes after unlock, should allow apply but stay visible.
 
-### 8. Batch-Oriented Controls
+### 9. Batch-Oriented Controls
 
 For multi-select renaming, add cautious batch helpers:
 
@@ -149,7 +190,7 @@ Batch application should be constrained to rows with compatible extracted parts.
 ## Interaction Model
 
 1. Dialog opens with the first conflict or review-needed row selected.
-2. The user sees original filename, suggested filename, extracted parts, and reasons in one panel.
+2. The user sees original filename, suggested filename, extracted parts, insertable tokens, and common phrases in one panel.
 3. The user edits either the final filename or structured fields.
 4. Validation runs immediately after edit changes, not only after leaving a grid cell.
 5. When a row becomes valid/resolved, the status updates in the left list.
@@ -162,7 +203,7 @@ Recommended shortcuts:
 
 - `Ctrl+C` on original field: copy selected original text.
 - `Ctrl+Shift+C`: copy original full filename.
-- `Ctrl+R`: restore generated suggestion for current row.
+- `Ctrl+R`: use the generated automatic name for current row.
 - `Ctrl+Enter`: apply current part fields to final filename.
 - `Alt+Down`: next problem row.
 - `Esc`: cancel, matching existing dialog behavior.
@@ -177,7 +218,8 @@ The smallest useful implementation can keep the existing `RenameReviewDialog` cl
 - Replace the editable `DataGridView` with a read-only row selector plus a selected-row editor.
 - Bind selected-row editor controls to the current `RenameRow`.
 - Add a `FileNameParts` draft for each row so structured fields can compose `SuggestedName`.
-- Use `RenamePreview.Reasons` and `RenamePreview.Candidates` in the detail panel.
+- Use `RenamePreview.Candidates` as actionable candidate tokens.
+- Keep `RenamePreview.Reasons` available for diagnostics, but do not show it as a default bottom section.
 
 Suggested helper types:
 
@@ -196,22 +238,39 @@ Implement first:
 - Original/new filename comparison.
 - Final filename textbox.
 - Structured title, episode, author, tags, and extension fields.
-- Token insert buttons from original stem, parsed parts, reasons/candidates.
+- Token insert buttons from original stem, parsed parts, and correction candidates.
+- Insert-only common phrase chips from the existing app-level dictionary.
 - Immediate validation and current summary behavior.
 - Next problem navigation.
 
 Defer:
 
+- Filter buttons.
+- Skip-current-item behavior.
 - Batch pattern application.
 - Persisted dialog layout.
 - Advanced token selection from arbitrary original-name text ranges.
 - Per-user custom compose templates.
+- Common phrase add/remove controls in the rename dialog.
+- Full correction-rule creation from accepted edits.
+- Dictionary, internet dictionary, or AI-assisted automatic correction.
+
+## Long-Term Direction
+
+After the editor stabilizes, automatic correction can grow in three layers:
+
+- Local dictionary/rules: deterministic user-controlled replacements and common words.
+- External dictionary lookup: optional internet dictionary support for ambiguous or corrupted terms.
+- AI-assisted correction: optional candidate generation for difficult names, always presented as reviewable suggestions rather than silent changes.
+
+The first implementation should focus on local rules and common words because they are predictable, explainable, and cheap to run.
 
 ## Acceptance Criteria
 
 - A user can edit a long target filename without using a grid cell.
 - A user can reuse the original title or extracted strings with one click.
+- A user can insert app-level common words without leaving the dialog.
 - The first problematic row is selected automatically.
-- Generated candidates and extraction reasons are visible for the selected row.
+- Generated candidates are visible as actionable options for the selected row.
 - Conflict/invalid rows still block Apply/OK.
 - Existing ContextMenu apply and standalone plan-editing flows keep their current semantics.

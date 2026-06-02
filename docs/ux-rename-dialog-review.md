@@ -12,7 +12,7 @@ Scope:
 
 Current reference:
 
-![Current rename dialog](images/filetools-rename-dialog.svg)
+![Current rename editor dialog](images/rename-editor-dialog-concept.svg)
 
 ## Summary
 
@@ -22,6 +22,8 @@ The rename dialog now supports two review modes:
 - Review only when at least one generated rename needs review or has a conflict.
 
 The ContextMenu execution flow still uses the dialog as the apply surface when review is required. The main application planner still uses the same dialog as a plan-editing surface, where OK stores the manual target filename instead of mutating the file system.
+
+The current dialog uses a two-pane editor: a read-only item list on the left and a selected-item rename editor on the right.
 
 ## Implemented Changes
 
@@ -39,6 +41,14 @@ The ContextMenu execution flow still uses the dialog as the apply surface when r
 - Disables Apply/OK while a row has a blocking validation error such as an empty name, invalid filename, duplicate target, or existing target path.
 - Sanitizes edited filenames through `WindowsFileNameSafety.MakeSafeFileName` after edit completion.
 - Adds cell tooltips for full source path, target path, and validation status.
+- Replaced grid-cell filename editing with a selected-item editor.
+- Shows original and new filename fields for the selected row.
+- Adds `Use original` / `Use automatic name` actions.
+- Exposes extracted title, episode, author, tags, and extension fields.
+- Re-composes the target filename when extracted part fields change.
+- Provides insertable token buttons from original text, parsed parts, and correction candidates.
+- Shows existing common phrases as insertable chips when configured.
+- Adds next-issue navigation.
 
 ## Remaining UX Notes
 
@@ -46,18 +56,17 @@ The ContextMenu execution flow still uses the dialog as the apply surface when r
 
 Generated conflict rows still appear as conflicts until the user edits them. This keeps automatically suffixed names visible for review. If users find this too heavy, the next pass can split the status into `Conflict` and `Auto-resolved conflict`.
 
-### 2. Candidate details are not exposed yet
+### 2. Candidate details are exposed as insert tokens
 
-The reason column was removed to keep the grid focused on before/after filenames. The rename engine still produces reasons and candidate alternatives, but the dialog does not yet show them in a selected-row detail area.
+The reason column remains hidden to keep the list focused, but candidate alternatives are now available as selected-row token buttons. Internal extraction reasons are still not shown in the default editor surface.
 
 Recommended next change:
 
-- Add an optional details panel below the grid or behind an expandable row.
-- Show full original path, full target path, all reasons, and candidate alternatives there.
+- Add an optional diagnostic details view if extraction reasons become important during real use.
 
-### 3. Extension changes are still allowed
+### 3. Extension changes are still possible through direct filename editing
 
-Users can currently edit the whole target filename, including extension. This is flexible, but accidental extension removal or replacement is possible.
+The structured extension field is read-only, but users can still edit the whole target filename directly. This is flexible, but accidental extension removal or replacement is possible.
 
 Recommended next change:
 
@@ -74,7 +83,7 @@ Recommended next change:
 
 ## Suggested Next Priority
 
-1. Add selected-row details for hidden reasons and candidate alternatives.
-2. Decide whether generated conflict suffixes should show as `Conflict` or `Auto-resolved conflict`.
-3. Add extension-change warnings for file targets.
-4. Remember the last dialog size after real-use validation.
+1. Decide whether generated conflict suffixes should show as `Conflict` or `Auto-resolved conflict`.
+2. Add extension-change warnings for file targets.
+3. Remember the last dialog size after real-use validation.
+4. Consider in-dialog common phrase add/remove after the editor is validated in real use.

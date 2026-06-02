@@ -29,18 +29,9 @@
   <text class="title" x="38" y="52">이름변경 검토</text>
   <text class="body" x="760" y="52">Total 12 | Changes 10 | Review 3 | Conflicts 1 | Resolved 2</text>
 
-  <rect class="button" x="38" y="72" width="64" height="28" rx="4"/>
-  <text class="body" x="55" y="91">전체</text>
-  <rect class="button" x="108" y="72" width="64" height="28" rx="4"/>
-  <text class="body" x="125" y="91">검토</text>
-  <rect class="button" x="178" y="72" width="64" height="28" rx="4"/>
-  <text class="body" x="195" y="91">충돌</text>
-  <rect class="button" x="248" y="72" width="80" height="28" rx="4"/>
-  <text class="body" x="266" y="91">변경됨</text>
-
   <rect class="panel" x="38" y="116" width="340" height="574" rx="4"/>
   <text class="label" x="56" y="142">대상 목록</text>
-  <text class="small" x="236" y="142">문제 항목 우선 정렬</text>
+  <text class="small" x="230" y="142">읽기 전용 목록</text>
 
   <rect x="50" y="158" width="316" height="78" fill="#fdf4f4" stroke="#e5b3b3"/>
   <text class="body" x="64" y="183">[충돌] 작품 제목 12화.zip</text>
@@ -68,30 +59,27 @@
 
   <rect class="button" x="56" y="646" width="116" height="30" rx="4"/>
   <text class="body" x="78" y="666">다음 문제</text>
-  <rect class="button" x="180" y="646" width="116" height="30" rx="4"/>
-  <text class="body" x="202" y="666">건너뜀</text>
 
   <rect class="panel" x="398" y="116" width="742" height="574" rx="4"/>
-  <text class="label" x="418" y="142">선택 항목 편집</text>
-  <text class="small" x="1004" y="142">확장자 잠금 켜짐</text>
+  <text class="label" x="418" y="142">선택 항목</text>
 
   <text class="label" x="418" y="178">기존 이름</text>
   <rect class="input" x="418" y="190" width="560" height="36" rx="3"/>
   <text class="mono" x="430" y="214">ㅇr이돌 ep 03 [번역].zip</text>
   <rect class="button" x="990" y="190" width="98" height="36" rx="4"/>
-  <text class="body" x="1015" y="213">원본 복사</text>
+  <text class="body" x="1015" y="213">원본 사용</text>
 
-  <text class="label" x="418" y="258">바뀔 이름</text>
+  <text class="label" x="418" y="258">새 이름</text>
   <rect class="input" x="418" y="270" width="560" height="38" rx="3"/>
   <text class="mono" x="430" y="294">아이돌 03화 [번역].zip</text>
-  <rect class="button" x="990" y="270" width="98" height="38" rx="4"/>
-  <text class="body" x="1012" y="294">추천안 복원</text>
+  <rect class="button" x="990" y="270" width="112" height="38" rx="4"/>
+  <text class="body" x="1008" y="294">자동 이름 사용</text>
 
   <rect class="warning" x="418" y="322" width="670" height="34" rx="4"/>
   <text class="body" x="432" y="344">검토 필요: 왜곡 한글 복원 후보를 확인하세요.</text>
 
   <text class="label" x="418" y="392">추출된 구성요소</text>
-  <text class="small" x="846" y="392">필드를 바꾸면 바뀔 이름이 다시 조합됨</text>
+  <text class="small" x="846" y="392">필드를 바꾸면 새 이름이 다시 조합됨</text>
 
   <text class="small" x="418" y="426">제목</text>
   <rect class="input" x="418" y="436" width="316" height="34" rx="3"/>
@@ -106,14 +94,12 @@
   <text class="small" x="918" y="458">비어 있음</text>
 
   <text class="small" x="418" y="498">태그</text>
-  <rect class="chip" x="418" y="510" width="74" height="28" rx="14"/>
+  <rect class="input" x="418" y="510" width="360" height="28" rx="3"/>
   <text class="body" x="438" y="529">번역</text>
-  <rect class="button" x="506" y="510" width="90" height="28" rx="4"/>
-  <text class="body" x="528" y="529">태그 추가</text>
 
-  <text class="small" x="620" y="498">확장자</text>
-  <rect class="input" x="620" y="510" width="90" height="28" rx="3"/>
-  <text class="body" x="644" y="529">.zip</text>
+  <text class="small" x="802" y="498">확장자</text>
+  <rect class="input" x="802" y="510" width="90" height="28" rx="3"/>
+  <text class="body" x="826" y="529">.zip</text>
 
   <text class="label" x="418" y="574">원본/후보 삽입</text>
   <rect class="chip" x="418" y="590" width="94" height="28" rx="14"/>
@@ -127,13 +113,21 @@
   <rect class="chip" x="762" y="590" width="138" height="28" rx="14"/>
   <text class="body" x="784" y="609">아이돌 03화</text>
 
-  <text class="label" x="418" y="648">추출 근거</text>
-  <text class="small" x="500" y="648">왜곡 한글 복원 후보: 아이돌 · 회차 추출: 03 · 태그 추출: 번역</text>
+  <text class="label" x="418" y="648">자주 쓰는 문구</text>
+  <text class="small" x="520" y="648">설정에 등록된 문구를 클릭해서 삽입</text>
+  <rect class="chip" x="418" y="662" width="70" height="26" rx="13"/>
+  <text class="body" x="436" y="680">아이돌</text>
+  <rect class="chip" x="496" y="662" width="58" height="26" rx="13"/>
+  <text class="body" x="514" y="680">외전</text>
+  <rect class="chip" x="562" y="662" width="58" height="26" rx="13"/>
+  <text class="body" x="580" y="680">완결</text>
+  <rect class="chip" x="628" y="662" width="70" height="26" rx="13"/>
+  <text class="body" x="646" y="680">특별판</text>
+  <rect class="chip" x="706" y="662" width="70" height="26" rx="13"/>
+  <text class="body" x="724" y="680">마법</text>
 
-  <rect class="button" x="810" y="704" width="92" height="32" rx="4"/>
-  <text class="body" x="837" y="725">취소</text>
-  <rect class="button" x="910" y="704" width="118" height="32" rx="4"/>
-  <text class="body" x="929" y="725">현재 구조 적용</text>
+  <rect class="button" x="910" y="704" width="92" height="32" rx="4"/>
+  <text class="body" x="937" y="725">취소</text>
   <rect class="primary" x="1036" y="704" width="104" height="32" rx="4"/>
   <text class="primaryText" x="1063" y="725">적용</text>
 </svg>

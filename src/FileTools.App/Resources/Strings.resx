@@ -158,6 +158,23 @@
   <data name="AutoRelocationStepDescription" xml:space="preserve"><value>Select the relocation template and optional target root for this action.</value></data>
   <data name="ManualTargetRootDialogDescription" xml:space="preserve"><value>Select a manual target root folder</value></data>
   <data name="SettingsFormTitle" xml:space="preserve"><value>FileTools settings</value></data>
+  <data name="SettingsStatusTitle" xml:space="preserve"><value>Settings status</value></data>
+  <data name="SettingsContextMenuRegistered" xml:space="preserve"><value>Explorer menu registered</value></data>
+  <data name="SettingsContextMenuNotRegistered" xml:space="preserve"><value>Explorer menu not registered</value></data>
+  <data name="SettingsStatusRegisteredFormat" xml:space="preserve"><value>Explorer menu is registered. {0} commands are selected.</value></data>
+  <data name="SettingsStatusNotRegisteredFormat" xml:space="preserve"><value>Explorer menu is not registered. {0} commands are saved for future registration.</value></data>
+  <data name="SettingsStatusApplyHintFormat" xml:space="preserve"><value>Pressing OK saves settings and applies the current shell menu state: {0}.</value></data>
+  <data name="SettingsSummaryRegisteredEnabledCountFormat" xml:space="preserve"><value>Registered · {0} enabled</value></data>
+  <data name="SettingsSummaryNotRegisteredEnabledCountFormat" xml:space="preserve"><value>Not registered · {0} selected</value></data>
+  <data name="SettingsSummaryPairFormat" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="SettingsSummaryDictionaryOn" xml:space="preserve"><value>Dictionary on</value></data>
+  <data name="SettingsSummaryDictionaryOff" xml:space="preserve"><value>Dictionary off</value></data>
+  <data name="SettingsContextMenuRegistrationHelp" xml:space="preserve"><value>Command choices are kept even when Explorer registration is off.</value></data>
+  <data name="SettingsContextMenuLayoutHelp" xml:space="preserve"><value>Grouped keeps one FileTools submenu; expanded places commands directly in Explorer.</value></data>
+  <data name="SettingsRenameReviewHelp" xml:space="preserve"><value>The safer automated mode still stops for NeedsReview and Conflict rows.</value></data>
+  <data name="SettingsFolderOperationHelp" xml:space="preserve"><value>Default used by Explorer and new plan steps unless a step overrides it.</value></data>
+  <data name="SettingsFolderMismatchExample" xml:space="preserve"><value>Example: FolderA\Image01.jpg can keep Image01.jpg, become FolderA.jpg, or become FolderA-Image01.jpg.</value></data>
+  <data name="SettingsAutoRelocationHelp" xml:space="preserve"><value>Default template for Explorer relocation commands and new relocation plan steps.</value></data>
   <data name="TabContextMenu" xml:space="preserve"><value>Context Menu</value></data>
   <data name="TabRename" xml:space="preserve"><value>Rename</value></data>
   <data name="TabAutoRelocation" xml:space="preserve"><value>Auto Relocation</value></data>
@@ -221,6 +238,20 @@
   <data name="RenameStatusInvalid" xml:space="preserve"><value>Invalid</value></data>
   <data name="RenameInvalidNameMessage" xml:space="preserve"><value>Enter a valid new name for every item.</value></data>
   <data name="RenameDuplicateNameMessage" xml:space="preserve"><value>Two or more items target the same name.</value></data>
+  <data name="RenameEditorItems" xml:space="preserve"><value>Items</value></data>
+  <data name="RenameEditorSelectedItem" xml:space="preserve"><value>Selected item</value></data>
+  <data name="RenameEditorExtractedParts" xml:space="preserve"><value>Extracted parts</value></data>
+  <data name="RenameEditorTitle" xml:space="preserve"><value>Title</value></data>
+  <data name="RenameEditorEpisode" xml:space="preserve"><value>Episode</value></data>
+  <data name="RenameEditorAuthor" xml:space="preserve"><value>Author</value></data>
+  <data name="RenameEditorTags" xml:space="preserve"><value>Tags</value></data>
+  <data name="RenameEditorExtension" xml:space="preserve"><value>Extension</value></data>
+  <data name="RenameEditorInsertTokens" xml:space="preserve"><value>Original and candidate text</value></data>
+  <data name="RenameEditorCommonPhrases" xml:space="preserve"><value>Common phrases</value></data>
+  <data name="RenameEditorNoCommonPhrases" xml:space="preserve"><value>No common phrases are registered.</value></data>
+  <data name="ButtonUseOriginalName" xml:space="preserve"><value>Use original</value></data>
+  <data name="ButtonUseAutomaticName" xml:space="preserve"><value>Use automatic name</value></data>
+  <data name="ButtonNextIssue" xml:space="preserve"><value>Next issue</value></data>
   <data name="MenuFile" xml:space="preserve"><value>File</value></data>
   <data name="MenuTasks" xml:space="preserve"><value>Tasks</value></data>
   <data name="MenuSettings" xml:space="preserve"><value>Settings</value></data>
