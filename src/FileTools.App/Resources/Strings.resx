@@ -143,6 +143,9 @@
   <data name="InitialPlanStatus" xml:space="preserve"><value>Add targets on the left, add actions on the right, then run the plan.</value></data>
   <data name="NoSelectedTargetMessage" xml:space="preserve"><value>Select a target before adding an action.</value></data>
   <data name="NoPlanStepsMessage" xml:space="preserve"><value>Add at least one action to a target before running the plan.</value></data>
+  <data name="PlanScopeNoSelection" xml:space="preserve"><value>No target selected.</value></data>
+  <data name="PlanScopeSingleFormat" xml:space="preserve"><value>Showing {0} · {1} planned steps</value></data>
+  <data name="PlanScopeSelectedFormat" xml:space="preserve"><value>Showing {0} · {1} selected targets · {2} selected planned steps</value></data>
   <data name="PlanExecutionTitle" xml:space="preserve"><value>Plan execution</value></data>
   <data name="DialogRenameTitle" xml:space="preserve"><value>Rename action</value></data>
   <data name="DialogFolderWrapTitle" xml:space="preserve"><value>Folder wrap action</value></data>
@@ -194,6 +197,8 @@
   <data name="LabelSourceText" xml:space="preserve"><value>Source text</value></data>
   <data name="LabelReplacementText" xml:space="preserve"><value>Replacement text</value></data>
   <data name="LabelCommonPhrase" xml:space="preserve"><value>Phrase</value></data>
+  <data name="EditorValueRequiredMessage" xml:space="preserve"><value>Enter a value before adding or updating.</value></data>
+  <data name="EditorDuplicateValueMessage" xml:space="preserve"><value>This value is already registered.</value></data>
   <data name="LabelDefaultTemplate" xml:space="preserve"><value>Default template</value></data>
   <data name="ButtonEditTemplates" xml:space="preserve"><value>Edit templates...</value></data>
   <data name="DialogTemplateEditorTitle" xml:space="preserve"><value>Auto relocation template editor</value></data>

@@ -46,6 +46,7 @@ The standalone window supports:
 - Accessing file, task, and settings commands from the menu bar, while common task commands stay on the fixed task toolbar.
 - Selecting folder unwrapping variants from a split button, including the default setting, same-name folders, single-file folder name mismatch modes, and moving direct child files upward.
 - Reviewing each selected target's work plan in a grid with order, icon-labeled action kind, and expected result.
+- Showing the currently displayed target, selected target count, and selected targets' planned step count above the work plan.
 - Showing detailed per-step options in grid row tooltips instead of dedicating a separate settings column.
 - Removing one selected step or clearing the currently displayed target's steps from the plan-side toolbar; the preview is recalculated from the remaining step chain.
 - Double-clicking a planned action to reopen the matching action dialog; rename steps reopen the rename review dialog.
@@ -67,7 +68,7 @@ Separate dialogs are available for:
 
 - Rename replacement dictionary entries (`source -> replacement`).
 - Rename common phrase dictionary entries used by the filename correction scorer.
-- AutoRelocation template editing. Path rule steps are evaluated in order, so a template can produce paths such as `{KnownFileKind}\[{Initial}]\{EpisodeRange}`.
+- AutoRelocation template editing. Path rule steps are evaluated in order, so a template can produce paths such as `{KnownFileKind}\[{Initial}]\{EpisodeRange}`. The template editor and per-step action dialogs resize for long template names, paths, and localized labels.
 
 AutoRelocation templates intentionally use only file-derived values:
 

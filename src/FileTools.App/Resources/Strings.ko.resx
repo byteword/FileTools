@@ -143,6 +143,9 @@
   <data name="InitialPlanStatus" xml:space="preserve"><value>왼쪽에 대상을 추가하고, 오른쪽에서 작업을 추가한 뒤 플랜을 실행합니다.</value></data>
   <data name="NoSelectedTargetMessage" xml:space="preserve"><value>작업을 추가할 대상을 먼저 선택하세요.</value></data>
   <data name="NoPlanStepsMessage" xml:space="preserve"><value>플랜을 실행하기 전에 대상에 하나 이상의 작업을 추가하세요.</value></data>
+  <data name="PlanScopeNoSelection" xml:space="preserve"><value>선택한 대상이 없습니다.</value></data>
+  <data name="PlanScopeSingleFormat" xml:space="preserve"><value>표시 중: {0} · 계획된 단계 {1}개</value></data>
+  <data name="PlanScopeSelectedFormat" xml:space="preserve"><value>표시 중: {0} · 선택 대상 {1}개 · 선택 대상 단계 {2}개</value></data>
   <data name="PlanExecutionTitle" xml:space="preserve"><value>플랜 실행</value></data>
   <data name="DialogRenameTitle" xml:space="preserve"><value>이름변경 작업</value></data>
   <data name="DialogFolderWrapTitle" xml:space="preserve"><value>폴더 감싸기 작업</value></data>
@@ -194,6 +197,8 @@
   <data name="LabelSourceText" xml:space="preserve"><value>원본 문구</value></data>
   <data name="LabelReplacementText" xml:space="preserve"><value>변경 문구</value></data>
   <data name="LabelCommonPhrase" xml:space="preserve"><value>문구</value></data>
+  <data name="EditorValueRequiredMessage" xml:space="preserve"><value>추가하거나 수정할 값을 입력하세요.</value></data>
+  <data name="EditorDuplicateValueMessage" xml:space="preserve"><value>이미 등록된 값입니다.</value></data>
   <data name="LabelDefaultTemplate" xml:space="preserve"><value>기본 템플릿</value></data>
   <data name="ButtonEditTemplates" xml:space="preserve"><value>템플릿 편집...</value></data>
   <data name="DialogTemplateEditorTitle" xml:space="preserve"><value>자동 재배치 템플릿 편집기</value></data>

@@ -129,6 +129,7 @@ public sealed partial class MainForm : Form
         Text = Localizer.Get("MainFormTitle");
         _targetsGroup.Text = Localizer.Get("GroupDropTargets");
         _planGroup.Text = Localizer.Get("GroupWorkPlan");
+        _planScopeLabel.Text = Localizer.Get("PlanScopeNoSelection");
 
         _fileMenuItem.Text = Localizer.Get("MenuFile");
         _taskMenuItem.Text = Localizer.Get("MenuTasks");
@@ -185,6 +186,7 @@ public sealed partial class MainForm : Form
         ApplyTargetGridLocalization();
         ApplyPlanGridLocalization();
         _logBox.Text = Localizer.Get("LogReady");
+        UpdatePlanScopeHeader(GetSelectedTarget());
         UpdateCommandStates();
     }
 
@@ -621,6 +623,7 @@ public sealed partial class MainForm : Form
     {
         var target = GetSelectedTarget();
         _planGrid.Rows.Clear();
+        UpdatePlanScopeHeader(target);
         if (target is null)
         {
             return;
@@ -646,6 +649,25 @@ public sealed partial class MainForm : Form
                 cell.ToolTipText = preview.ToolTipText;
             }
         }
+    }
+
+    private void UpdatePlanScopeHeader(WorkTargetPlan? displayedTarget)
+    {
+        if (displayedTarget is null)
+        {
+            _planScopeLabel.Text = Localizer.Get("PlanScopeNoSelection");
+            _planScopeLabel.ForeColor = Color.FromArgb(93, 99, 108);
+            return;
+        }
+
+        var selectedTargets = GetSelectedTargets().ToArray();
+        var selectedCount = selectedTargets.Length;
+        var selectedStepCount = selectedTargets.Sum(static target => target.Steps.Count);
+        var displayedName = GetTargetName(displayedTarget);
+        _planScopeLabel.Text = selectedCount > 1
+            ? Localizer.Format("PlanScopeSelectedFormat", displayedName, selectedCount, selectedStepCount)
+            : Localizer.Format("PlanScopeSingleFormat", displayedName, displayedTarget.Steps.Count);
+        _planScopeLabel.ForeColor = Color.FromArgb(55, 65, 81);
     }
 
     private WorkTargetPlan? GetSelectedTarget()

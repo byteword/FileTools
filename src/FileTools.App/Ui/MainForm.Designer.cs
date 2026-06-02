@@ -51,6 +51,7 @@ partial class MainForm
     private ToolStripMenuItem _addMoveInnerFilesUpToolItem = null!;
     private ToolStripButton _addRelocationToolButton = null!;
     private GroupBox _planGroup = null!;
+    private Label _planScopeLabel = null!;
     private DataGridView _planGrid = null!;
     private ToolStrip _planToolStrip = null!;
     private ToolStripButton _removeStepToolButton = null!;
@@ -117,6 +118,7 @@ partial class MainForm
         _addMoveInnerFilesUpToolItem = new ToolStripMenuItem();
         _addRelocationToolButton = new ToolStripButton();
         _planGroup = new GroupBox();
+        _planScopeLabel = new Label();
         _planGrid = new DataGridView();
         _planToolStrip = new ToolStrip();
         _removeStepToolButton = new ToolStripButton();
@@ -395,6 +397,14 @@ partial class MainForm
         _planGroup.Text = "Work plan";
         _planGroup.Controls.Add(_planGrid);
         _planGroup.Controls.Add(_planToolStrip);
+        _planGroup.Controls.Add(_planScopeLabel);
+
+        _planScopeLabel.Dock = DockStyle.Top;
+        _planScopeLabel.Height = 28;
+        _planScopeLabel.Name = "_planScopeLabel";
+        _planScopeLabel.Padding = new Padding(2, 0, 0, 0);
+        _planScopeLabel.Text = "No target selected.";
+        _planScopeLabel.TextAlign = ContentAlignment.MiddleLeft;
 
         _planGrid.AllowUserToAddRows = false;
         _planGrid.AllowUserToDeleteRows = false;
@@ -410,7 +420,7 @@ partial class MainForm
         _planGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         _planGrid.ShowCellToolTips = true;
 
-        _planToolStrip.Dock = DockStyle.Right;
+        _planToolStrip.Dock = DockStyle.Top;
         _planToolStrip.GripStyle = ToolStripGripStyle.Hidden;
         _planToolStrip.ImageScalingSize = new Size(18, 18);
         _planToolStrip.Items.AddRange(new ToolStripItem[]
@@ -418,20 +428,22 @@ partial class MainForm
             _removeStepToolButton,
             _clearStepsToolButton
         });
-        _planToolStrip.LayoutStyle = ToolStripLayoutStyle.VerticalStackWithOverflow;
+        _planToolStrip.LayoutStyle = ToolStripLayoutStyle.HorizontalStackWithOverflow;
         _planToolStrip.Name = "_planToolStrip";
         _planToolStrip.Padding = new Padding(2, 2, 2, 2);
-        _planToolStrip.Size = new Size(29, 555);
+        _planToolStrip.Size = new Size(554, 29);
 
-        _removeStepToolButton.DisplayStyle = ToolStripItemDisplayStyle.Image;
+        _removeStepToolButton.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
         _removeStepToolButton.ImageTransparentColor = Color.Magenta;
         _removeStepToolButton.Name = "_removeStepToolButton";
         _removeStepToolButton.Text = "Remove step";
+        _removeStepToolButton.TextImageRelation = TextImageRelation.ImageBeforeText;
 
-        _clearStepsToolButton.DisplayStyle = ToolStripItemDisplayStyle.Image;
+        _clearStepsToolButton.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
         _clearStepsToolButton.ImageTransparentColor = Color.Magenta;
         _clearStepsToolButton.Name = "_clearStepsToolButton";
         _clearStepsToolButton.Text = "Clear steps";
+        _clearStepsToolButton.TextImageRelation = TextImageRelation.ImageBeforeText;
 
         _executionPanel.Dock = DockStyle.Bottom;
         _executionPanel.Height = 96;

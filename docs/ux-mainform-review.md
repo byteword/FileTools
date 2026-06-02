@@ -1,6 +1,6 @@
 # MainForm UX Review
 
-Review date: 2026-06-02
+Review date: 2026-06-03
 
 Scope:
 
@@ -11,7 +11,7 @@ Scope:
 
 ## Summary
 
-The standalone window is now organized as a planner: targets on the left, task planning on the right, and execution feedback at the bottom. The latest layout pass addresses the earlier command-mixing problem by introducing a menu bar, icon toolbars, an unwrap split button, and a bottom-right run/stop button paired with a compact log view.
+The standalone window is now organized as a planner: targets on the left, task planning on the right, and execution feedback at the bottom. The latest layout pass addresses the earlier command-mixing problem by introducing a menu bar, icon toolbars, an unwrap split button, a plan scope header, and a bottom-right run/stop button paired with a compact log view.
 
 The README now references `docs/images/current-mainform-designer-layout.svg`, which describes the current planner-oriented layout.
 
@@ -24,7 +24,8 @@ The README now references `docs/images/current-mainform-designer-layout.svg`, wh
 - Folder unwrapping uses `ToolStripSplitButton` for default unwrap, same-name unwrap, single-file mismatch modes, and moving direct child files upward.
 - The work plan area now uses a read-only `DataGridView` with order, icon-labeled action kind, and expected result columns.
 - Step options are moved out of the grid body and into row tooltips, keeping the visible grid focused on action and outcome.
-- Step delete and clear-all-for-current-target commands sit on a narrow toolbar beside the plan grid.
+- Step delete and clear-all-for-current-target commands sit on a horizontal icon+text toolbar above the plan grid.
+- The work plan area shows which target is currently displayed, how many targets are selected, and the selected targets' planned step count for multi-target selections.
 - Plan previews are rebuilt from the remaining step chain after add, edit, delete, or clear so downstream steps reflect the current virtual input path.
 - The old always-large result box is replaced by a compact bottom log view.
 - Execution uses one bottom-right button that shows run in the idle state and stop while running.
@@ -32,9 +33,9 @@ The README now references `docs/images/current-mainform-designer-layout.svg`, wh
 
 ## Remaining UX Notes
 
-### 1. Plan scope is still selected-target-first
+### 1. Plan scope is now visible but still selected-target-first
 
-The target grid now shows per-target action counts, and the right plan grid shows the currently selected target only. This is acceptable for the current pass, but multi-target workflows would be clearer with a selected-target header or a compact aggregate status such as `3 selected targets, 6 total planned steps`.
+The target grid shows per-target action counts, and the right plan grid still shows the currently selected target only. The new scope header reduces ambiguity by showing the displayed target, selected target count, and the selected targets' aggregate planned step count.
 
 ### 2. Icon-only commands need real-use validation
 
@@ -54,7 +55,6 @@ The plan grid now predicts rename, wrap, unwrap, and relocation where enough pat
 
 ## Suggested Next Priority
 
-1. Add selected count and total planned step count near the target grid or plan header.
-2. Decide whether task toolbar buttons should remain icon-only or become icon+text.
-3. Validate whether the side delete/clear toolbar is discoverable enough or should use icon+text at wider sizes.
-4. Revisit bottom log height and splitter constraints after using the new layout.
+1. Decide whether task toolbar buttons should remain icon-only or become icon+text.
+2. Revisit bottom log height and splitter constraints after using the new layout.
+3. Consider a richer execution result viewer if result review becomes a primary workflow.

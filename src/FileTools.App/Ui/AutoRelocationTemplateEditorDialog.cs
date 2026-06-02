@@ -5,6 +5,8 @@ namespace FileTools;
 
 internal sealed class AutoRelocationTemplateEditorDialog : Form
 {
+    private const int EditorMinimumControlWidth = 520;
+
     private readonly ListBox _templateList = new();
     private readonly TextBox _idBox = new();
     private readonly TextBox _nameBox = new();
@@ -22,6 +24,7 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
     private readonly ComboBox _prefilterActionCombo = new();
     private readonly TextBox _prefilterTargetBox = new();
     private readonly List<AutoRelocationPathRule> _pathRules = [];
+    private readonly ToolTip _toolTip = new();
 
     private bool _loading;
     private bool _loadingPathRule;
@@ -38,6 +41,7 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
         MinimumSize = new Size(920, 600);
 
         BuildLayout();
+        WireToolTipUpdates();
         BindCombos();
         LoadTemplateList(AutoRelocationTemplateDefaults.DefaultTemplateId);
     }
@@ -141,6 +145,9 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
         };
         saveButton.Click += (_, _) => SaveTemplate();
         panel.Controls.Add(saveButton);
+        panel.Resize += (_, _) => ResizeEditorPanel(panel);
+        panel.ControlAdded += (_, _) => ResizeEditorPanel(panel);
+        ResizeEditorPanel(panel);
 
         return panel;
     }
@@ -150,7 +157,7 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
         var group = new GroupBox
         {
             Text = Localizer.Get("GroupPathRules"),
-            Width = 760,
+            Width = 720,
             Height = 252,
             Padding = new Padding(12)
         };
@@ -241,6 +248,17 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
         BindEnumCombo(_prefilterActionCombo, AutoRelocationPrefilterAction.ReviewOnly);
     }
 
+    private void WireToolTipUpdates()
+    {
+        _idBox.TextChanged += (_, _) => UpdateTemplateFieldToolTips();
+        _nameBox.TextChanged += (_, _) => UpdateTemplateFieldToolTips();
+        _descriptionBox.TextChanged += (_, _) => UpdateTemplateFieldToolTips();
+        _pathFormatBox.TextChanged += (_, _) => UpdateTemplateFieldToolTips();
+        _pathFallbackBox.TextChanged += (_, _) => UpdateTemplateFieldToolTips();
+        _prefilterValueBox.TextChanged += (_, _) => UpdateTemplateFieldToolTips();
+        _prefilterTargetBox.TextChanged += (_, _) => UpdateTemplateFieldToolTips();
+    }
+
     private void LoadTemplateList(string? selectedTemplateId)
     {
         var items = AutoRelocationTemplateStore.LoadTemplates()
@@ -288,6 +306,7 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
             ? [CreateDefaultPathRule()]
             : document.PathRules.Select(ClonePathRule));
         RefreshPathRuleList(0);
+        UpdateTemplateFieldToolTips();
 
         var prefilter = document.Prefilters.FirstOrDefault();
         _prefilterEnabledCheckBox.Checked = prefilter?.Enabled ?? false;
@@ -296,6 +315,7 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
         _prefilterValueBox.Text = prefilter?.Value ?? "";
         SelectComboValue(_prefilterActionCombo, prefilter?.Action ?? AutoRelocationPrefilterAction.ReviewOnly);
         _prefilterTargetBox.Text = prefilter?.TargetFolderName ?? "";
+        UpdateTemplateFieldToolTips();
     }
 
     private void SelectPathRule(int nextIndex)
@@ -545,7 +565,7 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
         var group = new GroupBox
         {
             Text = text,
-            Width = 760,
+            Width = 720,
             Height = 32 + controls.Length * 36,
             Padding = new Padding(12)
         };
@@ -559,13 +579,20 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
             top += 36;
         }
 
+        group.Resize += (_, _) =>
+        {
+            foreach (var control in controls)
+            {
+                control.Width = Math.Max(120, group.ClientSize.Width - 24);
+            }
+        };
         return group;
     }
 
     private static Control CreateTextRow(string labelText, TextBox textBox)
     {
-        var panel = new Panel { Width = 720, Height = 32 };
-        panel.Controls.Add(new Label
+        var panel = new Panel { Width = 680, Height = 32 };
+        var label = new Label
         {
             Text = labelText,
             Left = 0,
@@ -573,18 +600,21 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
             Width = 170,
             Height = 24,
             TextAlign = ContentAlignment.MiddleLeft
-        });
+        };
+        panel.Controls.Add(label);
         textBox.Left = 180;
         textBox.Top = 3;
         textBox.Width = 500;
+        textBox.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
         panel.Controls.Add(textBox);
+        panel.Resize += (_, _) => ResizeLabeledRow(panel, label, textBox, minInputWidth: 180);
         return panel;
     }
 
     private static Control CreateComboRow(string labelText, ComboBox combo)
     {
-        var panel = new Panel { Width = 720, Height = 32 };
-        panel.Controls.Add(new Label
+        var panel = new Panel { Width = 680, Height = 32 };
+        var label = new Label
         {
             Text = labelText,
             Left = 0,
@@ -592,18 +622,21 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
             Width = 170,
             Height = 24,
             TextAlign = ContentAlignment.MiddleLeft
-        });
+        };
+        panel.Controls.Add(label);
         combo.Left = 180;
         combo.Top = 3;
         combo.Width = 500;
+        combo.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
         panel.Controls.Add(combo);
+        panel.Resize += (_, _) => ResizeLabeledRow(panel, label, combo, minInputWidth: 180);
         return panel;
     }
 
     private static Control CreateCompactTextRow(string labelText, TextBox textBox)
     {
-        var panel = new Panel { Width = 430, Height = 32 };
-        panel.Controls.Add(new Label
+        var panel = new Panel { Dock = DockStyle.Fill, Height = 32 };
+        var label = new Label
         {
             Text = labelText,
             Left = 0,
@@ -611,18 +644,21 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
             Width = 110,
             Height = 24,
             TextAlign = ContentAlignment.MiddleLeft
-        });
+        };
+        panel.Controls.Add(label);
         textBox.Left = 120;
         textBox.Top = 3;
         textBox.Width = 280;
+        textBox.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
         panel.Controls.Add(textBox);
+        panel.Resize += (_, _) => ResizeLabeledRow(panel, label, textBox, minInputWidth: 120);
         return panel;
     }
 
     private static Control CreateCompactComboRow(string labelText, ComboBox combo)
     {
-        var panel = new Panel { Width = 430, Height = 32 };
-        panel.Controls.Add(new Label
+        var panel = new Panel { Dock = DockStyle.Fill, Height = 32 };
+        var label = new Label
         {
             Text = labelText,
             Left = 0,
@@ -630,11 +666,14 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
             Width = 110,
             Height = 24,
             TextAlign = ContentAlignment.MiddleLeft
-        });
+        };
+        panel.Controls.Add(label);
         combo.Left = 120;
         combo.Top = 3;
         combo.Width = 280;
+        combo.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
         panel.Controls.Add(combo);
+        panel.Resize += (_, _) => ResizeLabeledRow(panel, label, combo, minInputWidth: 120);
         return panel;
     }
 
@@ -644,6 +683,41 @@ internal sealed class AutoRelocationTemplateEditorDialog : Form
         checkBox.Width = 700;
         checkBox.Height = 28;
         return checkBox;
+    }
+
+    private static void ResizeLabeledRow(Panel panel, Label label, Control input, int minInputWidth)
+    {
+        var labelWidth = Math.Clamp(panel.ClientSize.Width / 3, 100, 180);
+        label.Width = labelWidth;
+        input.Left = labelWidth + 10;
+        input.Width = Math.Max(minInputWidth, panel.ClientSize.Width - input.Left);
+    }
+
+    private static void ResizeEditorPanel(FlowLayoutPanel panel)
+    {
+        var width = Math.Max(
+            EditorMinimumControlWidth,
+            panel.ClientSize.Width - panel.Padding.Horizontal - SystemInformation.VerticalScrollBarWidth - 8);
+        foreach (Control control in panel.Controls)
+        {
+            if (control is not GroupBox)
+            {
+                continue;
+            }
+
+            control.Width = Math.Max(120, width - control.Margin.Horizontal);
+        }
+    }
+
+    private void UpdateTemplateFieldToolTips()
+    {
+        _toolTip.SetToolTip(_idBox, _idBox.Text);
+        _toolTip.SetToolTip(_nameBox, _nameBox.Text);
+        _toolTip.SetToolTip(_descriptionBox, _descriptionBox.Text);
+        _toolTip.SetToolTip(_pathFormatBox, _pathFormatBox.Text);
+        _toolTip.SetToolTip(_pathFallbackBox, _pathFallbackBox.Text);
+        _toolTip.SetToolTip(_prefilterValueBox, _prefilterValueBox.Text);
+        _toolTip.SetToolTip(_prefilterTargetBox, _prefilterTargetBox.Text);
     }
 
     private static void BindEnumCombo<T>(ComboBox combo, T selectedValue)
