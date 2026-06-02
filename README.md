@@ -11,7 +11,7 @@ FileTools provides three current-user ContextMenu actions for selected files and
 1. **파일이름 자동 교정**
    - Uses the filename correction flow derived from `NameCorrector`.
    - Normalizes Korean jamo/Unicode, extracts title/episode/tag/author parts, makes Windows-safe names, and avoids conflicts with suffixes.
-   - The rename review dialog opens before applying changes, including ContextMenu execution.
+   - Rename review opens before applying changes by default, including ContextMenu execution, and can be limited to generated rows that need review or have conflicts.
 
 2. **폴더 wrapping / unwrapping**
    - In automatic mode, selected files are wrapped into same-stem folders.
@@ -56,9 +56,11 @@ The settings window owns operational defaults and Explorer ContextMenu installat
 Folder wrapping/unwrapping and AutoRelocation commands can be selected independently for Explorer registration. Pressing OK in the settings window saves the options and synchronizes the current-user ContextMenu registration, even if the Install/Remove buttons are not pressed.
 The app icon is stored as transparent PNG and multi-size ICO assets under `src\FileTools.App\Resources`; the EXE and MSI product metadata both use the ICO.
 
-The rename review dialog is used by ContextMenu rename commands and by standalone plan editing.
+The rename review dialog is used by ContextMenu rename commands and by standalone plan editing. Rename review can be configured to always open before applying changes, or to open only when generated rows need review or have conflicts. The dialog summarizes total changes in the upper-right corner, emphasizes review/conflict rows, and validates edited target names after each edit.
 
 ![FileTools rename dialog](docs/images/filetools-rename-dialog.svg)
+
+UX review notes for the current rename dialog are tracked in `docs/ux-rename-dialog-review.md`.
 
 Separate dialogs are available for:
 
@@ -271,12 +273,12 @@ FileTools.exe /context AutoRelocationChooseTarget "%1"
 
 The first three `/context` commands are kept for backward compatibility. Native ShellExt decides which submenu items are visible from the selected item type. For single-file folders, it also checks whether the single file stem matches the folder name and exposes either the simple unwrap command or explicit folder-name/file-name unwrap commands.
 
-Explorer often starts one process per selected item. FileTools waits briefly, merges those selected paths through a temporary queue, runs the selected operation, and exits automatically for non-interactive commands. File name correction opens the rename review dialog before applying changes. If any exception occurs, an error summary is shown.
+Explorer often starts one process per selected item. FileTools waits briefly, merges those selected paths through a temporary queue, runs the selected operation, and exits automatically for non-interactive commands. File name correction opens the rename review dialog according to the configured review mode before applying changes. If any exception occurs, an error summary is shown.
 
 ## Safety Behavior
 
 - Existing destination files/folders are not overwritten.
-- Filename correction is reviewed in a dialog before applying changes.
+- Filename correction is reviewed before applying changes by default, or only when generated rows need review or have conflicts if that review mode is selected.
 - AutoRelocation applies `(2)`, `(3)` suffixes when a target already exists.
 - Folders are deleted only when empty after unwrapping/moving child files.
 - Folder unwrapping only moves direct child files; nested folder contents are not flattened.

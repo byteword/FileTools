@@ -18,7 +18,7 @@ internal sealed class SettingsForm : Form
     private readonly ComboBox _defaultFolderOperationCombo = new();
     private readonly ComboBox _folderMismatchCombo = new();
     private readonly ComboBox _defaultTemplateCombo = new();
-    private readonly CheckBox _renameReviewCheckBox = new();
+    private readonly ComboBox _renameReviewModeCombo = new();
     private readonly CheckBox _renameDictionaryCheckBox = new();
 
     public SettingsForm(FileToolsSettings settings)
@@ -129,13 +129,10 @@ internal sealed class SettingsForm : Form
         var panel = CreateStackPanel();
         page.Controls.Add(panel);
 
-        _renameReviewCheckBox.Text = Localizer.Get("CheckRenameReviewBeforeApply");
-        _renameReviewCheckBox.Width = 660;
-        _renameReviewCheckBox.Height = 28;
         _renameDictionaryCheckBox.Text = Localizer.Get("CheckRenameUseDictionary");
         _renameDictionaryCheckBox.Width = 660;
         _renameDictionaryCheckBox.Height = 28;
-        panel.Controls.Add(_renameReviewCheckBox);
+        panel.Controls.Add(CreateComboRow(Localizer.Get("LabelRenameReviewMode"), _renameReviewModeCombo));
         panel.Controls.Add(_renameDictionaryCheckBox);
 
         var buttonPanel = new FlowLayoutPanel
@@ -215,8 +212,13 @@ internal sealed class SettingsForm : Form
         _contextMenuFolderMoveInnerFilesCheckBox.Checked = Settings.ContextMenuFolderMoveInnerFilesUp;
         _contextMenuRelocationCurrentCheckBox.Checked = Settings.ContextMenuAutoRelocationCurrentFolder;
         _contextMenuRelocationChooseTargetCheckBox.Checked = Settings.ContextMenuAutoRelocationChooseTarget;
-        _renameReviewCheckBox.Checked = Settings.RenameReviewBeforeApply;
         _renameDictionaryCheckBox.Checked = Settings.RenameUseDictionary;
+
+        _renameReviewModeCombo.DropDownStyle = ComboBoxStyle.DropDownList;
+        _renameReviewModeCombo.DataSource = Enum.GetValues<RenameReviewMode>()
+            .Select(mode => new ComboOption<RenameReviewMode>(ToolModeText.GetDisplayName(mode), mode))
+            .ToArray();
+        SelectComboValue(_renameReviewModeCombo, Settings.RenameReviewMode);
 
         _contextMenuLayoutCombo.DropDownStyle = ComboBoxStyle.DropDownList;
         _contextMenuLayoutCombo.DataSource = Enum.GetValues<ContextMenuLayout>()
@@ -268,8 +270,12 @@ internal sealed class SettingsForm : Form
         Settings.ContextMenuAutoRelocation = true;
         Settings.ContextMenuAutoRelocationCurrentFolder = _contextMenuRelocationCurrentCheckBox.Checked;
         Settings.ContextMenuAutoRelocationChooseTarget = _contextMenuRelocationChooseTargetCheckBox.Checked;
-        Settings.RenameReviewBeforeApply = _renameReviewCheckBox.Checked;
         Settings.RenameUseDictionary = _renameDictionaryCheckBox.Checked;
+
+        if (_renameReviewModeCombo.SelectedItem is ComboOption<RenameReviewMode> renameReviewMode)
+        {
+            Settings.RenameReviewMode = renameReviewMode.Value;
+        }
 
         if (_contextMenuLayoutCombo.SelectedItem is ComboOption<ContextMenuLayout> layout)
         {

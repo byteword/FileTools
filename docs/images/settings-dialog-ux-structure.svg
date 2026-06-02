@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="520" viewBox="0 0 920 520" role="img" aria-labelledby="title desc">
+  <title id="title">Settings dialog UX structure</title>
+  <desc id="desc">Schematic review image of the current FileTools settings dialog and a recommended sticky status plus collapsible group structure.</desc>
+  <rect width="920" height="520" fill="#f4f6f8"/>
+  <rect x="1" y="1" width="918" height="518" fill="none" stroke="#aeb7c2"/>
+
+  <text x="30" y="40" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="600" fill="#18212f">현재 설정 다이얼로그 구조</text>
+  <rect x="30" y="62" width="420" height="430" fill="#ffffff" stroke="#c8d0da"/>
+  <rect x="30" y="62" width="420" height="32" fill="#eef2f6" stroke="#c8d0da"/>
+  <text x="48" y="84" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f2937">Context Menu</text>
+  <text x="164" y="84" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#6b7280">이름변경</text>
+  <text x="254" y="84" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#6b7280">자동 재배치</text>
+  <text x="364" y="84" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#6b7280">폴더 구조</text>
+
+  <text x="52" y="124" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f2937">☑ Explorer ContextMenu 등록</text>
+  <rect x="52" y="142" width="366" height="38" fill="#fbfcfd" stroke="#c8d0da"/>
+  <text x="68" y="166" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#374151">메뉴 방식</text>
+  <text x="198" y="166" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f2937">묶음형 / 펼침형</text>
+
+  <rect x="52" y="196" width="366" height="56" fill="#ffffff" stroke="#c8d0da"/>
+  <text x="66" y="218" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="600" fill="#374151">Context Menu 작업</text>
+  <text x="66" y="240" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f2937">☑ 파일이름 자동 교정</text>
+
+  <rect x="52" y="266" width="366" height="108" fill="#ffffff" stroke="#c8d0da"/>
+  <text x="66" y="288" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="600" fill="#374151">폴더 wrapping / unwrapping</text>
+  <text x="66" y="310" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f2937">☑ 파일 wrapping</text>
+  <text x="66" y="332" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f2937">☑ 같은 이름 단일 파일 폴더 unwrapping</text>
+  <text x="66" y="354" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f2937">☑ 단일 파일 폴더 unwrapping</text>
+
+  <rect x="52" y="388" width="366" height="52" fill="#ffffff" stroke="#c8d0da"/>
+  <text x="66" y="410" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="600" fill="#374151">자동 재배치 Context Menu 명령</text>
+  <text x="66" y="432" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f2937">☑ 현재 폴더에서 자동 재배치  ☑ 선택한 폴더로 자동 재배치</text>
+
+  <rect x="52" y="456" width="130" height="28" fill="#eaf3ef" stroke="#9bbfaa"/>
+  <text x="72" y="475" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f2937">설치</text>
+  <rect x="192" y="456" width="130" height="28" fill="#fff4f2" stroke="#d7a39a"/>
+  <text x="232" y="475" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#1f2937">제거</text>
+
+  <text x="490" y="40" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="600" fill="#18212f">권장 정보 구조</text>
+  <rect x="490" y="62" width="400" height="430" fill="#ffffff" stroke="#c8d0da"/>
+
+  <rect x="512" y="84" width="356" height="72" fill="#f8fafc" stroke="#c8d0da"/>
+  <text x="530" y="110" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" fill="#1f2937">고정 상태 요약</text>
+  <text x="530" y="134" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#4b5563">탐색기 메뉴 등록됨 · OK가 메뉴 구성을 동기화</text>
+  <text x="530" y="150" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="#6b7280">스크롤과 무관하게 상단 고정</text>
+
+  <rect x="512" y="174" width="356" height="330" fill="#fbfcfd" stroke="#d9e0e8"/>
+  <text x="532" y="198" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#6b7280">스크롤 영역</text>
+
+  <rect x="532" y="212" width="316" height="92" fill="#ffffff" stroke="#3b82f6"/>
+  <rect x="532" y="212" width="316" height="32" fill="#dbeafe" stroke="#3b82f6"/>
+  <text x="548" y="234" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#1f2937">⌄ Explorer 메뉴</text>
+  <text x="724" y="234" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="#2563eb">등록됨 · 6개 활성</text>
+  <text x="548" y="266" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#4b5563">묶음형/펼침형 미리보기 · 명령 체크리스트</text>
+  <text x="548" y="286" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#4b5563">등록 꺼짐 상태에서는 하위 옵션 비활성 표시</text>
+
+  <rect x="532" y="318" width="316" height="38" fill="#ffffff" stroke="#10b981"/>
+  <rect x="532" y="318" width="316" height="38" fill="#ecfdf5" stroke="#10b981"/>
+  <text x="548" y="342" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#1f2937">› 이름변경 기본값</text>
+  <text x="724" y="342" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="#047857">항상 검토</text>
+
+  <rect x="532" y="370" width="316" height="70" fill="#ffffff" stroke="#f59e0b"/>
+  <rect x="532" y="370" width="316" height="32" fill="#fef3c7" stroke="#f59e0b"/>
+  <text x="548" y="392" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#1f2937">⌄ 폴더 구조 기본값</text>
+  <text x="724" y="392" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="#b45309">자동</text>
+  <text x="548" y="422" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#4b5563">불일치 예시: FolderA\Image01.jpg → FolderA-Image01.jpg</text>
+
+  <rect x="532" y="454" width="316" height="38" fill="#f5f3ff" stroke="#8b5cf6"/>
+  <text x="548" y="478" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#1f2937">› 자동 재배치 / 사전 / 템플릿</text>
+  <text x="762" y="478" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="#6d28d9">접힘</text>
+
+  <path d="M458 250 C480 250 480 250 500 250" stroke="#7b8794" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#7b8794"/>
+    </marker>
+  </defs>
+</svg>

@@ -165,6 +165,9 @@
   <data name="LabelContextMenuLayout" xml:space="preserve"><value>Menu layout</value></data>
   <data name="GroupContextMenuTasks" xml:space="preserve"><value>Context menu tasks</value></data>
   <data name="GroupApplicationContextMenu" xml:space="preserve"><value>Application command</value></data>
+  <data name="LabelRenameReviewMode" xml:space="preserve"><value>Review mode</value></data>
+  <data name="RenameReviewModeAlways" xml:space="preserve"><value>Always review before applying</value></data>
+  <data name="RenameReviewModeIssuesOnly" xml:space="preserve"><value>Review only when an item needs review or conflicts</value></data>
   <data name="CheckRenameReviewBeforeApply" xml:space="preserve"><value>Review ambiguous rename candidates before applying</value></data>
   <data name="CheckRenameUseDictionary" xml:space="preserve"><value>Use rename dictionary when available</value></data>
   <data name="ButtonEditRenameDictionary" xml:space="preserve"><value>Edit rename dictionary...</value></data>
@@ -205,9 +208,17 @@
   <data name="PlanActionUnwrap" xml:space="preserve"><value>Unwrap</value></data>
   <data name="PlanActionRelocate" xml:space="preserve"><value>Relocate</value></data>
   <data name="ColumnOriginalName" xml:space="preserve"><value>Original name</value></data>
+  <data name="ColumnRenameArrow" xml:space="preserve"><value>&gt;</value></data>
   <data name="ColumnSuggestedName" xml:space="preserve"><value>New name</value></data>
   <data name="ColumnRenameStatus" xml:space="preserve"><value>Status</value></data>
   <data name="ColumnRenameReason" xml:space="preserve"><value>Reason</value></data>
+  <data name="RenameSummaryFormat" xml:space="preserve"><value>Total {0} | Changes {1} | Review {2} | Conflicts {3} | Resolved {4}</value></data>
+  <data name="RenameStatusReady" xml:space="preserve"><value>Ready</value></data>
+  <data name="RenameStatusUnchanged" xml:space="preserve"><value>Unchanged</value></data>
+  <data name="RenameStatusNeedsReview" xml:space="preserve"><value>Review</value></data>
+  <data name="RenameStatusConflict" xml:space="preserve"><value>Conflict</value></data>
+  <data name="RenameStatusResolved" xml:space="preserve"><value>Resolved</value></data>
+  <data name="RenameStatusInvalid" xml:space="preserve"><value>Invalid</value></data>
   <data name="RenameInvalidNameMessage" xml:space="preserve"><value>Enter a valid new name for every item.</value></data>
   <data name="RenameDuplicateNameMessage" xml:space="preserve"><value>Two or more items target the same name.</value></data>
   <data name="MenuFile" xml:space="preserve"><value>File</value></data>

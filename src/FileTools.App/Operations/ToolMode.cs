@@ -29,6 +29,12 @@ internal enum ContextMenuLayout
     Expanded
 }
 
+internal enum RenameReviewMode
+{
+    Always,
+    IssuesOnly
+}
+
 internal enum ContextMenuCommand
 {
     OpenApp,
@@ -80,6 +86,13 @@ internal static class ToolModeText
         ContextMenuLayout.Grouped => Localizer.Get("ContextMenuLayoutGrouped"),
         ContextMenuLayout.Expanded => Localizer.Get("ContextMenuLayoutExpanded"),
         _ => layout.ToString()
+    };
+
+    public static string GetDisplayName(RenameReviewMode mode) => mode switch
+    {
+        RenameReviewMode.Always => Localizer.Get("RenameReviewModeAlways"),
+        RenameReviewMode.IssuesOnly => Localizer.Get("RenameReviewModeIssuesOnly"),
+        _ => mode.ToString()
     };
 
     public static string GetDisplayName(ContextMenuCommand command) => command switch
