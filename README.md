@@ -32,18 +32,24 @@ The non-processing **FileTools 열기 / Open FileTools** command stays in the Fi
 
 Run `FileTools.exe` without arguments to open the drag-and-drop work plan window.
 
-![FileTools standalone window](docs/images/filetools-main-window.svg)
+![FileTools standalone window](docs/images/current-mainform-designer-layout.svg)
 
 The standalone window supports:
 
 - Drag and drop files/folders into the target list.
+- Reviewing targets in a grid with file/folder icons, parent locations, and per-target action counts.
+- Using the target toolbar to add/remove targets and move selected targets up or down in execution order.
 - Dropped or newly added targets are selected automatically. Action buttons add the configured step to every selected target, so multi-folder unwrap workflows can be prepared in one pass.
 - Manual file/folder selection.
 - Adding multiple planned actions to each target before changing files.
 - Chaining filename correction, folder wrapping, folder unwrapping, and AutoRelocation actions.
-- Showing rename steps as `original -> new name` in the plan list.
+- Accessing file, task, and settings commands from the menu bar, while common task commands stay on the fixed task toolbar.
+- Selecting folder unwrapping variants from a split button, including the default setting, same-name folders, single-file folder name mismatch modes, and moving direct child files upward.
+- Reviewing each selected target's work plan in a grid with order, icon-labeled action kind, and expected result.
+- Showing detailed per-step options in grid row tooltips instead of dedicating a separate settings column.
+- Removing one selected step or clearing the currently displayed target's steps from the plan-side toolbar; the preview is recalculated from the remaining step chain.
 - Double-clicking a planned action to reopen the matching action dialog; rename steps reopen the rename review dialog.
-- Running all target plans in order with one command.
+- Running all target plans in order with one bottom-right run/stop button and reviewing progress in the bottom log view.
 - Opening a separate tabbed settings window for defaults, rename options, AutoRelocation defaults, folder options, and Explorer ContextMenu registration.
 
 The settings window owns operational defaults and Explorer ContextMenu installation/removal. Native ShellExt registration uses one FileTools submenu, and individual ContextMenu actions can be enabled or disabled.

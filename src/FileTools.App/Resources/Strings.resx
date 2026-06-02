@@ -194,11 +194,69 @@
   <data name="ContextCommandFolderUnwrapUseFolderName" xml:space="preserve"><value>Unwrap using folder name</value></data>
   <data name="ContextCommandFolderUnwrapKeepFileName" xml:space="preserve"><value>Unwrap using file name</value></data>
   <data name="ButtonApply" xml:space="preserve"><value>Apply</value></data>
+  <data name="ColumnTargetName" xml:space="preserve"><value>Name</value></data>
+  <data name="ColumnTargetLocation" xml:space="preserve"><value>Location</value></data>
+  <data name="ColumnTargetActions" xml:space="preserve"><value>Actions</value></data>
+  <data name="ColumnPlanOrder" xml:space="preserve"><value>#</value></data>
+  <data name="ColumnPlanAction" xml:space="preserve"><value>Action</value></data>
+  <data name="ColumnPlanPreview" xml:space="preserve"><value>Expected result</value></data>
+  <data name="PlanActionRename" xml:space="preserve"><value>Rename</value></data>
+  <data name="PlanActionWrap" xml:space="preserve"><value>Wrap</value></data>
+  <data name="PlanActionUnwrap" xml:space="preserve"><value>Unwrap</value></data>
+  <data name="PlanActionRelocate" xml:space="preserve"><value>Relocate</value></data>
   <data name="ColumnOriginalName" xml:space="preserve"><value>Original name</value></data>
   <data name="ColumnSuggestedName" xml:space="preserve"><value>New name</value></data>
   <data name="ColumnRenameStatus" xml:space="preserve"><value>Status</value></data>
   <data name="ColumnRenameReason" xml:space="preserve"><value>Reason</value></data>
   <data name="RenameInvalidNameMessage" xml:space="preserve"><value>Enter a valid new name for every item.</value></data>
   <data name="RenameDuplicateNameMessage" xml:space="preserve"><value>Two or more items target the same name.</value></data>
+  <data name="MenuFile" xml:space="preserve"><value>File</value></data>
+  <data name="MenuTasks" xml:space="preserve"><value>Tasks</value></data>
+  <data name="MenuSettings" xml:space="preserve"><value>Settings</value></data>
+  <data name="MenuUnwrapDefault" xml:space="preserve"><value>Default unwrap</value></data>
+  <data name="MenuUnwrapSingleFormat" xml:space="preserve"><value>Unwrap single-file folders - {0}</value></data>
+  <data name="ButtonStop" xml:space="preserve"><value>Stop</value></data>
+  <data name="ButtonClearSteps" xml:space="preserve"><value>Clear steps</value></data>
+  <data name="ToolTipAddTarget" xml:space="preserve"><value>Add files or folders.</value></data>
+  <data name="ToolTipRemoveTarget" xml:space="preserve"><value>Remove selected targets.</value></data>
+  <data name="ToolTipClearTargets" xml:space="preserve"><value>Clear the target list.</value></data>
+  <data name="ToolTipMoveTargetUp" xml:space="preserve"><value>Move selected targets up.</value></data>
+  <data name="ToolTipMoveTargetDown" xml:space="preserve"><value>Move selected targets down.</value></data>
+  <data name="ToolTipAddRename" xml:space="preserve"><value>Add a rename action to selected targets.</value></data>
+  <data name="ToolTipAddWrap" xml:space="preserve"><value>Add a folder wrapping action to selected file targets.</value></data>
+  <data name="ToolTipAddUnwrap" xml:space="preserve"><value>Add a folder unwrapping action to selected folder targets.</value></data>
+  <data name="ToolTipAddRelocation" xml:space="preserve"><value>Add an auto relocation action to selected targets.</value></data>
+  <data name="ToolTipRemoveStep" xml:space="preserve"><value>Remove the selected plan step.</value></data>
+  <data name="ToolTipClearSteps" xml:space="preserve"><value>Clear every step shown in the current work plan.</value></data>
+  <data name="ToolTipRunPlan" xml:space="preserve"><value>Run the current plan.</value></data>
+  <data name="ToolTipStopPlan" xml:space="preserve"><value>Request a stop after the current operation completes.</value></data>
+  <data name="LogReady" xml:space="preserve"><value>Ready.</value></data>
+  <data name="LogExecutionStartingFormat" xml:space="preserve"><value>Starting plan: {0} targets, {1} steps.</value></data>
+  <data name="LogExecutionSummaryFormat" xml:space="preserve"><value>Summary: targets {0}, applied {1}, skipped {2}, errors {3}.</value></data>
+  <data name="LogExecutionCompleted" xml:space="preserve"><value>Plan completed.</value></data>
+  <data name="LogExecutionStopped" xml:space="preserve"><value>Plan stopped.</value></data>
+  <data name="LogStopRequested" xml:space="preserve"><value>Stop requested. The current operation will finish first.</value></data>
+  <data name="LogExecutionFailedFormat" xml:space="preserve"><value>Execution failed: {0}</value></data>
+  <data name="LogTargetStartingFormat" xml:space="preserve"><value>Target: {0}</value></data>
+  <data name="LogStepStartingFormat" xml:space="preserve"><value>Run {1} on {0}</value></data>
+  <data name="LogErrorFormat" xml:space="preserve"><value>ERROR: {0}</value></data>
+  <data name="PlanPreviewTransitionFormat" xml:space="preserve"><value>{0} -> {1}</value></data>
+  <data name="PlanPreviewNoChange" xml:space="preserve"><value>No change</value></data>
+  <data name="PlanPreviewUnavailable" xml:space="preserve"><value>Preview unavailable</value></data>
+  <data name="PlanPreviewInputMissingFormat" xml:space="preserve"><value>Input no longer exists: {0}</value></data>
+  <data name="PlanPreviewNotFile" xml:space="preserve"><value>The current input is not a file.</value></data>
+  <data name="PlanPreviewNotFolder" xml:space="preserve"><value>The current input is not a folder.</value></data>
+  <data name="PlanPreviewNoParent" xml:space="preserve"><value>Cannot resolve the parent folder.</value></data>
+  <data name="PlanPreviewTargetExistsFormat" xml:space="preserve"><value>Target already exists: {0}</value></data>
+  <data name="PlanPreviewMoveUpUnavailable" xml:space="preserve"><value>Cannot confirm direct child files for move-up.</value></data>
+  <data name="PlanPreviewSingleFileUnavailable" xml:space="preserve"><value>Cannot confirm a single-file folder.</value></data>
+  <data name="PlanPreviewSameNameMismatchFormat" xml:space="preserve"><value>Folder/file name mismatch: {0}</value></data>
+  <data name="PlanPreviewRelocationExcluded" xml:space="preserve"><value>Relocation template excludes this item.</value></data>
+  <data name="PlanPreviewRequiresReview" xml:space="preserve"><value>Relocation requires review.</value></data>
+  <data name="PlanTooltipInputFormat" xml:space="preserve"><value>Input: {0}</value></data>
+  <data name="PlanTooltipOptionsFormat" xml:space="preserve"><value>Options: {0}</value></data>
+  <data name="PlanTooltipOutputFormat" xml:space="preserve"><value>Output: {0}</value></data>
+  <data name="PlanTooltipWarningFormat" xml:space="preserve"><value>Warning: {0}</value></data>
+  <data name="PlanOptionManualRenameFormat" xml:space="preserve"><value>Manual filename: {0}</value></data>
   <data name="FolderOptionsFutureMessage" xml:space="preserve"><value>Folder wrapping and unwrapping options are intentionally kept here for future expansion.</value></data>
 </root>

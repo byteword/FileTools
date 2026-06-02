@@ -194,11 +194,69 @@
   <data name="ContextCommandFolderUnwrapUseFolderName" xml:space="preserve"><value>폴더명으로 벗기기</value></data>
   <data name="ContextCommandFolderUnwrapKeepFileName" xml:space="preserve"><value>파일명으로 벗기기</value></data>
   <data name="ButtonApply" xml:space="preserve"><value>적용</value></data>
+  <data name="ColumnTargetName" xml:space="preserve"><value>이름</value></data>
+  <data name="ColumnTargetLocation" xml:space="preserve"><value>위치</value></data>
+  <data name="ColumnTargetActions" xml:space="preserve"><value>작업</value></data>
+  <data name="ColumnPlanOrder" xml:space="preserve"><value>순서</value></data>
+  <data name="ColumnPlanAction" xml:space="preserve"><value>작업</value></data>
+  <data name="ColumnPlanPreview" xml:space="preserve"><value>예상 결과</value></data>
+  <data name="PlanActionRename" xml:space="preserve"><value>이름변경</value></data>
+  <data name="PlanActionWrap" xml:space="preserve"><value>감싸기</value></data>
+  <data name="PlanActionUnwrap" xml:space="preserve"><value>벗기기</value></data>
+  <data name="PlanActionRelocate" xml:space="preserve"><value>재배치</value></data>
   <data name="ColumnOriginalName" xml:space="preserve"><value>원래 이름</value></data>
   <data name="ColumnSuggestedName" xml:space="preserve"><value>새 이름</value></data>
   <data name="ColumnRenameStatus" xml:space="preserve"><value>상태</value></data>
   <data name="ColumnRenameReason" xml:space="preserve"><value>근거</value></data>
   <data name="RenameInvalidNameMessage" xml:space="preserve"><value>모든 항목에 올바른 새 이름을 입력하세요.</value></data>
   <data name="RenameDuplicateNameMessage" xml:space="preserve"><value>두 개 이상의 항목이 같은 이름으로 변경되도록 설정되었습니다.</value></data>
+  <data name="MenuFile" xml:space="preserve"><value>파일</value></data>
+  <data name="MenuTasks" xml:space="preserve"><value>작업</value></data>
+  <data name="MenuSettings" xml:space="preserve"><value>설정</value></data>
+  <data name="MenuUnwrapDefault" xml:space="preserve"><value>기본 설정으로 벗기기</value></data>
+  <data name="MenuUnwrapSingleFormat" xml:space="preserve"><value>단일 파일 폴더 벗기기 - {0}</value></data>
+  <data name="ButtonStop" xml:space="preserve"><value>중지</value></data>
+  <data name="ButtonClearSteps" xml:space="preserve"><value>작업 비우기</value></data>
+  <data name="ToolTipAddTarget" xml:space="preserve"><value>파일 또는 폴더를 추가합니다.</value></data>
+  <data name="ToolTipRemoveTarget" xml:space="preserve"><value>선택한 대상을 제거합니다.</value></data>
+  <data name="ToolTipClearTargets" xml:space="preserve"><value>대상 목록을 비웁니다.</value></data>
+  <data name="ToolTipMoveTargetUp" xml:space="preserve"><value>선택한 대상을 위로 이동합니다.</value></data>
+  <data name="ToolTipMoveTargetDown" xml:space="preserve"><value>선택한 대상을 아래로 이동합니다.</value></data>
+  <data name="ToolTipAddRename" xml:space="preserve"><value>선택한 대상에 이름변경 작업을 추가합니다.</value></data>
+  <data name="ToolTipAddWrap" xml:space="preserve"><value>선택한 파일 대상에 폴더 감싸기 작업을 추가합니다.</value></data>
+  <data name="ToolTipAddUnwrap" xml:space="preserve"><value>선택한 폴더 대상에 폴더 벗기기 작업을 추가합니다.</value></data>
+  <data name="ToolTipAddRelocation" xml:space="preserve"><value>선택한 대상에 자동 재배치 작업을 추가합니다.</value></data>
+  <data name="ToolTipRemoveStep" xml:space="preserve"><value>선택한 플랜 단계를 제거합니다.</value></data>
+  <data name="ToolTipClearSteps" xml:space="preserve"><value>현재 작업 플랜에 표시된 모든 단계를 삭제합니다.</value></data>
+  <data name="ToolTipRunPlan" xml:space="preserve"><value>현재 플랜을 실행합니다.</value></data>
+  <data name="ToolTipStopPlan" xml:space="preserve"><value>현재 작업이 끝난 뒤 중지하도록 요청합니다.</value></data>
+  <data name="LogReady" xml:space="preserve"><value>준비됨.</value></data>
+  <data name="LogExecutionStartingFormat" xml:space="preserve"><value>플랜 실행 시작: 대상 {0}개, 단계 {1}개.</value></data>
+  <data name="LogExecutionSummaryFormat" xml:space="preserve"><value>요약: 대상 {0}, 적용 {1}, 건너뜀 {2}, 오류 {3}.</value></data>
+  <data name="LogExecutionCompleted" xml:space="preserve"><value>플랜 실행 완료.</value></data>
+  <data name="LogExecutionStopped" xml:space="preserve"><value>플랜 실행 중지.</value></data>
+  <data name="LogStopRequested" xml:space="preserve"><value>중지를 요청했습니다. 현재 작업이 끝난 뒤 멈춥니다.</value></data>
+  <data name="LogExecutionFailedFormat" xml:space="preserve"><value>실행 실패: {0}</value></data>
+  <data name="LogTargetStartingFormat" xml:space="preserve"><value>대상: {0}</value></data>
+  <data name="LogStepStartingFormat" xml:space="preserve"><value>{0}에 {1} 실행</value></data>
+  <data name="LogErrorFormat" xml:space="preserve"><value>오류: {0}</value></data>
+  <data name="PlanPreviewTransitionFormat" xml:space="preserve"><value>{0} -> {1}</value></data>
+  <data name="PlanPreviewNoChange" xml:space="preserve"><value>변경 없음</value></data>
+  <data name="PlanPreviewUnavailable" xml:space="preserve"><value>미리보기 불가</value></data>
+  <data name="PlanPreviewInputMissingFormat" xml:space="preserve"><value>입력이 더 이상 존재하지 않음: {0}</value></data>
+  <data name="PlanPreviewNotFile" xml:space="preserve"><value>현재 입력이 파일이 아닙니다.</value></data>
+  <data name="PlanPreviewNotFolder" xml:space="preserve"><value>현재 입력이 폴더가 아닙니다.</value></data>
+  <data name="PlanPreviewNoParent" xml:space="preserve"><value>부모 폴더를 확인할 수 없습니다.</value></data>
+  <data name="PlanPreviewTargetExistsFormat" xml:space="preserve"><value>대상 경로가 이미 존재합니다: {0}</value></data>
+  <data name="PlanPreviewMoveUpUnavailable" xml:space="preserve"><value>상위로 이동할 직접 하위 파일을 확인할 수 없습니다.</value></data>
+  <data name="PlanPreviewSingleFileUnavailable" xml:space="preserve"><value>단일 파일 폴더인지 확인할 수 없습니다.</value></data>
+  <data name="PlanPreviewSameNameMismatchFormat" xml:space="preserve"><value>폴더명/파일명 불일치: {0}</value></data>
+  <data name="PlanPreviewRelocationExcluded" xml:space="preserve"><value>재배치 템플릿에서 이 항목을 제외합니다.</value></data>
+  <data name="PlanPreviewRequiresReview" xml:space="preserve"><value>재배치 검토가 필요합니다.</value></data>
+  <data name="PlanTooltipInputFormat" xml:space="preserve"><value>입력: {0}</value></data>
+  <data name="PlanTooltipOptionsFormat" xml:space="preserve"><value>옵션: {0}</value></data>
+  <data name="PlanTooltipOutputFormat" xml:space="preserve"><value>출력: {0}</value></data>
+  <data name="PlanTooltipWarningFormat" xml:space="preserve"><value>경고: {0}</value></data>
+  <data name="PlanOptionManualRenameFormat" xml:space="preserve"><value>수동 파일명: {0}</value></data>
   <data name="FolderOptionsFutureMessage" xml:space="preserve"><value>폴더 감싸기/벗기기 옵션은 향후 확장을 위해 이 탭에 유지합니다.</value></data>
 </root>
