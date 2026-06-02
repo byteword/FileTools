@@ -59,7 +59,7 @@ The settings layout notes are tracked in `docs/ux-settings-dialog-review.md`.
 The app icon is stored as transparent PNG and multi-size ICO assets under `src\FileTools.App\Resources`; the EXE and MSI product metadata both use the ICO.
 
 The rename review dialog is used by ContextMenu rename commands and by standalone plan editing.
-Rename review can be configured to always open before applying changes, or to open only when generated rows need review or have conflicts. The dialog uses a read-only item list plus a selected-item editor, so long target names can be edited outside the grid while extracted title, episode, author, tag, extension, candidate, and common-phrase values remain available as input aids. It summarizes total changes in the upper-right corner, emphasizes review/conflict rows, validates edited target names after each edit, and lets the selected row be restored to auto/original or skipped before applying.
+Rename review can be configured to always open before applying changes, or to open only when generated rows need review or have conflicts. The dialog uses a read-only item list plus a selected-item editor, so long target names can be edited outside the grid while extracted title, episode, author, tag, extension, candidate, and common-phrase values remain available as input aids. Common phrases stay collapsed to one row by default and can be expanded or collapsed from the same panel. It summarizes total changes in the upper-right corner, emphasizes review/conflict rows, validates edited target names after each edit, and lets the selected row be restored to auto/original or skipped before applying.
 
 ![FileTools rename dialog](docs/images/rename-editor-dialog-concept.svg)
 

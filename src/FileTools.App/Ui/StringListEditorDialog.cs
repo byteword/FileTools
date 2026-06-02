@@ -23,9 +23,10 @@ internal sealed class StringListEditorDialog : Form
         StartPosition = FormStartPosition.CenterParent;
         Width = 520;
         Height = 420;
+        MinimumSize = new Size(420, 320);
         MinimizeBox = false;
-        MaximizeBox = false;
-        FormBorderStyle = FormBorderStyle.FixedDialog;
+        MaximizeBox = true;
+        FormBorderStyle = FormBorderStyle.Sizable;
 
         BuildLayout(itemLabel);
     }
@@ -113,8 +114,9 @@ internal sealed class StringListEditorDialog : Form
             FlowDirection = FlowDirection.RightToLeft,
             WrapContents = false
         };
-        var okButton = new Button { Text = "OK", DialogResult = DialogResult.OK, Width = 90 };
+        var okButton = new Button { Text = "OK", Width = 90 };
         var cancelButton = new Button { Text = Localizer.Get("ButtonCancel"), DialogResult = DialogResult.Cancel, Width = 90 };
+        okButton.Click += (_, _) => Confirm();
         dialogButtons.Controls.Add(cancelButton);
         dialogButtons.Controls.Add(okButton);
         root.Controls.Add(dialogButtons, 0, 4);
@@ -123,52 +125,76 @@ internal sealed class StringListEditorDialog : Form
         CancelButton = cancelButton;
     }
 
-    private void AddItem()
+    private void Confirm()
+    {
+        if (!CommitPendingEdit())
+        {
+            return;
+        }
+
+        DialogResult = DialogResult.OK;
+        Close();
+    }
+
+    private bool CommitPendingEdit()
+    {
+        var value = _textBox.Text.Trim();
+        if (_list.SelectedIndex < 0)
+        {
+            return value.Length == 0 || AddItem();
+        }
+
+        var current = _items[_list.SelectedIndex];
+        return string.Equals(current, value, StringComparison.Ordinal) || UpdateItem();
+    }
+
+    private bool AddItem()
     {
         var value = _textBox.Text.Trim();
         if (value.Length == 0)
         {
             ShowStatus(Localizer.Get("EditorValueRequiredMessage"));
-            return;
+            return false;
         }
 
         if (_items.Any(item => string.Equals(item, value, StringComparison.OrdinalIgnoreCase)))
         {
             ShowStatus(Localizer.Get("EditorDuplicateValueMessage"));
-            return;
+            return false;
         }
 
         _items.Add(value);
         _list.SelectedItem = value;
         ClearStatus();
+        return true;
     }
 
-    private void UpdateItem()
+    private bool UpdateItem()
     {
         if (_list.SelectedIndex < 0)
         {
-            AddItem();
-            return;
+            return AddItem();
         }
 
         var value = _textBox.Text.Trim();
         if (value.Length == 0)
         {
             ShowStatus(Localizer.Get("EditorValueRequiredMessage"));
-            return;
+            return false;
         }
 
         if (_items.Where((_, index) => index != _list.SelectedIndex)
             .Any(item => string.Equals(item, value, StringComparison.OrdinalIgnoreCase)))
         {
             ShowStatus(Localizer.Get("EditorDuplicateValueMessage"));
-            return;
+            return false;
         }
 
         var index = _list.SelectedIndex;
         _items[index] = value;
         _list.SelectedIndex = index;
         ClearStatus();
+        return true;
     }
 
     private void DeleteItem()

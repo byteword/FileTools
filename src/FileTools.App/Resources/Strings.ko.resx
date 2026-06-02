@@ -255,6 +255,10 @@
   <data name="RenameEditorInsertTokens" xml:space="preserve"><value>원본/후보 문자열</value></data>
   <data name="RenameEditorCommonPhrases" xml:space="preserve"><value>자주 쓰는 문구</value></data>
   <data name="RenameEditorNoCommonPhrases" xml:space="preserve"><value>등록된 자주 쓰는 문구가 없습니다.</value></data>
+  <data name="ButtonShowMoreCommonPhrases" xml:space="preserve"><value>더보기</value></data>
+  <data name="ButtonCollapseCommonPhrases" xml:space="preserve"><value>접기</value></data>
+  <data name="ButtonShowMoreCommonPhrasesTooltip" xml:space="preserve"><value>자주 쓰는 문구를 더 표시합니다.</value></data>
+  <data name="ButtonCollapseCommonPhrasesTooltip" xml:space="preserve"><value>자주 쓰는 문구를 한 줄로 접습니다.</value></data>
   <data name="ButtonUseOriginalName" xml:space="preserve"><value>원본 사용</value></data>
   <data name="ButtonUseAutomaticName" xml:space="preserve"><value>자동 이름 사용</value></data>
   <data name="ButtonNextIssue" xml:space="preserve"><value>다음 문제</value></data>

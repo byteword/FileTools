@@ -255,6 +255,10 @@
   <data name="RenameEditorInsertTokens" xml:space="preserve"><value>Original and candidate text</value></data>
   <data name="RenameEditorCommonPhrases" xml:space="preserve"><value>Common phrases</value></data>
   <data name="RenameEditorNoCommonPhrases" xml:space="preserve"><value>No common phrases are registered.</value></data>
+  <data name="ButtonShowMoreCommonPhrases" xml:space="preserve"><value>More</value></data>
+  <data name="ButtonCollapseCommonPhrases" xml:space="preserve"><value>Collapse</value></data>
+  <data name="ButtonShowMoreCommonPhrasesTooltip" xml:space="preserve"><value>Show more common phrases.</value></data>
+  <data name="ButtonCollapseCommonPhrasesTooltip" xml:space="preserve"><value>Collapse common phrases.</value></data>
   <data name="ButtonUseOriginalName" xml:space="preserve"><value>Use original</value></data>
   <data name="ButtonUseAutomaticName" xml:space="preserve"><value>Use automatic name</value></data>
   <data name="ButtonNextIssue" xml:space="preserve"><value>Next issue</value></data>

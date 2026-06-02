@@ -27,9 +27,10 @@ internal sealed class RenameDictionaryEditorDialog : Form
         StartPosition = FormStartPosition.CenterParent;
         Width = 620;
         Height = 450;
+        MinimumSize = new Size(520, 360);
         MinimizeBox = false;
-        MaximizeBox = false;
-        FormBorderStyle = FormBorderStyle.FixedDialog;
+        MaximizeBox = true;
+        FormBorderStyle = FormBorderStyle.Sizable;
 
         BuildLayout();
     }
@@ -96,8 +97,9 @@ internal sealed class RenameDictionaryEditorDialog : Form
             FlowDirection = FlowDirection.RightToLeft,
             WrapContents = false
         };
-        var okButton = new Button { Text = "OK", DialogResult = DialogResult.OK, Width = 90 };
+        var okButton = new Button { Text = "OK", Width = 90 };
         var cancelButton = new Button { Text = Localizer.Get("ButtonCancel"), DialogResult = DialogResult.Cancel, Width = 90 };
+        okButton.Click += (_, _) => Confirm();
         dialogButtons.Controls.Add(cancelButton);
         dialogButtons.Controls.Add(okButton);
         root.Controls.Add(dialogButtons, 0, 5);
@@ -149,51 +151,76 @@ internal sealed class RenameDictionaryEditorDialog : Form
         ClearStatus();
     }
 
-    private void AddEntry()
+    private void Confirm()
+    {
+        if (!CommitPendingEdit())
+        {
+            return;
+        }
+
+        DialogResult = DialogResult.OK;
+        Close();
+    }
+
+    private bool CommitPendingEdit()
+    {
+        if (_list.SelectedIndex < 0)
+        {
+            return string.IsNullOrWhiteSpace(_sourceBox.Text) &&
+                string.IsNullOrWhiteSpace(_replacementBox.Text) || AddEntry();
+        }
+
+        var current = _entries[_list.SelectedIndex];
+        return string.Equals(current.Source, _sourceBox.Text.Trim(), StringComparison.Ordinal) &&
+            string.Equals(current.Replacement, _replacementBox.Text.Trim(), StringComparison.Ordinal) || UpdateEntry();
+    }
+
+    private bool AddEntry()
     {
         var entry = CreateEntryFromFields();
         if (entry is null)
         {
             ShowStatus(Localizer.Get("EditorValueRequiredMessage"));
-            return;
+            return false;
         }
 
         if (HasDuplicateSource(entry.Source, exceptIndex: -1))
         {
             ShowStatus(Localizer.Get("EditorDuplicateValueMessage"));
-            return;
+            return false;
         }
 
         _entries.Add(entry);
         _list.SelectedItem = entry;
         ClearStatus();
+        return true;
     }
 
-    private void UpdateEntry()
+    private bool UpdateEntry()
     {
         if (_list.SelectedIndex < 0)
         {
-            AddEntry();
-            return;
+            return AddEntry();
         }
 
         var entry = CreateEntryFromFields();
         if (entry is null)
         {
             ShowStatus(Localizer.Get("EditorValueRequiredMessage"));
-            return;
+            return false;
         }
 
         if (HasDuplicateSource(entry.Source, _list.SelectedIndex))
         {
             ShowStatus(Localizer.Get("EditorDuplicateValueMessage"));
-            return;
+            return false;
         }
 
         var index = _list.SelectedIndex;
         _entries[index] = entry;
         _list.SelectedIndex = index;
         ClearStatus();
+        return true;
     }
 
     private void DeleteEntry()

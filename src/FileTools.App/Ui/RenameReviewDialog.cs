@@ -6,6 +6,13 @@ namespace FileTools;
 
 internal sealed class RenameReviewDialog : Form
 {
+    private const int CommonPhraseCollapsedRowHeight = 72;
+    private const int TokenButtonMinWidth = 64;
+    private const int TokenButtonMaxWidth = 180;
+    private const int TokenButtonHeight = 28;
+    private const int TokenButtonRightMargin = 6;
+    private const int TokenButtonBottomMargin = 6;
+
     private static readonly StringComparer PathComparer = OperatingSystem.IsWindows()
         ? StringComparer.OrdinalIgnoreCase
         : StringComparer.Ordinal;
@@ -33,8 +40,10 @@ internal sealed class RenameReviewDialog : Form
     private readonly FlowLayoutPanel _commonPhrasePanel = new();
     private readonly ToolTip _toolTip = new();
 
+    private TableLayoutPanel? _selectedEditorPanel;
     private RenameRow? _selectedRow;
     private TextBox? _activeTextBox;
+    private bool _commonPhrasesExpanded;
     private bool _updatingRows;
     private bool _updatingEditor;
 
@@ -251,8 +260,9 @@ internal sealed class RenameReviewDialog : Form
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 136));
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 150));
-        panel.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
-        panel.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+        panel.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, CommonPhraseCollapsedRowHeight));
+        _selectedEditorPanel = panel;
 
         var label = new Label
         {
@@ -392,8 +402,9 @@ internal sealed class RenameReviewDialog : Form
         };
 
         _commonPhrasePanel.Dock = DockStyle.Fill;
-        _commonPhrasePanel.AutoScroll = true;
-        _commonPhrasePanel.WrapContents = true;
+        _commonPhrasePanel.AutoScroll = false;
+        _commonPhrasePanel.WrapContents = false;
+        _commonPhrasePanel.Resize += (_, _) => RebuildCommonPhrasePanel();
         group.Controls.Add(_commonPhrasePanel);
         return group;
     }
@@ -981,26 +992,138 @@ internal sealed class RenameReviewDialog : Form
             return;
         }
 
-        foreach (var phrase in _commonPhrases.Take(24))
+        _commonPhrasePanel.AutoScroll = _commonPhrasesExpanded;
+        _commonPhrasePanel.WrapContents = _commonPhrasesExpanded;
+
+        var visiblePhrases = _commonPhrases.AsEnumerable();
+        var hiddenCount = 0;
+        if (!_commonPhrasesExpanded)
+        {
+            var unreservedCount = CountCommonPhrasesThatFit(0);
+            if (unreservedCount < _commonPhrases.Length)
+            {
+                var toggleReserve = GetTokenButtonWidth(Localizer.Get("ButtonShowMoreCommonPhrases")) + TokenButtonRightMargin;
+                var visibleCount = CountCommonPhrasesThatFit(toggleReserve);
+                hiddenCount = _commonPhrases.Length - visibleCount;
+                visiblePhrases = _commonPhrases.Take(visibleCount);
+            }
+        }
+
+        foreach (var phrase in visiblePhrases)
         {
             AddTokenButton(_commonPhrasePanel, phrase);
+        }
+
+        if (_commonPhrasesExpanded)
+        {
+            AddCommonPhraseToggleButton(Localizer.Get("ButtonCollapseCommonPhrases"), Localizer.Get("ButtonCollapseCommonPhrasesTooltip"));
+        }
+        else if (hiddenCount > 0)
+        {
+            AddCommonPhraseToggleButton(Localizer.Get("ButtonShowMoreCommonPhrases"), Localizer.Get("ButtonShowMoreCommonPhrasesTooltip"));
         }
     }
 
     private void AddTokenButton(FlowLayoutPanel panel, string value)
     {
-        var width = Math.Min(180, Math.Max(64, TextRenderer.MeasureText(value, Font).Width + 24));
+        var width = GetTokenButtonWidth(value);
         var button = new Button
         {
             Text = value,
             AutoEllipsis = true,
             Width = width,
-            Height = 28,
-            Margin = new Padding(0, 0, 6, 6)
+            Height = TokenButtonHeight,
+            Margin = new Padding(0, 0, TokenButtonRightMargin, TokenButtonBottomMargin)
         };
         _toolTip.SetToolTip(button, value);
         button.Click += (_, _) => InsertToken(value);
         panel.Controls.Add(button);
+    }
+
+    private void AddCommonPhraseToggleButton(string text, string toolTip)
+    {
+        var button = new Button
+        {
+            Text = text,
+            AutoEllipsis = true,
+            Width = GetTokenButtonWidth(text),
+            Height = TokenButtonHeight,
+            Margin = new Padding(0, 0, TokenButtonRightMargin, TokenButtonBottomMargin)
+        };
+        _toolTip.SetToolTip(button, toolTip);
+        button.Click += (_, _) => ToggleCommonPhraseExpansion();
+        _commonPhrasePanel.Controls.Add(button);
+    }
+
+    private int CountCommonPhrasesThatFit(int reservedWidth)
+    {
+        var panelWidth = _commonPhrasePanel.ClientSize.Width;
+        if (panelWidth <= 0)
+        {
+            panelWidth = Math.Max(240, ClientSize.Width - 460);
+        }
+
+        var availableWidth = Math.Max(0, panelWidth - reservedWidth);
+        var usedWidth = 0;
+        var count = 0;
+        foreach (var phrase in _commonPhrases)
+        {
+            var itemWidth = GetTokenButtonWidth(phrase) + TokenButtonRightMargin;
+            if (count > 0 && usedWidth + itemWidth > availableWidth)
+            {
+                break;
+            }
+
+            if (count == 0 && itemWidth > availableWidth)
+            {
+                return availableWidth >= TokenButtonMinWidth ? 1 : 0;
+            }
+
+            usedWidth += itemWidth;
+            count++;
+        }
+
+        return count;
+    }
+
+    private int GetTokenButtonWidth(string value)
+    {
+        return Math.Min(TokenButtonMaxWidth, Math.Max(TokenButtonMinWidth, TextRenderer.MeasureText(value, Font).Width + 24));
+    }
+
+    private void ToggleCommonPhraseExpansion()
+    {
+        _commonPhrasesExpanded = !_commonPhrasesExpanded;
+        UpdateCommonPhraseRowHeight();
+        RebuildCommonPhrasePanel();
+    }
+
+    private void UpdateCommonPhraseRowHeight()
+    {
+        var selectedEditorPanel = _selectedEditorPanel;
+        if (selectedEditorPanel is null || selectedEditorPanel.RowStyles.Count < 5)
+        {
+            return;
+        }
+
+        var tokenRow = selectedEditorPanel.RowStyles[3];
+        var phraseRow = selectedEditorPanel.RowStyles[4];
+        if (_commonPhrasesExpanded)
+        {
+            tokenRow.SizeType = SizeType.Percent;
+            tokenRow.Height = 50;
+            phraseRow.SizeType = SizeType.Percent;
+            phraseRow.Height = 50;
+        }
+        else
+        {
+            tokenRow.SizeType = SizeType.Percent;
+            tokenRow.Height = 100;
+            phraseRow.SizeType = SizeType.Absolute;
+            phraseRow.Height = CommonPhraseCollapsedRowHeight;
+        }
+
+        selectedEditorPanel.PerformLayout();
     }
 
     private void SetCellToolTip(DataGridViewCellToolTipTextNeededEventArgs args)

@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="460" viewBox="0 0 920 460" role="img" aria-labelledby="title desc">
+  <title id="title">Secondary dictionary editor behavior</title>
+  <desc id="desc">Resizable dictionary editor with pending edits committed by OK or Enter before closing.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f6f7f9; }
+      .panel { fill: #ffffff; stroke: #d7dbe2; stroke-width: 1; }
+      .input { fill: #ffffff; stroke: #bfc6d1; stroke-width: 1; }
+      .button { fill: #f9fafb; stroke: #c8ced8; stroke-width: 1; }
+      .primary { fill: #2563eb; }
+      .title { fill: #20242a; font: 18px "Segoe UI", Arial, sans-serif; font-weight: 700; }
+      .label { fill: #1f2937; font: 13px "Segoe UI", Arial, sans-serif; font-weight: 600; }
+      .body { fill: #20242a; font: 13px "Segoe UI", Arial, sans-serif; }
+      .small { fill: #68707c; font: 12px "Segoe UI", Arial, sans-serif; }
+      .primaryText { fill: #ffffff; font: 13px "Segoe UI", Arial, sans-serif; font-weight: 600; }
+      .note { fill: #eef6ff; stroke: #93c5fd; stroke-width: 1; }
+      .status { fill: #fff7db; stroke: #e0c15a; stroke-width: 1; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="920" height="460"/>
+  <rect class="panel" x="42" y="32" width="836" height="396" rx="4"/>
+  <text class="title" x="70" y="68">Dictionary / Common Phrase Editor</text>
+  <text class="small" x="70" y="92">Sizable dialog, minimum size preserved</text>
+
+  <rect class="panel" x="70" y="118" width="310" height="218" rx="3"/>
+  <text class="label" x="88" y="144">Registered entries</text>
+  <rect x="88" y="164" width="274" height="42" fill="#fffaf0" stroke="#e9d68e"/>
+  <text class="body" x="104" y="190">old title -&gt; clean title</text>
+  <rect x="88" y="216" width="274" height="42" fill="#ffffff" stroke="#d7dbe2"/>
+  <text class="body" x="104" y="242">season tag</text>
+  <rect x="88" y="268" width="274" height="42" fill="#ffffff" stroke="#d7dbe2"/>
+  <text class="body" x="104" y="294">author alias</text>
+
+  <text class="label" x="420" y="144">Source / phrase</text>
+  <rect class="input" x="420" y="158" width="456" height="34" rx="3"/>
+  <text class="body" x="436" y="180">old title</text>
+  <text class="label" x="420" y="224">Replacement</text>
+  <rect class="input" x="420" y="238" width="456" height="34" rx="3"/>
+  <text class="body" x="436" y="260">clean title</text>
+
+  <rect class="status" x="420" y="292" width="456" height="34" rx="3"/>
+  <text class="body" x="436" y="314">Validation message stays visible when commit fails</text>
+
+  <rect class="button" x="420" y="352" width="88" height="30" rx="4"/>
+  <text class="body" x="442" y="372">Add</text>
+  <rect class="button" x="520" y="352" width="88" height="30" rx="4"/>
+  <text class="body" x="540" y="372">Update</text>
+  <rect class="button" x="620" y="352" width="88" height="30" rx="4"/>
+  <text class="body" x="644" y="372">Delete</text>
+
+  <rect class="note" x="70" y="356" width="310" height="54" rx="3"/>
+  <text class="body" x="88" y="380">OK / Enter commits the edited row first.</text>
+  <text class="small" x="88" y="400">If validation fails, the dialog remains open.</text>
+
+  <rect class="button" x="658" y="386" width="92" height="32" rx="4"/>
+  <text class="body" x="684" y="407">Cancel</text>
+  <rect class="primary" x="768" y="386" width="92" height="32" rx="4"/>
+  <text class="primaryText" x="796" y="407">OK</text>
+</svg>

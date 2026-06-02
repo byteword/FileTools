@@ -114,7 +114,7 @@
   <text class="body" x="784" y="609">아이돌 03화</text>
 
   <text class="label" x="418" y="648">자주 쓰는 문구</text>
-  <text class="small" x="520" y="648">설정에 등록된 문구를 클릭해서 삽입</text>
+  <text class="small" x="520" y="648">한 줄 기본 표시, 더보기로 확장</text>
   <rect class="chip" x="418" y="662" width="70" height="26" rx="13"/>
   <text class="body" x="436" y="680">아이돌</text>
   <rect class="chip" x="496" y="662" width="58" height="26" rx="13"/>
@@ -125,6 +125,8 @@
   <text class="body" x="646" y="680">특별판</text>
   <rect class="chip" x="706" y="662" width="70" height="26" rx="13"/>
   <text class="body" x="724" y="680">마법</text>
+  <rect class="button" x="784" y="662" width="70" height="26" rx="4"/>
+  <text class="body" x="800" y="680">더보기</text>
 
   <rect class="button" x="910" y="704" width="92" height="32" rx="4"/>
   <text class="body" x="937" y="725">취소</text>

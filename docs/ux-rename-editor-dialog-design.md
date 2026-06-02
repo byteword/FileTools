@@ -141,6 +141,7 @@ Replace the bottom "extraction evidence" area with an app-level common word set.
 
 - Frequently used title words, author names, tags, and domain phrases.
 - Words from the current `CommonPhrases`/lexicon configuration.
+- The default view shows only the phrases that fit in one row and uses More/Collapse controls to avoid crowding the editor when the phrase set grows.
 - Recently used words from accepted rename edits. Deferred.
 - User-added words that improve future correction candidates. Deferred.
 
@@ -239,7 +240,7 @@ Implement first:
 - Final filename textbox.
 - Structured title, episode, author, tags, and extension fields.
 - Token insert buttons from original stem, parsed parts, and correction candidates.
-- Insert-only common phrase chips from the existing app-level dictionary.
+- Insert-only common phrase chips from the existing app-level dictionary, initially limited to one row with an expandable view.
 - Immediate validation and current summary behavior.
 - Next problem navigation.
 

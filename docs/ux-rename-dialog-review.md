@@ -47,7 +47,7 @@ The current dialog uses a two-pane editor: a read-only item list on the left and
 - Exposes extracted title, episode, author, tags, and extension fields.
 - Re-composes the target filename when extracted part fields change.
 - Provides insertable token buttons from original text, parsed parts, and correction candidates.
-- Shows existing common phrases as insertable chips when configured.
+- Shows existing common phrases as insertable chips when configured, collapsed to one row by default with More/Collapse controls for large phrase sets.
 - Adds next-issue navigation.
 
 ## Remaining UX Notes

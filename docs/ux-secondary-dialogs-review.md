@@ -9,6 +9,10 @@ Scope:
 - `src/FileTools.App/Ui/RenameDictionaryEditorDialog.cs`
 - `src/FileTools.App/Ui/StringListEditorDialog.cs`
 
+Current reference:
+
+![Secondary dictionary editor behavior](images/secondary-editor-dialog-resize-commit.svg)
+
 ## Summary
 
 The secondary editing dialogs now better match the newer settings and rename editor direction. They avoid silent failures, handle longer values more reliably, and reduce brittle fixed-position layouts where users are likely to see long template names, paths, or localized labels.
@@ -23,7 +27,8 @@ The secondary editing dialogs now better match the newer settings and rename edi
 - AutoRelocation plan-step template selection and manual target root fields resize with the dialog.
 - Long selected templates and manual target paths are available through tooltips.
 - Rename dictionary and common phrase editors now show inline status messages for empty values and duplicates instead of silently ignoring Add/Update.
-- Rename dictionary and common phrase editor input rows resize horizontally with the dialog.
+- Rename dictionary and common phrase editor dialogs are resizable, and their input rows resize horizontally with the dialog.
+- Rename dictionary and common phrase editor OK/Enter handling commits the current edited row before closing; validation failures keep the dialog open with the inline status message.
 
 ## Remaining Notes
 
