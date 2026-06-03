@@ -13,11 +13,16 @@
     <MediaTemplate EmbedCab="yes" />
 
     <Property Id="INSTALLLEVEL" Value="1" />
+    <Property Id="FILETOOLS_INSTALL_CONTEXT_MENU" Value="1" />
+    <Property Id="FILETOOLS_CREATE_START_MENU_SHORTCUT" Value="1" />
+    <Property Id="FILETOOLS_CREATE_DESKTOP_SHORTCUT" Value="0" />
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
     <Property Id="ARPPRODUCTICON" Value="FileToolsAppIcon" />
     <Icon Id="FileToolsAppIcon" SourceFile="$(var.AppIconPath)" />
     <ui:WixUI Id="WixUI_FeatureTree" />
     <WixVariable Id="WixUILicenseRtf" Value="$(var.LicenseRtfPath)" />
+    <WixVariable Id="WixUIDialogBmp" Value="$(var.MsiDialogBmpPath)" />
+    <WixVariable Id="WixUIBannerBmp" Value="$(var.MsiBannerBmpPath)" />
 
     <StandardDirectory Id="LocalAppDataFolder">
       <Directory Id="ProgramsFolder" Name="Programs">
@@ -27,6 +32,23 @@
 
     <StandardDirectory Id="ProgramMenuFolder">
       <Directory Id="ProgramMenuFileTools" Name="FileTools" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder">
+      <Component Id="DesktopShortcutComponent" Guid="4b9837aa-a72b-4cfd-b5a0-15eadc7de088" Condition="FILETOOLS_CREATE_DESKTOP_SHORTCUT=&quot;1&quot;">
+        <Shortcut
+          Id="DesktopShortcut"
+          Name="FileTools"
+          Target="[INSTALLFOLDER]FileTools.exe"
+          WorkingDirectory="INSTALLFOLDER" />
+        <RegistryValue
+          Root="HKCU"
+          Key="Software\FileTools"
+          Name="DesktopShortcut"
+          Type="integer"
+          Value="1"
+          KeyPath="yes" />
+      </Component>
     </StandardDirectory>
 
     <DirectoryRef Id="INSTALLFOLDER">
@@ -45,6 +67,16 @@
 
       <Component Id="ShellExtensionComponent" Guid="b11f26f8-cc8d-4e91-93aa-1858643a50b7">
         <File Id="FileToolsShellExtFile" Source="$(var.ShellExtensionPath)" />
+        <RegistryValue
+          Root="HKCU"
+          Key="Software\FileTools"
+          Name="ShellExtensionInstalled"
+          Type="integer"
+          Value="1"
+          KeyPath="yes" />
+      </Component>
+
+      <Component Id="ShellExtensionRegistrationComponent" Guid="fc25cfad-7aa2-4d6a-9f0a-6516389403d7" Condition="FILETOOLS_INSTALL_CONTEXT_MENU&lt;&gt;&quot;0&quot;">
         <RegistryValue Root="HKCU" Key="Software\Classes\CLSID\{716e7cc4-5941-4362-8aca-d38c62817de9}" Type="string" Value="FileTools Shell Extension" KeyPath="yes" />
         <RegistryValue Root="HKCU" Key="Software\Classes\CLSID\{716e7cc4-5941-4362-8aca-d38c62817de9}\InprocServer32" Type="string" Value="[INSTALLFOLDER]FileTools.ShellExt.dll" />
         <RegistryValue Root="HKCU" Key="Software\Classes\CLSID\{716e7cc4-5941-4362-8aca-d38c62817de9}\InprocServer32" Name="ThreadingModel" Type="string" Value="Apartment" />
@@ -76,7 +108,7 @@
           KeyPath="yes" />
       </Component>
 
-      <Component Id="ContextMenuExpandedFilesComponent" Guid="d905f5af-190d-4c7f-a85e-774ecd31f746" Condition="&amp;ContextMenuExpandedFeature=3">
+      <Component Id="ContextMenuExpandedFilesComponent" Guid="d905f5af-190d-4c7f-a85e-774ecd31f746" Condition="FILETOOLS_INSTALL_CONTEXT_MENU&lt;&gt;&quot;0&quot; AND &amp;ContextMenuExpandedFeature=3">
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_01_NameCorrection" Type="string" Value="파일이름 자동 교정" KeyPath="yes" />
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_01_NameCorrection" Name="MUIVerb" Type="string" Value="파일이름 자동 교정" />
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_01_NameCorrection" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
@@ -110,7 +142,7 @@
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools_99_Open\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /open &quot;%1&quot;" />
       </Component>
 
-      <Component Id="ContextMenuExpandedDirectoriesComponent" Guid="d31ff423-ff85-46d1-81d7-26da1ca93cc8" Condition="&amp;ContextMenuExpandedFeature=3">
+      <Component Id="ContextMenuExpandedDirectoriesComponent" Guid="d31ff423-ff85-46d1-81d7-26da1ca93cc8" Condition="FILETOOLS_INSTALL_CONTEXT_MENU&lt;&gt;&quot;0&quot; AND &amp;ContextMenuExpandedFeature=3">
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_01_NameCorrection" Type="string" Value="파일이름 자동 교정" KeyPath="yes" />
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_01_NameCorrection" Name="MUIVerb" Type="string" Value="파일이름 자동 교정" />
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_01_NameCorrection" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
@@ -156,7 +188,7 @@
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools_99_Open\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /open &quot;%1&quot;" />
       </Component>
 
-      <Component Id="ContextMenuGroupedFilesComponent" Guid="842b2a81-b217-43a1-bec5-4d3457bd234d" Condition="&amp;ContextMenuExpandedFeature&lt;&gt;3">
+      <Component Id="ContextMenuGroupedFilesComponent" Guid="842b2a81-b217-43a1-bec5-4d3457bd234d" Condition="FILETOOLS_INSTALL_CONTEXT_MENU&lt;&gt;&quot;0&quot; AND &amp;ContextMenuExpandedFeature&lt;&gt;3">
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools" Name="MUIVerb" Type="string" Value="FileTools" KeyPath="yes" />
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools" Name="MultiSelectModel" Type="string" Value="Player" />
@@ -178,7 +210,7 @@
         <RegistryValue Root="HKCU" Key="Software\Classes\*\shell\FileTools\ExtendedSubCommandsKey\Shell\FileTools_99_Open\command" Type="string" Value="&quot;[INSTALLFOLDER]FileTools.exe&quot; /open &quot;%1&quot;" />
       </Component>
 
-      <Component Id="ContextMenuGroupedDirectoriesComponent" Guid="3ab862d5-b794-4a7f-8c0f-176a4352a48f" Condition="&amp;ContextMenuExpandedFeature&lt;&gt;3">
+      <Component Id="ContextMenuGroupedDirectoriesComponent" Guid="3ab862d5-b794-4a7f-8c0f-176a4352a48f" Condition="FILETOOLS_INSTALL_CONTEXT_MENU&lt;&gt;&quot;0&quot; AND &amp;ContextMenuExpandedFeature&lt;&gt;3">
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools" Name="MUIVerb" Type="string" Value="FileTools" KeyPath="yes" />
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools" Name="Icon" Type="string" Value="[INSTALLFOLDER]FileTools.exe" />
         <RegistryValue Root="HKCU" Key="Software\Classes\Directory\shell\FileTools" Name="MultiSelectModel" Type="string" Value="Player" />
@@ -208,7 +240,7 @@
     </DirectoryRef>
 
     <DirectoryRef Id="ProgramMenuFileTools">
-      <Component Id="StartMenuShortcutComponent" Guid="4cbe5d9c-11be-4bf8-ae44-d6ec6ffad7e3">
+      <Component Id="StartMenuShortcutComponent" Guid="4cbe5d9c-11be-4bf8-ae44-d6ec6ffad7e3" Condition="FILETOOLS_CREATE_START_MENU_SHORTCUT&lt;&gt;&quot;0&quot;">
         <Shortcut
           Id="StartMenuShortcut"
           Name="FileTools"
@@ -229,9 +261,11 @@
       <ComponentRef Id="FileToolsExeComponent" />
       <ComponentRef Id="InstallStateComponent" />
       <ComponentRef Id="StartMenuShortcutComponent" />
+      <ComponentRef Id="DesktopShortcutComponent" />
 
       <Feature Id="ContextMenuFeature" Title="Explorer Context Menu" Description="Register FileTools commands in Explorer context menus." Level="1">
         <ComponentRef Id="ShellExtensionComponent" />
+        <ComponentRef Id="ShellExtensionRegistrationComponent" />
         <Feature Id="ContextMenuGroupedFeature" Title="Legacy Grouped Context Menu" Level="0">
           <ComponentRef Id="ContextMenuGroupedFilesComponent" />
           <ComponentRef Id="ContextMenuGroupedDirectoriesComponent" />

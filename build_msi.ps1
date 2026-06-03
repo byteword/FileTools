@@ -1,9 +1,26 @@
+param(
+    [string] $Configuration = 'Release',
+    [string] $SigningPublisher = 'CN=FileTools Self-Signed'
+)
+
 $ErrorActionPreference = 'Stop'
 
+$version = '1.1.0.0'
 $solution = Join-Path $PSScriptRoot 'installer\FileTools.Installer.sln'
+$installerProject = Join-Path $PSScriptRoot 'installer\FileTools.Installer\FileTools.Installer.wixproj'
+$bundleProject = Join-Path $PSScriptRoot 'installer\FileTools.Bundle\FileTools.Bundle.wixproj'
 $shellExtProject = Join-Path $PSScriptRoot 'src\FileTools.ShellExt\FileTools.ShellExt.vcxproj'
-$msi = Join-Path $PSScriptRoot 'installer\FileTools.Installer\bin\Release\FileTools.msi'
-$setup = Join-Path $PSScriptRoot 'installer\FileTools.Bundle\bin\Release\FileToolsSetup.exe'
+$identityHelperProject = Join-Path $PSScriptRoot 'src\FileTools.IdentityHelper\FileTools.IdentityHelper.csproj'
+$identityHelperPublishDir = Join-Path $PSScriptRoot 'artifacts\publish\FileTools.IdentityHelper-win-x64'
+$identityHelper = Join-Path $identityHelperPublishDir 'FileTools.IdentityHelper.exe'
+$identityPackageScript = Join-Path $PSScriptRoot 'scripts\build_identity_msix.ps1'
+$identityOutputDir = Join-Path $PSScriptRoot 'artifacts\identity'
+$identityMsix = Join-Path $identityOutputDir 'FileTools.Identity.msix'
+$identityCer = Join-Path $identityOutputDir 'FileTools.Identity.cer'
+$signingOutputDir = Join-Path $PSScriptRoot 'artifacts\signing'
+$signingPfx = Join-Path $signingOutputDir 'FileTools.Signing.pfx'
+$msi = Join-Path $PSScriptRoot "installer\FileTools.Installer\bin\$Configuration\FileTools.msi"
+$setup = Join-Path $PSScriptRoot "installer\FileTools.Bundle\bin\$Configuration\FileToolsSetup.exe"
 
 if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
     throw 'dotnet SDK was not found. Install .NET 8 SDK first.'
@@ -29,20 +46,144 @@ function Find-MSBuild {
     throw 'MSBuild with Visual C++ tools was not found. Install Visual Studio Build Tools with the C++ workload.'
 }
 
+function Find-WindowsSdkTool {
+    param([Parameter(Mandatory = $true)][string] $ToolName)
+
+    $sdkRoot = Join-Path ${env:ProgramFiles(x86)} 'Windows Kits\10\bin'
+    $candidates = Get-ChildItem -Path $sdkRoot -Recurse -Filter $ToolName -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -match '\\x64\\' } |
+        ForEach-Object {
+            $versionText = Split-Path (Split-Path $_.DirectoryName -Parent) -Leaf
+            $version = $null
+            [pscustomobject]@{
+                Tool = $_
+                Version = if ([version]::TryParse($versionText, [ref] $version)) { $version } else { [version] '0.0' }
+            }
+        }
+
+    $candidate = $candidates |
+        Sort-Object Version, { $_.Tool.FullName } -Descending |
+        Select-Object -First 1
+
+    if (-not $candidate) {
+        throw "$ToolName was not found under $sdkRoot."
+    }
+
+    return $candidate.Tool.FullName
+}
+
+function New-SigningMaterial {
+    param([Parameter(Mandatory = $true)][string] $Publisher)
+
+    New-Item -ItemType Directory -Force -Path $signingOutputDir | Out-Null
+    New-Item -ItemType Directory -Force -Path $identityOutputDir | Out-Null
+
+    $base64 = $env:FILETOOLS_SIGNING_PFX_BASE64
+    $password = $env:FILETOOLS_SIGNING_PASSWORD
+    if ([string]::IsNullOrWhiteSpace($base64)) {
+        $base64 = $env:MSIX_SIGNING_PFX_BASE64
+    }
+
+    if ([string]::IsNullOrWhiteSpace($password)) {
+        $password = $env:MSIX_SIGNING_PASSWORD
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($base64)) {
+        if ([string]::IsNullOrWhiteSpace($password)) {
+            throw 'A signing PFX was provided but FILETOOLS_SIGNING_PASSWORD/MSIX_SIGNING_PASSWORD is empty.'
+        }
+
+        [IO.File]::WriteAllBytes($signingPfx, [Convert]::FromBase64String($base64))
+        $cert = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new($signingPfx, $password)
+        if ($cert.Subject -ne $Publisher) {
+            throw "Signing certificate subject '$($cert.Subject)' must match '$Publisher'."
+        }
+
+        [IO.File]::WriteAllBytes($identityCer, $cert.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert))
+        return [pscustomobject]@{
+            PfxPath = $signingPfx
+            Password = $password
+            Publisher = $cert.Subject
+            CertificatePath = $identityCer
+            IsTemporary = $false
+        }
+    }
+
+    $password = [Guid]::NewGuid().ToString('N')
+    $securePassword = ConvertTo-SecureString $password -AsPlainText -Force
+    $cert = New-SelfSignedCertificate `
+        -Type Custom `
+        -Subject $Publisher `
+        -KeyUsage DigitalSignature `
+        -KeyAlgorithm RSA `
+        -KeyLength 2048 `
+        -CertStoreLocation Cert:\CurrentUser\My `
+        -TextExtension @('2.5.29.37={text}1.3.6.1.5.5.7.3.3', '2.5.29.19={text}')
+
+    Export-PfxCertificate -Cert $cert -FilePath $signingPfx -Password $securePassword | Out-Null
+    [IO.File]::WriteAllBytes($identityCer, $cert.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert))
+    Remove-Item "Cert:\CurrentUser\My\$($cert.Thumbprint)" -Force -ErrorAction SilentlyContinue
+
+    return [pscustomobject]@{
+        PfxPath = $signingPfx
+        Password = $password
+        Publisher = $cert.Subject
+        CertificatePath = $identityCer
+        IsTemporary = $true
+    }
+}
+
+function Invoke-CodeSigning {
+    param(
+        [Parameter(Mandatory = $true)][string] $FilePath,
+        [Parameter(Mandatory = $true)] $SigningMaterial
+    )
+
+    $signtool = Find-WindowsSdkTool 'signtool.exe'
+    $args = @('sign', '/fd', 'SHA256', '/f', $SigningMaterial.PfxPath, '/p', $SigningMaterial.Password)
+    if (-not [string]::IsNullOrWhiteSpace($env:FILETOOLS_TIMESTAMP_URL)) {
+        $args += @('/tr', $env:FILETOOLS_TIMESTAMP_URL, '/td', 'SHA256')
+    }
+
+    $args += $FilePath
+    & $signtool @args
+    if ($LASTEXITCODE -ne 0) {
+        throw "Code signing failed for $FilePath with exit code $LASTEXITCODE."
+    }
+}
+
 if (Test-Path $msi) {
     Remove-Item $msi -Force
 }
 if (Test-Path $setup) {
     Remove-Item $setup -Force
 }
+Remove-Item $identityOutputDir -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item $identityHelperPublishDir -Recurse -Force -ErrorAction SilentlyContinue
+
+$signing = New-SigningMaterial -Publisher $SigningPublisher
 
 $msbuild = Find-MSBuild
-& $msbuild $shellExtProject /p:Configuration=Release /p:Platform=x64 /m
+& $msbuild $shellExtProject /p:Configuration=$Configuration /p:Platform=x64 /m
 if ($LASTEXITCODE -ne 0) {
     throw "Shell extension build failed with exit code $LASTEXITCODE."
 }
 
-dotnet build $solution -c Release
+dotnet publish $identityHelperProject -c $Configuration -r win-x64 --self-contained false -p:PublishSingleFile=true -o $identityHelperPublishDir
+if ($LASTEXITCODE -ne 0) {
+    throw "Identity helper publish failed with exit code $LASTEXITCODE."
+}
+if (-not (Test-Path $identityHelper)) {
+    throw "Identity helper not found: $identityHelper"
+}
+
+& $identityPackageScript -Version $version -Publisher $signing.Publisher -OutputPath $identityMsix
+if ($LASTEXITCODE -ne 0) {
+    throw "Identity MSIX build failed with exit code $LASTEXITCODE."
+}
+Invoke-CodeSigning -FilePath $identityMsix -SigningMaterial $signing
+
+dotnet build $installerProject -c $Configuration
 if ($LASTEXITCODE -ne 0) {
     throw "MSI build failed with exit code $LASTEXITCODE."
 }
@@ -50,9 +191,26 @@ if ($LASTEXITCODE -ne 0) {
 if (-not (Test-Path $msi)) {
     throw "MSI not found: $msi"
 }
+Invoke-CodeSigning -FilePath $msi -SigningMaterial $signing
+
+dotnet build $bundleProject -c $Configuration `
+    /p:SkipBuildFileToolsMsi=true `
+    /p:IdentityHelperPath="$identityHelper" `
+    /p:IdentityMsixPath="$identityMsix" `
+    /p:IdentityCertificatePath="$identityCer"
+if ($LASTEXITCODE -ne 0) {
+    throw "Setup bootstrapper build failed with exit code $LASTEXITCODE."
+}
+
 if (-not (Test-Path $setup)) {
     throw "Setup bootstrapper not found: $setup"
 }
+Invoke-CodeSigning -FilePath $setup -SigningMaterial $signing
 
 Write-Host "MSI created: $msi"
 Write-Host "Setup bootstrapper created: $setup"
+Write-Host "Identity MSIX created: $identityMsix"
+Write-Host "Identity certificate created: $identityCer"
+if ($signing.IsTemporary) {
+    Write-Host "Signed with a temporary self-signed certificate. Set FILETOOLS_SIGNING_PFX_BASE64 and FILETOOLS_SIGNING_PASSWORD for reproducible release signing."
+}

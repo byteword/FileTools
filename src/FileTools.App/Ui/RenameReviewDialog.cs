@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Drawing;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace FileTools;
@@ -13,6 +14,20 @@ internal sealed class RenameReviewDialog : Form
     private const int TokenButtonRightMargin = 6;
     private const int TokenButtonBottomMargin = 6;
 
+    private static readonly Regex CandidateBracketMetadataRegex = new(
+        @"\[[^\]\r\n]{1,80}\]|\([^\)\r\n]{1,80}\)|\{[^\}\r\n]{1,80}\}",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    private static readonly Regex CandidateEpisodeSuffixRegex = new(
+        @"(?:^|[\s._~-])(?:제\s*)?\d+(?:\.\d+)?(?:\s*[-~]\s*\d+(?:\.\d+)?)?\s*(?:화|회|권|권째|부|편|장|vol(?:ume)?|v|ep(?:isode)?|ch(?:apter)?)\s*$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+
+    private static readonly Regex CandidateWhitespaceRegex = new(
+        @"\s+",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    private static readonly char[] CandidateTitleTrimChars = [' ', '\t', '\r', '\n', '_', '-', '.', ',', '~'];
+
     private static readonly StringComparer PathComparer = OperatingSystem.IsWindows()
         ? StringComparer.OrdinalIgnoreCase
         : StringComparer.Ordinal;
@@ -24,6 +39,7 @@ internal sealed class RenameReviewDialog : Form
     private readonly Button _cancelButton = new();
     private readonly Button _nextIssueButton = new();
     private readonly Button _skipButton = new();
+    private readonly Button _ruleTraceButton = new();
     private readonly Button _useOriginalButton = new();
     private readonly Button _useAutomaticButton = new();
     private readonly DataGridView _grid = new();
@@ -438,6 +454,12 @@ internal sealed class RenameReviewDialog : Form
         _skipButton.Height = 28;
         _skipButton.Click += (_, _) => SkipSelectedRow();
         leftButtons.Controls.Add(_skipButton);
+
+        _ruleTraceButton.Text = Localizer.Get("ButtonRuleTrace");
+        _ruleTraceButton.Width = 104;
+        _ruleTraceButton.Height = 28;
+        _ruleTraceButton.Click += (_, _) => ShowSelectedRuleTrace();
+        leftButtons.Controls.Add(_ruleTraceButton);
         footer.Controls.Add(leftButtons, 0, 0);
 
         var rightButtons = new FlowLayoutPanel
@@ -655,6 +677,27 @@ internal sealed class RenameReviewDialog : Form
         _selectedRow.SetSkipped();
         SyncEditorFromRow(_selectedRow);
         ValidateRows();
+    }
+
+    private void ShowSelectedRuleTrace()
+    {
+        if (_selectedRow is null)
+        {
+            return;
+        }
+
+        var lines = BuildRuleTraceLines(_selectedRow.Preview).ToArray();
+        if (lines.Length == 0)
+        {
+            ShowValidation(Localizer.Get("RenameRuleTraceEmptyMessage"));
+            return;
+        }
+
+        MessageBox.Show(
+            string.Join(Environment.NewLine, lines),
+            Localizer.Get("DialogRenameRuleTraceTitle"),
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
     }
 
     private void SetSelectedSuggestedName(string fileName, bool userEdited, bool resetDraft)
@@ -900,6 +943,7 @@ internal sealed class RenameReviewDialog : Form
         _okButton.Enabled = !_rows.Any(static row => row.BlockingError);
         _nextIssueButton.Enabled = _rows.Any(static row => IsIssueState(row.State));
         _skipButton.Enabled = _selectedRow is not null && !_selectedRow.IsSkipped;
+        _ruleTraceButton.Enabled = _selectedRow?.Preview.RuleTraces.Count > 0;
     }
 
     private void UpdateSelectedValidation()
@@ -1234,6 +1278,22 @@ internal sealed class RenameReviewDialog : Form
         }
     }
 
+    private static IEnumerable<string> BuildRuleTraceLines(RenamePreview preview)
+    {
+        foreach (var trace in preview.RuleTraces)
+        {
+            var action = trace.Applied
+                ? Localizer.Get("RenameRuleTraceApplied")
+                : Localizer.Get("RenameRuleTraceCandidateOnly");
+            var review = trace.RequiresReview
+                ? " / " + RenameCorrectionRuleText.GetModeDisplayName(RenameCorrectionRuleMode.Review)
+                : "";
+            yield return $"{action}{review}: [{RenameCorrectionRuleText.GetStageDisplayName(trace.Stage)}] {trace.RuleName}";
+            yield return $"  {Localizer.Get("RenameRuleTraceBefore")}: {trace.Before}";
+            yield return $"  {Localizer.Get("RenameRuleTraceAfter")}: {trace.After}";
+        }
+    }
+
     private static IEnumerable<string> GetTokenCandidates(RenameRow row)
     {
         var originalStem = Path.GetFileNameWithoutExtension(row.OriginalName);
@@ -1262,8 +1322,49 @@ internal sealed class RenameReviewDialog : Form
 
         foreach (var candidate in row.Preview.Candidates)
         {
+            foreach (var token in GetCorrectionCandidateTokens(candidate.Value))
+            {
+                yield return token;
+            }
+        }
+
+        foreach (var candidate in row.Preview.Candidates)
+        {
             yield return candidate.Value;
         }
+    }
+
+    private static IEnumerable<string> GetCorrectionCandidateTokens(string candidateFileName)
+    {
+        var stem = Path.GetFileNameWithoutExtension(candidateFileName);
+        var title = NormalizeCandidateTitleToken(stem);
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            yield break;
+        }
+
+        yield return title;
+        foreach (var token in SplitUsefulTokens(title))
+        {
+            yield return token;
+        }
+    }
+
+    private static string NormalizeCandidateTitleToken(string value)
+    {
+        var result = CandidateBracketMetadataRegex.Replace(value, " ");
+        while (true)
+        {
+            var next = CandidateEpisodeSuffixRegex.Replace(result, " ");
+            if (string.Equals(next, result, StringComparison.Ordinal))
+            {
+                break;
+            }
+
+            result = next;
+        }
+
+        return CandidateWhitespaceRegex.Replace(result, " ").Trim(CandidateTitleTrimChars);
     }
 
     private static IEnumerable<string> SplitUsefulTokens(string value)

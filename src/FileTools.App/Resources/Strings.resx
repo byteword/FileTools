@@ -192,11 +192,25 @@
   <data name="CheckRenameUseDictionary" xml:space="preserve"><value>Use rename dictionary when available</value></data>
   <data name="ButtonEditRenameDictionary" xml:space="preserve"><value>Edit rename dictionary...</value></data>
   <data name="ButtonEditCommonPhrases" xml:space="preserve"><value>Edit common phrases...</value></data>
+  <data name="ButtonEditRenameRules" xml:space="preserve"><value>Edit rules...</value></data>
   <data name="DialogRenameDictionaryTitle" xml:space="preserve"><value>Rename dictionary</value></data>
   <data name="DialogCommonPhrasesTitle" xml:space="preserve"><value>Common phrase dictionary</value></data>
+  <data name="DialogRenameRulesTitle" xml:space="preserve"><value>Rename correction rules</value></data>
   <data name="LabelSourceText" xml:space="preserve"><value>Source text</value></data>
   <data name="LabelReplacementText" xml:space="preserve"><value>Replacement text</value></data>
   <data name="LabelCommonPhrase" xml:space="preserve"><value>Phrase</value></data>
+  <data name="RenameRulesListLabel" xml:space="preserve"><value>Rules</value></data>
+  <data name="LabelRuleEnabled" xml:space="preserve"><value>Enabled</value></data>
+  <data name="LabelRuleName" xml:space="preserve"><value>Name</value></data>
+  <data name="LabelRuleStage" xml:space="preserve"><value>Stage</value></data>
+  <data name="LabelRuleKind" xml:space="preserve"><value>Kind</value></data>
+  <data name="LabelRuleMode" xml:space="preserve"><value>Mode</value></data>
+  <data name="LabelRuleSource" xml:space="preserve"><value>Source</value></data>
+  <data name="LabelRuleReplacement" xml:space="preserve"><value>Replacement</value></data>
+  <data name="LabelRuleDescription" xml:space="preserve"><value>Description</value></data>
+  <data name="CheckRuleIgnoreCase" xml:space="preserve"><value>Ignore case</value></data>
+  <data name="NewRenameRuleDisplayName" xml:space="preserve"><value>New rule</value></data>
+  <data name="RenameRuleSourceRequiredMessage" xml:space="preserve"><value>Enter a source value for this rule type.</value></data>
   <data name="EditorValueRequiredMessage" xml:space="preserve"><value>Enter a value before adding or updating.</value></data>
   <data name="EditorDuplicateValueMessage" xml:space="preserve"><value>This value is already registered.</value></data>
   <data name="LabelDefaultTemplate" xml:space="preserve"><value>Default template</value></data>
@@ -263,6 +277,13 @@
   <data name="ButtonUseAutomaticName" xml:space="preserve"><value>Use automatic name</value></data>
   <data name="ButtonNextIssue" xml:space="preserve"><value>Next issue</value></data>
   <data name="ButtonRenameSkip" xml:space="preserve"><value>Skip</value></data>
+  <data name="ButtonRuleTrace" xml:space="preserve"><value>Rule trace</value></data>
+  <data name="DialogRenameRuleTraceTitle" xml:space="preserve"><value>Applied rename rules</value></data>
+  <data name="RenameRuleTraceEmptyMessage" xml:space="preserve"><value>No rename rules changed this item.</value></data>
+  <data name="RenameRuleTraceApplied" xml:space="preserve"><value>Applied</value></data>
+  <data name="RenameRuleTraceCandidateOnly" xml:space="preserve"><value>Candidate</value></data>
+  <data name="RenameRuleTraceBefore" xml:space="preserve"><value>Before</value></data>
+  <data name="RenameRuleTraceAfter" xml:space="preserve"><value>After</value></data>
   <data name="MenuFile" xml:space="preserve"><value>File</value></data>
   <data name="MenuTasks" xml:space="preserve"><value>Tasks</value></data>
   <data name="MenuSettings" xml:space="preserve"><value>Settings</value></data>

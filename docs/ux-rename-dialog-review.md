@@ -47,7 +47,9 @@ The current dialog uses a two-pane editor: a read-only item list on the left and
 - Exposes extracted title, episode, author, tags, and extension fields.
 - Re-composes the target filename when extracted part fields change.
 - Provides insertable token buttons from original text, parsed parts, and correction candidates.
+- Extracts cleaned title tokens from correction candidate filenames before showing the full candidate filename, so a candidate such as `[Monaka] 아가씨는 벌 받는 걸 좋아해 10권` also offers `아가씨는 벌 받는 걸 좋아해`.
 - Shows existing common phrases as insertable chips when configured, collapsed to one row by default with More/Collapse controls for large phrase sets.
+- Adds a rule-trace action so the selected row can show which built-in or user correction rules changed the name or produced candidates before apply.
 - Adds next-issue navigation.
 
 ## Remaining UX Notes
@@ -58,7 +60,7 @@ Generated conflict rows still appear as conflicts until the user edits them. Thi
 
 ### 2. Candidate details are exposed as insert tokens
 
-The reason column remains hidden to keep the list focused, but candidate alternatives are now available as selected-row token buttons. Internal extraction reasons are still not shown in the default editor surface.
+The reason column remains hidden to keep the list focused, but candidate alternatives are now available as selected-row token buttons. Candidate filenames are also reduced to title-only token options by removing bracket metadata and trailing episode or volume suffixes before the full candidate filename is shown. Internal extraction reasons are still not shown in the default editor surface.
 
 Recommended next change:
 
@@ -87,3 +89,4 @@ Recommended next change:
 2. Add extension-change warnings for file targets.
 3. Remember the last dialog size after real-use validation.
 4. Consider in-dialog common phrase add/remove after the editor is validated in real use.
+5. Consider a non-modal rule trace panel if users need to compare traces across many rows.

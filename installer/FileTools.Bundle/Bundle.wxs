@@ -6,15 +6,27 @@
   <?define DotNetDesktopRuntimeUrl = https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/$(var.DotNetDesktopRuntimeVersion)/windowsdesktop-runtime-$(var.DotNetDesktopRuntimeVersion)-win-x64.exe ?>
 
   <Bundle
-    Name="FileTools Setup"
+    Name="FileTools"
     Manufacturer="byteword"
     Version="$(var.ProductVersion)"
     UpgradeCode="6eaac913-dcd6-4584-9816-60f90582b79a"
     IconSourceFile="$(var.AppIconPath)">
 
     <BootstrapperApplication>
-      <bal:WixStandardBootstrapperApplication Theme="hyperlinkLicense" LicenseUrl="https://opensource.org/license/mit" />
+      <bal:WixStandardBootstrapperApplication
+        Theme="hyperlinkLicense"
+        ThemeFile="$(var.BundleThemePath)"
+        LocalizationFile="$(var.BundleThemeLocalizationPath)"
+        LogoFile="$(var.SetupLogoPath)"
+        LicenseUrl="https://opensource.org/license/mit"
+        LaunchTarget="[LocalAppDataFolder]Programs\FileTools\FileTools.exe"
+        LaunchWorkingFolder="[LocalAppDataFolder]Programs\FileTools" />
     </BootstrapperApplication>
+
+    <Variable Name="InstallContextMenu" Type="numeric" Value="1" bal:Overridable="yes" />
+    <Variable Name="CreateStartMenuShortcut" Type="numeric" Value="1" bal:Overridable="yes" />
+    <Variable Name="CreateDesktopShortcut" Type="numeric" Value="0" bal:Overridable="yes" />
+    <Variable Name="EnableWindows11ContextMenu" Type="numeric" Value="0" bal:Overridable="yes" />
 
     <util:RegistrySearch
       Id="FindDotNetDesktopRuntime8"
@@ -24,15 +36,24 @@
       Variable="DotNetDesktopRuntime8Installed"
       Result="exists" />
 
+    <util:RegistrySearch
+      Id="FindFileToolsWindows11Identity"
+      Root="HKCU"
+      Key="SOFTWARE\FileTools"
+      Value="Windows11IdentityInstalled"
+      Variable="FileToolsWindows11IdentityInstalled"
+      Result="value" />
+
     <Chain>
       <ExePackage
         Id="DotNetDesktopRuntime8X64"
         DisplayName="Microsoft .NET Desktop Runtime 8.0.27 (x64)"
-        Cache="keep"
+        Cache="remove"
         PerMachine="yes"
         Permanent="yes"
         Vital="yes"
         DetectCondition="DotNetDesktopRuntime8Installed"
+        InstallCondition="NOT DotNetDesktopRuntime8Installed"
         InstallArguments="/install /quiet /norestart"
         RepairArguments="/repair /quiet /norestart"
         UninstallArguments="/uninstall /quiet /norestart">
@@ -50,8 +71,27 @@
         Id="FileToolsMsi"
         SourceFile="$(var.MsiPath)"
         Compressed="yes"
-        bal:DisplayInternalUICondition="1"
-        Vital="yes" />
+        Vital="yes">
+        <MsiProperty Name="FILETOOLS_INSTALL_CONTEXT_MENU" Value="[InstallContextMenu]" />
+        <MsiProperty Name="FILETOOLS_CREATE_START_MENU_SHORTCUT" Value="[CreateStartMenuShortcut]" />
+        <MsiProperty Name="FILETOOLS_CREATE_DESKTOP_SHORTCUT" Value="[CreateDesktopShortcut]" />
+      </MsiPackage>
+
+      <ExePackage
+        Id="FileToolsWindows11Identity"
+        SourceFile="$(var.IdentityHelperPath)"
+        Name="FileTools.IdentityHelper.exe"
+        DisplayName="FileTools Windows 11 Context Menu identity"
+        Cache="remove"
+        PerMachine="no"
+        Vital="yes"
+        DetectCondition="FileToolsWindows11IdentityInstalled"
+        InstallCondition="EnableWindows11ContextMenu"
+        InstallArguments="install --msix FileTools.Identity.msix --cert FileTools.Identity.cer --external-location &quot;[LocalAppDataFolder]Programs\FileTools&quot;"
+        UninstallArguments="uninstall">
+        <Payload SourceFile="$(var.IdentityMsixPath)" Name="FileTools.Identity.msix" />
+        <Payload SourceFile="$(var.IdentityCertificatePath)" Name="FileTools.Identity.cer" />
+      </ExePackage>
     </Chain>
   </Bundle>
 </Wix>

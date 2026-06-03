@@ -2,7 +2,7 @@
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
-Current version: `1.0.1.8`.
+Current version: `1.1.0.0`.
 
 ## Features
 
@@ -56,10 +56,10 @@ The standalone window supports:
 The settings window owns operational defaults and Explorer ContextMenu installation/removal. Native ShellExt registration uses one FileTools submenu, and individual ContextMenu actions can be enabled or disabled.
 Folder wrapping/unwrapping and AutoRelocation commands can be selected independently for Explorer registration. Pressing OK in the settings window saves the options and synchronizes the current-user ContextMenu registration, even if the Install/Remove buttons are not pressed.
 The settings layout notes are tracked in `docs/ux-settings-dialog-review.md`.
-The app icon is stored as transparent PNG and multi-size ICO assets under `src\FileTools.App\Resources`; the EXE and MSI product metadata both use the ICO.
+The app icon is stored as transparent PNG and multi-size ICO assets under `src\FileTools.App\Resources`; the EXE and MSI product metadata both use the ICO. The Burn setup and uninstall UI use a separate blue setup logo under `installer\FileTools.Bundle\Assets`, and the MSI wizard uses separate blue dialog/banner bitmaps under `installer\FileTools.Installer\Assets`.
 
 The rename review dialog is used by ContextMenu rename commands and by standalone plan editing.
-Rename review can be configured to always open before applying changes, or to open only when generated rows need review or have conflicts. The dialog uses a read-only item list plus a selected-item editor, so long target names can be edited outside the grid while extracted title, episode, author, tag, extension, candidate, and common-phrase values remain available as input aids. Common phrases stay collapsed to one row by default and can be expanded or collapsed from the same panel. It summarizes total changes in the upper-right corner, emphasizes review/conflict rows, validates edited target names after each edit, and lets the selected row be restored to auto/original or skipped before applying.
+Rename review can be configured to always open before applying changes, or to open only when generated rows need review or have conflicts. The dialog uses a read-only item list plus a selected-item editor, so long target names can be edited outside the grid while extracted title, episode, author, tag, extension, candidate, common-phrase, and rule-trace values remain available as input aids. Common phrases stay collapsed to one row by default and can be expanded or collapsed from the same panel. It summarizes total changes in the upper-right corner, emphasizes review/conflict rows, validates edited target names after each edit, and lets the selected row be restored to auto/original or skipped before applying.
 
 ![FileTools rename dialog](docs/images/rename-editor-dialog-concept.svg)
 
@@ -69,6 +69,7 @@ Separate dialogs are available for:
 
 - Rename replacement dictionary entries (`source -> replacement`).
 - Rename common phrase dictionary entries used by the filename correction scorer.
+- Rename correction rules, including built-in rule visibility, enabled state, stage-scoped ordering, and automatic/review/candidate-only modes. Script-backed rules are deferred and documented in `docs/ux-rename-rule-management.md`.
 - AutoRelocation template editing. Path rule steps are evaluated in order, so a template can produce paths such as `{KnownFileKind}\[{Initial}]\{EpisodeRange}`. The template editor and per-step action dialogs resize for long template names, paths, and localized labels.
 
 AutoRelocation templates intentionally use only file-derived values:
@@ -167,6 +168,8 @@ Output:
 ```text
 installer\FileTools.Installer\bin\Release\FileTools.msi
 installer\FileTools.Bundle\bin\Release\FileToolsSetup.exe
+artifacts\identity\FileTools.Identity.msix
+artifacts\identity\FileTools.Identity.cer
 ```
 
 The MSI publishes FileTools as a framework-dependent `win-x64` single-file app and installs it per-user under:
@@ -176,13 +179,27 @@ The MSI publishes FileTools as a framework-dependent `win-x64` single-file app a
 ```
 
 The MSI is intentionally small and requires Microsoft .NET 8 Desktop Runtime x64. Use `FileToolsSetup.exe` for normal distribution; the Burn bootstrapper detects Microsoft .NET Desktop Runtime 8.0.27 x64 and downloads it from Microsoft's official runtime endpoint when it is missing, then runs the MSI.
+When the runtime is already installed, `FileToolsSetup.exe` installs only the per-user MSI and should not require elevation. When the runtime is missing, the bootstrapper requests elevation only for the machine-wide Microsoft .NET Desktop Runtime installer, then continues with the per-user FileTools MSI.
+The bootstrapper is displayed as `FileTools` in Windows Apps and Features, while the executable file remains `FileToolsSetup.exe`.
+The bootstrapper hides the MSI wizard and shows its own setup options:
+
+- `Add Explorer Context Menu commands`: enabled by default.
+- `Create Start Menu shortcut`: enabled by default.
+- `Create Desktop shortcut`: disabled by default.
+- `Use Windows 11 native context menu`: disabled by default.
+
+After a successful install, the bootstrapper shows a `Run FileTools` button on the success page.
 
 MSI options:
 
 - `FileTools`: application and Start Menu shortcut.
 - `Explorer Context Menu`: optional native ShellExt registration.
 
+When `FileTools.msi` is run directly, these MSI features remain available in the MSI wizard. Without bootstrapper-provided properties, the MSI installs the Explorer Context Menu and Start Menu shortcut by default and does not create a Desktop shortcut.
+
 The MSI installs the native `FileTools.ShellExt.dll` as a current-user COM ExplorerCommand handler. After first launch, use FileTools settings to choose individual folder wrapping/unwrapping and AutoRelocation commands. Legacy static registry components are kept disabled for fallback development only.
+
+The optional Windows 11 native context menu path registers a signed sparse MSIX identity package with `Add-AppxPackage -ExternalLocation`, so Windows can discover the shell extension through `desktop4:FileExplorerContextMenus` and `windows.comServer`. The setup imports the public self-signed CER into the current user's Trusted People store before registering the identity package. Restart Explorer after installing or removing this option if the menu does not refresh immediately.
 
 The native ShellExt explicitly exports `DllGetClassObject`, `DllCanUnloadNow`, `DllRegisterServer`, and `DllUnregisterServer` through `FileTools.ShellExt.def`, and is built with the static C runtime so Explorer can load it without a separate VC runtime dependency.
 
@@ -190,13 +207,15 @@ Use `dotnet build src\FileTools.App\FileTools.App.csproj` for an app-only build.
 
 ## Release
 
-GitHub Releases use a manual workflow that builds the setup bootstrapper and MSI,
-generates `checksums.txt`, and creates GitHub artifact attestations for the
-release assets.
+GitHub Releases use a manual workflow that builds and signs the setup
+bootstrapper, MSI, and sparse MSIX identity package, generates `checksums.txt`,
+and creates GitHub artifact attestations for the release assets.
 
-This is not Windows Authenticode signing. Release assets can be verified through
-GitHub provenance and SHA256 hashes, but Windows may still show `Unknown
-Publisher` or SmartScreen warnings.
+The release uses a self-signed FileTools certificate stored in GitHub Secrets as
+a base64 PFX plus password. This is suitable for free GitHub distribution and
+MSIX identity registration after the CER is trusted, but it is not a public CA
+code-signing certificate. Windows can still show SmartScreen or trust warnings
+for first-time users.
 
 See `docs\release.md` for the release workflow and verification steps.
 
@@ -218,6 +237,12 @@ src\FileTools.ShellExt
 installer\FileTools.Installer
 ├─ FileTools.Installer.sln
 └─ FileTools.Installer
+
+installer\FileTools.Identity
+└─ Sparse MSIX identity manifest
+
+src\FileTools.IdentityHelper
+└─ Certificate trust and sparse identity registration helper
 ```
 
 ## Install ContextMenu

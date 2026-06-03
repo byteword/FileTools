@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
+  xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
+  xmlns:desktop4="http://schemas.microsoft.com/appx/manifest/desktop/windows10/4"
+  xmlns:desktop5="http://schemas.microsoft.com/appx/manifest/desktop/windows10/5"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap uap10 com desktop4 desktop5 rescap">
+
+  <Identity
+    Name="byteword.FileTools"
+    Publisher="$(Publisher)"
+    Version="$(Version)"
+    ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>FileTools</DisplayName>
+    <PublisherDisplayName>byteword</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <uap10:AllowExternalContent>true</uap10:AllowExternalContent>
+  </Properties>
+
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+
+  <Dependencies>
+    <TargetDeviceFamily
+      Name="Windows.Desktop"
+      MinVersion="10.0.22000.0"
+      MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+    <rescap:Capability Name="unvirtualizedResources" />
+  </Capabilities>
+
+  <Applications>
+    <Application
+      Id="FileTools"
+      Executable="FileTools.exe"
+      uap10:RuntimeBehavior="win32App"
+      uap10:TrustLevel="mediumIL">
+      <uap:VisualElements
+        AppListEntry="none"
+        DisplayName="FileTools"
+        Description="FileTools"
+        BackgroundColor="transparent"
+        Square44x44Logo="Assets\Square44x44Logo.png"
+        Square150x150Logo="Assets\Square150x150Logo.png" />
+      <Extensions>
+        <com:Extension Category="windows.comServer">
+          <com:ComServer>
+            <com:SurrogateServer DisplayName="FileTools">
+              <com:Class
+                Id="716e7cc4-5941-4362-8aca-d38c62817de9"
+                Path="FileTools.ShellExt.dll"
+                ThreadingModel="STA" />
+            </com:SurrogateServer>
+          </com:ComServer>
+        </com:Extension>
+        <desktop4:Extension Category="windows.fileExplorerContextMenus">
+          <desktop4:FileExplorerContextMenus>
+            <desktop5:ItemType Type="*">
+              <desktop5:Verb Id="FileToolsFiles" Clsid="716e7cc4-5941-4362-8aca-d38c62817de9" />
+            </desktop5:ItemType>
+            <desktop5:ItemType Type="Directory">
+              <desktop5:Verb Id="FileToolsDirectories" Clsid="716e7cc4-5941-4362-8aca-d38c62817de9" />
+            </desktop5:ItemType>
+          </desktop4:FileExplorerContextMenus>
+        </desktop4:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+</Package>

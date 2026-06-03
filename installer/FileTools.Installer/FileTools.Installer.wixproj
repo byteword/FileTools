@@ -3,13 +3,15 @@
     <OutputName>FileTools</OutputName>
     <OutputType>Package</OutputType>
     <InstallerPlatform>x64</InstallerPlatform>
-    <ProductVersion>1.0.1.8</ProductVersion>
+    <ProductVersion>1.1.0.0</ProductVersion>
     <SuppressIces>ICE91</SuppressIces>
     <AppPublishDir>$(MSBuildThisFileDirectory)..\..\artifacts\publish\FileTools-win-x64\</AppPublishDir>
     <AppIconPath>$(MSBuildThisFileDirectory)..\..\src\FileTools.App\Resources\FileToolsIcon.ico</AppIconPath>
     <ShellExtensionPath>$(MSBuildThisFileDirectory)..\..\src\FileTools.ShellExt\x64\Release\FileTools.ShellExt.dll</ShellExtensionPath>
     <LicenseRtfPath>$(MSBuildThisFileDirectory)License.rtf</LicenseRtfPath>
-    <DefineConstants>AppPublishDir=$(AppPublishDir);ProductVersion=$(ProductVersion);AppIconPath=$(AppIconPath);ShellExtensionPath=$(ShellExtensionPath);LicenseRtfPath=$(LicenseRtfPath)</DefineConstants>
+    <MsiDialogBmpPath>$(MSBuildThisFileDirectory)Assets\FileToolsDialogBmp.png</MsiDialogBmpPath>
+    <MsiBannerBmpPath>$(MSBuildThisFileDirectory)Assets\FileToolsBannerBmp.png</MsiBannerBmpPath>
+    <DefineConstants>AppPublishDir=$(AppPublishDir);ProductVersion=$(ProductVersion);AppIconPath=$(AppIconPath);ShellExtensionPath=$(ShellExtensionPath);LicenseRtfPath=$(LicenseRtfPath);MsiDialogBmpPath=$(MsiDialogBmpPath);MsiBannerBmpPath=$(MsiBannerBmpPath)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

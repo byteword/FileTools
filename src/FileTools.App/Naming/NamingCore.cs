@@ -21,6 +21,8 @@ internal sealed record CorrectionOptions
     public IReadOnlyList<RenameDictionaryEntry> RenameDictionary { get; init; } = [];
 
     public string[] CommonPhrases { get; init; } = [];
+
+    public IReadOnlyList<RenameCorrectionRule> Rules { get; init; } = RenameRuleStore.CreateDefaultDocument().Rules;
 }
 
 internal sealed record FileNameParts
@@ -84,6 +86,20 @@ internal sealed record RenamePreview
     public required RenamePreviewStatus Status { get; init; }
     public IReadOnlyList<string> Reasons { get; init; } = [];
     public IReadOnlyList<NameCorrectionCandidate> Candidates { get; init; } = [];
+    public IReadOnlyList<RenameRuleTrace> RuleTraces { get; init; } = [];
+}
+
+internal sealed record RenameRuleTrace
+{
+    public required string RuleId { get; init; }
+    public required string RuleName { get; init; }
+    public required RenameCorrectionRuleStage Stage { get; init; }
+    public required RenameCorrectionRuleMode Mode { get; init; }
+    public required string Before { get; init; }
+    public required string After { get; init; }
+    public required string Reason { get; init; }
+    public bool Applied { get; init; } = true;
+    public bool RequiresReview { get; init; }
 }
 
 internal sealed record NameCorrectionCandidate
@@ -99,12 +115,14 @@ internal sealed partial class KoreanFileNameCorrector
     private readonly CorrectionOptions _options;
     private readonly HashSet<string> _knownTags;
     private readonly ObfuscatedHangulCandidateGenerator _obfuscatedHangulCandidateGenerator;
+    private readonly IReadOnlyList<RenameCorrectionRule> _rules;
 
     public KoreanFileNameCorrector(CorrectionOptions? options = null)
     {
         _options = options ?? new CorrectionOptions();
         _knownTags = new HashSet<string>(_options.KnownTags, StringComparer.OrdinalIgnoreCase);
         _obfuscatedHangulCandidateGenerator = new ObfuscatedHangulCandidateGenerator(new KoreanLexicon(_options.CommonPhrases));
+        _rules = RenameRuleStore.NormalizeRules(_options.Rules);
     }
 
     public RenamePreview CreatePreview(string path)
@@ -114,17 +132,16 @@ internal sealed partial class KoreanFileNameCorrector
         var extension = isDirectory ? "" : Path.GetExtension(originalFileName);
         var rawStem = isDirectory ? originalFileName : Path.GetFileNameWithoutExtension(originalFileName);
         var reasons = new List<string>();
+        var ruleTraces = new List<RenameRuleTrace>();
+        var stemCandidates = new List<NameCorrectionCandidate>();
+        var requiresReview = false;
 
-        var normalizedStem = NormalizeStem(rawStem, reasons);
-        var stemCandidates = _obfuscatedHangulCandidateGenerator.Generate(normalizedStem);
-        if (stemCandidates.Count > 0)
-        {
-            reasons.Add($"왜곡 한글 복원 후보: {stemCandidates[0].Value}");
-        }
+        var normalizedStem = NormalizeStem(rawStem, reasons, ruleTraces, stemCandidates, ref requiresReview);
+        normalizedStem = CreateConfiguredCandidates(normalizedStem, reasons, ruleTraces, stemCandidates, ref requiresReview);
 
-        var parts = ParseParts(normalizedStem, extension, reasons);
+        var parts = ParseParts(normalizedStem, extension, reasons, ruleTraces, ref requiresReview);
         var composed = parts.Compose();
-        var suggested = WindowsFileNameSafety.MakeSafeFileName(composed);
+        var suggested = ApplyWindowsFileNameSafety(composed, reasons, ruleTraces, ref requiresReview);
         if (!string.Equals(suggested, composed, StringComparison.Ordinal))
         {
             reasons.Add("Windows 파일명 금지 문자 또는 예약어 보정");
@@ -140,10 +157,10 @@ internal sealed partial class KoreanFileNameCorrector
             status = RenamePreviewStatus.NeedsReview;
             reasons.Add("제목 또는 회차 추출 확인 필요");
         }
-        else if (stemCandidates.Count > 0)
+        else if (requiresReview || stemCandidates.Any(static candidate => candidate.RequiresReview))
         {
             status = RenamePreviewStatus.NeedsReview;
-            reasons.Add("왜곡 한글 복원 후보 검수 필요");
+            reasons.Add("이름 보정 규칙 검수 필요");
         }
 
         var fileNameCandidates = CreateFileNameCandidates(originalFileName, suggested, extension, stemCandidates);
@@ -157,7 +174,8 @@ internal sealed partial class KoreanFileNameCorrector
             SuggestedPath = Path.Combine(directory, suggested),
             Status = status,
             Reasons = reasons.Distinct(StringComparer.Ordinal).ToArray(),
-            Candidates = fileNameCandidates
+            Candidates = fileNameCandidates,
+            RuleTraces = ruleTraces
         };
     }
 
@@ -218,67 +236,114 @@ internal sealed partial class KoreanFileNameCorrector
 
     public FileNameParts ParseParts(string stem, string extension, List<string>? reasons = null)
     {
-        var working = NormalizeSeparators(stem);
+        var reasonList = reasons ?? [];
+        var trace = new List<RenameRuleTrace>();
+        var review = false;
+        var candidates = new List<NameCorrectionCandidate>();
+        var normalizedStem = NormalizeStem(stem, reasonList, trace, candidates, ref review);
+        return ParseParts(normalizedStem, extension, reasonList, trace, ref review);
+    }
+
+    private FileNameParts ParseParts(
+        string stem,
+        string extension,
+        List<string> reasons,
+        List<RenameRuleTrace> ruleTraces,
+        ref bool requiresReview)
+    {
+        var working = stem;
         var tags = new List<string>();
         string? author = null;
 
-        working = BracketContentRegex().Replace(working, match =>
+        var bracketRule = GetRule(RenameCorrectionRuleKind.BuiltInBracketMetadataExtraction);
+        if (IsRuleActive(bracketRule))
         {
-            var content = CleanupToken(match.Groups[1].Value);
-            if (content.Length == 0)
+            var before = working;
+            working = BracketContentRegex().Replace(working, match =>
             {
+                var content = CleanupToken(match.Groups[1].Value);
+                if (content.Length == 0)
+                {
+                    return " ";
+                }
+
+                if (_knownTags.Contains(content))
+                {
+                    tags.Add(content);
+                    reasons.Add($"태그 추출: {content}");
+                }
+                else if (author is null)
+                {
+                    author = content;
+                    reasons.Add($"작가 후보 추출: {content}");
+                }
+                else
+                {
+                    tags.Add(content);
+                    reasons.Add($"추가 표식 추출: {content}");
+                }
+
                 return " ";
-            }
+            });
+            RecordRuleChange(bracketRule!, before, working, "괄호 메타데이터 추출", reasons, ruleTraces, ref requiresReview);
+        }
 
-            if (_knownTags.Contains(content))
-            {
-                tags.Add(content);
-                reasons?.Add($"태그 추출: {content}");
-            }
-            else if (author is null)
-            {
-                author = content;
-                reasons?.Add($"작가 후보 추출: {content}");
-            }
-            else
-            {
-                tags.Add(content);
-                reasons?.Add($"추가 표식 추출: {content}");
-            }
-
-            return " ";
-        });
-
-        var authorMatch = AuthorRegex().Match(working);
-        if (authorMatch.Success && author is null)
+        var authorRule = GetRule(RenameCorrectionRuleKind.BuiltInAuthorExtraction);
+        if (IsRuleActive(authorRule))
         {
-            author = CleanupToken(authorMatch.Groups["author"].Value);
-            working = working.Remove(authorMatch.Index, authorMatch.Length).Insert(authorMatch.Index, " ");
-            reasons?.Add($"작가 후보 추출: {author}");
+            var authorMatch = AuthorRegex().Match(working);
+            if (authorMatch.Success && author is null)
+            {
+                var before = working;
+                author = CleanupToken(authorMatch.Groups["author"].Value);
+                working = working.Remove(authorMatch.Index, authorMatch.Length).Insert(authorMatch.Index, " ");
+                reasons.Add($"작가 후보 추출: {author}");
+                RecordRuleChange(authorRule!, before, working, $"작가 후보 추출: {author}", reasons, ruleTraces, ref requiresReview);
+            }
         }
 
         string? episode = null;
-        var rangeMatch = EpisodeUnitRangeRegex().Matches(working).LastOrDefault()
-            ?? EpisodeCompoundRegex().Matches(working).LastOrDefault();
-        if (rangeMatch is not null)
+        var episodeRule = GetRule(RenameCorrectionRuleKind.BuiltInEpisodeExtraction);
+        if (IsRuleActive(episodeRule))
         {
-            episode = NormalizeEpisodeToken(rangeMatch.Groups["episode"].Value);
-            working = working.Remove(rangeMatch.Index, rangeMatch.Length).Insert(rangeMatch.Index, " ");
-            reasons?.Add($"회차 추출: {episode}");
-        }
-        else
-        {
-            var singleMatch = EpisodePrefixedSingleRegex().Matches(working).LastOrDefault()
-                ?? EpisodeSingleRegex().Matches(working).LastOrDefault();
-            if (singleMatch is not null)
+            var rangeMatch = EpisodeUnitRangeRegex().Matches(working).LastOrDefault()
+                ?? EpisodeCompoundRegex().Matches(working).LastOrDefault();
+            if (rangeMatch is not null)
             {
-                episode = NormalizeEpisodeToken(singleMatch.Groups["episode"].Value);
-                working = working.Remove(singleMatch.Index, singleMatch.Length).Insert(singleMatch.Index, " ");
-                reasons?.Add($"회차 추출: {episode}");
+                var before = working;
+                episode = NormalizeEpisodeToken(rangeMatch.Groups["episode"].Value);
+                working = working.Remove(rangeMatch.Index, rangeMatch.Length).Insert(rangeMatch.Index, " ");
+                reasons.Add($"회차 추출: {episode}");
+                RecordRuleChange(episodeRule!, before, working, $"회차 추출: {episode}", reasons, ruleTraces, ref requiresReview);
+            }
+            else
+            {
+                var singleMatch = EpisodePrefixedSingleRegex().Matches(working).LastOrDefault()
+                    ?? EpisodeSingleRegex().Matches(working).LastOrDefault();
+                if (singleMatch is not null)
+                {
+                    var before = working;
+                    episode = NormalizeEpisodeToken(singleMatch.Groups["episode"].Value);
+                    working = working.Remove(singleMatch.Index, singleMatch.Length).Insert(singleMatch.Index, " ");
+                    reasons.Add($"회차 추출: {episode}");
+                    RecordRuleChange(episodeRule!, before, working, $"회차 추출: {episode}", reasons, ruleTraces, ref requiresReview);
+                }
             }
         }
 
-        var title = CleanupTitle(working);
+        var title = working;
+        var titleRule = GetRule(RenameCorrectionRuleKind.BuiltInTitleCleanup);
+        if (IsRuleActive(titleRule))
+        {
+            var before = title;
+            title = CleanupTitle(title);
+            RecordRuleChange(titleRule!, before, title, "제목 노이즈 정리", reasons, ruleTraces, ref requiresReview);
+        }
+        else
+        {
+            title = WhitespaceRegex().Replace(title.Trim(), " ");
+        }
+
         return new FileNameParts
         {
             Title = title,
@@ -289,23 +354,277 @@ internal sealed partial class KoreanFileNameCorrector
         };
     }
 
-    private string NormalizeStem(string stem, List<string> reasons)
+    private string NormalizeStem(
+        string stem,
+        List<string> reasons,
+        List<RenameRuleTrace> ruleTraces,
+        List<NameCorrectionCandidate> stemCandidates,
+        ref bool requiresReview)
     {
-        var result = KoreanJamoNormalizer.Normalize(stem);
-        if (!string.Equals(stem, result, StringComparison.Ordinal))
+        var result = stem;
+        foreach (var rule in GetRules(RenameCorrectionRuleStage.Preprocess)
+            .Concat(GetRules(RenameCorrectionRuleStage.UserRewrite)))
         {
-            reasons.Add("Unicode NFC/한글 자모 결합");
+            result = ApplyStemRule(rule, result, reasons, ruleTraces, stemCandidates, ref requiresReview);
         }
 
-        var mojibakeCandidate = TryRecoverUtf8AsLatin1(result);
-        if (mojibakeCandidate is not null)
+        return result;
+    }
+
+    private string ApplyStemRule(
+        RenameCorrectionRule rule,
+        string value,
+        List<string> reasons,
+        List<RenameRuleTrace> ruleTraces,
+        List<NameCorrectionCandidate> stemCandidates,
+        ref bool requiresReview)
+    {
+        if (!IsRuleActive(rule))
         {
-            result = mojibakeCandidate;
-            reasons.Add("UTF-8/Latin-1 깨짐 후보 복구");
+            return value;
         }
 
-        result = ApplyRenameDictionary(result, reasons);
-        return NormalizeSeparators(result);
+        var before = value;
+        var after = rule.Kind switch
+        {
+            RenameCorrectionRuleKind.BuiltInUnicodeJamo => KoreanJamoNormalizer.Normalize(value),
+            RenameCorrectionRuleKind.BuiltInMojibakeRecovery => TryRecoverUtf8AsLatin1(value) ?? value,
+            RenameCorrectionRuleKind.BuiltInRenameDictionary => ApplyRenameDictionary(value, reasons),
+            RenameCorrectionRuleKind.BuiltInSeparatorNormalization => NormalizeSeparators(value),
+            RenameCorrectionRuleKind.LiteralReplace => ApplyLiteralReplaceRule(rule, value),
+            RenameCorrectionRuleKind.PrefixTrim => ApplyPrefixTrimRule(rule, value),
+            RenameCorrectionRuleKind.SuffixTrim => ApplySuffixTrimRule(rule, value),
+            RenameCorrectionRuleKind.WhitespaceNormalize => WhitespaceRegex().Replace(value, " ").Trim(),
+            RenameCorrectionRuleKind.SeparatorNormalize => NormalizeSeparators(value),
+            RenameCorrectionRuleKind.RegexReplace => ApplyRegexReplaceRule(rule, value),
+            _ => value
+        };
+
+        if (string.Equals(before, after, StringComparison.Ordinal))
+        {
+            return value;
+        }
+
+        if (rule.Mode == RenameCorrectionRuleMode.CandidateOnly)
+        {
+            stemCandidates.Add(new NameCorrectionCandidate
+            {
+                Value = after,
+                Score = 0.70,
+                Reason = $"{rule.DisplayName} 후보",
+                RequiresReview = true
+            });
+            RecordRuleTrace(rule, before, after, "후보 생성", false, true, reasons, ruleTraces);
+            requiresReview = true;
+            return value;
+        }
+
+        RecordRuleTrace(
+            rule,
+            before,
+            after,
+            rule.Kind == RenameCorrectionRuleKind.BuiltInMojibakeRecovery
+                ? "UTF-8/Latin-1 깨짐 후보 복구"
+                : rule.DisplayName,
+            true,
+            rule.Mode == RenameCorrectionRuleMode.Review,
+            reasons,
+            ruleTraces);
+        if (rule.Mode == RenameCorrectionRuleMode.Review)
+        {
+            requiresReview = true;
+        }
+
+        return after;
+    }
+
+    private string CreateConfiguredCandidates(
+        string stem,
+        List<string> reasons,
+        List<RenameRuleTrace> ruleTraces,
+        List<NameCorrectionCandidate> stemCandidates,
+        ref bool requiresReview)
+    {
+        var result = stem;
+        foreach (var rule in GetRules(RenameCorrectionRuleStage.Candidate))
+        {
+            if (!IsRuleActive(rule) || rule.Kind != RenameCorrectionRuleKind.BuiltInObfuscatedHangulCandidate)
+            {
+                continue;
+            }
+
+            var candidates = _obfuscatedHangulCandidateGenerator.Generate(result);
+            if (candidates.Count == 0)
+            {
+                continue;
+            }
+
+            var candidate = candidates[0];
+            if (rule.Mode == RenameCorrectionRuleMode.CandidateOnly)
+            {
+                stemCandidates.Add(candidate);
+                RecordRuleTrace(rule, result, candidate.Value, candidate.Reason, false, candidate.RequiresReview, reasons, ruleTraces);
+                requiresReview = requiresReview || candidate.RequiresReview;
+                continue;
+            }
+
+            RecordRuleTrace(
+                rule,
+                result,
+                candidate.Value,
+                candidate.Reason,
+                true,
+                rule.Mode == RenameCorrectionRuleMode.Review || candidate.RequiresReview,
+                reasons,
+                ruleTraces);
+            result = candidate.Value;
+            requiresReview = requiresReview || rule.Mode == RenameCorrectionRuleMode.Review || candidate.RequiresReview;
+        }
+
+        return result;
+    }
+
+    private string ApplyWindowsFileNameSafety(
+        string value,
+        List<string> reasons,
+        List<RenameRuleTrace> ruleTraces,
+        ref bool requiresReview)
+    {
+        var rule = GetRule(RenameCorrectionRuleKind.BuiltInWindowsSafeFileName);
+        var safe = WindowsFileNameSafety.MakeSafeFileName(value);
+        if (IsRuleActive(rule))
+        {
+            RecordRuleChange(rule!, value, safe, "Windows 파일명 안전화", reasons, ruleTraces, ref requiresReview);
+            return safe;
+        }
+
+        return safe;
+    }
+
+    private static string ApplyLiteralReplaceRule(RenameCorrectionRule rule, string value)
+    {
+        if (string.IsNullOrWhiteSpace(rule.Source))
+        {
+            return value;
+        }
+
+        return value.Replace(
+            rule.Source,
+            rule.Replacement,
+            rule.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+    }
+
+    private static string ApplyPrefixTrimRule(RenameCorrectionRule rule, string value)
+    {
+        var source = rule.Source.Trim();
+        if (source.Length == 0 ||
+            !value.StartsWith(source, rule.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+        {
+            return value;
+        }
+
+        return value[source.Length..].TrimStart();
+    }
+
+    private static string ApplySuffixTrimRule(RenameCorrectionRule rule, string value)
+    {
+        var source = rule.Source.Trim();
+        if (source.Length == 0 ||
+            !value.EndsWith(source, rule.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+        {
+            return value;
+        }
+
+        return value[..^source.Length].TrimEnd();
+    }
+
+    private static string ApplyRegexReplaceRule(RenameCorrectionRule rule, string value)
+    {
+        if (string.IsNullOrWhiteSpace(rule.Source))
+        {
+            return value;
+        }
+
+        try
+        {
+            var options = rule.IgnoreCase ? RegexOptions.IgnoreCase : RegexOptions.None;
+            var regex = new Regex(rule.Source, options, TimeSpan.FromMilliseconds(100));
+            return regex.Replace(value, rule.Replacement);
+        }
+        catch (ArgumentException)
+        {
+            return value;
+        }
+        catch (RegexMatchTimeoutException)
+        {
+            return value;
+        }
+    }
+
+    private IEnumerable<RenameCorrectionRule> GetRules(RenameCorrectionRuleStage stage)
+    {
+        return _rules
+            .Where(rule => rule.Stage == stage)
+            .OrderBy(rule => rule.Order)
+            .ThenBy(rule => rule.DisplayName, StringComparer.CurrentCultureIgnoreCase);
+    }
+
+    private RenameCorrectionRule? GetRule(RenameCorrectionRuleKind kind)
+    {
+        return _rules.FirstOrDefault(rule => rule.Kind == kind);
+    }
+
+    private static bool IsRuleActive(RenameCorrectionRule? rule)
+    {
+        return rule is not null && (rule.Enabled || rule.IsRequired);
+    }
+
+    private static void RecordRuleChange(
+        RenameCorrectionRule rule,
+        string before,
+        string after,
+        string reason,
+        List<string> reasons,
+        List<RenameRuleTrace> ruleTraces,
+        ref bool requiresReview)
+    {
+        if (string.Equals(before, after, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        var review = rule.Mode == RenameCorrectionRuleMode.Review;
+        RecordRuleTrace(rule, before, after, reason, true, review, reasons, ruleTraces);
+        requiresReview = requiresReview || review;
+    }
+
+    private static void RecordRuleTrace(
+        RenameCorrectionRule rule,
+        string before,
+        string after,
+        string reason,
+        bool applied,
+        bool requiresReview,
+        List<string> reasons,
+        List<RenameRuleTrace> ruleTraces)
+    {
+        if (!string.IsNullOrWhiteSpace(reason))
+        {
+            reasons.Add($"{rule.DisplayName}: {reason}");
+        }
+
+        ruleTraces.Add(new RenameRuleTrace
+        {
+            RuleId = rule.Id,
+            RuleName = rule.DisplayName,
+            Stage = rule.Stage,
+            Mode = rule.Mode,
+            Before = before,
+            After = after,
+            Reason = reason,
+            Applied = applied,
+            RequiresReview = requiresReview
+        });
     }
 
     private string ApplyRenameDictionary(string value, List<string> reasons)

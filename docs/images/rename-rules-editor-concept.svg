@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="680" viewBox="0 0 1120 680" role="img" aria-labelledby="title desc">
+  <title id="title">Rename correction rule editor concept</title>
+  <desc id="desc">Rule editor showing built-in and user rename correction rules with stage order, enabled state, and application mode.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f6f7f9; }
+      .panel { fill: #ffffff; stroke: #d7dbe2; stroke-width: 1; }
+      .row { fill: #ffffff; stroke: #e5e7eb; stroke-width: 1; }
+      .selected { fill: #ecfdf5; stroke: #34d399; stroke-width: 1; }
+      .mutedRow { fill: #f3f4f6; stroke: #e5e7eb; stroke-width: 1; }
+      .title { fill: #20242a; font: 18px "Segoe UI", Arial, sans-serif; font-weight: 700; }
+      .label { fill: #1f2937; font: 13px "Segoe UI", Arial, sans-serif; font-weight: 600; }
+      .body { fill: #20242a; font: 13px "Segoe UI", Arial, sans-serif; }
+      .small { fill: #68707c; font: 12px "Segoe UI", Arial, sans-serif; }
+      .input { fill: #ffffff; stroke: #bfc6d1; stroke-width: 1; }
+      .button { fill: #f9fafb; stroke: #c8ced8; stroke-width: 1; }
+      .primary { fill: #2563eb; }
+      .primaryText { fill: #ffffff; font: 13px "Segoe UI", Arial, sans-serif; font-weight: 600; }
+      .pill { fill: #eef2f7; stroke: #cfd6e1; stroke-width: 1; }
+      .locked { fill: #fff7db; stroke: #e0c15a; stroke-width: 1; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1120" height="680"/>
+  <rect class="panel" x="28" y="24" width="1064" height="632" rx="4"/>
+  <text class="title" x="56" y="60">이름 자동 보정 규칙</text>
+  <text class="small" x="56" y="84">내장 규칙과 사용자 규칙을 같은 stage 안에서 정렬하고 적용 방식을 제어</text>
+
+  <rect class="panel" x="56" y="112" width="420" height="478" rx="3"/>
+  <text class="label" x="76" y="140">규칙</text>
+  <rect class="row" x="76" y="158" width="380" height="42"/>
+  <text class="body" x="94" y="183">010 [전처리] On - Unicode NFC/한글 자모 결합</text>
+  <rect class="selected" x="76" y="206" width="380" height="42"/>
+  <text class="body" x="94" y="231">020 [전처리] On - UTF-8/Latin-1 깨짐 복구</text>
+  <rect class="row" x="76" y="254" width="380" height="42"/>
+  <text class="body" x="94" y="279">010 [사용자 보정] On - 기존 이름변경 사전 적용</text>
+  <rect class="row" x="76" y="302" width="380" height="42"/>
+  <text class="body" x="94" y="327">020 [사용자 보정] On - 접두사 제거: sample_</text>
+  <rect class="row" x="76" y="350" width="380" height="42"/>
+  <text class="body" x="94" y="375">010 [후보 생성] On - 왜곡 한글 복원 후보</text>
+  <rect class="mutedRow" x="76" y="398" width="380" height="42"/>
+  <text class="small" x="94" y="423">010 [최종 안전화] On - Windows 파일명 안전화</text>
+
+  <rect class="button" x="76" y="462" width="72" height="30" rx="4"/>
+  <text class="body" x="96" y="482">추가</text>
+  <rect class="button" x="156" y="462" width="72" height="30" rx="4"/>
+  <text class="body" x="176" y="482">수정</text>
+  <rect class="button" x="236" y="462" width="72" height="30" rx="4"/>
+  <text class="body" x="256" y="482">삭제</text>
+  <rect class="button" x="76" y="506" width="72" height="30" rx="4"/>
+  <text class="body" x="97" y="526">위로</text>
+  <rect class="button" x="156" y="506" width="72" height="30" rx="4"/>
+  <text class="body" x="174" y="526">아래로</text>
+
+  <rect class="panel" x="504" y="112" width="536" height="478" rx="3"/>
+  <text class="label" x="526" y="140">선택 규칙</text>
+
+  <text class="small" x="526" y="174">활성</text>
+  <rect class="input" x="686" y="158" width="24" height="24" rx="3"/>
+  <path d="M692 170 L700 178 L710 162" stroke="#059669" stroke-width="3" fill="none"/>
+
+  <text class="small" x="526" y="220">이름</text>
+  <rect class="input" x="686" y="200" width="318" height="34" rx="3"/>
+  <text class="body" x="700" y="222">UTF-8/Latin-1 깨짐 복구</text>
+
+  <text class="small" x="526" y="266">단계</text>
+  <rect class="input" x="686" y="246" width="318" height="34" rx="3"/>
+  <text class="body" x="700" y="268">전처리</text>
+
+  <text class="small" x="526" y="312">종류</text>
+  <rect class="input" x="686" y="292" width="318" height="34" rx="3"/>
+  <text class="body" x="700" y="314">깨진 인코딩 복구</text>
+
+  <text class="small" x="526" y="358">적용 방식</text>
+  <rect class="input" x="686" y="338" width="318" height="34" rx="3"/>
+  <text class="body" x="700" y="360">검토 필요</text>
+
+  <text class="small" x="526" y="404">원본 / 변경</text>
+  <rect class="input" x="686" y="384" width="318" height="34" rx="3"/>
+  <text class="small" x="700" y="406">내장 규칙은 값 편집 불가</text>
+
+  <rect class="locked" x="526" y="446" width="478" height="54" rx="3"/>
+  <text class="body" x="544" y="470">내장 규칙은 활성 상태와 적용 방식만 제어합니다.</text>
+  <text class="small" x="544" y="490">Windows 파일명 안전화는 필수 규칙으로 항상 활성입니다.</text>
+
+  <rect class="pill" x="526" y="522" width="196" height="30" rx="15"/>
+  <text class="body" x="544" y="542">Stage 안에서만 순서 이동</text>
+  <rect class="pill" x="734" y="522" width="230" height="30" rx="15"/>
+  <text class="body" x="752" y="542">스크립트 규칙은 후순위 문서화</text>
+
+  <rect class="button" x="842" y="610" width="82" height="32" rx="4"/>
+  <text class="body" x="868" y="631">취소</text>
+  <rect class="primary" x="946" y="610" width="82" height="32" rx="4"/>
+  <text class="primaryText" x="974" y="631">OK</text>
+</svg>

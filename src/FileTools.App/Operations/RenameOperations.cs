@@ -81,16 +81,13 @@ internal static class RenameOperations
 
     private static KoreanFileNameCorrector CreateFileNameCorrector(FileToolsSettings settings)
     {
-        if (!settings.RenameUseDictionary)
-        {
-            return new KoreanFileNameCorrector();
-        }
-
         var dictionary = RenameDictionaryStore.Load();
+        var rules = RenameRuleStore.Load();
         return new KoreanFileNameCorrector(new CorrectionOptions
         {
-            RenameDictionary = dictionary.Replacements,
-            CommonPhrases = dictionary.CommonPhrases.ToArray()
+            RenameDictionary = settings.RenameUseDictionary ? dictionary.Replacements : [],
+            CommonPhrases = settings.RenameUseDictionary ? dictionary.CommonPhrases.ToArray() : [],
+            Rules = rules.Rules
         });
     }
 }

@@ -388,16 +388,13 @@ internal sealed class WorkPlanExecutor
 
     private KoreanFileNameCorrector CreateFileNameCorrector()
     {
-        if (!_baseSettings.RenameUseDictionary)
-        {
-            return new KoreanFileNameCorrector();
-        }
-
         var dictionary = RenameDictionaryStore.Load();
+        var rules = RenameRuleStore.Load();
         return new KoreanFileNameCorrector(new CorrectionOptions
         {
-            RenameDictionary = dictionary.Replacements,
-            CommonPhrases = dictionary.CommonPhrases.ToArray()
+            RenameDictionary = _baseSettings.RenameUseDictionary ? dictionary.Replacements : [],
+            CommonPhrases = _baseSettings.RenameUseDictionary ? dictionary.CommonPhrases.ToArray() : [],
+            Rules = rules.Rules
         });
     }
 }

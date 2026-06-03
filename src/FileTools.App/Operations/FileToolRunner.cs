@@ -492,16 +492,13 @@ internal sealed class FileToolRunner
 
     private KoreanFileNameCorrector CreateFileNameCorrector()
     {
-        if (!_settings.RenameUseDictionary)
-        {
-            return new KoreanFileNameCorrector();
-        }
-
         var dictionary = RenameDictionaryStore.Load();
+        var rules = RenameRuleStore.Load();
         return new KoreanFileNameCorrector(new CorrectionOptions
         {
-            RenameDictionary = dictionary.Replacements,
-            CommonPhrases = dictionary.CommonPhrases.ToArray()
+            RenameDictionary = _settings.RenameUseDictionary ? dictionary.Replacements : [],
+            CommonPhrases = _settings.RenameUseDictionary ? dictionary.CommonPhrases.ToArray() : [],
+            Rules = rules.Rules
         });
     }
 }

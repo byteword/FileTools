@@ -317,10 +317,18 @@ internal sealed class SettingsForm : Form
             Width = 230,
             Height = 30
         };
+        var ruleButton = new Button
+        {
+            Text = Localizer.Get("ButtonEditRenameRules"),
+            Width = 190,
+            Height = 30
+        };
         dictionaryButton.Click += (_, _) => OpenRenameDictionaryEditor();
         phraseButton.Click += (_, _) => OpenCommonPhraseEditor();
+        ruleButton.Click += (_, _) => OpenRenameRuleEditor();
         panel.Controls.Add(dictionaryButton);
         panel.Controls.Add(phraseButton);
+        panel.Controls.Add(ruleButton);
         return panel;
     }
 
@@ -622,6 +630,17 @@ internal sealed class SettingsForm : Form
         {
             document.CommonPhrases = dialog.Items.ToList();
             RenameDictionaryStore.Save(document);
+        }
+    }
+
+    private void OpenRenameRuleEditor()
+    {
+        var document = RenameRuleStore.Load();
+        using var dialog = new RenameRuleEditorDialog(document.Rules);
+        if (dialog.ShowDialog(this) == DialogResult.OK)
+        {
+            document.Rules = dialog.Rules.ToList();
+            RenameRuleStore.Save(document);
         }
     }
 

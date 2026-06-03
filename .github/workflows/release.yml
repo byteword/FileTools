@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: Existing release tag to build, for example v1.0.1.8.
+        description: Existing release tag to build, for example v1.1.0.0.
         required: true
         type: string
       draft:
@@ -34,8 +34,27 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Build MSI and setup bootstrapper
+      - name: Validate signing secrets
         shell: pwsh
+        env:
+          FILETOOLS_SIGNING_PFX_BASE64: ${{ secrets.FILETOOLS_SIGNING_PFX_BASE64 }}
+          FILETOOLS_SIGNING_PASSWORD: ${{ secrets.FILETOOLS_SIGNING_PASSWORD }}
+          MSIX_SIGNING_PFX_BASE64: ${{ secrets.MSIX_SIGNING_PFX_BASE64 }}
+          MSIX_SIGNING_PASSWORD: ${{ secrets.MSIX_SIGNING_PASSWORD }}
+        run: |
+          $hasPfx = -not [string]::IsNullOrWhiteSpace($env:FILETOOLS_SIGNING_PFX_BASE64) -or -not [string]::IsNullOrWhiteSpace($env:MSIX_SIGNING_PFX_BASE64)
+          $hasPassword = -not [string]::IsNullOrWhiteSpace($env:FILETOOLS_SIGNING_PASSWORD) -or -not [string]::IsNullOrWhiteSpace($env:MSIX_SIGNING_PASSWORD)
+          if (-not $hasPfx -or -not $hasPassword) {
+            throw 'Release signing requires FILETOOLS_SIGNING_PFX_BASE64 and FILETOOLS_SIGNING_PASSWORD secrets. MSIX_SIGNING_* names are accepted as a fallback.'
+          }
+
+      - name: Build signed MSI, setup bootstrapper, and identity MSIX
+        shell: pwsh
+        env:
+          FILETOOLS_SIGNING_PFX_BASE64: ${{ secrets.FILETOOLS_SIGNING_PFX_BASE64 }}
+          FILETOOLS_SIGNING_PASSWORD: ${{ secrets.FILETOOLS_SIGNING_PASSWORD }}
+          MSIX_SIGNING_PFX_BASE64: ${{ secrets.MSIX_SIGNING_PFX_BASE64 }}
+          MSIX_SIGNING_PASSWORD: ${{ secrets.MSIX_SIGNING_PASSWORD }}
         run: ./build_msi.ps1
 
       - name: Stage release assets
@@ -49,11 +68,17 @@ jobs:
 
           $setupSource = Join-Path $PWD 'installer\FileTools.Bundle\bin\Release\FileToolsSetup.exe'
           $msiSource = Join-Path $PWD 'installer\FileTools.Installer\bin\Release\FileTools.msi'
+          $identityMsixSource = Join-Path $PWD 'artifacts\identity\FileTools.Identity.msix'
+          $identityCertSource = Join-Path $PWD 'artifacts\identity\FileTools.Identity.cer'
           $setupAsset = Join-Path $dist "FileTools-$version-win-x64-setup.exe"
           $msiAsset = Join-Path $dist "FileTools-$version-win-x64.msi"
+          $identityMsixAsset = Join-Path $dist "FileTools-$version-win-x64-identity.msix"
+          $identityCertAsset = Join-Path $dist "FileTools-$version-msix-self-signed.cer"
 
           Copy-Item $setupSource $setupAsset -Force
           Copy-Item $msiSource $msiAsset -Force
+          Copy-Item $identityMsixSource $identityMsixAsset -Force
+          Copy-Item $identityCertSource $identityCertAsset -Force
 
           $files = Get-ChildItem $dist -File | Sort-Object Name
           $checksums = foreach ($file in $files) {
@@ -68,11 +93,14 @@ jobs:
           FileTools $tag
 
           Assets:
-          - FileTools-$version-win-x64-setup.exe: normal installer bootstrapper.
-          - FileTools-$version-win-x64.msi: direct MSI package.
+          - FileTools-$version-win-x64-setup.exe: normal signed installer bootstrapper.
+          - FileTools-$version-win-x64.msi: direct signed MSI package.
+          - FileTools-$version-win-x64-identity.msix: signed sparse package identity for Windows 11 native context menus.
+          - FileTools-$version-msix-self-signed.cer: public certificate used to sign the self-signed MSIX identity package.
           - checksums.txt: SHA256 hashes for the release assets.
 
-          These assets are not Authenticode-signed. Windows may show Unknown Publisher or Microsoft Defender SmartScreen warnings.
+          These assets are signed with the FileTools self-signed certificate. Windows does not trust this certificate by default.
+          FileToolsSetup.exe can import the certificate into the current user's Trusted People store when the Windows 11 native context menu option is selected.
           Verify the SHA256 hashes and GitHub artifact attestations before installing.
           "@
           Set-Content -Path $notesPath -Value $releaseNotes -Encoding utf8
@@ -86,6 +114,8 @@ jobs:
           subject-path: |
             artifacts/release/FileTools-${{ steps.stage.outputs.version }}-win-x64-setup.exe
             artifacts/release/FileTools-${{ steps.stage.outputs.version }}-win-x64.msi
+            artifacts/release/FileTools-${{ steps.stage.outputs.version }}-win-x64-identity.msix
+            artifacts/release/FileTools-${{ steps.stage.outputs.version }}-msix-self-signed.cer
             artifacts/release/checksums.txt
 
       - name: Upload workflow artifact
