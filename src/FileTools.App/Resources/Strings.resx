@@ -206,6 +206,8 @@
   <data name="DialogRenameDictionaryTitle" xml:space="preserve"><value>Rename dictionary</value></data>
   <data name="DialogCommonPhrasesTitle" xml:space="preserve"><value>Common phrase dictionary</value></data>
   <data name="DialogRenameRulesTitle" xml:space="preserve"><value>Rename correction rules</value></data>
+  <data name="RenameRuleGeneralTab" xml:space="preserve"><value>General</value></data>
+  <data name="RenameRuleDetailsTab" xml:space="preserve"><value>Details</value></data>
   <data name="LabelSourceText" xml:space="preserve"><value>Source text</value></data>
   <data name="LabelReplacementText" xml:space="preserve"><value>Replacement text</value></data>
   <data name="LabelCommonPhrase" xml:space="preserve"><value>Phrase</value></data>
@@ -221,6 +223,30 @@
   <data name="CheckRuleIgnoreCase" xml:space="preserve"><value>Ignore case</value></data>
   <data name="NewRenameRuleDisplayName" xml:space="preserve"><value>New rule</value></data>
   <data name="RenameRuleSourceRequiredMessage" xml:space="preserve"><value>Enter a source value for this rule type.</value></data>
+  <data name="RenameRuleSpecificSettingsGroup" xml:space="preserve"><value>Selected rule settings</value></data>
+  <data name="RenameRuleSpecificDictionaryTitle" xml:space="preserve"><value>Rename dictionary</value></data>
+  <data name="RenameRuleSpecificDictionaryHelp" xml:space="preserve"><value>Manage source-to-replacement entries used by the built-in dictionary rule.</value></data>
+  <data name="RenameRuleSpecificObfuscatedHangulTitle" xml:space="preserve"><value>Obfuscated Hangul candidates</value></data>
+  <data name="RenameRuleSpecificObfuscatedHangulHelp" xml:space="preserve"><value>Manage candidate scoring words and protected English words without exposing character replacement internals.</value></data>
+  <data name="RenameRuleDetailCommonPhrasesTitle" xml:space="preserve"><value>Candidate scoring words</value></data>
+  <data name="RenameRuleDetailCommonPhrasesHelp" xml:space="preserve"><value>Edit common phrases used by the obfuscated Hangul candidate scorer. Protected English words still remain internal.</value></data>
+  <data name="RenameRuleSpecificBracketMetadataTitle" xml:space="preserve"><value>Bracket metadata extraction</value></data>
+  <data name="RenameRuleSpecificBracketMetadataHelp" xml:space="preserve"><value>Manage words that should be treated as tags when bracket metadata is extracted.</value></data>
+  <data name="RenameRuleSpecificAuthorExtractionTitle" xml:space="preserve"><value>Author extraction</value></data>
+  <data name="RenameRuleSpecificAuthorExtractionHelp" xml:space="preserve"><value>Manage author prefixes such as by, author, or writer while keeping author value validation internal.</value></data>
+  <data name="RenameRuleSpecificEpisodeExtractionTitle" xml:space="preserve"><value>Episode extraction</value></data>
+  <data name="RenameRuleSpecificEpisodeExtractionHelp" xml:space="preserve"><value>Manage episode prefixes and units while keeping regex generation internal.</value></data>
+  <data name="RenameRuleSpecificTitleCleanupTitle" xml:space="preserve"><value>Title cleanup</value></data>
+  <data name="RenameRuleSpecificTitleCleanupHelp" xml:space="preserve"><value>Manage words removed from the parsed title after metadata extraction.</value></data>
+  <data name="ButtonEditCandidateLexicon" xml:space="preserve"><value>Edit candidate words...</value></data>
+  <data name="ButtonEditProtectedEnglishWords" xml:space="preserve"><value>Edit protected English...</value></data>
+  <data name="ButtonEditKnownTags" xml:space="preserve"><value>Edit tag words...</value></data>
+  <data name="ButtonEditAuthorPrefixes" xml:space="preserve"><value>Edit author prefixes...</value></data>
+  <data name="ButtonEditEpisodePrefixes" xml:space="preserve"><value>Edit episode prefixes...</value></data>
+  <data name="ButtonEditEpisodeUnits" xml:space="preserve"><value>Edit episode units...</value></data>
+  <data name="ButtonEditTitleNoiseWords" xml:space="preserve"><value>Edit title noise words...</value></data>
+  <data name="RenameRuleNoSpecificSettingsTitle" xml:space="preserve"><value>No details available</value></data>
+  <data name="RenameRuleNoSpecificSettingsHelp" xml:space="preserve"><value>This rule does not expose additional settings yet. Use the General tab for enabled state, mode, and ordering.</value></data>
   <data name="EditorValueRequiredMessage" xml:space="preserve"><value>Enter a value before adding or updating.</value></data>
   <data name="EditorDuplicateValueMessage" xml:space="preserve"><value>This value is already registered.</value></data>
   <data name="LabelDefaultTemplate" xml:space="preserve"><value>Default template</value></data>

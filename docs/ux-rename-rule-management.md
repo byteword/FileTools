@@ -62,6 +62,27 @@ The default built-in rules are:
 
 Windows filename safety is required and remains active even when shown in the rule list.
 
+## Rule-Specific Settings
+
+`RenameRuleEditorDialog` now uses right-side `General` and `Details` tabs. The `General` tab keeps the shared rule fields: enabled state, display name, stage, kind, mode, source, replacement, description, and case handling. The `Details` tab is rebuilt from the selected built-in rule kind.
+
+Currently exposed detail panels are limited to settings that already had backing storage:
+
+- Existing rename dictionary application: inline `source -> replacement` editor backed by `rename-dictionary.json`.
+- Obfuscated Hangul candidate generation: inline common-phrase editor for the candidate scoring lexicon, also backed by `rename-dictionary.json`.
+
+The settings window no longer exposes separate rename dictionary and common-phrase entry buttons. Those settings are reached through the selected built-in rule so the main settings window does not accumulate more rename-specific buttons.
+
+Deferred detail panels:
+
+- Protected English words for obfuscated Hangul scoring.
+- Known tag words for bracket metadata extraction.
+- Author prefixes.
+- Episode prefixes and units.
+- Title noise words.
+
+These should use dedicated parser-profile or candidate-profile stores before they are exposed. Regex internals and character replacement tables should remain internal.
+
 ## User Rules
 
 The first user-rule set supports:

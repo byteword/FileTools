@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -31,34 +32,88 @@ internal sealed class RenameRuleEditorDialog : Form
     private readonly TextBox _sourceBox = new();
     private readonly TextBox _replacementBox = new();
     private readonly TextBox _descriptionBox = new();
+    private readonly TabControl _editorTabs = new();
+    private readonly TabPage _generalTab = new();
+    private readonly TabPage _detailsTab = new();
+    private readonly Panel _detailsScrollHost = new();
+    private readonly FlowLayoutPanel _detailsStack = new();
     private readonly Label _statusLabel = new();
     private readonly Button _updateButton = new();
     private readonly Button _deleteButton = new();
     private readonly Button _moveUpButton = new();
     private readonly Button _moveDownButton = new();
 
+    private readonly BindingList<RenameDictionaryEntry> _dictionaryEntries;
+    private readonly BindingList<string> _commonPhrases;
+    private readonly ListBox _dictionaryEntryList = new();
+    private readonly TextBox _dictionarySourceBox = new();
+    private readonly TextBox _dictionaryReplacementBox = new();
+    private readonly Label _dictionaryStatusLabel = new();
+    private readonly ListBox _commonPhraseList = new();
+    private readonly TextBox _commonPhraseBox = new();
+    private readonly Label _commonPhraseStatusLabel = new();
+
     private List<RenameCorrectionRule> _rules;
     private bool _loading;
 
-    public RenameRuleEditorDialog(IEnumerable<RenameCorrectionRule> rules)
+    public RenameRuleEditorDialog(
+        IEnumerable<RenameCorrectionRule> rules,
+        RenameDictionaryDocument? renameDictionary = null)
     {
         _rules = RenameRuleStore.NormalizeRules(rules)
             .Select(static rule => rule.Clone())
             .ToList();
 
+        var dictionary = renameDictionary ?? RenameDictionaryStore.Load();
+        _dictionaryEntries = new BindingList<RenameDictionaryEntry>(dictionary.Replacements
+            .Where(static entry => !string.IsNullOrWhiteSpace(entry.Source))
+            .Select(static entry => new RenameDictionaryEntry
+            {
+                Source = entry.Source.Trim(),
+                Replacement = entry.Replacement.Trim()
+            })
+            .DistinctBy(static entry => entry.Source, StringComparer.OrdinalIgnoreCase)
+            .ToList());
+        _commonPhrases = new BindingList<string>(dictionary.CommonPhrases
+            .Select(static phrase => phrase.Trim())
+            .Where(static phrase => phrase.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList());
+
         Text = Localizer.Get("DialogRenameRulesTitle");
         StartPosition = FormStartPosition.CenterParent;
-        Width = 980;
-        Height = 620;
-        MinimumSize = new Size(840, 520);
+        Width = 1040;
+        Height = 680;
+        MinimumSize = new Size(920, 560);
         MinimizeBox = false;
+        MaximizeBox = true;
 
+        BindDetailEditorData();
+        WireDetailEditorEvents();
         BuildLayout();
         BindCombos();
         RefreshList(_rules.FirstOrDefault());
     }
 
     public IReadOnlyList<RenameCorrectionRule> Rules => RenameRuleStore.NormalizeRules(_rules);
+
+    public RenameDictionaryDocument RenameDictionary => new()
+    {
+        Replacements = _dictionaryEntries
+            .Where(static entry => !string.IsNullOrWhiteSpace(entry.Source))
+            .Select(static entry => new RenameDictionaryEntry
+            {
+                Source = entry.Source.Trim(),
+                Replacement = entry.Replacement.Trim()
+            })
+            .DistinctBy(static entry => entry.Source, StringComparer.OrdinalIgnoreCase)
+            .ToList(),
+        CommonPhrases = _commonPhrases
+            .Select(static phrase => phrase.Trim())
+            .Where(static phrase => phrase.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList()
+    };
 
     private void BuildLayout()
     {
@@ -72,13 +127,15 @@ internal sealed class RenameRuleEditorDialog : Form
         root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 380));
         root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 52));
         Controls.Add(root);
 
         root.Controls.Add(BuildRuleList(), 0, 0);
-        root.Controls.Add(BuildEditor(), 1, 0);
-        root.Controls.Add(BuildFooter(), 0, 1);
-        root.SetColumnSpan(root.GetControlFromPosition(0, 1)!, 2);
+        root.Controls.Add(BuildEditorTabs(), 1, 0);
+
+        var footer = BuildFooter();
+        root.Controls.Add(footer, 0, 1);
+        root.SetColumnSpan(footer, 2);
     }
 
     private Control BuildRuleList()
@@ -92,7 +149,7 @@ internal sealed class RenameRuleEditorDialog : Form
         };
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
         panel.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 76));
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 80));
 
         var label = new Label
         {
@@ -110,7 +167,8 @@ internal sealed class RenameRuleEditorDialog : Form
         var buttons = new FlowLayoutPanel
         {
             Dock = DockStyle.Fill,
-            WrapContents = true
+            WrapContents = true,
+            Padding = new Padding(0, 8, 0, 0)
         };
         var addButton = new Button { Text = Localizer.Get("ButtonAdd"), Width = 82, Height = 30 };
         _updateButton.Text = Localizer.Get("ButtonUpdate");
@@ -139,20 +197,39 @@ internal sealed class RenameRuleEditorDialog : Form
         return panel;
     }
 
-    private Control BuildEditor()
+    private Control BuildEditorTabs()
+    {
+        _editorTabs.Dock = DockStyle.Fill;
+        _generalTab.Text = Localizer.Get("RenameRuleGeneralTab");
+        _generalTab.Padding = new Padding(8);
+        _detailsTab.Text = Localizer.Get("RenameRuleDetailsTab");
+        _detailsTab.Padding = new Padding(8);
+
+        _generalTab.Controls.Add(BuildGeneralEditor());
+        _detailsTab.Controls.Add(BuildDetailsEditor());
+        _editorTabs.TabPages.Add(_generalTab);
+        _editorTabs.TabPages.Add(_detailsTab);
+        return _editorTabs;
+    }
+
+    private Control BuildGeneralEditor()
     {
         var panel = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
             ColumnCount = 2,
-            RowCount = 10
+            RowCount = 10,
+            Padding = new Padding(0, 4, 0, 0)
         };
-        panel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150));
+        panel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 140));
         panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        for (var row = 0; row < 9; row++)
+        for (var row = 0; row < 7; row++)
         {
-            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, row == 7 ? 86 : 38));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
         }
+
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 96));
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
         panel.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
         AddRow(panel, 0, Localizer.Get("LabelRuleEnabled"), _enabledCheckBox);
@@ -182,23 +259,55 @@ internal sealed class RenameRuleEditorDialog : Form
         return panel;
     }
 
+    private Control BuildDetailsEditor()
+    {
+        _detailsScrollHost.Dock = DockStyle.Fill;
+        _detailsScrollHost.AutoScroll = true;
+        _detailsScrollHost.BackColor = SystemColors.Control;
+
+        _detailsStack.FlowDirection = FlowDirection.TopDown;
+        _detailsStack.WrapContents = false;
+        _detailsStack.AutoSize = true;
+        _detailsStack.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _detailsStack.Dock = DockStyle.Top;
+        _detailsStack.Padding = new Padding(0);
+        _detailsScrollHost.Controls.Add(_detailsStack);
+        _detailsScrollHost.Resize += (_, _) => ResizeDetailsControls();
+        return _detailsScrollHost;
+    }
+
     private Control BuildFooter()
     {
+        var panel = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 1,
+            Padding = new Padding(0, 10, 0, 0)
+        };
         var buttons = new FlowLayoutPanel
         {
             Dock = DockStyle.Fill,
             FlowDirection = FlowDirection.RightToLeft,
             WrapContents = false,
-            Padding = new Padding(0, 10, 0, 0)
+            Margin = new Padding(0)
         };
-        var okButton = new Button { Text = "OK", Width = 90, Height = 30 };
-        var cancelButton = new Button { Text = Localizer.Get("ButtonCancel"), DialogResult = DialogResult.Cancel, Width = 90, Height = 30 };
+        var okButton = new Button { Text = "OK", Width = 90, Height = 30, Margin = new Padding(8, 0, 0, 0) };
+        var cancelButton = new Button
+        {
+            Text = Localizer.Get("ButtonCancel"),
+            DialogResult = DialogResult.Cancel,
+            Width = 90,
+            Height = 30,
+            Margin = new Padding(8, 0, 0, 0)
+        };
         okButton.Click += (_, _) => Confirm();
         buttons.Controls.Add(cancelButton);
         buttons.Controls.Add(okButton);
+        panel.Controls.Add(buttons, 0, 0);
         AcceptButton = okButton;
         CancelButton = cancelButton;
-        return buttons;
+        return panel;
     }
 
     private static void AddRow(TableLayoutPanel panel, int row, string labelText, Control control)
@@ -228,6 +337,18 @@ internal sealed class RenameRuleEditorDialog : Form
         _modeCombo.DataSource = Enum.GetValues<RenameCorrectionRuleMode>()
             .Select(mode => new ComboOption<RenameCorrectionRuleMode>(RenameCorrectionRuleText.GetModeDisplayName(mode), mode))
             .ToArray();
+    }
+
+    private void BindDetailEditorData()
+    {
+        _dictionaryEntryList.DataSource = _dictionaryEntries;
+        _commonPhraseList.DataSource = _commonPhrases;
+    }
+
+    private void WireDetailEditorEvents()
+    {
+        _dictionaryEntryList.SelectedIndexChanged += (_, _) => LoadSelectedDictionaryEntry();
+        _commonPhraseList.SelectedIndexChanged += (_, _) => LoadSelectedCommonPhrase();
     }
 
     private void RefreshList(RenameCorrectionRule? selected)
@@ -293,6 +414,7 @@ internal sealed class RenameRuleEditorDialog : Form
         _replacementBox.Text = "";
         _descriptionBox.Text = "";
         _ignoreCaseCheckBox.Checked = true;
+        UpdateRuleSpecificSettingsPanel(null);
     }
 
     private void AddRule()
@@ -367,6 +489,13 @@ internal sealed class RenameRuleEditorDialog : Form
     {
         if (_ruleList.SelectedItem is RenameCorrectionRule rule && !ApplyFieldsToRule(rule))
         {
+            _editorTabs.SelectedTab = _generalTab;
+            return;
+        }
+
+        if (!CommitPendingDetailEdit())
+        {
+            _editorTabs.SelectedTab = _detailsTab;
             return;
         }
 
@@ -438,6 +567,399 @@ internal sealed class RenameRuleEditorDialog : Form
         _deleteButton.Enabled = isUserRule;
         _moveUpButton.Enabled = CanMove(rule, -1);
         _moveDownButton.Enabled = CanMove(rule, 1);
+        UpdateRuleSpecificSettingsPanel(rule);
+    }
+
+    private void UpdateRuleSpecificSettingsPanel(RenameCorrectionRule? rule)
+    {
+        _detailsStack.SuspendLayout();
+        try
+        {
+            _detailsStack.Controls.Clear();
+            ClearDetailStatuses();
+
+            if (rule?.Kind == RenameCorrectionRuleKind.BuiltInRenameDictionary)
+            {
+                BuildDictionaryDetailPanel();
+            }
+            else if (rule?.Kind == RenameCorrectionRuleKind.BuiltInObfuscatedHangulCandidate)
+            {
+                BuildCommonPhraseDetailPanel();
+            }
+            else
+            {
+                BuildNoDetailPanel(rule);
+            }
+        }
+        finally
+        {
+            _detailsStack.ResumeLayout();
+            ResizeDetailsControls();
+        }
+    }
+
+    private void BuildDictionaryDetailPanel()
+    {
+        AddDetailHeader(
+            Localizer.Get("RenameRuleSpecificDictionaryTitle"),
+            Localizer.Get("RenameRuleSpecificDictionaryHelp"));
+
+        var listHost = new Panel { Height = 220, Margin = new Padding(0, 8, 0, 10) };
+        _dictionaryEntryList.Dock = DockStyle.Fill;
+        listHost.Controls.Add(_dictionaryEntryList);
+        AddDetailControl(listHost);
+
+        AddDetailControl(CreateDetailTextRow(Localizer.Get("LabelSourceText"), _dictionarySourceBox));
+        AddDetailControl(CreateDetailTextRow(Localizer.Get("LabelReplacementText"), _dictionaryReplacementBox));
+
+        _dictionaryStatusLabel.ForeColor = Color.FromArgb(128, 23, 23);
+        _dictionaryStatusLabel.Height = 26;
+        _dictionaryStatusLabel.TextAlign = ContentAlignment.MiddleLeft;
+        AddDetailControl(_dictionaryStatusLabel);
+
+        var buttons = CreateDetailButtonRow(
+            () => AddDictionaryEntry(),
+            () => UpdateDictionaryEntry(),
+            DeleteDictionaryEntry);
+        AddDetailControl(buttons);
+    }
+
+    private void BuildCommonPhraseDetailPanel()
+    {
+        AddDetailHeader(
+            Localizer.Get("RenameRuleDetailCommonPhrasesTitle"),
+            Localizer.Get("RenameRuleDetailCommonPhrasesHelp"));
+
+        var listHost = new Panel { Height = 260, Margin = new Padding(0, 8, 0, 10) };
+        _commonPhraseList.Dock = DockStyle.Fill;
+        listHost.Controls.Add(_commonPhraseList);
+        AddDetailControl(listHost);
+
+        AddDetailControl(CreateDetailTextRow(Localizer.Get("LabelCommonPhrase"), _commonPhraseBox));
+
+        _commonPhraseStatusLabel.ForeColor = Color.FromArgb(128, 23, 23);
+        _commonPhraseStatusLabel.Height = 26;
+        _commonPhraseStatusLabel.TextAlign = ContentAlignment.MiddleLeft;
+        AddDetailControl(_commonPhraseStatusLabel);
+
+        var buttons = CreateDetailButtonRow(
+            () => AddCommonPhrase(),
+            () => UpdateCommonPhrase(),
+            DeleteCommonPhrase);
+        AddDetailControl(buttons);
+    }
+
+    private void BuildNoDetailPanel(RenameCorrectionRule? rule)
+    {
+        var title = rule is null
+            ? Localizer.Get("RenameRuleNoSpecificSettingsTitle")
+            : rule.DisplayName;
+        AddDetailHeader(title, Localizer.Get("RenameRuleNoSpecificSettingsHelp"));
+    }
+
+    private void AddDetailHeader(string title, string helpText)
+    {
+        var titleLabel = new Label
+        {
+            Text = title,
+            Height = 28,
+            Font = new Font(Font, FontStyle.Bold),
+            TextAlign = ContentAlignment.MiddleLeft
+        };
+        var helpLabel = new Label
+        {
+            Text = helpText,
+            Height = 44,
+            ForeColor = Color.FromArgb(75, 85, 99),
+            TextAlign = ContentAlignment.MiddleLeft
+        };
+        AddDetailControl(titleLabel);
+        AddDetailControl(helpLabel);
+    }
+
+    private void AddDetailControl(Control control)
+    {
+        control.Margin = new Padding(0, 0, 0, 8);
+        _detailsStack.Controls.Add(control);
+    }
+
+    private static Control CreateDetailTextRow(string labelText, TextBox textBox)
+    {
+        var panel = new Panel { Height = 38, Margin = new Padding(0, 0, 0, 8) };
+        var label = new Label
+        {
+            Text = labelText,
+            Left = 0,
+            Top = 7,
+            Width = 130,
+            Height = 24,
+            TextAlign = ContentAlignment.MiddleLeft
+        };
+        textBox.Left = 140;
+        textBox.Top = 5;
+        textBox.Height = 26;
+        textBox.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
+        panel.Controls.Add(label);
+        panel.Controls.Add(textBox);
+        panel.Resize += (_, _) =>
+        {
+            var labelWidth = Math.Clamp(panel.ClientSize.Width / 3, 110, 170);
+            label.Width = labelWidth;
+            textBox.Left = labelWidth + 10;
+            textBox.Width = Math.Max(160, panel.ClientSize.Width - textBox.Left);
+        };
+        return panel;
+    }
+
+    private static Control CreateDetailButtonRow(
+        Func<bool> add,
+        Func<bool> update,
+        Action delete)
+    {
+        var buttons = new FlowLayoutPanel
+        {
+            Height = 38,
+            WrapContents = false,
+            Margin = new Padding(0, 0, 0, 8)
+        };
+        var addButton = new Button { Text = Localizer.Get("ButtonAdd"), Width = 90, Height = 30 };
+        var updateButton = new Button { Text = Localizer.Get("ButtonUpdate"), Width = 90, Height = 30 };
+        var deleteButton = new Button { Text = Localizer.Get("ButtonDelete"), Width = 90, Height = 30 };
+        addButton.Click += (_, _) => add();
+        updateButton.Click += (_, _) => update();
+        deleteButton.Click += (_, _) => delete();
+        buttons.Controls.Add(addButton);
+        buttons.Controls.Add(updateButton);
+        buttons.Controls.Add(deleteButton);
+        return buttons;
+    }
+
+    private void ResizeDetailsControls()
+    {
+        var width = Math.Max(240, _detailsScrollHost.ClientSize.Width - SystemInformation.VerticalScrollBarWidth - 8);
+        _detailsStack.Width = width;
+        foreach (Control control in _detailsStack.Controls)
+        {
+            control.Width = Math.Max(180, width - control.Margin.Horizontal);
+        }
+    }
+
+    private bool CommitPendingDetailEdit()
+    {
+        if (_ruleList.SelectedItem is not RenameCorrectionRule rule)
+        {
+            return true;
+        }
+
+        return rule.Kind switch
+        {
+            RenameCorrectionRuleKind.BuiltInRenameDictionary => CommitPendingDictionaryEdit(),
+            RenameCorrectionRuleKind.BuiltInObfuscatedHangulCandidate => CommitPendingCommonPhraseEdit(),
+            _ => true
+        };
+    }
+
+    private void LoadSelectedDictionaryEntry()
+    {
+        if (_dictionaryEntryList.SelectedItem is not RenameDictionaryEntry entry)
+        {
+            _dictionarySourceBox.Text = "";
+            _dictionaryReplacementBox.Text = "";
+            ClearDetailStatuses();
+            return;
+        }
+
+        _dictionarySourceBox.Text = entry.Source;
+        _dictionaryReplacementBox.Text = entry.Replacement;
+        ClearDetailStatuses();
+    }
+
+    private bool CommitPendingDictionaryEdit()
+    {
+        if (_dictionaryEntryList.SelectedIndex < 0)
+        {
+            return string.IsNullOrWhiteSpace(_dictionarySourceBox.Text) &&
+                string.IsNullOrWhiteSpace(_dictionaryReplacementBox.Text) || AddDictionaryEntry();
+        }
+
+        var current = _dictionaryEntries[_dictionaryEntryList.SelectedIndex];
+        return string.Equals(current.Source, _dictionarySourceBox.Text.Trim(), StringComparison.Ordinal) &&
+            string.Equals(current.Replacement, _dictionaryReplacementBox.Text.Trim(), StringComparison.Ordinal) ||
+            UpdateDictionaryEntry();
+    }
+
+    private bool AddDictionaryEntry()
+    {
+        var entry = CreateDictionaryEntryFromFields();
+        if (entry is null)
+        {
+            ShowDictionaryStatus(Localizer.Get("EditorValueRequiredMessage"));
+            return false;
+        }
+
+        if (HasDuplicateDictionarySource(entry.Source, exceptIndex: -1))
+        {
+            ShowDictionaryStatus(Localizer.Get("EditorDuplicateValueMessage"));
+            return false;
+        }
+
+        _dictionaryEntries.Add(entry);
+        _dictionaryEntryList.SelectedItem = entry;
+        ClearDetailStatuses();
+        return true;
+    }
+
+    private bool UpdateDictionaryEntry()
+    {
+        if (_dictionaryEntryList.SelectedIndex < 0)
+        {
+            return AddDictionaryEntry();
+        }
+
+        var entry = CreateDictionaryEntryFromFields();
+        if (entry is null)
+        {
+            ShowDictionaryStatus(Localizer.Get("EditorValueRequiredMessage"));
+            return false;
+        }
+
+        if (HasDuplicateDictionarySource(entry.Source, _dictionaryEntryList.SelectedIndex))
+        {
+            ShowDictionaryStatus(Localizer.Get("EditorDuplicateValueMessage"));
+            return false;
+        }
+
+        var index = _dictionaryEntryList.SelectedIndex;
+        _dictionaryEntries[index] = entry;
+        _dictionaryEntryList.SelectedIndex = index;
+        ClearDetailStatuses();
+        return true;
+    }
+
+    private void DeleteDictionaryEntry()
+    {
+        if (_dictionaryEntryList.SelectedIndex >= 0)
+        {
+            _dictionaryEntries.RemoveAt(_dictionaryEntryList.SelectedIndex);
+            _dictionarySourceBox.Text = "";
+            _dictionaryReplacementBox.Text = "";
+            ClearDetailStatuses();
+        }
+    }
+
+    private RenameDictionaryEntry? CreateDictionaryEntryFromFields()
+    {
+        var source = _dictionarySourceBox.Text.Trim();
+        if (source.Length == 0)
+        {
+            return null;
+        }
+
+        return new RenameDictionaryEntry
+        {
+            Source = source,
+            Replacement = _dictionaryReplacementBox.Text.Trim()
+        };
+    }
+
+    private bool HasDuplicateDictionarySource(string source, int exceptIndex)
+    {
+        return _dictionaryEntries
+            .Where((_, index) => index != exceptIndex)
+            .Any(entry => string.Equals(entry.Source, source, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void LoadSelectedCommonPhrase()
+    {
+        _commonPhraseBox.Text = _commonPhraseList.SelectedItem as string ?? "";
+        ClearDetailStatuses();
+    }
+
+    private bool CommitPendingCommonPhraseEdit()
+    {
+        var value = _commonPhraseBox.Text.Trim();
+        if (_commonPhraseList.SelectedIndex < 0)
+        {
+            return value.Length == 0 || AddCommonPhrase();
+        }
+
+        var current = _commonPhrases[_commonPhraseList.SelectedIndex];
+        return string.Equals(current, value, StringComparison.Ordinal) || UpdateCommonPhrase();
+    }
+
+    private bool AddCommonPhrase()
+    {
+        var value = _commonPhraseBox.Text.Trim();
+        if (value.Length == 0)
+        {
+            ShowCommonPhraseStatus(Localizer.Get("EditorValueRequiredMessage"));
+            return false;
+        }
+
+        if (_commonPhrases.Any(phrase => string.Equals(phrase, value, StringComparison.OrdinalIgnoreCase)))
+        {
+            ShowCommonPhraseStatus(Localizer.Get("EditorDuplicateValueMessage"));
+            return false;
+        }
+
+        _commonPhrases.Add(value);
+        _commonPhraseList.SelectedItem = value;
+        ClearDetailStatuses();
+        return true;
+    }
+
+    private bool UpdateCommonPhrase()
+    {
+        if (_commonPhraseList.SelectedIndex < 0)
+        {
+            return AddCommonPhrase();
+        }
+
+        var value = _commonPhraseBox.Text.Trim();
+        if (value.Length == 0)
+        {
+            ShowCommonPhraseStatus(Localizer.Get("EditorValueRequiredMessage"));
+            return false;
+        }
+
+        if (_commonPhrases.Where((_, index) => index != _commonPhraseList.SelectedIndex)
+            .Any(phrase => string.Equals(phrase, value, StringComparison.OrdinalIgnoreCase)))
+        {
+            ShowCommonPhraseStatus(Localizer.Get("EditorDuplicateValueMessage"));
+            return false;
+        }
+
+        var index = _commonPhraseList.SelectedIndex;
+        _commonPhrases[index] = value;
+        _commonPhraseList.SelectedIndex = index;
+        ClearDetailStatuses();
+        return true;
+    }
+
+    private void DeleteCommonPhrase()
+    {
+        if (_commonPhraseList.SelectedIndex >= 0)
+        {
+            _commonPhrases.RemoveAt(_commonPhraseList.SelectedIndex);
+            _commonPhraseBox.Text = "";
+            ClearDetailStatuses();
+        }
+    }
+
+    private void ShowDictionaryStatus(string message)
+    {
+        _dictionaryStatusLabel.Text = message;
+    }
+
+    private void ShowCommonPhraseStatus(string message)
+    {
+        _commonPhraseStatusLabel.Text = message;
+    }
+
+    private void ClearDetailStatuses()
+    {
+        _dictionaryStatusLabel.Text = "";
+        _commonPhraseStatusLabel.Text = "";
     }
 
     private bool CanMove(RenameCorrectionRule? rule, int direction)

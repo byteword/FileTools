@@ -59,6 +59,13 @@ and troubleshooting.
 By default, the workflow creates a draft GitHub Release. Publish the draft only
 after checking the assets and release notes.
 
+## Documentation And Wiki Timing
+
+Keep repository docs current during feature work, but defer the external wiki
+update until the release pass. The release checklist should copy the finalized
+rename-rule settings notes, screenshots, and user-facing workflow changes to the
+wiki only after the release assets and release notes are verified.
+
 ## Signing Secrets
 
 Create the persistent self-signed release certificate once:
