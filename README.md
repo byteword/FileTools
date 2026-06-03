@@ -1,10 +1,366 @@
 # FileTools
 
+## 한국어
+
+Windows 탐색기 ContextMenu와 독립 실행형 WinForms 유틸리티를 제공하는 작은 파일 관리 도구입니다.
+
+현재 버전: `1.1.0.0`.
+
+### 개발 및 안정성 안내
+
+FileTools는 취미 개발자가 개인적으로 관리하는 프로젝트이며, Codex를 활용해 제작 및 업데이트하고 있습니다. 따라서 일부 업데이트는 충분히 안정화되지 않았을 수 있고, 버그 테스트도 제한적으로 이루어질 수 있습니다. 중요한 파일에 적용하기 전에는 백업을 권장드리며, 문제가 발견되면 이슈로 알려주시면 가능한 범위에서 확인하겠습니다.
+
+### 기능
+
+FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMenu 작업 세 가지를 제공합니다.
+
+1. **파일이름 자동 교정**
+   - `NameCorrector`에서 파생된 파일명 교정 흐름을 사용합니다.
+   - 한글 자모/유니코드를 정규화하고, 제목/회차/태그/작가 정보를 추출하며, Windows에서 안전한 이름을 만들고, 접미사를 붙여 충돌을 방지합니다.
+   - 변경 적용 전 이름 바꾸기 검토 창이 기본으로 열립니다. ContextMenu 실행에서도 동일하며, 검토가 필요하거나 충돌이 있는 생성 행만 검토하도록 제한할 수 있습니다.
+
+2. **폴더 wrapping / unwrapping**
+   - 자동 모드에서는 선택한 파일을 같은 이름의 폴더로 감쌉니다.
+   - 선택한 폴더가 단일 파일 폴더이면 풀고, 그렇지 않으면 바로 아래의 자식 파일을 상위로 이동합니다.
+   - 단일 파일 폴더를 풀 때 기존 파일 이름 유지, 폴더 이름으로 변경, `folder-file` 형식 변경 중 하나를 선택할 수 있습니다.
+   - 기존 대상 파일은 덮어쓰지 않습니다.
+
+3. **폴더 자동 재배치**
+   - `ImageArchiveManager`에서 파생된 가벼운 AutoRelocation 템플릿을 사용합니다.
+   - 기본 템플릿은 항목을 `[ㄱ]`, `[A]`, `[0A]` 같은 제목 초성/이니셜 버킷으로 이동합니다.
+   - 템플릿은 순서가 있는 경로 규칙 단계를 연결해 다단계 경로를 만들 수 있습니다.
+   - 템플릿 필드는 파일, 폴더 또는 파싱된 파일 이름에서 얻을 수 있는 값으로 제한됩니다.
+
+네이티브 ShellExt는 탐색기 메뉴 명령을 노출하고 실행 파일을 시작하는 역할만 합니다. 실행 파일은 선택 항목을 잠시 큐에 넣고, 탐색기가 항목별로 호출한 내용을 병합한 뒤, 비대화형 작업을 자동으로 수행하고 오류가 없으면 조용히 종료합니다.
+비처리 명령인 **FileTools 열기 / Open FileTools**는 FileTools 하위 메뉴에 남아 있으며, 선택한 모든 항목을 로드한 독립 실행형 플래너를 엽니다.
+
+### 독립 실행 UI
+
+인수 없이 `FileTools.exe`를 실행하면 드래그 앤 드롭 작업 계획 창이 열립니다.
+
+![FileTools 독립 실행 창](docs/images/current-mainform-designer-layout.svg)
+
+독립 실행 창은 다음 기능을 지원합니다.
+
+- 대상 목록에 파일/폴더를 드래그 앤 드롭합니다.
+- 파일/폴더 아이콘, 상위 위치, 대상별 작업 개수를 포함한 그리드에서 대상을 검토합니다.
+- 대상 도구 모음으로 대상을 추가/제거하고, 선택한 대상을 실행 순서에서 위나 아래로 이동합니다.
+- 드롭되거나 새로 추가된 대상은 자동으로 선택됩니다. 작업 버튼은 설정된 단계를 선택된 모든 대상에 추가하므로, 여러 폴더의 unwrap 작업 흐름을 한 번에 준비할 수 있습니다.
+- 파일/폴더를 수동으로 선택합니다.
+- 파일을 변경하기 전에 각 대상에 여러 계획 작업을 추가합니다.
+- 파일명 교정, 폴더 wrapping, 폴더 unwrapping, AutoRelocation 작업을 체인으로 연결합니다.
+- 메뉴 모음에서 파일, 작업, 설정 명령에 접근하고, 자주 쓰는 작업 명령은 고정 작업 도구 모음에 유지합니다.
+- 분할 버튼에서 폴더 unwrapping 변형을 선택합니다. 기본 설정, 같은 이름 폴더, 단일 파일 폴더 이름 불일치 처리 방식, 바로 아래 자식 파일 상위 이동을 포함합니다.
+- 각 선택 대상의 작업 계획을 순서, 아이콘이 붙은 작업 종류, 예상 결과와 함께 그리드에서 검토합니다. 이름 변경 단계는 `original -> new name` 형식으로 표시됩니다.
+- 작업 계획 위에 현재 표시 중인 대상, 선택된 대상 수, 선택된 대상의 계획 단계 수를 표시합니다.
+- 별도 설정 열을 두지 않고 그리드 행 툴팁으로 단계별 상세 옵션을 보여줍니다.
+- 계획 쪽 도구 모음에서 선택한 단계 하나를 제거하거나 현재 표시 중인 대상의 단계를 모두 지울 수 있으며, 남은 단계 체인을 기준으로 미리보기가 다시 계산됩니다.
+- 계획 작업을 두 번 클릭하면 해당 작업 대화상자를 다시 엽니다. 이름 변경 단계는 파일별 후보, 수동 편집, 건너뛰기 컨트롤이 포함된 이름 바꾸기 검토 창을 다시 엽니다.
+- 오른쪽 아래 실행/중지 버튼 하나로 모든 대상 계획을 순서대로 실행하고, 아래쪽 로그 보기에서 진행 상황을 검토합니다.
+- 탐색기 ContextMenu 등록, 이름 변경 기본값, 폴더 기본값, AutoRelocation 기본값을 위한 고정 상태 헤더와 접을 수 있는 옵션 그룹이 있는 크기 조절 가능한 설정 창을 엽니다.
+
+설정 창은 동작 기본값과 탐색기 ContextMenu 설치/제거를 관리합니다. 네이티브 ShellExt 등록은 하나의 FileTools 하위 메뉴를 사용하며, 개별 ContextMenu 작업은 켜거나 끌 수 있습니다.
+폴더 wrapping/unwrapping과 AutoRelocation 명령은 탐색기 등록용으로 각각 선택할 수 있습니다. 설정 창에서 OK를 누르면 Install/Remove 버튼을 누르지 않았더라도 옵션을 저장하고 현재 사용자 ContextMenu 등록을 동기화합니다.
+설정 레이아웃 메모는 `docs/ux-settings-dialog-review.md`에서 추적합니다.
+앱 아이콘은 `src\FileTools.App\Resources` 아래에 투명 PNG와 다중 크기 ICO 자산으로 저장되어 있으며, EXE와 MSI 제품 메타데이터 모두 ICO를 사용합니다. Burn 설치 및 제거 UI는 `installer\FileTools.Bundle\Assets` 아래의 별도 파란색 설치 로고를 사용하고, MSI 마법사는 `installer\FileTools.Installer\Assets` 아래의 별도 파란색 대화상자/배너 비트맵을 사용합니다.
+
+이름 바꾸기 검토 대화상자는 ContextMenu 이름 변경 명령과 독립 실행 계획 편집에서 사용됩니다.
+이름 바꾸기 검토는 변경 적용 전에 항상 열리도록 설정하거나, 생성 행에 검토가 필요하거나 충돌이 있을 때만 열리도록 설정할 수 있습니다. 이 대화상자는 읽기 전용 항목 목록과 선택 항목 편집기를 함께 사용하므로 긴 대상 이름을 그리드 밖에서 편집할 수 있으며, 추출된 제목, 회차, 작가, 태그, 확장자, 후보, 공통 문구, 규칙 추적 값은 입력 보조 정보로 계속 사용할 수 있습니다. 공통 문구는 기본적으로 한 행으로 접혀 있으며 같은 패널에서 펼치거나 접을 수 있습니다. 오른쪽 위에는 전체 변경 요약을 표시하고, 검토/충돌 행을 강조하며, 편집한 대상 이름을 매번 검증하고, 적용 전에 선택 행을 자동/원본으로 복원하거나 건너뛸 수 있습니다.
+
+![FileTools 이름 바꾸기 대화상자](docs/images/rename-editor-dialog-concept.svg)
+
+현재 이름 바꾸기 대화상자의 UX 검토 메모는 `docs/ux-rename-dialog-review.md`에서 추적합니다.
+
+별도 대화상자는 다음 용도로 제공됩니다.
+
+- 이름 변경 치환 사전 항목(`source -> replacement`).
+- 파일명 교정 점수 계산에서 사용하는 이름 변경 공통 문구 사전 항목.
+- 이름 변경 교정 규칙. 내장 규칙 표시 여부, 활성 상태, 단계별 순서, 자동/검토/후보 전용 모드를 포함합니다. 스크립트 기반 규칙은 보류 중이며 `docs/ux-rename-rule-management.md`에 문서화되어 있습니다.
+- AutoRelocation 템플릿 편집. 경로 규칙 단계는 순서대로 평가되므로 템플릿은 `{KnownFileKind}\[{Initial}]\{EpisodeRange}` 같은 경로를 만들 수 있습니다. 템플릿 편집기와 단계별 작업 대화상자는 긴 템플릿 이름, 경로, 현지화된 라벨을 위해 크기를 조절할 수 있습니다.
+
+AutoRelocation 템플릿은 의도적으로 파일에서 파생된 값만 사용합니다.
+
+- 파일 이름 stem.
+- 파일 확장자.
+- 일반 확장자에서 판별한 알려진 파일 종류: `Folder`, `Archive`, `Image`, `Video`, `Music`, `Text`, `Document`, `Program`, `Other`.
+- 파일 또는 폴더 이름에서 파싱한 제목과 회차 범위.
+- 크기, 만든 시간, 수정한 시간.
+
+알려진 파일 종류의 원본은 원시 확장자 원본과 분리되어 있습니다. 일반 확장자를 넓은 범주의 폴더로 묶습니다.
+
+- `Archive`: `zip`, `rar`, `7z`, `tar`, `gz`, `cbz`, `cbr`, `iso` 같은 압축/아카이브 및 디스크 이미지 계열 파일.
+- `Image`: `jpg`, `png`, `gif`, `webp`, `heic`, `svg`, `psd`, `ico` 같은 이미지/디자인/raw 형식.
+- `Video`: `mp4`, `mkv`, `avi`, `mov`, `webm`, `srt`, `ass`, `vtt` 같은 동영상 파일과 자막 사이드카.
+- `Music`: `mp3`, `flac`, `wav`, `m4a`, `ogg`, `opus`, `wma` 같은 오디오/음악 파일.
+- `Text`: `txt`, `md`, `log`, `csv`, `json`, `xml`, `yaml`, `ini` 같은 일반 텍스트와 구조화 텍스트.
+- `Document`: `pdf`, `docx`, `xlsx`, `pptx`, `odt`, `epub`, `hwp`, `hwpx` 같은 PDF, Office, OpenDocument, 전자책, HWP 형식.
+- `Program`: `exe`, `msi`, `bat`, `ps1`, `js`, `jar`, `dll`, `apk` 같은 실행 파일, 설치 파일, 스크립트, 패키지, 라이브러리 파일.
+
+설정과 템플릿은 다음 위치에 저장됩니다.
+
+```text
+%APPDATA%\FileTools
+%APPDATA%\FileTools\rename-dictionary.json
+%APPDATA%\FileTools\Relocate
+```
+
+`%APPDATA%`에 쓸 수 없으면 FileTools는 실행 파일 옆의 `FileToolsData`로 대체합니다.
+
+### UI 현지화
+
+앱 UI는 .NET `CurrentUICulture`를 통해 시스템 UI 문화권을 따릅니다.
+영어는 중립/기본 리소스이며, 한국어는 satellite 리소스로 제공됩니다.
+지원하지 않는 UI 문화권은 영어로 fallback됩니다.
+
+```text
+src\FileTools.App\Resources\Strings.resx
+src\FileTools.App\Resources\Strings.ko.resx
+```
+
+`MainForm`은 WinForms Designer 친화적인 partial 클래스로 분리되어 있습니다.
+
+```text
+src\FileTools.App\Ui\MainForm.cs
+src\FileTools.App\Ui\MainForm.Designer.cs
+src\FileTools.App\Ui\MainForm.resx
+```
+
+레이아웃/컨트롤 선언은 `MainForm.Designer.cs`에 두고, 런타임 동작과 현지화 텍스트 바인딩은 `MainForm.cs`에 둡니다.
+`Ui\MainForm.ko.resx` 같은 폼 수준 문화권 리소스는 의도적으로 빌드에서 제외되어 있습니다. UI 문자열은 `Resources\Strings*.resx`에만 추가하세요.
+Designer 파일은 Visual Studio가 런타임 현지화를 실행하지 않고도 폼을 렌더링할 수 있도록 중립 영어 텍스트와 placeholder 콤보 항목을 유지합니다. 앱은 시작 시 해당 값을 `Resources\Strings*.resx`에서 읽은 값으로 덮어씁니다.
+
+### 빌드 요구 사항
+
+- Windows
+- .NET 8 SDK 이상
+- `FileTools.ShellExt`용 C++ 워크로드가 포함된 Visual Studio Build Tools
+
+### 빌드
+
+`FileTools.sln`은 .NET/C++ 혼합 x64 솔루션입니다. WinForms 앱과 네이티브 ShellExt가 모두 필요하면 Visual Studio 또는 Visual Studio MSBuild에서 빌드하세요.
+
+```powershell
+MSBuild.exe FileTools.sln /p:Configuration=Release /p:Platform=x64
+```
+
+앱만 빌드하려면 다음 명령을 사용합니다.
+
+```powershell
+dotnet build .\src\FileTools.App\FileTools.App.csproj
+```
+
+게시:
+
+```powershell
+dotnet publish .\src\FileTools.App\FileTools.App.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true
+```
+
+출력:
+
+```text
+src\FileTools.App\bin\Release\net8.0-windows\win-x64\publish\FileTools.exe
+```
+
+### 설치 관리자 빌드
+
+설치 관리자는 WiX Toolset SDK 스타일 프로젝트 파일을 사용합니다. 빌드 스크립트는 먼저 Visual Studio MSBuild로 네이티브 ShellExt DLL을 빌드한 다음 WiX MSI와 Burn bundle 프로젝트를 복원/빌드합니다.
+
+```powershell
+.\build_msi.ps1
+```
+
+출력:
+
+```text
+installer\FileTools.Installer\bin\Release\FileTools.msi
+installer\FileTools.Bundle\bin\Release\FileToolsSetup.exe
+artifacts\identity\FileTools.Identity.msix
+artifacts\identity\FileTools.Identity.cer
+```
+
+MSI는 FileTools를 framework-dependent `win-x64` single-file 앱으로 게시하고 사용자별 위치에 설치합니다.
+
+```text
+%LOCALAPPDATA%\Programs\FileTools
+```
+
+MSI는 의도적으로 작게 유지되며 Microsoft .NET 8 Desktop Runtime x64가 필요합니다. 일반 배포에는 `FileToolsSetup.exe`를 사용하세요. Burn bootstrapper는 Microsoft .NET Desktop Runtime 8.0.27 x64가 없으면 Microsoft 공식 런타임 엔드포인트에서 다운로드한 뒤 MSI를 실행합니다.
+빌드 스크립트는 WiX `wix burn detach`와 `wix burn reattach` 흐름으로 Burn bootstrapper bundle에 서명하므로, 서명된 EXE도 연결된 MSI와 identity payload를 계속 추출할 수 있습니다.
+런타임이 이미 설치되어 있으면 `FileToolsSetup.exe`는 사용자별 MSI만 설치하며 관리자 권한이 필요하지 않아야 합니다. 런타임이 없으면 bootstrapper는 machine-wide Microsoft .NET Desktop Runtime 설치 관리자에 대해서만 승격을 요청한 뒤 사용자별 FileTools MSI 설치를 계속합니다.
+bootstrapper는 Windows 앱 및 기능에서 `FileTools`로 표시되며, 실행 파일 이름은 `FileToolsSetup.exe`로 유지됩니다.
+bootstrapper는 MSI 마법사를 숨기고 자체 설치 옵션을 표시합니다.
+
+- `Add Explorer Context Menu commands`: 기본 활성화.
+- `Create Start Menu shortcut`: 기본 활성화.
+- `Create Desktop shortcut`: 기본 비활성화.
+- `Use Windows 11 native context menu`: 기본 비활성화.
+
+설치가 성공하면 bootstrapper는 성공 페이지에 `Run FileTools` 버튼을 표시합니다.
+
+MSI 옵션:
+
+- `FileTools`: 애플리케이션과 시작 메뉴 바로가기.
+- `Explorer Context Menu`: 선택 사항인 네이티브 ShellExt 등록.
+
+`FileTools.msi`를 직접 실행하면 이 MSI 기능들은 MSI 마법사에서 계속 사용할 수 있습니다. bootstrapper에서 제공하는 속성이 없으면 MSI는 기본적으로 탐색기 ContextMenu와 시작 메뉴 바로가기를 설치하며, 바탕 화면 바로가기는 만들지 않습니다.
+
+MSI는 네이티브 `FileTools.ShellExt.dll`을 현재 사용자 COM ExplorerCommand handler로 설치합니다. 첫 실행 후 FileTools 설정에서 개별 폴더 wrapping/unwrapping 및 AutoRelocation 명령을 선택하세요. 기존 정적 레지스트리 컴포넌트는 fallback 개발 용도로만 비활성 상태로 유지됩니다.
+
+선택 사항인 Windows 11 네이티브 ContextMenu 경로는 `Add-AppxPackage -ExternalLocation`으로 서명된 sparse MSIX identity package를 등록합니다. 그러면 Windows가 `desktop4:FileExplorerContextMenus`와 `windows.comServer`를 통해 shell extension을 발견할 수 있습니다. 설치 프로그램은 identity package를 등록하기 전에 공개 self-signed CER을 현재 사용자의 Trusted People 저장소로 가져옵니다. 설치 또는 제거 후 메뉴가 즉시 갱신되지 않으면 Explorer를 다시 시작하세요.
+
+네이티브 ShellExt는 `FileTools.ShellExt.def`를 통해 `DllGetClassObject`, `DllCanUnloadNow`, `DllRegisterServer`, `DllUnregisterServer`를 명시적으로 내보내며, Explorer가 별도 VC runtime 의존성 없이 로드할 수 있도록 정적 C runtime으로 빌드됩니다.
+
+앱 전용 빌드에는 `dotnet build src\FileTools.App\FileTools.App.csproj`를 사용하세요. `FileTools.sln`은 루트 혼합 x64 솔루션이며 네이티브 ShellExt 프로젝트를 포함하므로 전체 솔루션 빌드에는 C++ 워크로드가 포함된 Visual Studio MSBuild가 필요합니다. ShellExt 프로젝트는 `build_msi.ps1`과 `publish_and_install.ps1`에서 빌드됩니다. 설치 관리자 프로젝트는 `installer\FileTools.Installer.sln`에 분리되어 있으며, `build_msi.ps1`로 빌드하거나 HeatWave 같은 WiX v4 호환 확장이 있는 Visual Studio에서 해당 솔루션을 열 수 있습니다.
+
+### 릴리스
+
+GitHub Releases는 setup bootstrapper, MSI, sparse MSIX identity package를 빌드하고 서명하며, `checksums.txt`를 생성하고, 릴리스 자산에 대한 GitHub artifact attestation을 만드는 수동 workflow를 사용합니다.
+
+릴리스는 GitHub Secrets에 base64 PFX와 비밀번호로 저장된 self-signed FileTools 인증서를 사용합니다. 이는 무료 GitHub 배포와 CER 신뢰 후 MSIX identity 등록에는 적합하지만, 공개 CA 코드 서명 인증서는 아닙니다. Windows는 첫 사용 사용자에게 SmartScreen 또는 신뢰 경고를 계속 표시할 수 있습니다.
+
+릴리스 workflow와 검증 단계는 `docs\release.md`를 참고하세요.
+
+### 프로젝트 구성
+
+```text
+src\FileTools.App
+├─ Configuration
+├─ Infrastructure
+├─ Naming
+├─ Operations
+├─ Relocation
+├─ Shell
+└─ Ui
+
+src\FileTools.ShellExt
+└─ Native C++ ExplorerCommand shell extension
+
+installer\FileTools.Installer
+├─ FileTools.Installer.sln
+└─ FileTools.Installer
+
+installer\FileTools.Identity
+└─ Sparse MSIX identity manifest
+
+src\FileTools.IdentityHelper
+└─ Certificate trust and sparse identity registration helper
+```
+
+### ContextMenu 설치
+
+도우미 스크립트를 사용합니다.
+
+```powershell
+.\publish_and_install.ps1
+```
+
+또는 게시된 실행 파일을 실행합니다.
+
+```powershell
+.\FileTools.exe /install
+```
+
+명시적인 `/install` 명령은 저장된 설정에서 현재 탐색기 등록이 꺼져 있더라도 `RegisterContextMenu`를 활성화합니다.
+Explorer가 이미 네이티브 ShellExt DLL을 로드하려고 시도한 뒤 DLL이 교체되었다면, 메뉴를 다시 확인하기 전에 Explorer를 다시 시작하세요.
+
+이 작업은 현재 사용자 레지스트리 키에만 기록합니다.
+
+```text
+HKCU\Software\Classes\*\shell
+HKCU\Software\Classes\Directory\shell
+HKCU\Software\Classes\CLSID\{716e7cc4-5941-4362-8aca-d38c62817de9}
+HKCU\Software\FileTools\ContextMenu
+```
+
+관리자 권한은 필요하지 않습니다.
+
+### ContextMenu 제거
+
+```powershell
+.\uninstall.ps1
+```
+
+또는:
+
+```powershell
+.\FileTools.exe /uninstall
+```
+
+명시적인 `/uninstall` 명령은 탐색기 등록을 제거하고 `RegisterContextMenu`를 비활성 상태로 저장합니다.
+
+### ContextMenu 등록 정리
+
+설치 후에도 Explorer에 FileTools 메뉴가 보이지 않으면 현재 사용자 등록 잔여 항목을 검사하고 정리하세요.
+
+```powershell
+.\cleanup_context_menu.ps1 -WhatIf
+```
+
+정리를 실행합니다.
+
+```powershell
+.\cleanup_context_menu.ps1
+```
+
+선택 플래그:
+
+- `-RemoveInstalledFiles`: 복사된 바이너리, 설정, 템플릿을 포함한 `%APPDATA%\FileTools`도 제거합니다.
+- `-RestartExplorer`: 정리 후 Explorer를 다시 시작합니다.
+
+### ContextMenu 동작
+
+등록되는 명령:
+
+```text
+FileTools.exe /open "%1"
+FileTools.exe /context FileNameCorrection "%1"
+FileTools.exe /context FolderStructure "%1"
+FileTools.exe /context AutoRelocation "%1"
+FileTools.exe /context FolderWrapFiles "%1"
+FileTools.exe /context FolderUnwrapSameNameSingleFile "%1"
+FileTools.exe /context FolderUnwrapSingleFile "%1"
+FileTools.exe /context FolderUnwrapUseFolderName "%1"
+FileTools.exe /context FolderUnwrapKeepFileName "%1"
+FileTools.exe /context FolderMoveInnerFilesUp "%1"
+FileTools.exe /context AutoRelocationCurrentFolder "%1"
+FileTools.exe /context AutoRelocationChooseTarget "%1"
+```
+
+처음 세 `/context` 명령은 하위 호환성을 위해 유지됩니다. 네이티브 ShellExt는 선택 항목 종류에 따라 표시할 하위 메뉴 항목을 결정합니다. 단일 파일 폴더의 경우 단일 파일 stem이 폴더 이름과 일치하는지도 확인하고, 단순 unwrap 명령 또는 명시적인 폴더 이름/파일 이름 unwrap 명령을 노출합니다.
+
+Explorer는 선택 항목마다 프로세스를 하나씩 시작하는 경우가 많습니다. FileTools는 잠시 기다린 뒤 임시 큐를 통해 선택 경로를 병합하고, 선택된 작업을 실행한 다음 비대화형 명령에서는 자동으로 종료합니다. Open FileTools 명령도 선택한 모든 경로를 받아 큐에 넣기 때문에 독립 실행형 플래너가 전체 선택 항목으로 시작됩니다. 파일명 교정은 구성된 검토 모드에 따라 적용 전에 이름 바꾸기 검토 창을 엽니다. 예외가 발생하면 오류 요약이 표시됩니다.
+
+### 안전 동작
+
+- 기존 대상 파일/폴더는 덮어쓰지 않습니다.
+- 파일명 교정은 기본적으로 변경 적용 전에 검토되며, 해당 검토 모드를 선택한 경우 생성 행에 검토가 필요하거나 충돌이 있을 때만 검토됩니다.
+- AutoRelocation은 대상이 이미 있으면 `(2)`, `(3)` 접미사를 적용합니다.
+- 폴더는 unwrapping 또는 자식 파일 이동 후 비어 있을 때만 삭제됩니다.
+- 폴더 unwrapping은 바로 아래의 자식 파일만 이동하며, 중첩 폴더 내용은 평탄화하지 않습니다.
+
+### 로그
+
+```text
+%TEMP%\FileTools.log
+```
+
+### 라이선스
+
+FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE`를 참고하세요.
+
+---
+
+## English
+
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
 Current version: `1.1.0.0`.
 
-## Features
+### Development and Stability Notice
+
+FileTools is maintained as a personal hobby project and is built and updated with the help of Codex. As a result, some updates may not be fully stable, and bug testing may be limited. Please consider backing up important files before using FileTools on them, and feel free to report issues so they can be reviewed as time permits.
+
+### Features
 
 FileTools provides three current-user ContextMenu actions for selected files and folders:
 
@@ -28,7 +384,7 @@ FileTools provides three current-user ContextMenu actions for selected files and
 The native ShellExt only exposes Explorer menu commands and launches the executable. The executable queues selected items briefly, merges Explorer's per-item invocations, performs non-interactive work automatically, and exits silently when there are no errors.
 The non-processing **FileTools 열기 / Open FileTools** command stays in the FileTools submenu and opens the standalone planner with all selected items loaded.
 
-## Standalone UI
+### Standalone UI
 
 Run `FileTools.exe` without arguments to open the drag-and-drop work plan window.
 
@@ -100,7 +456,7 @@ Settings and templates are stored under:
 
 If `%APPDATA%` is not writable, FileTools falls back to `FileToolsData` next to the executable.
 
-## UI Localization
+### UI Localization
 
 The app UI follows the system UI culture through .NET `CurrentUICulture`.
 English is the neutral/default resource, and Korean is provided as a satellite resource.
@@ -123,13 +479,13 @@ Keep layout/control declarations in `MainForm.Designer.cs`, and keep runtime beh
 Form-level culture resources such as `Ui\MainForm.ko.resx` are intentionally excluded from the build; add UI strings only to `Resources\Strings*.resx`.
 The Designer file keeps neutral English text and placeholder combo items so Visual Studio can render the form without running runtime localization; the app overwrites those values from `Resources\Strings*.resx` at startup.
 
-## Build Requirement
+### Build Requirement
 
 - Windows
 - .NET 8 SDK or newer
 - Visual Studio Build Tools with the C++ workload for `FileTools.ShellExt`
 
-## Build
+### Build
 
 `FileTools.sln` is a mixed .NET/C++ x64 solution. Build it from Visual Studio or Visual Studio MSBuild when you need both the WinForms app and the native ShellExt:
 
@@ -155,7 +511,7 @@ Output:
 src\FileTools.App\bin\Release\net8.0-windows\win-x64\publish\FileTools.exe
 ```
 
-## Build Installer
+### Build Installer
 
 The installer uses WiX Toolset SDK-style project files. The build script first builds the native ShellExt DLL with Visual Studio MSBuild, then restores/builds the WiX MSI and Burn bundle projects.
 
@@ -206,7 +562,7 @@ The native ShellExt explicitly exports `DllGetClassObject`, `DllCanUnloadNow`, `
 
 Use `dotnet build src\FileTools.App\FileTools.App.csproj` for an app-only build. `FileTools.sln` is the root mixed x64 solution and includes the native ShellExt project, so building the full solution requires Visual Studio MSBuild with the C++ workload. The ShellExt project is built by `build_msi.ps1` and `publish_and_install.ps1`. The installer projects are isolated in `installer\FileTools.Installer.sln`; build them with `build_msi.ps1` or open that solution in Visual Studio with a WiX v4-compatible extension such as HeatWave.
 
-## Release
+### Release
 
 GitHub Releases use a manual workflow that builds and signs the setup
 bootstrapper, MSI, and sparse MSIX identity package, generates `checksums.txt`,
@@ -220,7 +576,7 @@ for first-time users.
 
 See `docs\release.md` for the release workflow and verification steps.
 
-## Project Layout
+### Project Layout
 
 ```text
 src\FileTools.App
@@ -246,7 +602,7 @@ src\FileTools.IdentityHelper
 └─ Certificate trust and sparse identity registration helper
 ```
 
-## Install ContextMenu
+### Install ContextMenu
 
 Use the helper script:
 
@@ -274,7 +630,7 @@ HKCU\Software\FileTools\ContextMenu
 
 No administrator permission is required.
 
-## Uninstall ContextMenu
+### Uninstall ContextMenu
 
 ```powershell
 .\uninstall.ps1
@@ -288,7 +644,7 @@ Or:
 
 The explicit `/uninstall` command removes the Explorer registration and saves `RegisterContextMenu` as disabled.
 
-## Clean ContextMenu Registration
+### Clean ContextMenu Registration
 
 If Explorer still does not show the FileTools menu after install, inspect and clean current-user registration leftovers:
 
@@ -307,7 +663,7 @@ Optional flags:
 - `-RemoveInstalledFiles`: also removes `%APPDATA%\FileTools`, including copied binaries, settings, and templates.
 - `-RestartExplorer`: restarts Explorer after cleanup.
 
-## ContextMenu Behavior
+### ContextMenu Behavior
 
 Registered commands:
 
@@ -330,7 +686,7 @@ The first three `/context` commands are kept for backward compatibility. Native 
 
 Explorer often starts one process per selected item. FileTools waits briefly, merges those selected paths through a temporary queue, runs the selected operation, and exits automatically for non-interactive commands. The Open FileTools command also accepts and queues every selected path so the standalone planner starts with the full selection. File name correction opens the rename review dialog according to the configured review mode before applying changes. If any exception occurs, an error summary is shown.
 
-## Safety Behavior
+### Safety Behavior
 
 - Existing destination files/folders are not overwritten.
 - Filename correction is reviewed before applying changes by default, or only when generated rows need review or have conflicts if that review mode is selected.
@@ -338,12 +694,12 @@ Explorer often starts one process per selected item. FileTools waits briefly, me
 - Folders are deleted only when empty after unwrapping/moving child files.
 - Folder unwrapping only moves direct child files; nested folder contents are not flattened.
 
-## Log
+### Log
 
 ```text
 %TEMP%\FileTools.log
 ```
 
-## License
+### License
 
 FileTools is licensed under the MIT License. See `LICENSE`.
