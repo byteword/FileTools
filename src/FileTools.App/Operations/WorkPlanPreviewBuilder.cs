@@ -295,7 +295,7 @@ internal sealed class WorkPlanPreviewBuilder
         var parts = corrector.ParseParts(fileNameStem, extensionWithDot);
         var knownFileKind = state.Kind == PreviewPathKind.Folder
             ? "Folder"
-            : AutoRelocationFileTypeClassifier.GetKnownFileKind(state.Path);
+            : AutoRelocationFileTypeClassifier.GetKnownFileKind(state.Path, _settings);
         var properties = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
         {
             ["fileName"] = fileName,

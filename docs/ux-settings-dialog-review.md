@@ -14,7 +14,7 @@ Scope:
 
 ## Summary
 
-The settings dialog now uses a resizable single-panel layout with a fixed status header, a scrollable settings body, fixed OK/Cancel buttons, and collapsible option groups. It covers the current core defaults: Explorer ContextMenu registration, rename dictionary behavior, rename review mode, AutoRelocation default template, and folder structure defaults.
+The settings dialog now uses a resizable single-panel layout with a fixed status header, a scrollable settings body, fixed OK/Cancel buttons, and collapsible option groups. It covers the current core defaults: Explorer ContextMenu registration, Windows 11 native context menu identity actions, rename dictionary behavior, rename review mode, AutoRelocation default template and file-kind classification, and folder structure defaults.
 
 The dialog keeps settings scoped to repeatable defaults. One-off execution choices stay in action dialogs or the main planner.
 
@@ -27,13 +27,15 @@ The dialog keeps settings scoped to repeatable defaults. One-off execution choic
 - Each group has a title row with a small `v` / `>` marker and a compact summary of the current options.
 - Expanded group headers use group-specific colors; body content stays neutral and uses the group color as a border.
 - ContextMenu, Rename, Folder Structure, and AutoRelocation settings each have their own group.
+- The ContextMenu group now includes the Windows 11 native context menu section for explicit certificate trust and sparse package identity registration/removal.
 - Help text is placed under ambiguous rows such as menu layout, rename review mode, folder operation, mismatch handling, and default relocation template.
 - The bottom OK/Cancel row is fixed outside the scrollable settings body.
 
 ## Current Strengths
 
 - Context menu commands can be enabled independently, which is useful for reducing Explorer menu clutter.
-- Rename dictionaries, common phrases, correction rules, and relocation templates are reachable from the settings window without exposing their implementation files.
+- Rename dictionaries, common phrases, correction rules, relocation templates, and AutoRelocation file-kind classification are reachable from the settings window without exposing their implementation files.
+- AutoRelocation file-kind classification now supports managing the kind list directly, including custom kinds, deletion, and representative KnownFileKind name changes.
 - AutoRelocation and folder unwrap options are also available at the action-step level through `PlanStepDialog`, so the app already has a path for per-run overrides.
 - The collapsible group summaries make the single-panel layout scannable even when groups are collapsed.
 
@@ -68,7 +70,7 @@ Implemented change:
 
 - Inline helper text now describes the menu layout tradeoff.
 - Folder mismatch handling includes an inline example for keep, folder-name, and folder-file behavior.
-- AutoRelocation default template helper text explains where that default is used.
+- AutoRelocation default template helper text explains where that default is used, and the same group opens the file-kind classification editor for KnownFileKind extension rules and file-kind list management.
 
 ### 4. Rename review mode is now explicit
 

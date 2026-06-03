@@ -366,8 +366,16 @@ internal sealed class SettingsForm : Form
             Width = 180,
             Height = 30
         };
+        var classificationButton = new Button
+        {
+            Text = Localizer.Get("ButtonEditFileKindClassification"),
+            Width = 220,
+            Height = 30
+        };
         templateButton.Click += (_, _) => OpenTemplateEditor();
+        classificationButton.Click += (_, _) => OpenFileKindClassificationEditor();
         panel.Controls.Add(templateButton);
+        panel.Controls.Add(classificationButton);
         return panel;
     }
 
@@ -741,6 +749,16 @@ internal sealed class SettingsForm : Form
         dialog.ShowDialog(this);
         RefreshTemplateCombo(selectedTemplateId);
         UpdateUiState();
+    }
+
+    private void OpenFileKindClassificationEditor()
+    {
+        using var dialog = new FileKindClassificationEditorDialog(Settings.FileKindExtensionRules);
+        if (dialog.ShowDialog(this) == DialogResult.OK)
+        {
+            Settings.FileKindExtensionRules = dialog.Rules.ToList();
+            UpdateUiState();
+        }
     }
 
     private void RefreshTemplateCombo(string? selectedTemplateId)

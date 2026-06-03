@@ -13,6 +13,9 @@ internal sealed class FileToolsSettings
 
     public string? AutoRelocationTargetRootPath { get; set; }
 
+    public List<FileKindExtensionRule> FileKindExtensionRules { get; set; } =
+        AutoRelocationFileTypeClassifier.CreateDefaultExtensionRules().ToList();
+
     public bool RegisterContextMenu { get; set; } = true;
 
     public ContextMenuLayout ContextMenuLayout { get; set; } = ContextMenuLayout.Grouped;
@@ -70,6 +73,14 @@ internal sealed class FileToolsSettings
             FolderUnwrapNameMismatchMode = FolderUnwrapNameMismatchMode,
             AutoRelocationTemplateId = AutoRelocationTemplateId,
             AutoRelocationTargetRootPath = AutoRelocationTargetRootPath,
+            FileKindExtensionRules = AutoRelocationFileTypeClassifier
+                .NormalizeExtensionRules(FileKindExtensionRules)
+                .Select(static rule => new FileKindExtensionRule
+                {
+                    Kind = rule.Kind,
+                    Extensions = rule.Extensions.ToList()
+                })
+                .ToList(),
             RegisterContextMenu = RegisterContextMenu,
             ContextMenuLayout = ContextMenuLayout,
             ContextMenuOpenApp = ContextMenuOpenApp,
@@ -108,9 +119,11 @@ internal static class SettingsStore
 
         try
         {
-            return JsonSerializer.Deserialize<FileToolsSettings>(
+            var settings = JsonSerializer.Deserialize<FileToolsSettings>(
                 File.ReadAllText(SettingsPath),
                 JsonOptions) ?? new FileToolsSettings();
+            Normalize(settings);
+            return settings;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
         {
@@ -122,7 +135,20 @@ internal static class SettingsStore
     public static void Save(FileToolsSettings settings)
     {
         Directory.CreateDirectory(FileToolsEnvironment.AppDataDir);
+        Normalize(settings);
         File.WriteAllText(SettingsPath, JsonSerializer.Serialize(settings, JsonOptions));
+    }
+
+    private static void Normalize(FileToolsSettings settings)
+    {
+        settings.FileKindExtensionRules = AutoRelocationFileTypeClassifier
+            .NormalizeExtensionRules(settings.FileKindExtensionRules)
+            .Select(static rule => new FileKindExtensionRule
+            {
+                Kind = rule.Kind,
+                Extensions = rule.Extensions.ToList()
+            })
+            .ToList();
     }
 
     private static JsonSerializerOptions CreateJsonOptions()

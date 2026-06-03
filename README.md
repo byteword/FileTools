@@ -82,11 +82,11 @@ AutoRelocation 템플릿은 의도적으로 파일에서 파생된 값만 사용
 
 - 파일 이름 stem.
 - 파일 확장자.
-- 일반 확장자에서 판별한 알려진 파일 종류: `Folder`, `Archive`, `Image`, `Video`, `Music`, `Text`, `Document`, `Program`, `Other`.
+- 설정 기반 확장자 규칙에서 판별한 알려진 파일 종류. 기본값은 `Folder`, `Archive`, `Image`, `Video`, `Music`, `Text`, `Document`, `Program`, `Other`이며, 분류 편집기에서 사용자 정의 종류를 추가하거나 대표 이름을 바꿀 수 있습니다.
 - 파일 또는 폴더 이름에서 파싱한 제목과 회차 범위.
 - 크기, 만든 시간, 수정한 시간.
 
-알려진 파일 종류의 원본은 원시 확장자 원본과 분리되어 있습니다. 일반 확장자를 넓은 범주의 폴더로 묶습니다.
+알려진 파일 종류의 원본은 원시 확장자 원본과 분리되어 있습니다. 설정 창의 AutoRelocation 그룹에서 파일 종류 분류를 열어 파일 종류를 추가/삭제하거나 대표 이름과 확장자 규칙을 수정할 수 있고, Windows에 등록된 시스템 확장자를 참고 목록으로 검색해 추가할 수 있습니다. `Folder`는 실제 폴더일 때, `Other`는 어떤 규칙에도 맞지 않을 때 쓰는 고정 fallback입니다. 기본 규칙은 일반 확장자를 넓은 범주의 폴더로 묶습니다.
 
 - `Archive`: `zip`, `rar`, `7z`, `tar`, `gz`, `cbz`, `cbr`, `iso` 같은 압축/아카이브 및 디스크 이미지 계열 파일.
 - `Image`: `jpg`, `png`, `gif`, `webp`, `heic`, `svg`, `psd`, `ico` 같은 이미지/디자인/raw 형식.
@@ -100,6 +100,7 @@ AutoRelocation 템플릿은 의도적으로 파일에서 파생된 값만 사용
 
 ```text
 %APPDATA%\FileTools
+%APPDATA%\FileTools\settings.json
 %APPDATA%\FileTools\rename-dictionary.json
 %APPDATA%\FileTools\Relocate
 ```
@@ -428,11 +429,11 @@ AutoRelocation templates intentionally use only file-derived values:
 
 - File name stem.
 - File extension.
-- Known file kind from common extensions: `Folder`, `Archive`, `Image`, `Video`, `Music`, `Text`, `Document`, `Program`, `Other`.
+- Known file kind from settings-based extension rules. Defaults are `Folder`, `Archive`, `Image`, `Video`, `Music`, `Text`, `Document`, `Program`, `Other`, and the classification editor can add custom kinds or rename representative kind names.
 - Parsed title and episode range from the file or folder name.
 - Size, created time, and modified time.
 
-The known file kind source is separate from the raw extension source. It groups common extensions into broad folders:
+The known file kind source is separate from the raw extension source. Open file kind classification from the AutoRelocation settings group to add/delete file kinds, rename representative names, edit extension rules, and use the searchable Windows registered extension list as a reference when adding extensions. `Folder` is a fixed fallback for real folders, and `Other` is the fixed fallback when no rule matches. The default rules group common extensions into broad folders:
 
 - `Archive`: compressed/archive and disk-image style files such as `zip`, `rar`, `7z`, `tar`, `gz`, `cbz`, `cbr`, `iso`.
 - `Image`: image/design/raw formats such as `jpg`, `png`, `gif`, `webp`, `heic`, `svg`, `psd`, `ico`.
@@ -446,6 +447,7 @@ Settings and templates are stored under:
 
 ```text
 %APPDATA%\FileTools
+%APPDATA%\FileTools\settings.json
 %APPDATA%\FileTools\rename-dictionary.json
 %APPDATA%\FileTools\Relocate
 ```

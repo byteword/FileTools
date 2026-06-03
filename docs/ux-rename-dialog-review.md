@@ -10,7 +10,7 @@ Scope:
 - `src/FileTools.App/Resources/Strings.resx`
 - `src/FileTools.App/Resources/Strings.ko.resx`
 
-Current reference:
+Current reference, refreshed on 2026-06-03 to match the current WinForms dialog:
 
 ![Current rename editor dialog](images/rename-editor-dialog-concept.svg)
 

@@ -24,12 +24,11 @@ The first pass keeps the existing rename operation semantics and replaces the gr
 - `원본 사용` and `자동 이름 사용` quick actions.
 - Token insertion from original filename parts, parsed parts, and generated correction candidates.
 - Read-only common phrase chips from the existing app common phrase dictionary.
-- Immediate validation, conflict highlighting, summary counts, and next-issue navigation.
+- Immediate validation, conflict highlighting, summary counts, next-issue navigation, selected-row skip, and rule trace inspection.
 
 Not implemented in this pass:
 
 - Filter buttons.
-- Skip-current-item behavior.
 - Batch pattern application.
 - Common phrase add/remove from inside the rename dialog.
 - User-defined correction rule creation.
@@ -242,12 +241,11 @@ Implement first:
 - Token insert buttons from original stem, parsed parts, and correction candidates.
 - Insert-only common phrase chips from the existing app-level dictionary, initially limited to one row with an expandable view.
 - Immediate validation and current summary behavior.
-- Next problem navigation.
+- Next problem navigation, selected-row skip, and rule trace inspection.
 
 Defer:
 
 - Filter buttons.
-- Skip-current-item behavior.
 - Batch pattern application.
 - Persisted dialog layout.
 - Advanced token selection from arbitrary original-name text ranges.

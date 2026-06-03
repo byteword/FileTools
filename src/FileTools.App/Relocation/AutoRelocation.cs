@@ -198,113 +198,266 @@ internal sealed record AutoRelocationTemplateFile(
     AutoRelocationTemplateDocument Document,
     string FilePath);
 
+internal sealed class FileKindExtensionRule
+{
+    public string Kind { get; set; } = "";
+
+    public List<string> Extensions { get; set; } = [];
+}
+
 internal static class AutoRelocationFileTypeClassifier
 {
-    private const string FolderKind = "Folder";
-    private const string ArchiveKind = "Archive";
-    private const string ImageKind = "Image";
-    private const string VideoKind = "Video";
-    private const string MusicKind = "Music";
-    private const string TextKind = "Text";
-    private const string DocumentKind = "Document";
-    private const string ProgramKind = "Program";
-    private const string OtherKind = "Other";
+    public const string FolderKind = "Folder";
+    public const string ArchiveKind = "Archive";
+    public const string ImageKind = "Image";
+    public const string VideoKind = "Video";
+    public const string MusicKind = "Music";
+    public const string TextKind = "Text";
+    public const string DocumentKind = "Document";
+    public const string ProgramKind = "Program";
+    public const string OtherKind = "Other";
 
-    private static readonly HashSet<string> ArchiveExtensions = CreateSet(
-        ".7z", ".ace", ".arj", ".bz", ".bz2", ".cab", ".cb7", ".cbr", ".cbt", ".cbz",
-        ".cpio", ".dmg", ".gz", ".gzip", ".iso", ".lha", ".lzh", ".rar", ".tar",
-        ".tbz", ".tbz2", ".tgz", ".txz", ".xz", ".z", ".zip", ".zipx");
+    private static readonly char[] ExtensionSeparators = [' ', '\t', '\r', '\n', ',', ';'];
 
-    private static readonly HashSet<string> ImageExtensions = CreateSet(
-        ".ai", ".arw", ".avif", ".bmp", ".cr2", ".cur", ".dds", ".dib", ".dng",
-        ".gif", ".heic", ".heif", ".ico", ".jfif", ".jpeg", ".jpg", ".jxl", ".nef",
-        ".orf", ".png", ".psd", ".raw", ".rw2", ".svg", ".tga", ".tif", ".tiff", ".webp");
-
-    private static readonly HashSet<string> VideoExtensions = CreateSet(
-        ".3g2", ".3gp", ".asf", ".avi", ".divx", ".flv", ".m2t", ".m2ts", ".m4v",
-        ".mkv", ".mov", ".mp4", ".mpeg", ".mpg", ".mts", ".ogv", ".rm", ".rmvb",
-        ".ts", ".vob", ".webm", ".wmv");
-
-    private static readonly HashSet<string> SubtitleExtensions = CreateSet(
-        ".ass", ".idx", ".sami", ".smi", ".srt", ".ssa", ".sub", ".sup", ".usf", ".vtt");
-
-    private static readonly HashSet<string> MusicExtensions = CreateSet(
-        ".aac", ".ac3", ".aif", ".aifc", ".aiff", ".alac", ".amr", ".ape", ".au",
-        ".dts", ".flac", ".m4a", ".mid", ".midi", ".mka", ".mp3", ".mpc", ".oga",
-        ".ogg", ".opus", ".ra", ".wav", ".weba", ".wma");
-
-    private static readonly HashSet<string> TextExtensions = CreateSet(
-        ".cfg", ".conf", ".css", ".csv", ".htm", ".html", ".ini", ".json", ".log",
-        ".markdown", ".md", ".nfo", ".properties", ".sql", ".text", ".toml", ".tsv",
-        ".txt", ".xml", ".yaml", ".yml");
-
-    private static readonly HashSet<string> DocumentExtensions = CreateSet(
-        ".azw", ".azw3", ".doc", ".docm", ".docx", ".dot", ".dotx", ".epub", ".hwp",
-        ".hwpx", ".key", ".mobi", ".numbers", ".odp", ".ods", ".odt", ".pages", ".pdf",
-        ".pot", ".potx", ".pps", ".ppsx", ".ppt", ".pptm", ".pptx", ".rtf", ".tex",
-        ".xls", ".xlsb", ".xlsm", ".xlsx", ".xlt", ".xltx");
-
-    private static readonly HashSet<string> ProgramExtensions = CreateSet(
-        ".apk", ".appx", ".appxbundle", ".bat", ".bin", ".class", ".cmd", ".com",
-        ".cpl", ".deb", ".dll", ".drv", ".efi", ".exe", ".gadget", ".ipa", ".jar",
-        ".js", ".jse", ".lnk", ".lua", ".msi", ".msp", ".msix", ".ocx", ".php",
-        ".pkg", ".pl", ".ps1", ".psd1", ".psm1", ".py", ".pyw", ".rb", ".reg",
-        ".rpm", ".run", ".scr", ".sh", ".sys", ".vb", ".vbe", ".vbs", ".wsf", ".wsh");
-
-    public static string GetFileType(string path)
+    private static readonly Dictionary<string, string[]> DefaultExtensionMap = new(StringComparer.OrdinalIgnoreCase)
     {
-        return GetKnownFileKind(path);
+        [ArchiveKind] =
+        [
+            ".7z", ".ace", ".arj", ".bz", ".bz2", ".cab", ".cb7", ".cbr", ".cbt", ".cbz",
+            ".cpio", ".dmg", ".gz", ".gzip", ".iso", ".lha", ".lzh", ".rar", ".tar",
+            ".tbz", ".tbz2", ".tgz", ".txz", ".xz", ".z", ".zip", ".zipx"
+        ],
+        [ImageKind] =
+        [
+            ".ai", ".arw", ".avif", ".bmp", ".cr2", ".cur", ".dds", ".dib", ".dng",
+            ".gif", ".heic", ".heif", ".ico", ".jfif", ".jpeg", ".jpg", ".jxl", ".nef",
+            ".orf", ".png", ".psd", ".raw", ".rw2", ".svg", ".tga", ".tif", ".tiff", ".webp"
+        ],
+        [VideoKind] =
+        [
+            ".3g2", ".3gp", ".asf", ".avi", ".divx", ".flv", ".m2t", ".m2ts", ".m4v",
+            ".mkv", ".mov", ".mp4", ".mpeg", ".mpg", ".mts", ".ogv", ".rm", ".rmvb",
+            ".ts", ".vob", ".webm", ".wmv", ".ass", ".idx", ".sami", ".smi", ".srt",
+            ".ssa", ".sub", ".sup", ".usf", ".vtt"
+        ],
+        [MusicKind] =
+        [
+            ".aac", ".ac3", ".aif", ".aifc", ".aiff", ".alac", ".amr", ".ape", ".au",
+            ".dts", ".flac", ".m4a", ".mid", ".midi", ".mka", ".mp3", ".mpc", ".oga",
+            ".ogg", ".opus", ".ra", ".wav", ".weba", ".wma"
+        ],
+        [TextKind] =
+        [
+            ".cfg", ".conf", ".css", ".csv", ".htm", ".html", ".ini", ".json", ".log",
+            ".markdown", ".md", ".nfo", ".properties", ".sql", ".text", ".toml", ".tsv",
+            ".txt", ".xml", ".yaml", ".yml"
+        ],
+        [DocumentKind] =
+        [
+            ".azw", ".azw3", ".doc", ".docm", ".docx", ".dot", ".dotx", ".epub", ".hwp",
+            ".hwpx", ".key", ".mobi", ".numbers", ".odp", ".ods", ".odt", ".pages", ".pdf",
+            ".pot", ".potx", ".pps", ".ppsx", ".ppt", ".pptm", ".pptx", ".rtf", ".tex",
+            ".xls", ".xlsb", ".xlsm", ".xlsx", ".xlt", ".xltx"
+        ],
+        [ProgramKind] =
+        [
+            ".apk", ".appx", ".appxbundle", ".bat", ".bin", ".class", ".cmd", ".com",
+            ".cpl", ".deb", ".dll", ".drv", ".efi", ".exe", ".gadget", ".ipa", ".jar",
+            ".js", ".jse", ".lnk", ".lua", ".msi", ".msp", ".msix", ".ocx", ".php",
+            ".pkg", ".pl", ".ps1", ".psd1", ".psm1", ".py", ".pyw", ".rb", ".reg",
+            ".rpm", ".run", ".scr", ".sh", ".sys", ".vb", ".vbe", ".vbs", ".wsf", ".wsh"
+        ]
+    };
+
+    public static IReadOnlyList<string> ConfigurableFileKinds { get; } =
+    [
+        ArchiveKind,
+        ImageKind,
+        VideoKind,
+        MusicKind,
+        TextKind,
+        DocumentKind,
+        ProgramKind
+    ];
+
+    public static IReadOnlyList<FileKindExtensionRule> CreateDefaultExtensionRules()
+    {
+        return ConfigurableFileKinds
+            .Select(static kind => new FileKindExtensionRule
+            {
+                Kind = kind,
+                Extensions = DefaultExtensionMap[kind].ToList()
+            })
+            .ToArray();
     }
 
-    public static string GetKnownFileKind(string path)
+    public static IReadOnlyList<FileKindExtensionRule> NormalizeExtensionRules(
+        IEnumerable<FileKindExtensionRule>? rules)
+    {
+        if (rules is null)
+        {
+            return CreateDefaultExtensionRules();
+        }
+
+        var normalizedRules = new List<FileKindExtensionRule>();
+        var supplied = new Dictionary<string, FileKindExtensionRule>(StringComparer.OrdinalIgnoreCase);
+        foreach (var rule in rules)
+        {
+            var kind = NormalizeFileKind(rule.Kind);
+            if (!IsValidConfigurableFileKind(kind))
+            {
+                continue;
+            }
+
+            if (!supplied.TryGetValue(kind, out var normalizedRule))
+            {
+                normalizedRule = new FileKindExtensionRule { Kind = kind };
+                supplied[kind] = normalizedRule;
+                normalizedRules.Add(normalizedRule);
+            }
+
+            normalizedRule.Extensions.AddRange(NormalizeExtensions(rule.Extensions));
+        }
+
+        return normalizedRules
+            .Select(static rule => new FileKindExtensionRule
+            {
+                Kind = rule.Kind,
+                Extensions = NormalizeExtensions(rule.Extensions).ToList()
+            })
+            .ToArray();
+    }
+
+    public static string NormalizeFileKind(string? value)
+    {
+        var kind = (value ?? string.Empty).Trim();
+        if (kind.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        return Regex.Replace(kind, @"\s+", " ");
+    }
+
+    public static bool IsValidConfigurableFileKind(string? value)
+    {
+        var kind = NormalizeFileKind(value);
+        return kind.Length > 0 &&
+            !IsReservedFileKind(kind) &&
+            kind.IndexOfAny(Path.GetInvalidFileNameChars()) < 0 &&
+            !string.Equals(kind, ".", StringComparison.Ordinal) &&
+            !string.Equals(kind, "..", StringComparison.Ordinal);
+    }
+
+    public static bool IsReservedFileKind(string? value)
+    {
+        var kind = NormalizeFileKind(value);
+        return string.Equals(kind, FolderKind, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(kind, OtherKind, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static IReadOnlyList<string> ParseExtensionList(string text)
+    {
+        return NormalizeExtensions(text.Split(
+            ExtensionSeparators,
+            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+    }
+
+    public static IReadOnlyList<string> NormalizeExtensions(IEnumerable<string>? extensions)
+    {
+        if (extensions is null)
+        {
+            return [];
+        }
+
+        var normalized = new List<string>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var extension in extensions)
+        {
+            var value = NormalizeExtension(extension);
+            if (value.Length > 0 && seen.Add(value))
+            {
+                normalized.Add(value);
+            }
+        }
+
+        return normalized;
+    }
+
+    public static string NormalizeExtension(string? value)
+    {
+        var extension = (value ?? string.Empty).Trim();
+        if (extension.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        if (extension.StartsWith("*.", StringComparison.Ordinal))
+        {
+            extension = extension[1..];
+        }
+
+        if (!extension.StartsWith(".", StringComparison.Ordinal))
+        {
+            extension = "." + extension;
+        }
+
+        if (!IsSupportedExtensionFormat(extension))
+        {
+            return string.Empty;
+        }
+
+        return extension.ToLowerInvariant();
+    }
+
+    public static string GetFileType(string path, FileToolsSettings? settings = null)
+    {
+        return GetKnownFileKind(path, settings);
+    }
+
+    public static string GetKnownFileKind(string path, FileToolsSettings? settings = null)
     {
         if (Directory.Exists(path))
         {
             return FolderKind;
         }
 
-        var extension = Path.GetExtension(path);
-        if (ArchiveExtensions.Contains(extension))
+        var extension = NormalizeExtension(Path.GetExtension(path));
+        if (extension.Length == 0)
         {
-            return ArchiveKind;
+            return OtherKind;
         }
 
-        if (ImageExtensions.Contains(extension))
+        foreach (var rule in GetConfiguredExtensionRules(settings))
         {
-            return ImageKind;
-        }
-
-        if (VideoExtensions.Contains(extension) || SubtitleExtensions.Contains(extension))
-        {
-            return VideoKind;
-        }
-
-        if (MusicExtensions.Contains(extension))
-        {
-            return MusicKind;
-        }
-
-        if (TextExtensions.Contains(extension))
-        {
-            return TextKind;
-        }
-
-        if (DocumentExtensions.Contains(extension))
-        {
-            return DocumentKind;
-        }
-
-        if (ProgramExtensions.Contains(extension))
-        {
-            return ProgramKind;
+            if (rule.Extensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
+            {
+                return rule.Kind;
+            }
         }
 
         return OtherKind;
     }
 
-    private static HashSet<string> CreateSet(params string[] values)
+    private static IReadOnlyList<FileKindExtensionRule> GetConfiguredExtensionRules(FileToolsSettings? settings)
     {
-        return values.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        try
+        {
+            return NormalizeExtensionRules((settings ?? SettingsStore.Load()).FileKindExtensionRules);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
+        {
+            FileToolsEnvironment.Log("FILE_KIND", ex.Message);
+            return CreateDefaultExtensionRules();
+        }
+    }
+
+    private static bool IsSupportedExtensionFormat(string extension)
+    {
+        return extension.Length > 1 &&
+            !extension.Contains("\\", StringComparison.Ordinal) &&
+            !extension.Contains("/", StringComparison.Ordinal) &&
+            !extension.Contains(":", StringComparison.Ordinal);
     }
 }
 

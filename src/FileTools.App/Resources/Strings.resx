@@ -225,6 +225,33 @@
   <data name="EditorDuplicateValueMessage" xml:space="preserve"><value>This value is already registered.</value></data>
   <data name="LabelDefaultTemplate" xml:space="preserve"><value>Default template</value></data>
   <data name="ButtonEditTemplates" xml:space="preserve"><value>Edit templates...</value></data>
+  <data name="ButtonEditFileKindClassification" xml:space="preserve"><value>Edit file kinds...</value></data>
+  <data name="DialogFileKindClassificationTitle" xml:space="preserve"><value>File kind classification</value></data>
+  <data name="FileKindClassificationHelp" xml:space="preserve"><value>Edit the extensions AutoRelocation uses for KnownFileKind. Folder and Other are fixed fallbacks; registered system extensions are shown only as a reference.</value></data>
+  <data name="LabelFileKindCategories" xml:space="preserve"><value>File kinds</value></data>
+  <data name="LabelFileKindRepresentativeName" xml:space="preserve"><value>Representative name</value></data>
+  <data name="LabelFileKindExtensions" xml:space="preserve"><value>Extensions</value></data>
+  <data name="LabelRegisteredExtensions" xml:space="preserve"><value>Registered system extensions</value></data>
+  <data name="LabelExtensionSearch" xml:space="preserve"><value>Search extension or description</value></data>
+  <data name="ButtonAddExtension" xml:space="preserve"><value>Add extension</value></data>
+  <data name="ButtonRenameFileKind" xml:space="preserve"><value>Rename</value></data>
+  <data name="ButtonRestoreDefaults" xml:space="preserve"><value>Restore defaults</value></data>
+  <data name="NewFileKindDisplayName" xml:space="preserve"><value>New file kind</value></data>
+  <data name="FileKindEditorSelectExtension" xml:space="preserve"><value>Select a registered extension.</value></data>
+  <data name="FileKindEditorSelectCategory" xml:space="preserve"><value>Select a file kind.</value></data>
+  <data name="FileKindEditorNoRegisteredExtensions" xml:space="preserve"><value>No registered system extensions were found.</value></data>
+  <data name="FileKindEditorNoMatchingExtensions" xml:space="preserve"><value>No registered extensions match the search.</value></data>
+  <data name="FileKindEditorExtensionAddedFormat" xml:space="preserve"><value>{0} added to {1}.</value></data>
+  <data name="FileKindEditorExtensionAlreadyExistsFormat" xml:space="preserve"><value>{0} is already in {1}.</value></data>
+  <data name="FileKindEditorKindAddedFormat" xml:space="preserve"><value>{0} file kind added.</value></data>
+  <data name="FileKindEditorKindRenamedFormat" xml:space="preserve"><value>{0} file kind renamed to {1}.</value></data>
+  <data name="FileKindEditorKindDeletedFormat" xml:space="preserve"><value>{0} file kind deleted.</value></data>
+  <data name="FileKindEditorDeleteQuestionFormat" xml:space="preserve"><value>Delete the {0} file kind? Its {1} extensions will be removed from the classification rules.</value></data>
+  <data name="FileKindEditorKindNameRequired" xml:space="preserve"><value>Enter a representative name.</value></data>
+  <data name="FileKindEditorKindNameInvalid" xml:space="preserve"><value>The representative name cannot contain characters that are invalid in Windows file names.</value></data>
+  <data name="FileKindEditorReservedKindFormat" xml:space="preserve"><value>{0} is a fixed fallback name and cannot be used.</value></data>
+  <data name="FileKindEditorKindAlreadyExistsFormat" xml:space="preserve"><value>The {0} file kind already exists.</value></data>
+  <data name="FileKindEditorDefaultsRestored" xml:space="preserve"><value>Default extension rules restored.</value></data>
   <data name="DialogTemplateEditorTitle" xml:space="preserve"><value>Auto relocation template editor</value></data>
   <data name="GroupTemplateGeneral" xml:space="preserve"><value>Template</value></data>
   <data name="GroupPathRule" xml:space="preserve"><value>Selected path step</value></data>

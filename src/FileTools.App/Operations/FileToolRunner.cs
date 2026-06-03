@@ -297,7 +297,7 @@ internal sealed class FileToolRunner
             : Path.GetFullPath(_settings.AutoRelocationTargetRootPath);
 
         var grouped = paths
-            .Select(path => CreateRelocationContext(path, corrector, result, targetRootOverride))
+            .Select(path => CreateRelocationContext(path, corrector, result, targetRootOverride, _settings))
             .Where(static item => item is not null)
             .Cast<RelocationContextWithRoot>()
             .GroupBy(static item => item.RootFolder, PathComparer);
@@ -334,7 +334,8 @@ internal sealed class FileToolRunner
         string path,
         KoreanFileNameCorrector corrector,
         OperationResult result,
-        string? targetRootOverride)
+        string? targetRootOverride,
+        FileToolsSettings settings)
     {
         result.AddCandidate();
         var parent = Path.GetDirectoryName(path);
@@ -348,7 +349,7 @@ internal sealed class FileToolRunner
         {
             var preview = corrector.CreatePreview(path);
             var fileNameStem = GetRelocationFileNameStem(path);
-            var knownFileKind = AutoRelocationFileTypeClassifier.GetKnownFileKind(path);
+            var knownFileKind = AutoRelocationFileTypeClassifier.GetKnownFileKind(path, settings);
             var properties = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
             {
                 ["fileName"] = Path.GetFileName(path),

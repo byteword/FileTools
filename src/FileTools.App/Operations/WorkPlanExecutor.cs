@@ -304,7 +304,7 @@ internal sealed class WorkPlanExecutor
         var corrector = CreateFileNameCorrector();
         var preview = corrector.CreatePreview(path);
         var fileNameStem = GetRelocationFileNameStem(path);
-        var knownFileKind = AutoRelocationFileTypeClassifier.GetKnownFileKind(path);
+        var knownFileKind = AutoRelocationFileTypeClassifier.GetKnownFileKind(path, _baseSettings);
         var properties = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
         {
             ["fileName"] = Path.GetFileName(path),

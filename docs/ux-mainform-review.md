@@ -13,7 +13,7 @@ Scope:
 
 The standalone window is now organized as a planner: targets on the left, task planning on the right, and execution feedback at the bottom. The latest layout pass addresses the earlier command-mixing problem by introducing a menu bar, icon toolbars, an unwrap split button, a plan scope header, and a bottom-right run/stop button paired with a compact log view.
 
-The README now references `docs/images/current-mainform-designer-layout.svg`, which describes the current planner-oriented layout.
+The README now references `docs/images/current-mainform-designer-layout.svg`, which describes the current planner-oriented layout. The reference image was refreshed on 2026-06-03 to match the current WinForms structure: menu bar, icon-only task toolbar, plan scope label, icon+text plan-step toolbar, log box, and run/stop button.
 
 ## Implemented Layout Changes
 
