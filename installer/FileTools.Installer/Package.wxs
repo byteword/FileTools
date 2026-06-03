@@ -77,7 +77,6 @@
       </Component>
 
       <Component Id="IdentitySupportFilesComponent" Guid="8f1a5b08-2d76-4c51-a925-24db26b88d4c">
-        <File Id="FileToolsIdentityHelperFile" Source="$(var.IdentityHelperPath)" />
         <File Id="FileToolsIdentityMsixFile" Source="$(var.IdentityMsixPath)" />
         <File Id="FileToolsIdentityCertificateFile" Source="$(var.IdentityCertificatePath)" />
         <RegistryValue

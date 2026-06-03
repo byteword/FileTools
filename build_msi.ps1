@@ -5,14 +5,11 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$version = '1.1.1.0'
+$version = '1.1.1.1'
 $solution = Join-Path $PSScriptRoot 'installer\FileTools.Installer.sln'
 $installerProject = Join-Path $PSScriptRoot 'installer\FileTools.Installer\FileTools.Installer.wixproj'
 $bundleProject = Join-Path $PSScriptRoot 'installer\FileTools.Bundle\FileTools.Bundle.wixproj'
 $shellExtProject = Join-Path $PSScriptRoot 'src\FileTools.ShellExt\FileTools.ShellExt.vcxproj'
-$identityHelperProject = Join-Path $PSScriptRoot 'src\FileTools.IdentityHelper\FileTools.IdentityHelper.csproj'
-$identityHelperPublishDir = Join-Path $PSScriptRoot 'artifacts\publish\FileTools.IdentityHelper-win-x64'
-$identityHelper = Join-Path $identityHelperPublishDir 'FileTools.IdentityHelper.exe'
 $identityPackageScript = Join-Path $PSScriptRoot 'scripts\build_identity_msix.ps1'
 $identityOutputDir = Join-Path $PSScriptRoot 'artifacts\identity'
 $identityMsix = Join-Path $identityOutputDir 'FileTools.Identity.msix'
@@ -218,7 +215,6 @@ if (Test-Path $setup) {
     Remove-Item $setup -Force
 }
 Remove-Item $identityOutputDir -Recurse -Force -ErrorAction SilentlyContinue
-Remove-Item $identityHelperPublishDir -Recurse -Force -ErrorAction SilentlyContinue
 
 $signing = New-SigningMaterial -Publisher $SigningPublisher
 
@@ -228,14 +224,6 @@ if ($LASTEXITCODE -ne 0) {
     throw "Shell extension build failed with exit code $LASTEXITCODE."
 }
 
-dotnet publish $identityHelperProject -c $Configuration -r win-x64 --self-contained false -p:PublishSingleFile=true -o $identityHelperPublishDir
-if ($LASTEXITCODE -ne 0) {
-    throw "Identity helper publish failed with exit code $LASTEXITCODE."
-}
-if (-not (Test-Path $identityHelper)) {
-    throw "Identity helper not found: $identityHelper"
-}
-
 & $identityPackageScript -Version $version -Publisher $signing.Publisher -OutputPath $identityMsix
 if ($LASTEXITCODE -ne 0) {
     throw "Identity MSIX build failed with exit code $LASTEXITCODE."
@@ -243,7 +231,6 @@ if ($LASTEXITCODE -ne 0) {
 Invoke-CodeSigning -FilePath $identityMsix -SigningMaterial $signing
 
 dotnet build $installerProject -c $Configuration `
-    /p:IdentityHelperPath="$identityHelper" `
     /p:IdentityMsixPath="$identityMsix" `
     /p:IdentityCertificatePath="$identityCer"
 if ($LASTEXITCODE -ne 0) {

@@ -3,7 +3,7 @@
     <OutputName>FileToolsSetup</OutputName>
     <OutputType>Bundle</OutputType>
     <InstallerPlatform>x64</InstallerPlatform>
-    <ProductVersion>1.1.1.0</ProductVersion>
+    <ProductVersion>1.1.1.1</ProductVersion>
     <MsiPath>$(MSBuildThisFileDirectory)..\FileTools.Installer\bin\$(Configuration)\FileTools.msi</MsiPath>
     <AppIconPath>$(MSBuildThisFileDirectory)..\..\src\FileTools.App\Resources\FileToolsIcon.ico</AppIconPath>
     <SetupLogoPath>$(MSBuildThisFileDirectory)Assets\FileToolsSetupLogo.png</SetupLogoPath>

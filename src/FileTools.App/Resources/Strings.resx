@@ -174,7 +174,7 @@
   <data name="SettingsSummaryDictionaryOff" xml:space="preserve"><value>Dictionary off</value></data>
   <data name="SettingsContextMenuRegistrationHelp" xml:space="preserve"><value>Command choices are kept even when Explorer registration is off.</value></data>
   <data name="GroupWindows11NativeContextMenu" xml:space="preserve"><value>Windows 11 native context menu</value></data>
-  <data name="SettingsWindows11NativeContextMenuHelp" xml:space="preserve"><value>Setup installs only the support files. Use these buttons to manually trust the self-signed MSIX certificate and register or remove the sparse package identity.</value></data>
+  <data name="SettingsWindows11NativeContextMenuHelp" xml:space="preserve"><value>Setup installs only the MSIX and certificate support files. Use these buttons to manually trust the self-signed MSIX certificate and register or remove the sparse package identity.</value></data>
   <data name="ButtonRegisterWindows11ContextMenu" xml:space="preserve"><value>Register Windows 11 menu</value></data>
   <data name="ButtonUnregisterWindows11ContextMenu" xml:space="preserve"><value>Remove Windows 11 menu</value></data>
   <data name="Windows11ContextMenuWarningTitle" xml:space="preserve"><value>Windows 11 native context menu</value></data>
@@ -183,9 +183,6 @@
   <data name="Windows11ContextMenuRegistered" xml:space="preserve"><value>Windows 11 native context menu registered. Restart Explorer if the menu does not refresh immediately.</value></data>
   <data name="Windows11ContextMenuUnregistered" xml:space="preserve"><value>Windows 11 native context menu removed. Restart Explorer if the menu does not refresh immediately.</value></data>
   <data name="Windows11ContextMenuFilesMissing" xml:space="preserve"><value>Windows 11 native context menu support files were not found:&#x0D;&#x0A;{0}</value></data>
-  <data name="Windows11ContextMenuHelperStartFailed" xml:space="preserve"><value>Failed to start the Windows 11 native context menu helper.</value></data>
-  <data name="Windows11ContextMenuHelperNoOutput" xml:space="preserve"><value>No diagnostic output.</value></data>
-  <data name="Windows11ContextMenuHelperFailedFormat" xml:space="preserve"><value>Windows 11 native context menu helper failed with exit code {0}.&#x0D;&#x0A;&#x0D;&#x0A;{1}</value></data>
   <data name="SettingsContextMenuLayoutHelp" xml:space="preserve"><value>Grouped keeps one FileTools submenu; expanded places commands directly in Explorer.</value></data>
   <data name="SettingsRenameReviewHelp" xml:space="preserve"><value>The safer automated mode still stops for NeedsReview and Conflict rows.</value></data>
   <data name="SettingsFolderOperationHelp" xml:space="preserve"><value>Default used by Explorer and new plan steps unless a step overrides it.</value></data>

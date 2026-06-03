@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -638,7 +637,7 @@ internal sealed class SettingsForm : Form
 
         try
         {
-            RunIdentityHelper("install");
+            RegisterInstalledWindows11NativeContextMenu();
             MessageBox.Show(
                 Localizer.Get("Windows11ContextMenuRegistered"),
                 FileToolsEnvironment.AppName,
@@ -660,7 +659,7 @@ internal sealed class SettingsForm : Form
 
         try
         {
-            RunIdentityHelper("uninstall");
+            Windows11NativeContextMenuRegistrar.Uninstall();
             MessageBox.Show(
                 Localizer.Get("Windows11ContextMenuUnregistered"),
                 FileToolsEnvironment.AppName,
@@ -683,72 +682,18 @@ internal sealed class SettingsForm : Form
             MessageBoxDefaultButton.Button2) == DialogResult.OK;
     }
 
-    private static void RunIdentityHelper(string command)
+    private static void RegisterInstalledWindows11NativeContextMenu()
     {
         var baseDirectory = AppContext.BaseDirectory;
-        var helperPath = Path.Combine(baseDirectory, "FileTools.IdentityHelper.exe");
-        if (!File.Exists(helperPath))
+        var missingFiles = Windows11NativeContextMenuRegistrar.GetMissingSupportFiles(baseDirectory);
+        if (missingFiles.Length > 0)
         {
             throw new FileNotFoundException(Localizer.Format(
                 "Windows11ContextMenuFilesMissing",
-                helperPath));
+                string.Join(Environment.NewLine, missingFiles)));
         }
 
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = helperPath,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true
-        };
-        startInfo.ArgumentList.Add(command);
-
-        if (command == "install")
-        {
-            var msixPath = Path.Combine(baseDirectory, "FileTools.Identity.msix");
-            var certificatePath = Path.Combine(baseDirectory, "FileTools.Identity.cer");
-            var missingFiles = new[] { msixPath, certificatePath }
-                .Where(path => !File.Exists(path))
-                .ToArray();
-            if (missingFiles.Length > 0)
-            {
-                throw new FileNotFoundException(Localizer.Format(
-                    "Windows11ContextMenuFilesMissing",
-                    string.Join(Environment.NewLine, missingFiles)));
-            }
-
-            startInfo.ArgumentList.Add("--msix");
-            startInfo.ArgumentList.Add(msixPath);
-            startInfo.ArgumentList.Add("--cert");
-            startInfo.ArgumentList.Add(certificatePath);
-            startInfo.ArgumentList.Add("--external-location");
-            startInfo.ArgumentList.Add(baseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
-        }
-
-        using var process = Process.Start(startInfo)
-            ?? throw new InvalidOperationException(Localizer.Get("Windows11ContextMenuHelperStartFailed"));
-        var output = process.StandardOutput.ReadToEnd();
-        var error = process.StandardError.ReadToEnd();
-        process.WaitForExit();
-
-        if (process.ExitCode != 0)
-        {
-            throw new InvalidOperationException(Localizer.Format(
-                "Windows11ContextMenuHelperFailedFormat",
-                process.ExitCode,
-                FormatProcessOutput(output, error)));
-        }
-    }
-
-    private static string FormatProcessOutput(string output, string error)
-    {
-        var details = string.Join(
-            Environment.NewLine,
-            new[] { output.Trim(), error.Trim() }.Where(static text => !string.IsNullOrWhiteSpace(text)));
-        return string.IsNullOrWhiteSpace(details)
-            ? Localizer.Get("Windows11ContextMenuHelperNoOutput")
-            : details;
+        Windows11NativeContextMenuRegistrar.Install(baseDirectory);
     }
 
     private void OpenRenameDictionaryEditor()

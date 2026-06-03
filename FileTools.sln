@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileTools.App", "src\FileTo
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FileTools.ShellExt", "src\FileTools.ShellExt\FileTools.ShellExt.vcxproj", "{B671E50E-351A-4FB3-9B07-E1C5728C55DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileTools.IdentityHelper", "src\FileTools.IdentityHelper\FileTools.IdentityHelper.csproj", "{476DC2A6-F93C-4B8B-9C4A-2223E50D8202}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -25,10 +23,6 @@ Global
 		{B671E50E-351A-4FB3-9B07-E1C5728C55DB}.Debug|x64.Build.0 = Debug|x64
 		{B671E50E-351A-4FB3-9B07-E1C5728C55DB}.Release|x64.ActiveCfg = Release|x64
 		{B671E50E-351A-4FB3-9B07-E1C5728C55DB}.Release|x64.Build.0 = Release|x64
-		{476DC2A6-F93C-4B8B-9C4A-2223E50D8202}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{476DC2A6-F93C-4B8B-9C4A-2223E50D8202}.Debug|x64.Build.0 = Debug|Any CPU
-		{476DC2A6-F93C-4B8B-9C4A-2223E50D8202}.Release|x64.ActiveCfg = Release|Any CPU
-		{476DC2A6-F93C-4B8B-9C4A-2223E50D8202}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -36,6 +30,5 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{3E3AC88E-C656-489E-8FF5-F1B56544C5E7} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{B671E50E-351A-4FB3-9B07-E1C5728C55DB} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
-		{476DC2A6-F93C-4B8B-9C4A-2223E50D8202} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

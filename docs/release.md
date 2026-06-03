@@ -39,7 +39,7 @@ Repository prerequisites:
 - `FILETOOLS_SIGNING_PFX_BASE64` and `FILETOOLS_SIGNING_PASSWORD` must be set in
   GitHub Secrets.
 
-Before running it, create and push a version tag such as `v1.1.1.0`. Then run
+Before running it, create and push a version tag such as `v1.1.1.1`. Then run
 the `Release` workflow from GitHub Actions and provide that existing tag.
 
 The workflow builds and uploads:
@@ -94,12 +94,12 @@ identity manifest declares `desktop4:FileExplorerContextMenus` and
 `windows.comServer`, while the installed WinForms executable carries matching
 MSIX identity metadata in its application manifest.
 
-Setup places `FileTools.IdentityHelper.exe`, `FileTools.Identity.msix`, and
-`FileTools.Identity.cer` next to the installed application, but it does not run
-the helper. In FileTools settings, the Windows 11 native context menu action
-runs `FileTools.IdentityHelper.exe`, which imports `FileTools.Identity.cer` into
-the current user's Trusted People store and calls
-`PackageManager.AddPackageByUriAsync` with `AddPackageOptions.ExternalLocationUri`.
+Setup places `FileTools.Identity.msix` and `FileTools.Identity.cer` next to the
+installed application, but it does not trust the certificate or register the
+identity automatically. In FileTools settings, the Windows 11 native context
+menu action imports `FileTools.Identity.cer` into the current user's Trusted
+People store and calls `PackageManager.AddPackageByUriAsync` with
+`AddPackageOptions.ExternalLocationUri`.
 
 This is per-user and matches the current `%LOCALAPPDATA%\Programs\FileTools`
 installation path. Restart Explorer if the native menu does not appear or clear
@@ -118,7 +118,7 @@ make Windows trust the self-signed certificate.
 After downloading a release asset, verify its SHA256 hash:
 
 ```powershell
-Get-FileHash .\FileTools-1.1.1.0-win-x64-setup.exe -Algorithm SHA256
+Get-FileHash .\FileTools-1.1.1.1-win-x64-setup.exe -Algorithm SHA256
 ```
 
 Compare the result with `checksums.txt`.
@@ -126,19 +126,19 @@ Compare the result with `checksums.txt`.
 Users with GitHub CLI can also verify artifact attestations:
 
 ```powershell
-gh attestation verify .\FileTools-1.1.1.0-win-x64-setup.exe -R byteword/FileTools
-gh attestation verify .\FileTools-1.1.1.0-win-x64.msi -R byteword/FileTools
-gh attestation verify .\FileTools-1.1.1.0-win-x64-identity.msix -R byteword/FileTools
-gh attestation verify .\FileTools-1.1.1.0-msix-self-signed.cer -R byteword/FileTools
+gh attestation verify .\FileTools-1.1.1.1-win-x64-setup.exe -R byteword/FileTools
+gh attestation verify .\FileTools-1.1.1.1-win-x64.msi -R byteword/FileTools
+gh attestation verify .\FileTools-1.1.1.1-win-x64-identity.msix -R byteword/FileTools
+gh attestation verify .\FileTools-1.1.1.1-msix-self-signed.cer -R byteword/FileTools
 gh attestation verify .\checksums.txt -R byteword/FileTools
 ```
 
 On Windows, the self-signed Authenticode/MSIX signatures can also be inspected:
 
 ```powershell
-Get-AuthenticodeSignature .\FileTools-1.1.1.0-win-x64-setup.exe
-Get-AuthenticodeSignature .\FileTools-1.1.1.0-win-x64.msi
-Get-AuthenticodeSignature .\FileTools-1.1.1.0-win-x64-identity.msix
+Get-AuthenticodeSignature .\FileTools-1.1.1.1-win-x64-setup.exe
+Get-AuthenticodeSignature .\FileTools-1.1.1.1-win-x64.msi
+Get-AuthenticodeSignature .\FileTools-1.1.1.1-win-x64-identity.msix
 ```
 
 Before the self-signed CER is trusted, `Get-AuthenticodeSignature` may report an

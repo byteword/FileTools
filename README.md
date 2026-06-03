@@ -4,7 +4,7 @@
 
 Windows 탐색기 ContextMenu와 독립 실행형 WinForms 유틸리티를 제공하는 작은 파일 관리 도구입니다.
 
-현재 버전: `1.1.1.0`.
+현재 버전: `1.1.1.1`.
 
 ### 개발 및 안정성 안내
 
@@ -240,9 +240,6 @@ installer\FileTools.Installer
 
 installer\FileTools.Identity
 └─ Sparse MSIX identity manifest
-
-src\FileTools.IdentityHelper
-└─ Certificate trust and sparse identity registration helper
 ```
 
 ### ContextMenu 설치
@@ -353,7 +350,7 @@ FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE`를 �
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
-Current version: `1.1.1.0`.
+Current version: `1.1.1.1`.
 
 ### Development and Stability Notice
 
@@ -595,9 +592,6 @@ installer\FileTools.Installer
 
 installer\FileTools.Identity
 └─ Sparse MSIX identity manifest
-
-src\FileTools.IdentityHelper
-└─ Certificate trust and sparse identity registration helper
 ```
 
 ### Install ContextMenu

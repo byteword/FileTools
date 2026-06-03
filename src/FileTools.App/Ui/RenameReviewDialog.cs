@@ -13,6 +13,8 @@ internal sealed class RenameReviewDialog : Form
     private const int TokenButtonHeight = 28;
     private const int TokenButtonRightMargin = 6;
     private const int TokenButtonBottomMargin = 6;
+    private const int FooterRowHeight = 56;
+    private const int FooterButtonHeight = 32;
 
     private static readonly Regex CandidateBracketMetadataRegex = new(
         @"\[[^\]\r\n]{1,80}\]|\([^\)\r\n]{1,80}\)|\{[^\}\r\n]{1,80}\}",
@@ -152,7 +154,7 @@ internal sealed class RenameReviewDialog : Form
         };
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
         panel.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, FooterRowHeight));
         Controls.Add(panel);
 
         panel.Controls.Add(BuildHeader(), 0, 0);
@@ -313,6 +315,7 @@ internal sealed class RenameReviewDialog : Form
         panel.Controls.Add(CreateFieldLabel(Localizer.Get("ColumnOriginalName")), 0, 0);
         _originalNameBox.Dock = DockStyle.Fill;
         _originalNameBox.ReadOnly = true;
+        _originalNameBox.HideSelection = false;
         panel.Controls.Add(_originalNameBox, 1, 0);
 
         _useOriginalButton.Dock = DockStyle.Fill;
@@ -374,6 +377,7 @@ internal sealed class RenameReviewDialog : Form
         _authorBox.Dock = DockStyle.Fill;
         _extensionBox.Dock = DockStyle.Fill;
         _extensionBox.ReadOnly = true;
+        _extensionBox.HideSelection = false;
         RegisterPartEditor(_titleBox);
         RegisterPartEditor(_episodeBox);
         RegisterPartEditor(_authorBox);
@@ -432,7 +436,7 @@ internal sealed class RenameReviewDialog : Form
             Dock = DockStyle.Fill,
             ColumnCount = 2,
             RowCount = 1,
-            Padding = new Padding(0, 10, 0, 0)
+            Padding = new Padding(0, 8, 0, 0)
         };
         footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         footer.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 210));
@@ -445,19 +449,19 @@ internal sealed class RenameReviewDialog : Form
         };
         _nextIssueButton.Text = Localizer.Get("ButtonNextIssue");
         _nextIssueButton.Width = 112;
-        _nextIssueButton.Height = 28;
+        _nextIssueButton.Height = FooterButtonHeight;
         _nextIssueButton.Click += (_, _) => SelectNextIssue();
         leftButtons.Controls.Add(_nextIssueButton);
 
         _skipButton.Text = Localizer.Get("ButtonRenameSkip");
         _skipButton.Width = 86;
-        _skipButton.Height = 28;
+        _skipButton.Height = FooterButtonHeight;
         _skipButton.Click += (_, _) => SkipSelectedRow();
         leftButtons.Controls.Add(_skipButton);
 
         _ruleTraceButton.Text = Localizer.Get("ButtonRuleTrace");
         _ruleTraceButton.Width = 104;
-        _ruleTraceButton.Height = 28;
+        _ruleTraceButton.Height = FooterButtonHeight;
         _ruleTraceButton.Click += (_, _) => ShowSelectedRuleTrace();
         leftButtons.Controls.Add(_ruleTraceButton);
         footer.Controls.Add(leftButtons, 0, 0);
@@ -472,13 +476,13 @@ internal sealed class RenameReviewDialog : Form
 
         _okButton.Text = applyOnOk ? Localizer.Get("ButtonApply") : "OK";
         _okButton.Width = 96;
-        _okButton.Height = 28;
+        _okButton.Height = FooterButtonHeight;
         _okButton.Click += (_, _) => Confirm();
         rightButtons.Controls.Add(_okButton);
 
         _cancelButton.Text = Localizer.Get("ButtonCancel");
         _cancelButton.Width = 96;
-        _cancelButton.Height = 28;
+        _cancelButton.Height = FooterButtonHeight;
         _cancelButton.DialogResult = DialogResult.Cancel;
         rightButtons.Controls.Add(_cancelButton);
         return footer;
@@ -506,6 +510,7 @@ internal sealed class RenameReviewDialog : Form
 
     private void RegisterEditableTextBox(TextBox textBox)
     {
+        textBox.HideSelection = false;
         textBox.Enter += (_, _) => _activeTextBox = textBox;
     }
 
@@ -573,6 +578,15 @@ internal sealed class RenameReviewDialog : Form
     private void SyncEditorFromRow(RenameRow? row)
     {
         _selectedRow = row;
+        SyncEditorFieldsFromRow(row);
+        RebuildTokenPanel(row);
+        RebuildCommonPhrasePanel();
+        UpdateSelectedValidation();
+        UpdateCommandState();
+    }
+
+    private void SyncEditorFieldsFromRow(RenameRow? row)
+    {
         _updatingEditor = true;
         try
         {
@@ -599,11 +613,6 @@ internal sealed class RenameReviewDialog : Form
         {
             _updatingEditor = false;
         }
-
-        RebuildTokenPanel(row);
-        RebuildCommonPhrasePanel();
-        UpdateSelectedValidation();
-        UpdateCommandState();
     }
 
     private void HandleSuggestedNameChanged()
@@ -742,14 +751,38 @@ internal sealed class RenameReviewDialog : Form
 
     private void NormalizeSelectedRow()
     {
-        if (_selectedRow is null)
+        var row = _selectedRow;
+        if (row is null)
         {
             return;
         }
 
-        NormalizeEditedRow(_selectedRow);
-        SyncEditorFromRow(_selectedRow);
+        NormalizeEditedRow(row);
+        SyncSuggestedNameBoxFromRow(row);
         ValidateRows();
+    }
+
+    private void SyncSuggestedNameBoxFromRow(RenameRow row)
+    {
+        if (string.Equals(_suggestedNameBox.Text, row.SuggestedName, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        var selectionStart = Math.Min(_suggestedNameBox.SelectionStart, row.SuggestedName.Length);
+        var selectionLength = Math.Min(_suggestedNameBox.SelectionLength, row.SuggestedName.Length - selectionStart);
+
+        _updatingEditor = true;
+        try
+        {
+            _suggestedNameBox.Text = row.SuggestedName;
+            _suggestedNameBox.SelectionStart = selectionStart;
+            _suggestedNameBox.SelectionLength = selectionLength;
+        }
+        finally
+        {
+            _updatingEditor = false;
+        }
     }
 
     private void NormalizeEditedRow(RenameRow row)
@@ -1071,7 +1104,7 @@ internal sealed class RenameReviewDialog : Form
     private void AddTokenButton(FlowLayoutPanel panel, string value)
     {
         var width = GetTokenButtonWidth(value);
-        var button = new Button
+        var button = new NonFocusableButton
         {
             Text = value,
             AutoEllipsis = true,
@@ -1086,7 +1119,7 @@ internal sealed class RenameReviewDialog : Form
 
     private void AddCommonPhraseToggleButton(string text, string toolTip)
     {
-        var button = new Button
+        var button = new NonFocusableButton
         {
             Text = text,
             AutoEllipsis = true,
@@ -1427,6 +1460,17 @@ internal sealed class RenameReviewDialog : Form
         Resolved,
         Skipped,
         Invalid
+    }
+
+    private sealed class NonFocusableButton : Button
+    {
+        public NonFocusableButton()
+        {
+            SetStyle(ControlStyles.Selectable, false);
+            TabStop = false;
+        }
+
+        protected override bool ShowFocusCues => false;
     }
 
     private sealed class RenamePartDraft

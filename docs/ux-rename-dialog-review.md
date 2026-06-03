@@ -1,6 +1,6 @@
 # Rename Dialog UX Review
 
-Review date: 2026-06-02
+Review date: 2026-06-03
 
 Scope:
 
@@ -49,6 +49,10 @@ The current dialog uses a two-pane editor: a read-only item list on the left and
 - Provides insertable token buttons from original text, parsed parts, and correction candidates.
 - Extracts cleaned title tokens from correction candidate filenames before showing the full candidate filename, so a candidate such as `[Monaka] 아가씨는 벌 받는 걸 좋아해 10권` also offers `아가씨는 벌 받는 걸 좋아해`.
 - Shows existing common phrases as insertable chips when configured, collapsed to one row by default with More/Collapse controls for large phrase sets.
+- Keeps token and common-phrase chips out of the focus chain, so a first click inserts into the active editor instead of first triggering editor focus loss and panel rebuild.
+- Keeps editor selections visible after focus moves away, which makes the pending insertion point clear when using helper chips or command buttons.
+- Limits token and common-phrase panel rebuilds to row synchronization, resize, and expand/collapse paths; normalizing the current filename now updates only the filename field and validation state.
+- Gives the footer button row and command buttons additional height so OK/Apply and Cancel are not clipped by default WinForms margins or DPI scaling.
 - Adds a rule-trace action so the selected row can show which built-in or user correction rules changed the name or produced candidates before apply.
 - Adds next-issue navigation.
 
