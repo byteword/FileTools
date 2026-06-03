@@ -15,7 +15,7 @@ FileTools는 취미 개발자가 개인적으로 관리하는 프로젝트이며
 FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMenu 작업 세 가지를 제공합니다.
 
 1. **파일이름 자동 교정**
-   - `NameCorrector`에서 파생된 파일명 교정 흐름을 사용합니다.
+   - 파일명 교정 흐름을 사용합니다.
    - 한글 자모/유니코드를 정규화하고, 제목/회차/태그/작가 정보를 추출하며, Windows에서 안전한 이름을 만들고, 접미사를 붙여 충돌을 방지합니다.
    - 변경 적용 전 이름 바꾸기 검토 창이 기본으로 열립니다. ContextMenu 실행에서도 동일하며, 검토가 필요하거나 충돌이 있는 생성 행만 검토하도록 제한할 수 있습니다.
 
@@ -26,7 +26,7 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
    - 기존 대상 파일은 덮어쓰지 않습니다.
 
 3. **폴더 자동 재배치**
-   - `ImageArchiveManager`에서 파생된 가벼운 AutoRelocation 템플릿을 사용합니다.
+   - 가벼운 AutoRelocation 템플릿을 사용합니다.
    - 기본 템플릿은 항목을 `[ㄱ]`, `[A]`, `[0A]` 같은 제목 초성/이니셜 버킷으로 이동합니다.
    - 템플릿은 순서가 있는 경로 규칙 단계를 연결해 다단계 경로를 만들 수 있습니다.
    - 템플릿 필드는 파일, 폴더 또는 파싱된 파일 이름에서 얻을 수 있는 값으로 제한됩니다.
@@ -364,7 +364,7 @@ FileTools is maintained as a personal hobby project and is built and updated wit
 FileTools provides three current-user ContextMenu actions for selected files and folders:
 
 1. **파일이름 자동 교정**
-   - Uses the filename correction flow derived from `NameCorrector`.
+   - Uses the filename correction flow.
    - Normalizes Korean jamo/Unicode, extracts title/episode/tag/author parts, makes Windows-safe names, and avoids conflicts with suffixes.
    - Rename review opens before applying changes by default, including ContextMenu execution, and can be limited to generated rows that need review or have conflicts.
 
@@ -375,7 +375,7 @@ FileTools provides three current-user ContextMenu actions for selected files and
    - Existing destination files are not overwritten.
 
 3. **폴더 자동 재배치**
-   - Uses lightweight AutoRelocation templates derived from `ImageArchiveManager`.
+   - Uses lightweight AutoRelocation templates.
    - Default template moves items into title-initial buckets such as `[ㄱ]`, `[A]`, and `[0A]`.
    - Templates can build multi-level paths by chaining ordered path-rule steps.
    - Template fields are limited to values available from the file, folder, or parsed file name.
