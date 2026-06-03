@@ -25,7 +25,7 @@
   <Target Name="PublishFileToolsApp" BeforeTargets="CoreCompile">
     <MSBuild
       Projects="$(MSBuildThisFileDirectory)..\..\src\FileTools.App\FileTools.App.csproj"
-      Targets="Publish"
+      Targets="Restore;Publish"
       Properties="Configuration=$(Configuration);RuntimeIdentifier=win-x64;SelfContained=false;PublishSingleFile=true;PublishDir=$(AppPublishDir)" />
   </Target>
 </Project>
