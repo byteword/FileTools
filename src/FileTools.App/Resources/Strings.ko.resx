@@ -173,6 +173,19 @@
   <data name="SettingsSummaryDictionaryOn" xml:space="preserve"><value>사전 사용</value></data>
   <data name="SettingsSummaryDictionaryOff" xml:space="preserve"><value>사전 미사용</value></data>
   <data name="SettingsContextMenuRegistrationHelp" xml:space="preserve"><value>Explorer 등록을 꺼도 명령 선택값은 유지됩니다.</value></data>
+  <data name="GroupWindows11NativeContextMenu" xml:space="preserve"><value>Windows 11 기본 메뉴</value></data>
+  <data name="SettingsWindows11NativeContextMenuHelp" xml:space="preserve"><value>설치 프로그램은 지원 파일만 배치합니다. 이 버튼으로 self-signed MSIX 인증서를 직접 신뢰하고 sparse package identity를 등록하거나 제거할 수 있습니다.</value></data>
+  <data name="ButtonRegisterWindows11ContextMenu" xml:space="preserve"><value>Windows 11 메뉴 등록</value></data>
+  <data name="ButtonUnregisterWindows11ContextMenu" xml:space="preserve"><value>Windows 11 메뉴 제거</value></data>
+  <data name="Windows11ContextMenuWarningTitle" xml:space="preserve"><value>Windows 11 기본 메뉴</value></data>
+  <data name="Windows11ContextMenuRegisterWarning" xml:space="preserve"><value>현재 사용자의 Trusted People 저장소에 FileTools self-signed MSIX 인증서를 가져오고 sparse package identity를 등록합니다. 이 릴리스를 신뢰할 때만 계속하세요.</value></data>
+  <data name="Windows11ContextMenuUnregisterWarning" xml:space="preserve"><value>sparse package identity와 FileTools가 등록한 인증서 지문을 제거합니다. 계속할까요?</value></data>
+  <data name="Windows11ContextMenuRegistered" xml:space="preserve"><value>Windows 11 기본 메뉴를 등록했습니다. 메뉴가 바로 갱신되지 않으면 Explorer를 다시 시작하세요.</value></data>
+  <data name="Windows11ContextMenuUnregistered" xml:space="preserve"><value>Windows 11 기본 메뉴를 제거했습니다. 메뉴가 바로 갱신되지 않으면 Explorer를 다시 시작하세요.</value></data>
+  <data name="Windows11ContextMenuFilesMissing" xml:space="preserve"><value>Windows 11 기본 메뉴 지원 파일을 찾을 수 없습니다:&#x0D;&#x0A;{0}</value></data>
+  <data name="Windows11ContextMenuHelperStartFailed" xml:space="preserve"><value>Windows 11 기본 메뉴 등록 도구를 시작하지 못했습니다.</value></data>
+  <data name="Windows11ContextMenuHelperNoOutput" xml:space="preserve"><value>진단 출력이 없습니다.</value></data>
+  <data name="Windows11ContextMenuHelperFailedFormat" xml:space="preserve"><value>Windows 11 기본 메뉴 등록 도구가 종료 코드 {0}으로 실패했습니다.&#x0D;&#x0A;&#x0D;&#x0A;{1}</value></data>
   <data name="SettingsContextMenuLayoutHelp" xml:space="preserve"><value>묶음형은 FileTools 하위 메뉴 하나로 정리하고, 펼침형은 명령을 Explorer에 바로 표시합니다.</value></data>
   <data name="SettingsRenameReviewHelp" xml:space="preserve"><value>자동화 보조 모드에서도 검토 필요와 충돌 항목은 반드시 멈춰서 검토합니다.</value></data>
   <data name="SettingsFolderOperationHelp" xml:space="preserve"><value>Explorer 작업과 새 플랜 단계에서 별도 지정이 없을 때 쓰는 기본값입니다.</value></data>

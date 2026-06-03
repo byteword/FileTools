@@ -3,15 +3,18 @@
     <OutputName>FileTools</OutputName>
     <OutputType>Package</OutputType>
     <InstallerPlatform>x64</InstallerPlatform>
-    <ProductVersion>1.1.0.0</ProductVersion>
+    <ProductVersion>1.1.1.0</ProductVersion>
     <SuppressIces>ICE91</SuppressIces>
     <AppPublishDir>$(MSBuildThisFileDirectory)..\..\artifacts\publish\FileTools-win-x64\</AppPublishDir>
     <AppIconPath>$(MSBuildThisFileDirectory)..\..\src\FileTools.App\Resources\FileToolsIcon.ico</AppIconPath>
     <ShellExtensionPath>$(MSBuildThisFileDirectory)..\..\src\FileTools.ShellExt\x64\Release\FileTools.ShellExt.dll</ShellExtensionPath>
+    <IdentityHelperPath>$(MSBuildThisFileDirectory)..\..\artifacts\publish\FileTools.IdentityHelper-win-x64\FileTools.IdentityHelper.exe</IdentityHelperPath>
+    <IdentityMsixPath>$(MSBuildThisFileDirectory)..\..\artifacts\identity\FileTools.Identity.msix</IdentityMsixPath>
+    <IdentityCertificatePath>$(MSBuildThisFileDirectory)..\..\artifacts\identity\FileTools.Identity.cer</IdentityCertificatePath>
     <LicenseRtfPath>$(MSBuildThisFileDirectory)License.rtf</LicenseRtfPath>
     <MsiDialogBmpPath>$(MSBuildThisFileDirectory)Assets\FileToolsDialogBmp.png</MsiDialogBmpPath>
     <MsiBannerBmpPath>$(MSBuildThisFileDirectory)Assets\FileToolsBannerBmp.png</MsiBannerBmpPath>
-    <DefineConstants>AppPublishDir=$(AppPublishDir);ProductVersion=$(ProductVersion);AppIconPath=$(AppIconPath);ShellExtensionPath=$(ShellExtensionPath);LicenseRtfPath=$(LicenseRtfPath);MsiDialogBmpPath=$(MsiDialogBmpPath);MsiBannerBmpPath=$(MsiBannerBmpPath)</DefineConstants>
+    <DefineConstants>AppPublishDir=$(AppPublishDir);ProductVersion=$(ProductVersion);AppIconPath=$(AppIconPath);ShellExtensionPath=$(ShellExtensionPath);IdentityHelperPath=$(IdentityHelperPath);IdentityMsixPath=$(IdentityMsixPath);IdentityCertificatePath=$(IdentityCertificatePath);LicenseRtfPath=$(LicenseRtfPath);MsiDialogBmpPath=$(MsiDialogBmpPath);MsiBannerBmpPath=$(MsiBannerBmpPath)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

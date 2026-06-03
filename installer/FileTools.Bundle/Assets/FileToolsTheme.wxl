@@ -23,7 +23,6 @@
   <String Id="OptionInstallContextMenu" Value="Add Explorer Context Menu commands" />
   <String Id="OptionCreateStartMenuShortcut" Value="Create Start Menu shortcut" />
   <String Id="OptionCreateDesktopShortcut" Value="Create Desktop shortcut" />
-  <String Id="OptionEnableWindows11ContextMenu" Value="Use Windows 11 native context menu (imports self-signed certificate)" />
   <String Id="OptionsOkButton" Value="&amp;OK" />
   <String Id="OptionsCancelButton" Value="&amp;Cancel" />
   <String Id="ProgressHeader" Value="Setup Progress" />

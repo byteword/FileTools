@@ -5,7 +5,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$version = '1.1.0.0'
+$version = '1.1.1.0'
 $solution = Join-Path $PSScriptRoot 'installer\FileTools.Installer.sln'
 $installerProject = Join-Path $PSScriptRoot 'installer\FileTools.Installer\FileTools.Installer.wixproj'
 $bundleProject = Join-Path $PSScriptRoot 'installer\FileTools.Bundle\FileTools.Bundle.wixproj'
@@ -242,7 +242,10 @@ if ($LASTEXITCODE -ne 0) {
 }
 Invoke-CodeSigning -FilePath $identityMsix -SigningMaterial $signing
 
-dotnet build $installerProject -c $Configuration
+dotnet build $installerProject -c $Configuration `
+    /p:IdentityHelperPath="$identityHelper" `
+    /p:IdentityMsixPath="$identityMsix" `
+    /p:IdentityCertificatePath="$identityCer"
 if ($LASTEXITCODE -ne 0) {
     throw "MSI build failed with exit code $LASTEXITCODE."
 }
@@ -253,10 +256,7 @@ if (-not (Test-Path $msi)) {
 Invoke-CodeSigning -FilePath $msi -SigningMaterial $signing
 
 dotnet build $bundleProject -c $Configuration `
-    /p:SkipBuildFileToolsMsi=true `
-    /p:IdentityHelperPath="$identityHelper" `
-    /p:IdentityMsixPath="$identityMsix" `
-    /p:IdentityCertificatePath="$identityCer"
+    /p:SkipBuildFileToolsMsi=true
 if ($LASTEXITCODE -ne 0) {
     throw "Setup bootstrapper build failed with exit code $LASTEXITCODE."
 }

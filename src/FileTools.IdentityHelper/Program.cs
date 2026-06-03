@@ -1,7 +1,7 @@
-using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Win32;
+using Windows.Management.Deployment;
 
 namespace FileTools.IdentityHelper;
 
@@ -69,6 +69,7 @@ internal static class Program
         }
 
         var certificate = ImportCertificate(certificatePath);
+        RemovePackage();
         RegisterPackage(msixPath, externalLocation);
         WriteMarker(certificate.Thumbprint);
         return 0;
@@ -131,64 +132,42 @@ internal static class Program
 
     private static void RegisterPackage(string msixPath, string externalLocation)
     {
-        var script = string.Join(
-            Environment.NewLine,
-            "$ErrorActionPreference = 'Stop'",
-            "Add-AppxPackage -Path " + QuotePowerShell(msixPath) +
-            " -ExternalLocation " + QuotePowerShell(externalLocation) +
-            " -ForceUpdateFromAnyVersion");
+        var packageManager = new PackageManager();
+        var options = new AddPackageOptions
+        {
+            ExternalLocationUri = new Uri(externalLocation)
+        };
+        var result = packageManager
+            .AddPackageByUriAsync(new Uri(msixPath), options)
+            .AsTask()
+            .GetAwaiter()
+            .GetResult();
 
-        RunPowerShell(script);
         Log("Registered sparse identity package at " + externalLocation);
+        LogDeploymentResult(result);
     }
 
     private static void RemovePackage()
     {
-        var script = string.Join(
-            Environment.NewLine,
-            "$ErrorActionPreference = 'Stop'",
-            "$package = Get-AppxPackage -Name " + QuotePowerShell(PackageName),
-            "if ($package) { $package | Remove-AppxPackage -ErrorAction Stop }");
-
-        RunPowerShell(script);
-        Log("Removed sparse identity package if present.");
-    }
-
-    private static void RunPowerShell(string script)
-    {
-        var encoded = Convert.ToBase64String(Encoding.Unicode.GetBytes(script));
-        var startInfo = new ProcessStartInfo
+        var packageManager = new PackageManager();
+        var packages = packageManager
+            .FindPackagesForUser(string.Empty, PackageName)
+            .ToArray();
+        if (packages.Length == 0)
         {
-            FileName = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.System),
-                @"WindowsPowerShell\v1.0\powershell.exe"),
-            Arguments = "-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -EncodedCommand " + encoded,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardError = true,
-            RedirectStandardOutput = true
-        };
-
-        using var process = Process.Start(startInfo)
-            ?? throw new InvalidOperationException("Failed to start PowerShell.");
-
-        var output = process.StandardOutput.ReadToEnd();
-        var error = process.StandardError.ReadToEnd();
-        process.WaitForExit();
-
-        if (!string.IsNullOrWhiteSpace(output))
-        {
-            Log(output.Trim());
+            Log("Sparse identity package was not registered.");
+            return;
         }
 
-        if (process.ExitCode != 0)
+        foreach (var package in packages)
         {
-            if (!string.IsNullOrWhiteSpace(error))
-            {
-                Log(error.Trim());
-            }
-
-            throw new InvalidOperationException("PowerShell failed with exit code " + process.ExitCode + ".");
+            var result = packageManager
+                .RemovePackageAsync(package.Id.FullName)
+                .AsTask()
+                .GetAwaiter()
+                .GetResult();
+            Log("Removed sparse identity package: " + package.Id.FullName);
+            LogDeploymentResult(result);
         }
     }
 
@@ -222,9 +201,14 @@ internal static class Program
         return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, path));
     }
 
-    private static string QuotePowerShell(string value)
+    private static void LogDeploymentResult(DeploymentResult result)
     {
-        return "'" + value.Replace("'", "''") + "'";
+        if (!string.IsNullOrWhiteSpace(result.ErrorText))
+        {
+            Log("Deployment error text: " + result.ErrorText);
+        }
+
+        Log("Deployment activity id: " + result.ActivityId);
     }
 
     private static void Log(string message)

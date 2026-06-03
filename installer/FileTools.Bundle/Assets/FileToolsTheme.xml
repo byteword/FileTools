@@ -43,7 +43,6 @@
       <Checkbox Name="InstallContextMenu" X="22" Y="154" Width="-22" Height="17" TabStop="yes" FontId="3">#(loc.OptionInstallContextMenu)</Checkbox>
       <Checkbox Name="CreateStartMenuShortcut" X="22" Y="176" Width="-22" Height="17" TabStop="yes" FontId="3">#(loc.OptionCreateStartMenuShortcut)</Checkbox>
       <Checkbox Name="CreateDesktopShortcut" X="22" Y="198" Width="-22" Height="17" TabStop="yes" FontId="3">#(loc.OptionCreateDesktopShortcut)</Checkbox>
-      <Checkbox Name="EnableWindows11ContextMenu" X="22" Y="220" Width="-22" Height="17" TabStop="yes" FontId="3">#(loc.OptionEnableWindows11ContextMenu)</Checkbox>
       <Button Name="OptionsOkButton" X="-91" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0">
         <Text>#(loc.OptionsOkButton)</Text>
         <ChangePageAction Page="Install" />

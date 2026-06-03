@@ -26,7 +26,6 @@
     <Variable Name="InstallContextMenu" Type="numeric" Value="1" bal:Overridable="yes" />
     <Variable Name="CreateStartMenuShortcut" Type="numeric" Value="1" bal:Overridable="yes" />
     <Variable Name="CreateDesktopShortcut" Type="numeric" Value="0" bal:Overridable="yes" />
-    <Variable Name="EnableWindows11ContextMenu" Type="numeric" Value="0" bal:Overridable="yes" />
 
     <util:RegistrySearch
       Id="FindDotNetDesktopRuntime8"
@@ -35,14 +34,6 @@
       Value="$(var.DotNetDesktopRuntimeVersion)"
       Variable="DotNetDesktopRuntime8Installed"
       Result="exists" />
-
-    <util:RegistrySearch
-      Id="FindFileToolsWindows11Identity"
-      Root="HKCU"
-      Key="SOFTWARE\FileTools"
-      Value="Windows11IdentityInstalled"
-      Variable="FileToolsWindows11IdentityInstalled"
-      Result="value" />
 
     <Chain>
       <ExePackage
@@ -77,21 +68,6 @@
         <MsiProperty Name="FILETOOLS_CREATE_DESKTOP_SHORTCUT" Value="[CreateDesktopShortcut]" />
       </MsiPackage>
 
-      <ExePackage
-        Id="FileToolsWindows11Identity"
-        SourceFile="$(var.IdentityHelperPath)"
-        Name="FileTools.IdentityHelper.exe"
-        DisplayName="FileTools Windows 11 Context Menu identity"
-        Cache="remove"
-        PerMachine="no"
-        Vital="yes"
-        DetectCondition="FileToolsWindows11IdentityInstalled"
-        InstallCondition="EnableWindows11ContextMenu"
-        InstallArguments="install --msix FileTools.Identity.msix --cert FileTools.Identity.cer --external-location &quot;[LocalAppDataFolder]Programs\FileTools&quot;"
-        UninstallArguments="uninstall">
-        <Payload SourceFile="$(var.IdentityMsixPath)" Name="FileTools.Identity.msix" />
-        <Payload SourceFile="$(var.IdentityCertificatePath)" Name="FileTools.Identity.cer" />
-      </ExePackage>
     </Chain>
   </Bundle>
 </Wix>

@@ -76,6 +76,19 @@
           KeyPath="yes" />
       </Component>
 
+      <Component Id="IdentitySupportFilesComponent" Guid="8f1a5b08-2d76-4c51-a925-24db26b88d4c">
+        <File Id="FileToolsIdentityHelperFile" Source="$(var.IdentityHelperPath)" />
+        <File Id="FileToolsIdentityMsixFile" Source="$(var.IdentityMsixPath)" />
+        <File Id="FileToolsIdentityCertificateFile" Source="$(var.IdentityCertificatePath)" />
+        <RegistryValue
+          Root="HKCU"
+          Key="Software\FileTools"
+          Name="IdentitySupportFiles"
+          Type="integer"
+          Value="1"
+          KeyPath="yes" />
+      </Component>
+
       <Component Id="ShellExtensionRegistrationComponent" Guid="fc25cfad-7aa2-4d6a-9f0a-6516389403d7" Condition="FILETOOLS_INSTALL_CONTEXT_MENU&lt;&gt;&quot;0&quot;">
         <RegistryValue Root="HKCU" Key="Software\Classes\CLSID\{716e7cc4-5941-4362-8aca-d38c62817de9}" Type="string" Value="FileTools Shell Extension" KeyPath="yes" />
         <RegistryValue Root="HKCU" Key="Software\Classes\CLSID\{716e7cc4-5941-4362-8aca-d38c62817de9}\InprocServer32" Type="string" Value="[INSTALLFOLDER]FileTools.ShellExt.dll" />
@@ -260,6 +273,7 @@
     <Feature Id="AppFeature" Title="FileTools" Description="FileTools application and Start Menu shortcut." Level="1">
       <ComponentRef Id="FileToolsExeComponent" />
       <ComponentRef Id="InstallStateComponent" />
+      <ComponentRef Id="IdentitySupportFilesComponent" />
       <ComponentRef Id="StartMenuShortcutComponent" />
       <ComponentRef Id="DesktopShortcutComponent" />
 

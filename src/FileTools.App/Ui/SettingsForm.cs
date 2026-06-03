@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -221,6 +222,9 @@ internal sealed class SettingsForm : Form
         group.AddBodyControl(CreateSectionLabel(Localizer.Get("GroupApplicationContextMenu")));
         group.AddBodyControl(_contextMenuOpenCheckBox);
         group.AddBodyControl(CreateContextMenuButtons());
+        group.AddBodyControl(CreateSectionLabel(Localizer.Get("GroupWindows11NativeContextMenu")));
+        group.AddBodyControl(CreateHelperText(Localizer.Get("SettingsWindows11NativeContextMenuHelp")));
+        group.AddBodyControl(CreateWindows11NativeContextMenuButtons());
         RegisterGroup(group);
         return group;
     }
@@ -329,6 +333,23 @@ internal sealed class SettingsForm : Form
         panel.Controls.Add(dictionaryButton);
         panel.Controls.Add(phraseButton);
         panel.Controls.Add(ruleButton);
+        return panel;
+    }
+
+    private Control CreateWindows11NativeContextMenuButtons()
+    {
+        var panel = new FlowLayoutPanel
+        {
+            Height = 40,
+            WrapContents = false,
+            Margin = new Padding(0, 6, 0, 0)
+        };
+        var registerButton = new Button { Text = Localizer.Get("ButtonRegisterWindows11ContextMenu"), Width = 220, Height = 30 };
+        var unregisterButton = new Button { Text = Localizer.Get("ButtonUnregisterWindows11ContextMenu"), Width = 220, Height = 30 };
+        registerButton.Click += (_, _) => RegisterWindows11NativeContextMenu();
+        unregisterButton.Click += (_, _) => UnregisterWindows11NativeContextMenu();
+        panel.Controls.Add(registerButton);
+        panel.Controls.Add(unregisterButton);
         return panel;
     }
 
@@ -606,6 +627,128 @@ internal sealed class SettingsForm : Form
             FileToolsEnvironment.AppName,
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);
+    }
+
+    private void RegisterWindows11NativeContextMenu()
+    {
+        if (!ConfirmWindows11NativeContextMenu("Windows11ContextMenuRegisterWarning"))
+        {
+            return;
+        }
+
+        try
+        {
+            RunIdentityHelper("install");
+            MessageBox.Show(
+                Localizer.Get("Windows11ContextMenuRegistered"),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, FileToolsEnvironment.AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private void UnregisterWindows11NativeContextMenu()
+    {
+        if (!ConfirmWindows11NativeContextMenu("Windows11ContextMenuUnregisterWarning"))
+        {
+            return;
+        }
+
+        try
+        {
+            RunIdentityHelper("uninstall");
+            MessageBox.Show(
+                Localizer.Get("Windows11ContextMenuUnregistered"),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, FileToolsEnvironment.AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private bool ConfirmWindows11NativeContextMenu(string messageKey)
+    {
+        return MessageBox.Show(
+            Localizer.Get(messageKey),
+            Localizer.Get("Windows11ContextMenuWarningTitle"),
+            MessageBoxButtons.OKCancel,
+            MessageBoxIcon.Warning,
+            MessageBoxDefaultButton.Button2) == DialogResult.OK;
+    }
+
+    private static void RunIdentityHelper(string command)
+    {
+        var baseDirectory = AppContext.BaseDirectory;
+        var helperPath = Path.Combine(baseDirectory, "FileTools.IdentityHelper.exe");
+        if (!File.Exists(helperPath))
+        {
+            throw new FileNotFoundException(Localizer.Format(
+                "Windows11ContextMenuFilesMissing",
+                helperPath));
+        }
+
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = helperPath,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+        startInfo.ArgumentList.Add(command);
+
+        if (command == "install")
+        {
+            var msixPath = Path.Combine(baseDirectory, "FileTools.Identity.msix");
+            var certificatePath = Path.Combine(baseDirectory, "FileTools.Identity.cer");
+            var missingFiles = new[] { msixPath, certificatePath }
+                .Where(path => !File.Exists(path))
+                .ToArray();
+            if (missingFiles.Length > 0)
+            {
+                throw new FileNotFoundException(Localizer.Format(
+                    "Windows11ContextMenuFilesMissing",
+                    string.Join(Environment.NewLine, missingFiles)));
+            }
+
+            startInfo.ArgumentList.Add("--msix");
+            startInfo.ArgumentList.Add(msixPath);
+            startInfo.ArgumentList.Add("--cert");
+            startInfo.ArgumentList.Add(certificatePath);
+            startInfo.ArgumentList.Add("--external-location");
+            startInfo.ArgumentList.Add(baseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+        }
+
+        using var process = Process.Start(startInfo)
+            ?? throw new InvalidOperationException(Localizer.Get("Windows11ContextMenuHelperStartFailed"));
+        var output = process.StandardOutput.ReadToEnd();
+        var error = process.StandardError.ReadToEnd();
+        process.WaitForExit();
+
+        if (process.ExitCode != 0)
+        {
+            throw new InvalidOperationException(Localizer.Format(
+                "Windows11ContextMenuHelperFailedFormat",
+                process.ExitCode,
+                FormatProcessOutput(output, error)));
+        }
+    }
+
+    private static string FormatProcessOutput(string output, string error)
+    {
+        var details = string.Join(
+            Environment.NewLine,
+            new[] { output.Trim(), error.Trim() }.Where(static text => !string.IsNullOrWhiteSpace(text)));
+        return string.IsNullOrWhiteSpace(details)
+            ? Localizer.Get("Windows11ContextMenuHelperNoOutput")
+            : details;
     }
 
     private void OpenRenameDictionaryEditor()

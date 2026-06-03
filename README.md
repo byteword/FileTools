@@ -4,7 +4,7 @@
 
 Windows 탐색기 ContextMenu와 독립 실행형 WinForms 유틸리티를 제공하는 작은 파일 관리 도구입니다.
 
-현재 버전: `1.1.0.0`.
+현재 버전: `1.1.1.0`.
 
 ### 개발 및 안정성 안내
 
@@ -185,7 +185,7 @@ MSI는 FileTools를 framework-dependent `win-x64` single-file 앱으로 게시�
 ```
 
 MSI는 의도적으로 작게 유지되며 Microsoft .NET 8 Desktop Runtime x64가 필요합니다. 일반 배포에는 `FileToolsSetup.exe`를 사용하세요. Burn bootstrapper는 Microsoft .NET Desktop Runtime 8.0.27 x64가 없으면 Microsoft 공식 런타임 엔드포인트에서 다운로드한 뒤 MSI를 실행합니다.
-빌드 스크립트는 WiX `wix burn detach`와 `wix burn reattach` 흐름으로 Burn bootstrapper bundle에 서명하므로, 서명된 EXE도 연결된 MSI와 identity payload를 계속 추출할 수 있습니다.
+빌드 스크립트는 WiX `wix burn detach`와 `wix burn reattach` 흐름으로 Burn bootstrapper bundle에 서명하므로, 서명된 EXE도 연결된 MSI 컨테이너를 계속 추출할 수 있습니다.
 런타임이 이미 설치되어 있으면 `FileToolsSetup.exe`는 사용자별 MSI만 설치하며 관리자 권한이 필요하지 않아야 합니다. 런타임이 없으면 bootstrapper는 machine-wide Microsoft .NET Desktop Runtime 설치 관리자에 대해서만 승격을 요청한 뒤 사용자별 FileTools MSI 설치를 계속합니다.
 bootstrapper는 Windows 앱 및 기능에서 `FileTools`로 표시되며, 실행 파일 이름은 `FileToolsSetup.exe`로 유지됩니다.
 bootstrapper는 MSI 마법사를 숨기고 자체 설치 옵션을 표시합니다.
@@ -193,7 +193,6 @@ bootstrapper는 MSI 마법사를 숨기고 자체 설치 옵션을 표시합니�
 - `Add Explorer Context Menu commands`: 기본 활성화.
 - `Create Start Menu shortcut`: 기본 활성화.
 - `Create Desktop shortcut`: 기본 비활성화.
-- `Use Windows 11 native context menu`: 기본 비활성화.
 
 설치가 성공하면 bootstrapper는 성공 페이지에 `Run FileTools` 버튼을 표시합니다.
 
@@ -206,7 +205,7 @@ MSI 옵션:
 
 MSI는 네이티브 `FileTools.ShellExt.dll`을 현재 사용자 COM ExplorerCommand handler로 설치합니다. 첫 실행 후 FileTools 설정에서 개별 폴더 wrapping/unwrapping 및 AutoRelocation 명령을 선택하세요. 기존 정적 레지스트리 컴포넌트는 fallback 개발 용도로만 비활성 상태로 유지됩니다.
 
-선택 사항인 Windows 11 네이티브 ContextMenu 경로는 `Add-AppxPackage -ExternalLocation`으로 서명된 sparse MSIX identity package를 등록합니다. 그러면 Windows가 `desktop4:FileExplorerContextMenus`와 `windows.comServer`를 통해 shell extension을 발견할 수 있습니다. 설치 프로그램은 identity package를 등록하기 전에 공개 self-signed CER을 현재 사용자의 Trusted People 저장소로 가져옵니다. 설치 또는 제거 후 메뉴가 즉시 갱신되지 않으면 Explorer를 다시 시작하세요.
+선택 사항인 Windows 11 네이티브 ContextMenu 경로는 서명된 sparse MSIX identity package를 등록합니다. 그러면 Windows가 `desktop4:FileExplorerContextMenus`와 `windows.comServer`를 통해 shell extension을 발견할 수 있습니다. 설치 프로그램은 지원 파일만 배치하며 인증서 가져오기와 identity 등록은 자동 실행하지 않습니다. 설치 후 FileTools 설정 창의 Windows 11 기본 메뉴 섹션에서 사용자가 명시적으로 실행하면, 공개 self-signed CER을 현재 사용자의 Trusted People 저장소로 가져오고 `PackageManager.AddPackageByUriAsync`로 sparse package identity를 등록합니다. 설치 또는 제거 후 메뉴가 즉시 갱신되지 않으면 Explorer를 다시 시작하세요.
 
 네이티브 ShellExt는 `FileTools.ShellExt.def`를 통해 `DllGetClassObject`, `DllCanUnloadNow`, `DllRegisterServer`, `DllUnregisterServer`를 명시적으로 내보내며, Explorer가 별도 VC runtime 의존성 없이 로드할 수 있도록 정적 C runtime으로 빌드됩니다.
 
@@ -354,7 +353,7 @@ FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE`를 �
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
-Current version: `1.1.0.0`.
+Current version: `1.1.1.0`.
 
 ### Development and Stability Notice
 
@@ -535,7 +534,7 @@ The MSI publishes FileTools as a framework-dependent `win-x64` single-file app a
 ```
 
 The MSI is intentionally small and requires Microsoft .NET 8 Desktop Runtime x64. Use `FileToolsSetup.exe` for normal distribution; the Burn bootstrapper detects Microsoft .NET Desktop Runtime 8.0.27 x64 and downloads it from Microsoft's official runtime endpoint when it is missing, then runs the MSI.
-The build script signs Burn bootstrapper bundles with the WiX `wix burn detach` and `wix burn reattach` flow so the signed EXE can still extract its attached MSI and identity payloads.
+The build script signs Burn bootstrapper bundles with the WiX `wix burn detach` and `wix burn reattach` flow so the signed EXE can still extract its attached MSI container.
 When the runtime is already installed, `FileToolsSetup.exe` installs only the per-user MSI and should not require elevation. When the runtime is missing, the bootstrapper requests elevation only for the machine-wide Microsoft .NET Desktop Runtime installer, then continues with the per-user FileTools MSI.
 The bootstrapper is displayed as `FileTools` in Windows Apps and Features, while the executable file remains `FileToolsSetup.exe`.
 The bootstrapper hides the MSI wizard and shows its own setup options:
@@ -543,7 +542,6 @@ The bootstrapper hides the MSI wizard and shows its own setup options:
 - `Add Explorer Context Menu commands`: enabled by default.
 - `Create Start Menu shortcut`: enabled by default.
 - `Create Desktop shortcut`: disabled by default.
-- `Use Windows 11 native context menu`: disabled by default.
 
 After a successful install, the bootstrapper shows a `Run FileTools` button on the success page.
 
@@ -556,7 +554,7 @@ When `FileTools.msi` is run directly, these MSI features remain available in the
 
 The MSI installs the native `FileTools.ShellExt.dll` as a current-user COM ExplorerCommand handler. After first launch, use FileTools settings to choose individual folder wrapping/unwrapping and AutoRelocation commands. Legacy static registry components are kept disabled for fallback development only.
 
-The optional Windows 11 native context menu path registers a signed sparse MSIX identity package with `Add-AppxPackage -ExternalLocation`, so Windows can discover the shell extension through `desktop4:FileExplorerContextMenus` and `windows.comServer`. The setup imports the public self-signed CER into the current user's Trusted People store before registering the identity package. Restart Explorer after installing or removing this option if the menu does not refresh immediately.
+The optional Windows 11 native context menu path registers a signed sparse MSIX identity package, so Windows can discover the shell extension through `desktop4:FileExplorerContextMenus` and `windows.comServer`. Setup installs the support files only and does not import certificates or register the identity automatically. After installation, the Windows 11 native context menu section in FileTools settings lets the user explicitly import the public self-signed CER into the current user's Trusted People store and register the sparse package identity through `PackageManager.AddPackageByUriAsync`. Restart Explorer after registering or removing this option if the menu does not refresh immediately.
 
 The native ShellExt explicitly exports `DllGetClassObject`, `DllCanUnloadNow`, `DllRegisterServer`, and `DllUnregisterServer` through `FileTools.ShellExt.def`, and is built with the static C runtime so Explorer can load it without a separate VC runtime dependency.
 

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: Existing release tag to build, for example v1.1.0.0.
+        description: Existing release tag to build, for example v1.1.1.0.
         required: true
         type: string
       draft:
@@ -100,7 +100,7 @@ jobs:
           - checksums.txt: SHA256 hashes for the release assets.
 
           These assets are signed with the FileTools self-signed certificate. Windows does not trust this certificate by default.
-          FileToolsSetup.exe can import the certificate into the current user's Trusted People store when the Windows 11 native context menu option is selected.
+          Setup installs the Windows 11 native context menu support files only. FileTools settings can import the certificate into the current user's Trusted People store and register the sparse package identity when the user explicitly chooses that action.
           Verify the SHA256 hashes and GitHub artifact attestations before installing.
           "@
           Set-Content -Path $notesPath -Value $releaseNotes -Encoding utf8

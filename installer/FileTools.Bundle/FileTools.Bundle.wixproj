@@ -3,16 +3,13 @@
     <OutputName>FileToolsSetup</OutputName>
     <OutputType>Bundle</OutputType>
     <InstallerPlatform>x64</InstallerPlatform>
-    <ProductVersion>1.1.0.0</ProductVersion>
+    <ProductVersion>1.1.1.0</ProductVersion>
     <MsiPath>$(MSBuildThisFileDirectory)..\FileTools.Installer\bin\$(Configuration)\FileTools.msi</MsiPath>
     <AppIconPath>$(MSBuildThisFileDirectory)..\..\src\FileTools.App\Resources\FileToolsIcon.ico</AppIconPath>
     <SetupLogoPath>$(MSBuildThisFileDirectory)Assets\FileToolsSetupLogo.png</SetupLogoPath>
     <BundleThemePath>$(MSBuildThisFileDirectory)Assets\FileToolsTheme.xml</BundleThemePath>
     <BundleThemeLocalizationPath>$(MSBuildThisFileDirectory)Assets\FileToolsTheme.wxl</BundleThemeLocalizationPath>
-    <IdentityHelperPath>$(MSBuildThisFileDirectory)..\..\artifacts\publish\FileTools.IdentityHelper-win-x64\FileTools.IdentityHelper.exe</IdentityHelperPath>
-    <IdentityMsixPath>$(MSBuildThisFileDirectory)..\..\artifacts\identity\FileTools.Identity.msix</IdentityMsixPath>
-    <IdentityCertificatePath>$(MSBuildThisFileDirectory)..\..\artifacts\identity\FileTools.Identity.cer</IdentityCertificatePath>
-    <DefineConstants>ProductVersion=$(ProductVersion);MsiPath=$(MsiPath);AppIconPath=$(AppIconPath);SetupLogoPath=$(SetupLogoPath);BundleThemePath=$(BundleThemePath);BundleThemeLocalizationPath=$(BundleThemeLocalizationPath);IdentityHelperPath=$(IdentityHelperPath);IdentityMsixPath=$(IdentityMsixPath);IdentityCertificatePath=$(IdentityCertificatePath)</DefineConstants>
+    <DefineConstants>ProductVersion=$(ProductVersion);MsiPath=$(MsiPath);AppIconPath=$(AppIconPath);SetupLogoPath=$(SetupLogoPath);BundleThemePath=$(BundleThemePath);BundleThemeLocalizationPath=$(BundleThemeLocalizationPath)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
