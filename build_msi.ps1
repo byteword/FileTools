@@ -18,6 +18,7 @@ $identityOutputDir = Join-Path $PSScriptRoot 'artifacts\identity'
 $identityMsix = Join-Path $identityOutputDir 'FileTools.Identity.msix'
 $identityCer = Join-Path $identityOutputDir 'FileTools.Identity.cer'
 $signingOutputDir = Join-Path $PSScriptRoot 'artifacts\signing'
+$bundleSigningDir = Join-Path $signingOutputDir 'bundle'
 $signingPfx = Join-Path $signingOutputDir 'FileTools.Signing.pfx'
 $msi = Join-Path $PSScriptRoot "installer\FileTools.Installer\bin\$Configuration\FileTools.msi"
 $setup = Join-Path $PSScriptRoot "installer\FileTools.Bundle\bin\$Configuration\FileToolsSetup.exe"
@@ -70,6 +71,27 @@ function Find-WindowsSdkTool {
     }
 
     return $candidate.Tool.FullName
+}
+
+function Find-WixExe {
+    $project = [xml](Get-Content -Raw -Path $bundleProject)
+    $sdk = $project.Project.Sdk
+    $version = if ($sdk -match '^WixToolset\.Sdk/(.+)$') { $matches[1] } else { '4.0.6' }
+    $candidate = Join-Path $env:USERPROFILE ".nuget\packages\wixtoolset.sdk\$version\tools\net472\x64\wix.exe"
+    if (Test-Path $candidate) {
+        return $candidate
+    }
+
+    $candidate = Get-ChildItem -Path (Join-Path $env:USERPROFILE '.nuget\packages\wixtoolset.sdk') -Recurse -Filter wix.exe -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -match '\\tools\\net472\\x64\\wix\.exe$' } |
+        Sort-Object FullName -Descending |
+        Select-Object -First 1
+
+    if (-not $candidate) {
+        throw 'wix.exe was not found. Build the WiX project once or restore WiX Toolset SDK packages.'
+    }
+
+    return $candidate.FullName
 }
 
 function New-SigningMaterial {
@@ -152,6 +174,43 @@ function Invoke-CodeSigning {
     }
 }
 
+function Invoke-BurnBundleSigning {
+    param(
+        [Parameter(Mandatory = $true)][string] $BundlePath,
+        [Parameter(Mandatory = $true)] $SigningMaterial
+    )
+
+    $wix = Find-WixExe
+    Remove-Item $bundleSigningDir -Recurse -Force -ErrorAction SilentlyContinue
+    New-Item -ItemType Directory -Force -Path $bundleSigningDir | Out-Null
+
+    $engine = Join-Path $bundleSigningDir 'FileToolsSetup.engine.exe'
+    $signedBundle = Join-Path $bundleSigningDir 'FileToolsSetup.signed.exe'
+    $extractDir = Join-Path $bundleSigningDir 'extract'
+
+    & $wix burn detach $BundlePath -engine $engine
+    if ($LASTEXITCODE -ne 0) {
+        throw "Burn engine detach failed with exit code $LASTEXITCODE."
+    }
+
+    Invoke-CodeSigning -FilePath $engine -SigningMaterial $SigningMaterial
+
+    & $wix burn reattach $BundlePath -engine $engine -o $signedBundle
+    if ($LASTEXITCODE -ne 0) {
+        throw "Burn engine reattach failed with exit code $LASTEXITCODE."
+    }
+
+    Invoke-CodeSigning -FilePath $signedBundle -SigningMaterial $SigningMaterial
+
+    Remove-Item $BundlePath -Force
+    Move-Item -Path $signedBundle -Destination $BundlePath -Force
+
+    & $wix burn extract $BundlePath -o $extractDir
+    if ($LASTEXITCODE -ne 0) {
+        throw "Signed Burn bundle extraction failed with exit code $LASTEXITCODE."
+    }
+}
+
 if (Test-Path $msi) {
     Remove-Item $msi -Force
 }
@@ -205,7 +264,7 @@ if ($LASTEXITCODE -ne 0) {
 if (-not (Test-Path $setup)) {
     throw "Setup bootstrapper not found: $setup"
 }
-Invoke-CodeSigning -FilePath $setup -SigningMaterial $signing
+Invoke-BurnBundleSigning -BundlePath $setup -SigningMaterial $signing
 
 Write-Host "MSI created: $msi"
 Write-Host "Setup bootstrapper created: $setup"

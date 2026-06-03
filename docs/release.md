@@ -9,6 +9,11 @@ public CER is attached to the release so users can inspect or import the
 certificate, and the setup can import it automatically when the Windows 11 native
 context menu option is selected.
 
+The Burn setup bootstrapper must be signed with the WiX Burn engine
+detach/sign/reattach/sign sequence. Signing the bundle EXE directly can corrupt
+the attached container and make setup prompt for missing payload files during
+installation.
+
 This does not make FileTools a publicly trusted Windows publisher. Windows may
 still show SmartScreen or trust warnings, especially before the project builds
 reputation.

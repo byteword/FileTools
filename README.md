@@ -179,6 +179,7 @@ The MSI publishes FileTools as a framework-dependent `win-x64` single-file app a
 ```
 
 The MSI is intentionally small and requires Microsoft .NET 8 Desktop Runtime x64. Use `FileToolsSetup.exe` for normal distribution; the Burn bootstrapper detects Microsoft .NET Desktop Runtime 8.0.27 x64 and downloads it from Microsoft's official runtime endpoint when it is missing, then runs the MSI.
+The build script signs Burn bootstrapper bundles with the WiX `wix burn detach` and `wix burn reattach` flow so the signed EXE can still extract its attached MSI and identity payloads.
 When the runtime is already installed, `FileToolsSetup.exe` installs only the per-user MSI and should not require elevation. When the runtime is missing, the bootstrapper requests elevation only for the machine-wide Microsoft .NET Desktop Runtime installer, then continues with the per-user FileTools MSI.
 The bootstrapper is displayed as `FileTools` in Windows Apps and Features, while the executable file remains `FileToolsSetup.exe`.
 The bootstrapper hides the MSI wizard and shows its own setup options:
