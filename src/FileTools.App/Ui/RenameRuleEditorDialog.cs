@@ -53,12 +53,24 @@ internal sealed class RenameRuleEditorDialog : Form
     private readonly TextBox _commonPhraseBox = new();
     private readonly Label _commonPhraseStatusLabel = new();
 
+    private readonly BindingList<string> _knownTags;
+    private readonly BindingList<string> _authorPrefixes;
+    private readonly BindingList<string> _episodePrefixes;
+    private readonly BindingList<string> _episodeUnits;
+    private readonly BindingList<string> _titleNoiseWords;
+    private readonly StringListDetailEditor _knownTagsEditor;
+    private readonly StringListDetailEditor _authorPrefixesEditor;
+    private readonly StringListDetailEditor _episodePrefixesEditor;
+    private readonly StringListDetailEditor _episodeUnitsEditor;
+    private readonly StringListDetailEditor _titleNoiseWordsEditor;
+
     private List<RenameCorrectionRule> _rules;
     private bool _loading;
 
     public RenameRuleEditorDialog(
         IEnumerable<RenameCorrectionRule> rules,
-        RenameDictionaryDocument? renameDictionary = null)
+        RenameDictionaryDocument? renameDictionary = null,
+        RenameParserProfileDocument? parserProfile = null)
     {
         _rules = RenameRuleStore.NormalizeRules(rules)
             .Select(static rule => rule.Clone())
@@ -79,6 +91,17 @@ internal sealed class RenameRuleEditorDialog : Form
             .Where(static phrase => phrase.Length > 0)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList());
+        var profile = RenameParserProfileStore.Normalize(parserProfile ?? RenameParserProfileStore.Load());
+        _knownTags = new BindingList<string>(profile.KnownTags.ToList());
+        _authorPrefixes = new BindingList<string>(profile.AuthorPrefixes.ToList());
+        _episodePrefixes = new BindingList<string>(profile.EpisodePrefixes.ToList());
+        _episodeUnits = new BindingList<string>(profile.EpisodeUnits.ToList());
+        _titleNoiseWords = new BindingList<string>(profile.TitleNoiseWords.ToList());
+        _knownTagsEditor = new StringListDetailEditor(_knownTags);
+        _authorPrefixesEditor = new StringListDetailEditor(_authorPrefixes);
+        _episodePrefixesEditor = new StringListDetailEditor(_episodePrefixes);
+        _episodeUnitsEditor = new StringListDetailEditor(_episodeUnits);
+        _titleNoiseWordsEditor = new StringListDetailEditor(_titleNoiseWords);
 
         Text = Localizer.Get("DialogRenameRulesTitle");
         StartPosition = FormStartPosition.CenterParent;
@@ -114,6 +137,15 @@ internal sealed class RenameRuleEditorDialog : Form
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList()
     };
+
+    public RenameParserProfileDocument ParserProfile => RenameParserProfileStore.Normalize(new RenameParserProfileDocument
+    {
+        KnownTags = _knownTags.ToList(),
+        AuthorPrefixes = _authorPrefixes.ToList(),
+        EpisodePrefixes = _episodePrefixes.ToList(),
+        EpisodeUnits = _episodeUnits.ToList(),
+        TitleNoiseWords = _titleNoiseWords.ToList()
+    });
 
     private void BuildLayout()
     {
@@ -349,6 +381,8 @@ internal sealed class RenameRuleEditorDialog : Form
     {
         _dictionaryEntryList.SelectedIndexChanged += (_, _) => LoadSelectedDictionaryEntry();
         _commonPhraseList.SelectedIndexChanged += (_, _) => LoadSelectedCommonPhrase();
+        LoadSelectedDictionaryEntry();
+        LoadSelectedCommonPhrase();
     }
 
     private void RefreshList(RenameCorrectionRule? selected)
@@ -586,6 +620,22 @@ internal sealed class RenameRuleEditorDialog : Form
             {
                 BuildCommonPhraseDetailPanel();
             }
+            else if (rule?.Kind == RenameCorrectionRuleKind.BuiltInBracketMetadataExtraction)
+            {
+                BuildKnownTagsDetailPanel();
+            }
+            else if (rule?.Kind == RenameCorrectionRuleKind.BuiltInAuthorExtraction)
+            {
+                BuildAuthorPrefixesDetailPanel();
+            }
+            else if (rule?.Kind == RenameCorrectionRuleKind.BuiltInEpisodeExtraction)
+            {
+                BuildEpisodeDetailPanel();
+            }
+            else if (rule?.Kind == RenameCorrectionRuleKind.BuiltInTitleCleanup)
+            {
+                BuildTitleNoiseWordsDetailPanel();
+            }
             else
             {
                 BuildNoDetailPanel(rule);
@@ -647,6 +697,68 @@ internal sealed class RenameRuleEditorDialog : Form
             () => UpdateCommonPhrase(),
             DeleteCommonPhrase);
         AddDetailControl(buttons);
+    }
+
+    private void BuildKnownTagsDetailPanel()
+    {
+        AddDetailHeader(
+            Localizer.Get("RenameRuleSpecificBracketMetadataTitle"),
+            Localizer.Get("RenameRuleSpecificBracketMetadataHelp"));
+        AddDetailControl(CreateStringListEditorPanel(
+            _knownTagsEditor,
+            Localizer.Get("LabelKnownTag"),
+            Localizer.Get("RenameRuleDetailKnownTagsHelp")));
+    }
+
+    private void BuildAuthorPrefixesDetailPanel()
+    {
+        AddDetailHeader(
+            Localizer.Get("RenameRuleSpecificAuthorExtractionTitle"),
+            Localizer.Get("RenameRuleSpecificAuthorExtractionHelp"));
+        AddDetailControl(CreateStringListEditorPanel(
+            _authorPrefixesEditor,
+            Localizer.Get("LabelAuthorPrefix"),
+            Localizer.Get("RenameRuleDetailAuthorPrefixesHelp")));
+    }
+
+    private void BuildEpisodeDetailPanel()
+    {
+        AddDetailHeader(
+            Localizer.Get("RenameRuleSpecificEpisodeExtractionTitle"),
+            Localizer.Get("RenameRuleSpecificEpisodeExtractionHelp"));
+
+        var grid = new TableLayoutPanel
+        {
+            Height = 370,
+            ColumnCount = 2,
+            RowCount = 1,
+            Margin = new Padding(0, 8, 0, 10)
+        };
+        grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        grid.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        grid.Controls.Add(CreateStringListEditorPanel(
+            _episodePrefixesEditor,
+            Localizer.Get("LabelEpisodePrefix"),
+            Localizer.Get("RenameRuleDetailEpisodePrefixesHelp"),
+            new Padding(0, 0, 8, 0)), 0, 0);
+        grid.Controls.Add(CreateStringListEditorPanel(
+            _episodeUnitsEditor,
+            Localizer.Get("LabelEpisodeUnit"),
+            Localizer.Get("RenameRuleDetailEpisodeUnitsHelp"),
+            new Padding(8, 0, 0, 0)), 1, 0);
+        AddDetailControl(grid);
+    }
+
+    private void BuildTitleNoiseWordsDetailPanel()
+    {
+        AddDetailHeader(
+            Localizer.Get("RenameRuleSpecificTitleCleanupTitle"),
+            Localizer.Get("RenameRuleSpecificTitleCleanupHelp"));
+        AddDetailControl(CreateStringListEditorPanel(
+            _titleNoiseWordsEditor,
+            Localizer.Get("LabelTitleNoiseWord"),
+            Localizer.Get("RenameRuleDetailTitleNoiseWordsHelp")));
     }
 
     private void BuildNoDetailPanel(RenameCorrectionRule? rule)
@@ -734,6 +846,81 @@ internal sealed class RenameRuleEditorDialog : Form
         return buttons;
     }
 
+    private static Control CreateStringListEditorPanel(
+        StringListDetailEditor editor,
+        string valueLabel,
+        string helpText,
+        Padding? padding = null)
+    {
+        var panel = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            Height = 370,
+            ColumnCount = 1,
+            RowCount = 6,
+            Padding = padding ?? new Padding(0)
+        };
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 24));
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
+        panel.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 26));
+
+        var label = new Label
+        {
+            Dock = DockStyle.Fill,
+            Text = valueLabel,
+            Font = new Font(Control.DefaultFont, FontStyle.Bold),
+            TextAlign = ContentAlignment.MiddleLeft
+        };
+        panel.Controls.Add(label, 0, 0);
+
+        var helpLabel = new Label
+        {
+            Dock = DockStyle.Fill,
+            Text = helpText,
+            ForeColor = Color.FromArgb(75, 85, 99),
+            TextAlign = ContentAlignment.MiddleLeft
+        };
+        panel.Controls.Add(helpLabel, 0, 1);
+
+        editor.ListBox.Dock = DockStyle.Fill;
+        panel.Controls.Add(editor.ListBox, 0, 2);
+
+        var inputRow = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 2,
+            RowCount = 1,
+            Margin = new Padding(0, 8, 0, 0)
+        };
+        inputRow.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 72));
+        inputRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        inputRow.Controls.Add(new Label
+        {
+            Dock = DockStyle.Fill,
+            Text = valueLabel,
+            TextAlign = ContentAlignment.MiddleLeft
+        }, 0, 0);
+        editor.TextBox.Dock = DockStyle.Fill;
+        inputRow.Controls.Add(editor.TextBox, 1, 0);
+        panel.Controls.Add(inputRow, 0, 3);
+
+        var buttons = CreateDetailButtonRow(
+            () => editor.Add(),
+            () => editor.Update(),
+            editor.Delete);
+        buttons.Dock = DockStyle.Fill;
+        panel.Controls.Add(buttons, 0, 4);
+
+        editor.StatusLabel.Dock = DockStyle.Fill;
+        editor.StatusLabel.ForeColor = Color.FromArgb(128, 23, 23);
+        editor.StatusLabel.TextAlign = ContentAlignment.MiddleLeft;
+        panel.Controls.Add(editor.StatusLabel, 0, 5);
+        return panel;
+    }
+
     private void ResizeDetailsControls()
     {
         var width = Math.Max(240, _detailsScrollHost.ClientSize.Width - SystemInformation.VerticalScrollBarWidth - 8);
@@ -755,6 +942,11 @@ internal sealed class RenameRuleEditorDialog : Form
         {
             RenameCorrectionRuleKind.BuiltInRenameDictionary => CommitPendingDictionaryEdit(),
             RenameCorrectionRuleKind.BuiltInObfuscatedHangulCandidate => CommitPendingCommonPhraseEdit(),
+            RenameCorrectionRuleKind.BuiltInBracketMetadataExtraction => _knownTagsEditor.CommitPending(),
+            RenameCorrectionRuleKind.BuiltInAuthorExtraction => _authorPrefixesEditor.CommitPending(),
+            RenameCorrectionRuleKind.BuiltInEpisodeExtraction => _episodePrefixesEditor.CommitPending() &&
+                _episodeUnitsEditor.CommitPending(),
+            RenameCorrectionRuleKind.BuiltInTitleCleanup => _titleNoiseWordsEditor.CommitPending(),
             _ => true
         };
     }
@@ -960,6 +1152,11 @@ internal sealed class RenameRuleEditorDialog : Form
     {
         _dictionaryStatusLabel.Text = "";
         _commonPhraseStatusLabel.Text = "";
+        _knownTagsEditor.ClearStatus();
+        _authorPrefixesEditor.ClearStatus();
+        _episodePrefixesEditor.ClearStatus();
+        _episodeUnitsEditor.ClearStatus();
+        _titleNoiseWordsEditor.ClearStatus();
     }
 
     private bool CanMove(RenameCorrectionRule? rule, int direction)
@@ -1013,5 +1210,111 @@ internal sealed class RenameRuleEditorDialog : Form
     private void ClearStatus()
     {
         _statusLabel.Text = "";
+    }
+
+    private sealed class StringListDetailEditor
+    {
+        private readonly BindingList<string> _values;
+
+        public StringListDetailEditor(BindingList<string> values)
+        {
+            _values = values;
+            ListBox.DataSource = _values;
+            ListBox.SelectedIndexChanged += (_, _) => LoadSelected();
+            LoadSelected();
+        }
+
+        public ListBox ListBox { get; } = new();
+
+        public TextBox TextBox { get; } = new();
+
+        public Label StatusLabel { get; } = new();
+
+        public bool CommitPending()
+        {
+            var value = TextBox.Text.Trim();
+            if (ListBox.SelectedIndex < 0)
+            {
+                return value.Length == 0 || Add();
+            }
+
+            var current = _values[ListBox.SelectedIndex];
+            return string.Equals(current, value, StringComparison.Ordinal) || Update();
+        }
+
+        public bool Add()
+        {
+            var value = TextBox.Text.Trim();
+            if (value.Length == 0)
+            {
+                ShowStatus(Localizer.Get("EditorValueRequiredMessage"));
+                return false;
+            }
+
+            if (_values.Any(item => string.Equals(item, value, StringComparison.OrdinalIgnoreCase)))
+            {
+                ShowStatus(Localizer.Get("EditorDuplicateValueMessage"));
+                return false;
+            }
+
+            _values.Add(value);
+            ListBox.SelectedItem = value;
+            ClearStatus();
+            return true;
+        }
+
+        public bool Update()
+        {
+            if (ListBox.SelectedIndex < 0)
+            {
+                return Add();
+            }
+
+            var value = TextBox.Text.Trim();
+            if (value.Length == 0)
+            {
+                ShowStatus(Localizer.Get("EditorValueRequiredMessage"));
+                return false;
+            }
+
+            if (_values.Where((_, index) => index != ListBox.SelectedIndex)
+                .Any(item => string.Equals(item, value, StringComparison.OrdinalIgnoreCase)))
+            {
+                ShowStatus(Localizer.Get("EditorDuplicateValueMessage"));
+                return false;
+            }
+
+            var index = ListBox.SelectedIndex;
+            _values[index] = value;
+            ListBox.SelectedIndex = index;
+            ClearStatus();
+            return true;
+        }
+
+        public void Delete()
+        {
+            if (ListBox.SelectedIndex >= 0)
+            {
+                _values.RemoveAt(ListBox.SelectedIndex);
+                TextBox.Text = "";
+                ClearStatus();
+            }
+        }
+
+        public void ClearStatus()
+        {
+            StatusLabel.Text = "";
+        }
+
+        private void LoadSelected()
+        {
+            TextBox.Text = ListBox.SelectedItem as string ?? "";
+            ClearStatus();
+        }
+
+        private void ShowStatus(string message)
+        {
+            StatusLabel.Text = message;
+        }
     }
 }

@@ -494,9 +494,11 @@ internal sealed class FileToolRunner
     private KoreanFileNameCorrector CreateFileNameCorrector()
     {
         var dictionary = RenameDictionaryStore.Load();
+        var parserProfile = RenameParserProfileStore.Load();
         var rules = RenameRuleStore.Load();
         return new KoreanFileNameCorrector(new CorrectionOptions
         {
+            ParserProfile = parserProfile,
             RenameDictionary = _settings.RenameUseDictionary ? dictionary.Replacements : [],
             CommonPhrases = _settings.RenameUseDictionary ? dictionary.CommonPhrases.ToArray() : [],
             Rules = rules.Rules

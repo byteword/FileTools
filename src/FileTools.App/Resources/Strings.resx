@@ -245,6 +245,16 @@
   <data name="ButtonEditEpisodePrefixes" xml:space="preserve"><value>Edit episode prefixes...</value></data>
   <data name="ButtonEditEpisodeUnits" xml:space="preserve"><value>Edit episode units...</value></data>
   <data name="ButtonEditTitleNoiseWords" xml:space="preserve"><value>Edit title noise words...</value></data>
+  <data name="LabelKnownTag" xml:space="preserve"><value>Tag word</value></data>
+  <data name="LabelAuthorPrefix" xml:space="preserve"><value>Author prefix</value></data>
+  <data name="LabelEpisodePrefix" xml:space="preserve"><value>Episode prefix</value></data>
+  <data name="LabelEpisodeUnit" xml:space="preserve"><value>Episode unit</value></data>
+  <data name="LabelTitleNoiseWord" xml:space="preserve"><value>Noise word</value></data>
+  <data name="RenameRuleDetailKnownTagsHelp" xml:space="preserve"><value>Bracket values that match this list are extracted as tags.</value></data>
+  <data name="RenameRuleDetailAuthorPrefixesHelp" xml:space="preserve"><value>Values after these prefixes are extracted as author candidates.</value></data>
+  <data name="RenameRuleDetailEpisodePrefixesHelp" xml:space="preserve"><value>Prefixes that mark a following number as an episode.</value></data>
+  <data name="RenameRuleDetailEpisodeUnitsHelp" xml:space="preserve"><value>Units that mark a preceding number as an episode.</value></data>
+  <data name="RenameRuleDetailTitleNoiseWordsHelp" xml:space="preserve"><value>Words removed from the title after metadata extraction.</value></data>
   <data name="RenameRuleNoSpecificSettingsTitle" xml:space="preserve"><value>No details available</value></data>
   <data name="RenameRuleNoSpecificSettingsHelp" xml:space="preserve"><value>This rule does not expose additional settings yet. Use the General tab for enabled state, mode, and ordering.</value></data>
   <data name="EditorValueRequiredMessage" xml:space="preserve"><value>Enter a value before adding or updating.</value></data>

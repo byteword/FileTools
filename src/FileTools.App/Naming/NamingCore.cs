@@ -6,17 +6,7 @@ namespace FileTools;
 
 internal sealed record CorrectionOptions
 {
-    public string[] KnownTags { get; init; } =
-    [
-        "완결",
-        "번역",
-        "단편",
-        "컬러",
-        "무삭제",
-        "개정판",
-        "외전",
-        "직번"
-    ];
+    public RenameParserProfileDocument ParserProfile { get; init; } = RenameParserProfileStore.CreateDefaultDocument();
 
     public IReadOnlyList<RenameDictionaryEntry> RenameDictionary { get; init; } = [];
 
@@ -116,13 +106,28 @@ internal sealed partial class KoreanFileNameCorrector
     private readonly HashSet<string> _knownTags;
     private readonly ObfuscatedHangulCandidateGenerator _obfuscatedHangulCandidateGenerator;
     private readonly IReadOnlyList<RenameCorrectionRule> _rules;
+    private readonly Regex _episodeUnitRangeRegex;
+    private readonly Regex _episodeCompoundRegex;
+    private readonly Regex _episodeSingleRegex;
+    private readonly Regex _episodePrefixedSingleRegex;
+    private readonly Regex _authorRegex;
+    private readonly Regex _episodePrefixInsideTokenRegex;
+    private readonly Regex _titleNoiseRegex;
 
     public KoreanFileNameCorrector(CorrectionOptions? options = null)
     {
         _options = options ?? new CorrectionOptions();
-        _knownTags = new HashSet<string>(_options.KnownTags, StringComparer.OrdinalIgnoreCase);
+        var parserProfile = RenameParserProfileStore.Normalize(_options.ParserProfile);
+        _knownTags = new HashSet<string>(parserProfile.KnownTags, StringComparer.OrdinalIgnoreCase);
         _obfuscatedHangulCandidateGenerator = new ObfuscatedHangulCandidateGenerator(new KoreanLexicon(_options.CommonPhrases));
         _rules = RenameRuleStore.NormalizeRules(_options.Rules);
+        _episodeUnitRangeRegex = CreateEpisodeUnitRangeRegex(parserProfile);
+        _episodeCompoundRegex = CreateEpisodeCompoundRegex(parserProfile);
+        _episodeSingleRegex = CreateEpisodeSingleRegex(parserProfile);
+        _episodePrefixedSingleRegex = CreateEpisodePrefixedSingleRegex(parserProfile);
+        _authorRegex = CreateAuthorRegex(parserProfile);
+        _episodePrefixInsideTokenRegex = CreateEpisodePrefixInsideTokenRegex(parserProfile);
+        _titleNoiseRegex = CreateTitleNoiseRegex(parserProfile);
     }
 
     public RenamePreview CreatePreview(string path)
@@ -291,7 +296,7 @@ internal sealed partial class KoreanFileNameCorrector
         var authorRule = GetRule(RenameCorrectionRuleKind.BuiltInAuthorExtraction);
         if (IsRuleActive(authorRule))
         {
-            var authorMatch = AuthorRegex().Match(working);
+            var authorMatch = _authorRegex.Match(working);
             if (authorMatch.Success && author is null)
             {
                 var before = working;
@@ -306,8 +311,8 @@ internal sealed partial class KoreanFileNameCorrector
         var episodeRule = GetRule(RenameCorrectionRuleKind.BuiltInEpisodeExtraction);
         if (IsRuleActive(episodeRule))
         {
-            var rangeMatch = EpisodeUnitRangeRegex().Matches(working).LastOrDefault()
-                ?? EpisodeCompoundRegex().Matches(working).LastOrDefault();
+            var rangeMatch = _episodeUnitRangeRegex.Matches(working).LastOrDefault()
+                ?? _episodeCompoundRegex.Matches(working).LastOrDefault();
             if (rangeMatch is not null)
             {
                 var before = working;
@@ -318,8 +323,8 @@ internal sealed partial class KoreanFileNameCorrector
             }
             else
             {
-                var singleMatch = EpisodePrefixedSingleRegex().Matches(working).LastOrDefault()
-                    ?? EpisodeSingleRegex().Matches(working).LastOrDefault();
+                var singleMatch = _episodePrefixedSingleRegex.Matches(working).LastOrDefault()
+                    ?? _episodeSingleRegex.Matches(working).LastOrDefault();
                 if (singleMatch is not null)
                 {
                     var before = working;
@@ -667,9 +672,9 @@ internal sealed partial class KoreanFileNameCorrector
         }
     }
 
-    private static string NormalizeEpisodeToken(string value)
+    private string NormalizeEpisodeToken(string value)
     {
-        var normalized = EpisodePrefixInsideTokenRegex().Replace(value.Trim(), "$1");
+        var normalized = _episodePrefixInsideTokenRegex.Replace(value.Trim(), "$1");
         return WhitespaceRegex().Replace(normalized, "");
     }
 
@@ -684,10 +689,10 @@ internal sealed partial class KoreanFileNameCorrector
         return WhitespaceRegex().Replace(normalized, " ").Trim();
     }
 
-    private static string CleanupTitle(string value)
+    private string CleanupTitle(string value)
     {
         var title = CleanupToken(value);
-        title = TitleNoiseRegex().Replace(title, " ");
+        title = _titleNoiseRegex.Replace(title, " ");
         return WhitespaceRegex().Replace(title, " ").Trim(' ', '.', ',');
     }
 
@@ -699,29 +704,135 @@ internal sealed partial class KoreanFileNameCorrector
     [GeneratedRegex("[\\[\\(\\{]([^\\]\\)\\}]{1,80})[\\]\\)\\}]")]
     private static partial Regex BracketContentRegex();
 
-    [GeneratedRegex("(?<!\\d)(?:제|第)?\\s*(?:ep\\.?\\s*)?(?<episode>\\d{1,5}\\s*(?:화|話|회|편|권|巻|부)\\s*[-~]\\s*(?:제|第)?\\s*\\d{1,5}\\s*(?:화|話|회|편|권|巻|부))(?!\\d)", RegexOptions.IgnoreCase)]
-    private static partial Regex EpisodeUnitRangeRegex();
+    private static Regex CreateEpisodeUnitRangeRegex(RenameParserProfileDocument profile)
+    {
+        var units = BuildAlternation(profile.EpisodeUnits);
+        if (units.Length == 0)
+        {
+            return CreateNeverMatchRegex();
+        }
 
-    [GeneratedRegex("(?<!\\d)(?:제|第)?\\s*(?:ep\\.?\\s*)?(?<episode>\\d{1,5}\\s*(?:화|話|회|편|권|巻|부|ep|episode)?(?:\\s*[.-]\\s*(?:제|第)?\\s*\\d{1,5}\\s*(?:화|話|회|편|권|巻|부|ep|episode)?)+)(?!\\d)", RegexOptions.IgnoreCase)]
-    private static partial Regex EpisodeCompoundRegex();
+        var prefix = BuildOptionalEpisodePrefixPattern(profile.EpisodePrefixes);
+        return CreateConfiguredRegex(
+            $@"(?<!\d){prefix}(?<episode>\d{{1,5}}\s*(?:{units})\s*[-~]\s*{prefix}\d{{1,5}}\s*(?:{units}))(?!\d)",
+            RegexOptions.IgnoreCase);
+    }
 
-    [GeneratedRegex("(?:제|第)?\\s*(?:ep\\.?\\s*)?(?<episode>\\d{1,5}\\s*(?:화|話|회|편|권|巻|부|ep|episode))", RegexOptions.IgnoreCase)]
-    private static partial Regex EpisodeSingleRegex();
+    private static Regex CreateEpisodeCompoundRegex(RenameParserProfileDocument profile)
+    {
+        var unit = BuildOptionalUnitPattern(profile.EpisodeUnits);
+        var prefix = BuildOptionalEpisodePrefixPattern(profile.EpisodePrefixes);
+        return CreateConfiguredRegex(
+            $@"(?<!\d){prefix}(?<episode>\d{{1,5}}{unit}(?:\s*[.-]\s*{prefix}\d{{1,5}}{unit})+)(?!\d)",
+            RegexOptions.IgnoreCase);
+    }
 
-    [GeneratedRegex("(?<!\\d)(?:ep\\.?|episode\\s*)\\s*(?<episode>\\d{1,5})(?!\\d)", RegexOptions.IgnoreCase)]
-    private static partial Regex EpisodePrefixedSingleRegex();
+    private static Regex CreateEpisodeSingleRegex(RenameParserProfileDocument profile)
+    {
+        var units = BuildAlternation(profile.EpisodeUnits);
+        if (units.Length == 0)
+        {
+            return CreateNeverMatchRegex();
+        }
 
-    [GeneratedRegex("(?:작가|저자|by)\\s*[:：-]?\\s*(?<author>[가-힣A-Za-z0-9_. ]{2,40})", RegexOptions.IgnoreCase)]
-    private static partial Regex AuthorRegex();
+        var prefix = BuildOptionalEpisodePrefixPattern(profile.EpisodePrefixes);
+        return CreateConfiguredRegex(
+            $@"{prefix}(?<episode>\d{{1,5}}\s*(?:{units}))",
+            RegexOptions.IgnoreCase);
+    }
+
+    private static Regex CreateEpisodePrefixedSingleRegex(RenameParserProfileDocument profile)
+    {
+        var prefixes = BuildAlternation(profile.EpisodePrefixes.Where(ContainsAsciiLetter), allowOptionalDotForAscii: true);
+        if (prefixes.Length == 0)
+        {
+            return CreateNeverMatchRegex();
+        }
+
+        return CreateConfiguredRegex(
+            $@"(?<!\d)(?:{prefixes})\s*(?<episode>\d{{1,5}})(?!\d)",
+            RegexOptions.IgnoreCase);
+    }
+
+    private static Regex CreateAuthorRegex(RenameParserProfileDocument profile)
+    {
+        var prefixes = BuildAlternation(profile.AuthorPrefixes);
+        if (prefixes.Length == 0)
+        {
+            return CreateNeverMatchRegex();
+        }
+
+        return CreateConfiguredRegex(
+            $@"(?:{prefixes})\s*[:：-]?\s*(?<author>[가-힣A-Za-z0-9_. ]{{2,40}})",
+            RegexOptions.IgnoreCase);
+    }
 
     [GeneratedRegex("\\s+")]
     private static partial Regex WhitespaceRegex();
 
-    [GeneratedRegex("(^|[.-])(?:제|第)\\s*")]
-    private static partial Regex EpisodePrefixInsideTokenRegex();
+    private static Regex CreateEpisodePrefixInsideTokenRegex(RenameParserProfileDocument profile)
+    {
+        var prefixes = BuildAlternation(profile.EpisodePrefixes.Where(static prefix => !ContainsAsciiLetter(prefix)));
+        if (prefixes.Length == 0)
+        {
+            return CreateNeverMatchRegex();
+        }
 
-    [GeneratedRegex("\\b(?:완결|번역|단편|컬러|무삭제|개정판|외전)\\b", RegexOptions.IgnoreCase)]
-    private static partial Regex TitleNoiseRegex();
+        return CreateConfiguredRegex($@"(^|[.-])(?:{prefixes})\s*", RegexOptions.IgnoreCase);
+    }
+
+    private static Regex CreateTitleNoiseRegex(RenameParserProfileDocument profile)
+    {
+        var words = BuildAlternation(profile.TitleNoiseWords);
+        if (words.Length == 0)
+        {
+            return CreateNeverMatchRegex();
+        }
+
+        return CreateConfiguredRegex($@"(?<![\p{{L}}\p{{N}}_])(?:{words})(?![\p{{L}}\p{{N}}_])", RegexOptions.IgnoreCase);
+    }
+
+    private static string BuildOptionalEpisodePrefixPattern(IEnumerable<string> prefixes)
+    {
+        var pattern = BuildAlternation(prefixes, allowOptionalDotForAscii: true);
+        return pattern.Length == 0 ? "" : $@"(?:(?:{pattern})\s*)?";
+    }
+
+    private static string BuildOptionalUnitPattern(IEnumerable<string> units)
+    {
+        var pattern = BuildAlternation(units);
+        return pattern.Length == 0 ? "" : $@"\s*(?:{pattern})?";
+    }
+
+    private static string BuildAlternation(IEnumerable<string> values, bool allowOptionalDotForAscii = false)
+    {
+        return string.Join("|", values
+            .Select(static value => value.Trim())
+            .Where(static value => value.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(static value => value.Length)
+            .Select(value => Regex.Escape(value) + (allowOptionalDotForAscii && IsAsciiLetters(value) ? @"\.?" : "")));
+    }
+
+    private static bool IsAsciiLetters(string value)
+    {
+        return value.All(static ch => ch is >= 'A' and <= 'Z' or >= 'a' and <= 'z');
+    }
+
+    private static bool ContainsAsciiLetter(string value)
+    {
+        return value.Any(static ch => ch is >= 'A' and <= 'Z' or >= 'a' and <= 'z');
+    }
+
+    private static Regex CreateConfiguredRegex(string pattern, RegexOptions options = RegexOptions.None)
+    {
+        return new Regex(pattern, RegexOptions.Compiled | options);
+    }
+
+    private static Regex CreateNeverMatchRegex()
+    {
+        return CreateConfiguredRegex("(?!)");
+    }
 }
 
 internal sealed class RenamePlanner

@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820">
+  <defs>
+    <style>
+      .bg { fill: #f4f6f8; }
+      .window { fill: #ffffff; stroke: #c8d0d9; stroke-width: 1.5; }
+      .titlebar { fill: #edf1f5; stroke: #c8d0d9; stroke-width: 1; }
+      .panel { fill: #ffffff; stroke: #d5dce4; stroke-width: 1; }
+      .panel-soft { fill: #f8fafc; stroke: #d5dce4; stroke-width: 1; }
+      .tab { fill: #e9eef4; stroke: #c8d0d9; stroke-width: 1; }
+      .tab-active { fill: #ffffff; stroke: #c8d0d9; stroke-width: 1; }
+      .selected { fill: #e6f1ff; stroke: #6aa5e8; stroke-width: 1.4; }
+      .field { fill: #ffffff; stroke: #bfc8d2; stroke-width: 1; }
+      .button { fill: #eef2f6; stroke: #b8c2cc; stroke-width: 1; }
+      .primary { fill: #2d6cdf; stroke: #1f55b7; stroke-width: 1; }
+      .muted { fill: #eef2f6; stroke: #c8d0d9; stroke-width: 1; }
+      .line { stroke: #d0d7df; stroke-width: 1; }
+      .text { font-family: "Malgun Gothic", "Segoe UI", sans-serif; fill: #1f2933; font-size: 16px; }
+      .small { font-family: "Malgun Gothic", "Segoe UI", sans-serif; fill: #4b5563; font-size: 13px; }
+      .tiny { font-family: "Malgun Gothic", "Segoe UI", sans-serif; fill: #64748b; font-size: 12px; }
+      .title { font-family: "Malgun Gothic", "Segoe UI", sans-serif; fill: #111827; font-size: 20px; font-weight: 700; }
+      .section { font-family: "Malgun Gothic", "Segoe UI", sans-serif; fill: #111827; font-size: 15px; font-weight: 700; }
+      .buttonText { font-family: "Malgun Gothic", "Segoe UI", sans-serif; fill: #1f2933; font-size: 13px; }
+      .primaryText { font-family: "Malgun Gothic", "Segoe UI", sans-serif; fill: #ffffff; font-size: 13px; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1200" height="820"/>
+
+  <rect class="window" x="40" y="36" width="1120" height="744" rx="8"/>
+  <rect class="titlebar" x="40" y="36" width="1120" height="48" rx="8"/>
+  <text class="title" x="64" y="67">보정 규칙 편집 - 파서 프로파일 설정 레이아웃</text>
+  <text class="small" x="804" y="66">선택 규칙에 따라 세부 설정 탭이 동적으로 전환됨</text>
+
+  <rect class="panel-soft" x="64" y="112" width="300" height="596" rx="6"/>
+  <text class="section" x="84" y="140">규칙 목록</text>
+  <rect class="field" x="84" y="156" width="260" height="36" rx="4"/>
+  <text class="small" x="98" y="179">유니코드/자모 정규화</text>
+  <rect class="field" x="84" y="198" width="260" height="36" rx="4"/>
+  <text class="small" x="98" y="221">기존 이름변경 사전 적용</text>
+  <rect class="field" x="84" y="240" width="260" height="36" rx="4"/>
+  <text class="small" x="98" y="263">왜곡 한글 후보 생성</text>
+  <rect class="selected" x="84" y="282" width="260" height="44" rx="4"/>
+  <text class="small" x="98" y="307">괄호 태그/작가 추출</text>
+  <rect class="field" x="84" y="334" width="260" height="44" rx="4"/>
+  <text class="small" x="98" y="359">작가 표기 추출</text>
+  <rect class="field" x="84" y="386" width="260" height="44" rx="4"/>
+  <text class="small" x="98" y="411">회차 추출/정규화</text>
+  <rect class="field" x="84" y="438" width="260" height="44" rx="4"/>
+  <text class="small" x="98" y="463">제목 노이즈 정리</text>
+  <rect class="field" x="84" y="490" width="260" height="44" rx="4"/>
+  <text class="small" x="98" y="515">Windows 파일명 안전화</text>
+  <line class="line" x1="84" y1="560" x2="344" y2="560"/>
+  <rect class="button" x="84" y="580" width="76" height="32" rx="4"/>
+  <text class="buttonText" x="109" y="601">추가</text>
+  <rect class="button" x="168" y="580" width="76" height="32" rx="4"/>
+  <text class="buttonText" x="193" y="601">삭제</text>
+  <rect class="button" x="252" y="580" width="92" height="32" rx="4"/>
+  <text class="buttonText" x="277" y="601">위/아래</text>
+
+  <rect class="panel" x="392" y="112" width="764" height="596" rx="6"/>
+  <rect class="tab" x="416" y="132" width="110" height="38" rx="5"/>
+  <text class="buttonText" x="453" y="156">일반</text>
+  <rect class="tab-active" x="526" y="132" width="126" height="38" rx="5"/>
+  <text class="buttonText" x="563" y="156">세부 설정</text>
+  <line class="line" x1="416" y1="170" x2="1132" y2="170"/>
+
+  <text class="title" x="420" y="210">괄호 태그/작가 추출</text>
+  <text class="small" x="420" y="235">괄호 안 문자열을 태그로 볼지 작가 후보로 볼지 판단하는 단어 목록입니다.</text>
+  <text class="tiny" x="420" y="255">정규식 전체는 열지 않고 단어 목록만 저장합니다. 저장 파일: rename-parser-profile.json</text>
+
+  <rect class="panel-soft" x="420" y="282" width="342" height="270" rx="6"/>
+  <text class="section" x="438" y="310">태그 단어</text>
+  <rect class="field" x="438" y="326" width="306" height="122" rx="4"/>
+  <text class="small" x="456" y="352">완결</text>
+  <text class="small" x="456" y="378">번역</text>
+  <text class="small" x="456" y="404">단편</text>
+  <text class="small" x="456" y="430">직번</text>
+  <text class="small" x="438" y="474">단어</text>
+  <rect class="field" x="482" y="456" width="262" height="32" rx="4"/>
+  <rect class="button" x="438" y="504" width="80" height="30" rx="4"/>
+  <text class="buttonText" x="461" y="524">추가</text>
+  <rect class="button" x="528" y="504" width="80" height="30" rx="4"/>
+  <text class="buttonText" x="551" y="524">수정</text>
+  <rect class="button" x="618" y="504" width="80" height="30" rx="4"/>
+  <text class="buttonText" x="641" y="524">삭제</text>
+
+  <rect class="panel-soft" x="786" y="282" width="342" height="270" rx="6"/>
+  <text class="section" x="804" y="310">다른 규칙 선택 시 같은 영역 전환</text>
+  <rect class="muted" x="804" y="330" width="306" height="38" rx="4"/>
+  <text class="small" x="820" y="354">작가 표기 추출 → 작가 접두어</text>
+  <rect class="muted" x="804" y="378" width="306" height="62" rx="4"/>
+  <text class="small" x="820" y="403">회차 추출/정규화 →</text>
+  <text class="small" x="820" y="425">회차 접두어 + 회차 단위</text>
+  <rect class="muted" x="804" y="450" width="306" height="38" rx="4"/>
+  <text class="small" x="820" y="474">제목 노이즈 정리 → 노이즈 단어</text>
+  <rect class="muted" x="804" y="498" width="306" height="34" rx="4"/>
+  <text class="tiny" x="820" y="520">각 목록은 중복 제거, trim, 빈 값 차단</text>
+
+  <rect class="panel-soft" x="420" y="574" width="708" height="84" rx="6"/>
+  <text class="section" x="438" y="604">회차 추출/정규화 선택 시 상세 배치</text>
+  <rect class="field" x="438" y="620" width="260" height="32" rx="4"/>
+  <text class="tiny" x="452" y="641">회차 접두어: 제, 第, ep, episode</text>
+  <rect class="field" x="716" y="620" width="260" height="32" rx="4"/>
+  <text class="tiny" x="730" y="641">회차 단위: 화, 話, 회, 편, 권, 巻, 부, ep</text>
+  <text class="tiny" x="990" y="640">OK에서 함께 저장</text>
+
+  <rect class="button" x="920" y="728" width="80" height="32" rx="4"/>
+  <text class="buttonText" x="943" y="749">OK</text>
+  <rect class="button" x="1010" y="728" width="80" height="32" rx="4"/>
+  <text class="buttonText" x="1030" y="749">취소</text>
+</svg>

@@ -245,6 +245,16 @@
   <data name="ButtonEditEpisodePrefixes" xml:space="preserve"><value>회차 접두어 편집...</value></data>
   <data name="ButtonEditEpisodeUnits" xml:space="preserve"><value>회차 단위 편집...</value></data>
   <data name="ButtonEditTitleNoiseWords" xml:space="preserve"><value>제목 노이즈 단어 편집...</value></data>
+  <data name="LabelKnownTag" xml:space="preserve"><value>태그 단어</value></data>
+  <data name="LabelAuthorPrefix" xml:space="preserve"><value>작가 접두어</value></data>
+  <data name="LabelEpisodePrefix" xml:space="preserve"><value>회차 접두어</value></data>
+  <data name="LabelEpisodeUnit" xml:space="preserve"><value>회차 단위</value></data>
+  <data name="LabelTitleNoiseWord" xml:space="preserve"><value>노이즈 단어</value></data>
+  <data name="RenameRuleDetailKnownTagsHelp" xml:space="preserve"><value>괄호 안 값이 이 목록과 일치하면 태그로 분리합니다.</value></data>
+  <data name="RenameRuleDetailAuthorPrefixesHelp" xml:space="preserve"><value>이 접두어 뒤의 값을 작가 후보로 추출합니다.</value></data>
+  <data name="RenameRuleDetailEpisodePrefixesHelp" xml:space="preserve"><value>숫자 앞에서 회차 표기를 알리는 접두어입니다.</value></data>
+  <data name="RenameRuleDetailEpisodeUnitsHelp" xml:space="preserve"><value>숫자 뒤에서 회차 표기를 알리는 단위입니다.</value></data>
+  <data name="RenameRuleDetailTitleNoiseWordsHelp" xml:space="preserve"><value>추출 후 제목에 남으면 제거할 단어입니다.</value></data>
   <data name="RenameRuleNoSpecificSettingsTitle" xml:space="preserve"><value>추가 설정 없음</value></data>
   <data name="RenameRuleNoSpecificSettingsHelp" xml:space="preserve"><value>이 규칙은 아직 추가 설정을 제공하지 않습니다. 활성 상태, 적용 방식, 순서는 일반 탭에서 조정합니다.</value></data>
   <data name="EditorValueRequiredMessage" xml:space="preserve"><value>추가하거나 수정할 값을 입력하세요.</value></data>
