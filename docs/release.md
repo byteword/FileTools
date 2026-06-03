@@ -26,6 +26,8 @@ Repository prerequisites:
 - The repository must be public when using GitHub Free, Pro, or Team artifact
   attestations.
 - GitHub Actions must be enabled for the repository.
+- The release workflow currently uses the `windows-2025-vs2026` hosted runner
+  because `FileTools.ShellExt` targets the MSVC `v145` platform toolset.
 - The workflow declares `contents: write`, `id-token: write`, and
   `attestations: write` permissions.
 - `FILETOOLS_SIGNING_PFX_BASE64` and `FILETOOLS_SIGNING_PASSWORD` must be set in
