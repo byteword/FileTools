@@ -113,6 +113,21 @@ internal interface IArchiveMergeQuestionSink
     ArchiveMergeDuplicateContentDecision ResolveDuplicateContent(ArchiveMergeDuplicateContentQuestion question);
 }
 
+internal interface IArchiveMergeFileSystem
+{
+    void CreateDirectory(string path);
+
+    bool FileExists(string path);
+
+    bool DirectoryExists(string path);
+
+    string CreateTempArchivePath(string outputDirectory);
+
+    void MoveFile(string sourcePath, string destinationPath);
+
+    void DeleteFileIfExists(string path);
+}
+
 internal enum ArchiveMergeNameCollisionDecision
 {
     AutoNumberCurrent,
@@ -214,6 +229,23 @@ internal static class ArchiveMergeOperations
         IProgress<string>? progress = null,
         IArchiveMergeQuestionSink? questionSink = null)
     {
+        return Merge(
+            options,
+            cancellationToken,
+            PhysicalArchiveMergeFileSystem.Instance,
+            progress,
+            questionSink);
+    }
+
+    internal static OperationResult Merge(
+        ArchiveMergeOptions options,
+        CancellationToken cancellationToken,
+        IArchiveMergeFileSystem fileSystem,
+        IProgress<string>? progress = null,
+        IArchiveMergeQuestionSink? questionSink = null)
+    {
+        ArgumentNullException.ThrowIfNull(fileSystem);
+
         var result = new OperationResult();
         var sourcePaths = NormalizeArchivePaths(options.SourcePaths);
         foreach (var sourcePath in sourcePaths)
@@ -247,13 +279,15 @@ internal static class ArchiveMergeOperations
             return result;
         }
 
-        Directory.CreateDirectory(outputDirectory);
-        outputPath = ResolveOutputCollision(outputPath, sourcePaths);
-        var tempPath = Path.Combine(outputDirectory, ".FileTools.Merge.tmp-" + Guid.NewGuid().ToString("N") + ".zip");
+        string? tempPath = null;
         var states = new List<SourceArchiveState>();
 
         try
         {
+            fileSystem.CreateDirectory(outputDirectory);
+            outputPath = ResolveOutputCollision(outputPath, sourcePaths, fileSystem);
+            tempPath = fileSystem.CreateTempArchivePath(outputDirectory);
+
             progress?.Report(Localizer.Get("ArchiveMergeProgressValidateSources"));
             foreach (var sourcePath in sourcePaths)
             {
@@ -313,7 +347,7 @@ internal static class ArchiveMergeOperations
             VerifyOutputArchive(tempPath, writePlans.Length);
 
             progress?.Report(Localizer.Get("ArchiveMergeProgressMoveFinal"));
-            File.Move(tempPath, outputPath);
+            fileSystem.MoveFile(tempPath, outputPath);
 
             var writtenCount = writePlans.Count(static plan => !plan.Entry.IsDirectory);
             var directoryCount = writePlans.Count(static plan => plan.Entry.IsDirectory);
@@ -340,7 +374,10 @@ internal static class ArchiveMergeOperations
         }
         finally
         {
-            TryDeleteFile(tempPath);
+            if (!string.IsNullOrWhiteSpace(tempPath))
+            {
+                TryDeleteFile(tempPath, fileSystem);
+            }
         }
 
         return result;
@@ -817,10 +854,20 @@ internal static class ArchiveMergeOperations
 
     private static string ResolveOutputCollision(string outputPath, IReadOnlyList<string> sourcePaths)
     {
+        return ResolveOutputCollision(outputPath, sourcePaths, PhysicalArchiveMergeFileSystem.Instance);
+    }
+
+    private static string ResolveOutputCollision(
+        string outputPath,
+        IReadOnlyList<string> sourcePaths,
+        IArchiveMergeFileSystem fileSystem)
+    {
         var directory = Path.GetDirectoryName(outputPath) ?? "";
         var desiredName = Path.GetFileName(outputPath);
         var used = sourcePaths.Select(Path.GetFullPath).ToHashSet(PathComparer);
-        if (!File.Exists(outputPath) && !Directory.Exists(outputPath) && !used.Contains(Path.GetFullPath(outputPath)))
+        if (!fileSystem.FileExists(outputPath) &&
+            !fileSystem.DirectoryExists(outputPath) &&
+            !used.Contains(Path.GetFullPath(outputPath)))
         {
             return outputPath;
         }
@@ -830,7 +877,9 @@ internal static class ArchiveMergeOperations
         for (var index = 2; index < 10_000; index++)
         {
             var candidate = Path.Combine(directory, $"{stem} ({index}){extension}");
-            if (!File.Exists(candidate) && !Directory.Exists(candidate) && !used.Contains(Path.GetFullPath(candidate)))
+            if (!fileSystem.FileExists(candidate) &&
+                !fileSystem.DirectoryExists(candidate) &&
+                !used.Contains(Path.GetFullPath(candidate)))
             {
                 return candidate;
             }
@@ -984,14 +1033,11 @@ internal static class ArchiveMergeOperations
         return index < 0 ? normalized : normalized[(index + 1)..];
     }
 
-    private static void TryDeleteFile(string path)
+    private static void TryDeleteFile(string path, IArchiveMergeFileSystem fileSystem)
     {
         try
         {
-            if (File.Exists(path))
-            {
-                File.Delete(path);
-            }
+            fileSystem.DeleteFileIfExists(path);
         }
         catch
         {
@@ -1057,6 +1103,48 @@ internal static class ArchiveMergeOperations
                 Size: 0,
                 new ArchiveEntryMetadata(DateTime.Now, DateTime.Now, DateTime.Now, Archived: null, 0, ExtraData: null, Comment: null));
             return new EntryMergePlan(state.SourcePath, entry, targetPath);
+        }
+    }
+}
+
+internal sealed class PhysicalArchiveMergeFileSystem : IArchiveMergeFileSystem
+{
+    public static PhysicalArchiveMergeFileSystem Instance { get; } = new();
+
+    private PhysicalArchiveMergeFileSystem()
+    {
+    }
+
+    public void CreateDirectory(string path)
+    {
+        Directory.CreateDirectory(path);
+    }
+
+    public bool FileExists(string path)
+    {
+        return File.Exists(path);
+    }
+
+    public bool DirectoryExists(string path)
+    {
+        return Directory.Exists(path);
+    }
+
+    public string CreateTempArchivePath(string outputDirectory)
+    {
+        return Path.Combine(outputDirectory, ".FileTools.Merge.tmp-" + Guid.NewGuid().ToString("N") + ".zip");
+    }
+
+    public void MoveFile(string sourcePath, string destinationPath)
+    {
+        File.Move(sourcePath, destinationPath);
+    }
+
+    public void DeleteFileIfExists(string path)
+    {
+        if (File.Exists(path))
+        {
+            File.Delete(path);
         }
     }
 }

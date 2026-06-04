@@ -167,7 +167,7 @@ src\FileTools.App\bin\Release\net8.0-windows\win-x64\publish\FileTools.exe
 
 ### 테스트
 
-자동 테스트는 `tests\FileTools.Tests`에 있습니다. 현재 회귀 범위는 ZIP 병합의 엔트리 메타데이터 보존, 열 수 없는 ZIP 건너뛰기, 손상 엔트리 건너뛰기, 출력 경로 파일시스템 실패입니다. 테스트 프로젝트는 본 프로그램 소스를 테스트용으로 변경하지 않고 앱 어셈블리를 참조한 뒤 reflection으로 내부 병합 API를 호출합니다.
+자동 테스트는 `tests\FileTools.Tests`에 있습니다. 현재 회귀 범위는 ZIP 병합의 엔트리 메타데이터 보존, 열 수 없는 ZIP 건너뛰기, 손상 엔트리 건너뛰기, 출력 부모 경로 실패, 최종 이동 실패 후 임시 ZIP 정리입니다. 테스트 프로젝트는 `InternalsVisibleTo`로 내부 병합 API에 접근하며, 출력 파일시스템 오류는 내부 `IArchiveMergeFileSystem` 어댑터로 주입합니다.
 
 ```powershell
 dotnet test .\tests\FileTools.Tests\FileTools.Tests.csproj
@@ -527,7 +527,7 @@ src\FileTools.App\bin\Release\net8.0-windows\win-x64\publish\FileTools.exe
 
 ### Tests
 
-Automated tests live in `tests\FileTools.Tests`. The current regression scope covers ZIP merge entry metadata preservation, unreadable ZIP skipping, corrupt-entry skipping, and output-path filesystem failures. The test project does not change the app source for test access; it references the app assembly and calls the internal merge API through reflection.
+Automated tests live in `tests\FileTools.Tests`. The current regression scope covers ZIP merge entry metadata preservation, unreadable ZIP skipping, corrupt-entry skipping, output parent path failures, and temp ZIP cleanup after final move failures. The test project uses `InternalsVisibleTo` for the internal merge API, and output filesystem errors are injected through the internal `IArchiveMergeFileSystem` adapter.
 
 ```powershell
 dotnet test .\tests\FileTools.Tests\FileTools.Tests.csproj
