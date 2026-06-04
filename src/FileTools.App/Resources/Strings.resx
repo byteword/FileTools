@@ -87,6 +87,7 @@
   <data name="ButtonAddFolder" xml:space="preserve"><value>Add folder</value></data>
   <data name="ButtonRemoveSelected" xml:space="preserve"><value>Remove selected</value></data>
   <data name="ButtonClear" xml:space="preserve"><value>Clear</value></data>
+  <data name="ButtonMergeSelectedTargets" xml:space="preserve"><value>Merge selected into folder</value></data>
   <data name="GroupFolderStructure" xml:space="preserve"><value>Folder wrapping / unwrapping</value></data>
   <data name="GroupContextMenu" xml:space="preserve"><value>ContextMenu</value></data>
   <data name="CheckRegisterContextMenu" xml:space="preserve"><value>Register Explorer ContextMenu</value></data>
@@ -375,6 +376,7 @@
   <data name="ToolTipClearTargets" xml:space="preserve"><value>Clear the target list.</value></data>
   <data name="ToolTipMoveTargetUp" xml:space="preserve"><value>Move selected targets up.</value></data>
   <data name="ToolTipMoveTargetDown" xml:space="preserve"><value>Move selected targets down.</value></data>
+  <data name="ToolTipMergeSelectedTargets" xml:space="preserve"><value>Move selected files and folders into one generated folder.</value></data>
   <data name="ToolTipAddRename" xml:space="preserve"><value>Add a rename action to selected targets.</value></data>
   <data name="ToolTipAddWrap" xml:space="preserve"><value>Add a folder wrapping action to selected file targets.</value></data>
   <data name="ToolTipAddUnwrap" xml:space="preserve"><value>Add a folder unwrapping action to selected folder targets.</value></data>
@@ -438,4 +440,14 @@
   <data name="NameTemplatePreviewUnwrapFormat" xml:space="preserve"><value>Unwrap mismatch: FolderA\Image01.jpg -> {0}</value></data>
   <data name="NameTemplatePreviewConflictFormat" xml:space="preserve"><value>Conflict ({0}): Book.zip -> {1}</value></data>
   <data name="NameTemplateValidationFailedFormat" xml:space="preserve"><value>{0} is invalid: {1}</value></data>
+  <data name="DefaultMergeFolderName" xml:space="preserve"><value>Merged</value></data>
+  <data name="FolderMergeNeedsMultipleTargets" xml:space="preserve"><value>Select two or more existing targets to merge.</value></data>
+  <data name="FolderMergePlannedStepsMessage" xml:space="preserve"><value>Merge selected targets only after clearing their planned steps.</value></data>
+  <data name="FolderMergeConfirmFormat" xml:space="preserve"><value>Merge {0} selected targets into:&#x0D;&#x0A;{1}</value></data>
+  <data name="FolderMergeCompletedFormat" xml:space="preserve"><value>Merge completed: {0} | applied {1}, skipped {2}, errors {3}.</value></data>
+  <data name="FolderMergeSameAsTargetFolderFormat" xml:space="preserve"><value>{0} is the target folder</value></data>
+  <data name="FolderMergeSourceMissingFormat" xml:space="preserve"><value>{0} source does not exist</value></data>
+  <data name="FolderMergeFileNameCollisionFormat" xml:space="preserve"><value>{0} target file name collision</value></data>
+  <data name="FolderMergeSourceContainsTargetFormat" xml:space="preserve"><value>{0} cannot merge into its own child path</value></data>
+  <data name="FolderMergeFolderNameCollisionFormat" xml:space="preserve"><value>{0} target folder name collision</value></data>
 </root>

@@ -12,6 +12,7 @@ partial class MainForm
     private ToolStripMenuItem _addFolderMenuItem = null!;
     private ToolStripMenuItem _removeTargetMenuItem = null!;
     private ToolStripMenuItem _clearTargetsMenuItem = null!;
+    private ToolStripMenuItem _mergeSelectedMenuItem = null!;
     private ToolStripMenuItem _taskMenuItem = null!;
     private ToolStripMenuItem _addRenameMenuItem = null!;
     private ToolStripMenuItem _addWrapMenuItem = null!;
@@ -37,6 +38,7 @@ partial class MainForm
     private ToolStripButton _removeTargetToolButton = null!;
     private ToolStripButton _moveTargetUpToolButton = null!;
     private ToolStripButton _moveTargetDownToolButton = null!;
+    private ToolStripButton _mergeSelectedToolButton = null!;
     private ToolStripButton _clearTargetsToolButton = null!;
     private Panel _rightPanel = null!;
     private ToolStrip _actionToolStrip = null!;
@@ -79,6 +81,7 @@ partial class MainForm
         _addFolderMenuItem = new ToolStripMenuItem();
         _removeTargetMenuItem = new ToolStripMenuItem();
         _clearTargetsMenuItem = new ToolStripMenuItem();
+        _mergeSelectedMenuItem = new ToolStripMenuItem();
         _taskMenuItem = new ToolStripMenuItem();
         _addRenameMenuItem = new ToolStripMenuItem();
         _addWrapMenuItem = new ToolStripMenuItem();
@@ -104,6 +107,7 @@ partial class MainForm
         _removeTargetToolButton = new ToolStripButton();
         _moveTargetUpToolButton = new ToolStripButton();
         _moveTargetDownToolButton = new ToolStripButton();
+        _mergeSelectedToolButton = new ToolStripButton();
         _clearTargetsToolButton = new ToolStripButton();
         _rightPanel = new Panel();
         _actionToolStrip = new ToolStrip();
@@ -158,6 +162,7 @@ partial class MainForm
             _addFolderMenuItem,
             new ToolStripSeparator(),
             _removeTargetMenuItem,
+            _mergeSelectedMenuItem,
             _clearTargetsMenuItem
         });
         _fileMenuItem.Name = "_fileMenuItem";
@@ -174,6 +179,9 @@ partial class MainForm
 
         _clearTargetsMenuItem.Name = "_clearTargetsMenuItem";
         _clearTargetsMenuItem.Text = "Clear";
+
+        _mergeSelectedMenuItem.Name = "_mergeSelectedMenuItem";
+        _mergeSelectedMenuItem.Text = "Merge selected into folder";
 
         _taskMenuItem.DropDownItems.AddRange(new ToolStripItem[]
         {
@@ -281,6 +289,7 @@ partial class MainForm
             _moveTargetUpToolButton,
             _moveTargetDownToolButton,
             new ToolStripSeparator(),
+            _mergeSelectedToolButton,
             _clearTargetsToolButton
         });
         _targetToolStrip.Name = "_targetToolStrip";
@@ -317,6 +326,11 @@ partial class MainForm
         _moveTargetDownToolButton.ImageTransparentColor = Color.Magenta;
         _moveTargetDownToolButton.Name = "_moveTargetDownToolButton";
         _moveTargetDownToolButton.Text = "Down";
+
+        _mergeSelectedToolButton.DisplayStyle = ToolStripItemDisplayStyle.Image;
+        _mergeSelectedToolButton.ImageTransparentColor = Color.Magenta;
+        _mergeSelectedToolButton.Name = "_mergeSelectedToolButton";
+        _mergeSelectedToolButton.Text = "Merge";
 
         _clearTargetsToolButton.DisplayStyle = ToolStripItemDisplayStyle.Image;
         _clearTargetsToolButton.ImageTransparentColor = Color.Magenta;

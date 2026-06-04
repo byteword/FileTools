@@ -87,6 +87,7 @@
   <data name="ButtonAddFolder" xml:space="preserve"><value>폴더 추가</value></data>
   <data name="ButtonRemoveSelected" xml:space="preserve"><value>선택 제거</value></data>
   <data name="ButtonClear" xml:space="preserve"><value>비우기</value></data>
+  <data name="ButtonMergeSelectedTargets" xml:space="preserve"><value>선택 항목을 폴더로 병합</value></data>
   <data name="GroupFolderStructure" xml:space="preserve"><value>폴더 wrapping / unwrapping</value></data>
   <data name="GroupContextMenu" xml:space="preserve"><value>ContextMenu</value></data>
   <data name="CheckRegisterContextMenu" xml:space="preserve"><value>Explorer ContextMenu 등록</value></data>
@@ -375,6 +376,7 @@
   <data name="ToolTipClearTargets" xml:space="preserve"><value>대상 목록을 비웁니다.</value></data>
   <data name="ToolTipMoveTargetUp" xml:space="preserve"><value>선택한 대상을 위로 이동합니다.</value></data>
   <data name="ToolTipMoveTargetDown" xml:space="preserve"><value>선택한 대상을 아래로 이동합니다.</value></data>
+  <data name="ToolTipMergeSelectedTargets" xml:space="preserve"><value>선택한 파일과 폴더를 생성된 하나의 폴더로 이동합니다.</value></data>
   <data name="ToolTipAddRename" xml:space="preserve"><value>선택한 대상에 이름변경 작업을 추가합니다.</value></data>
   <data name="ToolTipAddWrap" xml:space="preserve"><value>선택한 파일 대상에 폴더 감싸기 작업을 추가합니다.</value></data>
   <data name="ToolTipAddUnwrap" xml:space="preserve"><value>선택한 폴더 대상에 폴더 벗기기 작업을 추가합니다.</value></data>
@@ -438,4 +440,14 @@
   <data name="NameTemplatePreviewUnwrapFormat" xml:space="preserve"><value>unwrap 불일치: FolderA\Image01.jpg -> {0}</value></data>
   <data name="NameTemplatePreviewConflictFormat" xml:space="preserve"><value>충돌({0}): Book.zip -> {1}</value></data>
   <data name="NameTemplateValidationFailedFormat" xml:space="preserve"><value>{0}이(가) 올바르지 않습니다: {1}</value></data>
+  <data name="DefaultMergeFolderName" xml:space="preserve"><value>Merged</value></data>
+  <data name="FolderMergeNeedsMultipleTargets" xml:space="preserve"><value>병합할 기존 대상 2개 이상을 선택하세요.</value></data>
+  <data name="FolderMergePlannedStepsMessage" xml:space="preserve"><value>선택 대상의 플랜 단계를 먼저 비운 뒤 병합하세요.</value></data>
+  <data name="FolderMergeConfirmFormat" xml:space="preserve"><value>선택 항목 {0}개를 다음 폴더로 병합합니다:&#x0D;&#x0A;{1}</value></data>
+  <data name="FolderMergeCompletedFormat" xml:space="preserve"><value>병합 완료: {0} | 적용 {1}, 건너뜀 {2}, 오류 {3}.</value></data>
+  <data name="FolderMergeSameAsTargetFolderFormat" xml:space="preserve"><value>{0} 대상 폴더와 동일</value></data>
+  <data name="FolderMergeSourceMissingFormat" xml:space="preserve"><value>{0} 원본 없음</value></data>
+  <data name="FolderMergeFileNameCollisionFormat" xml:space="preserve"><value>{0} 대상 파일명 충돌</value></data>
+  <data name="FolderMergeSourceContainsTargetFormat" xml:space="preserve"><value>{0} 원본 하위로 병합 불가</value></data>
+  <data name="FolderMergeFolderNameCollisionFormat" xml:space="preserve"><value>{0} 대상 폴더명 충돌</value></data>
 </root>

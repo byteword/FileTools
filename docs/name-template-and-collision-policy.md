@@ -4,7 +4,7 @@ This document records the naming design used by folder wrap/unwrap and the exten
 
 ## Scope
 
-The current implementation adds a shared naming foundation and applies it to folder wrap/unwrap execution, work-plan prediction, and work-plan preview. Folder name templates and collision policy can be edited from the folder-structure settings group.
+The current implementation adds a shared naming foundation and applies it to folder wrap/unwrap execution, work-plan prediction, work-plan preview, and selected-target folder merge. Folder name templates and collision policy can be edited from the folder-structure settings group.
 
 ## Template Evaluation
 
@@ -132,13 +132,26 @@ Correction-derived tokens must carry review state. If the correction preview req
 
 In the current implementation, correction-derived tokens are unavailable when the correction preview is `NeedsReview`, `Conflict`, or `Skipped`. A template that depends on those tokens then falls back to the operation's safe default name.
 
+## Folder Merge
+
+Selected-target folder merge moves two or more selected files and folders into one generated folder. It is an immediate target-list command rather than a per-target work-plan step, because it operates across multiple targets at once.
+
+Current behavior:
+
+```text
+Target folder template: {CommonStem}
+Target folder collision: AutoNumber
+Child file/folder collision: AutoNumber
+Folder layout: PreserveSourceFolder
+```
+
+Files are moved directly into the generated folder. Folders are moved as named child folders, preserving their original structure. Selected targets with planned steps are not merged until those steps are cleared, because moving them would invalidate their per-target plan.
+
 ## Future Merge Operations
 
 The template foundation leaves room for these operations:
 
 ```text
-Multiple files -> one folder
-Multiple folders -> one folder
 Multiple archives -> one archive
 ```
 

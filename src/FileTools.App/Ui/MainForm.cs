@@ -66,6 +66,7 @@ public sealed partial class MainForm : Form
         _addFilesMenuItem.Click += (_, _) => AddFiles();
         _addFolderMenuItem.Click += (_, _) => AddFolder();
         _removeTargetMenuItem.Click += (_, _) => RemoveSelectedTarget();
+        _mergeSelectedMenuItem.Click += (_, _) => MergeSelectedTargets();
         _clearTargetsMenuItem.Click += (_, _) => ClearTargets();
         _addRenameMenuItem.Click += (_, _) => AddRenameSteps();
         _addWrapMenuItem.Click += (_, _) => AddStep(CreateWrapStep());
@@ -97,6 +98,7 @@ public sealed partial class MainForm : Form
         _removeTargetToolButton.Click += (_, _) => RemoveSelectedTarget();
         _moveTargetUpToolButton.Click += (_, _) => MoveSelectedTargets(-1);
         _moveTargetDownToolButton.Click += (_, _) => MoveSelectedTargets(1);
+        _mergeSelectedToolButton.Click += (_, _) => MergeSelectedTargets();
         _clearTargetsToolButton.Click += (_, _) => ClearTargets();
 
         _addRenameToolButton.Click += (_, _) => AddRenameSteps();
@@ -137,6 +139,7 @@ public sealed partial class MainForm : Form
         _addFilesMenuItem.Text = Localizer.Get("ButtonAddFiles");
         _addFolderMenuItem.Text = Localizer.Get("ButtonAddFolder");
         _removeTargetMenuItem.Text = Localizer.Get("ButtonRemoveSelected");
+        _mergeSelectedMenuItem.Text = Localizer.Get("ButtonMergeSelectedTargets");
         _clearTargetsMenuItem.Text = Localizer.Get("ButtonClear");
         _addRenameMenuItem.Text = Localizer.Get("ButtonAddRenameStep");
         _addWrapMenuItem.Text = Localizer.Get("ButtonAddWrapStep");
@@ -161,6 +164,8 @@ public sealed partial class MainForm : Form
         _moveTargetUpToolButton.ToolTipText = Localizer.Get("ToolTipMoveTargetUp");
         _moveTargetDownToolButton.Text = Localizer.Get("ButtonMoveDown");
         _moveTargetDownToolButton.ToolTipText = Localizer.Get("ToolTipMoveTargetDown");
+        _mergeSelectedToolButton.Text = Localizer.Get("ButtonMergeSelectedTargets");
+        _mergeSelectedToolButton.ToolTipText = Localizer.Get("ToolTipMergeSelectedTargets");
         _clearTargetsToolButton.Text = Localizer.Get("ButtonClear");
         _clearTargetsToolButton.ToolTipText = Localizer.Get("ToolTipClearTargets");
 
@@ -195,6 +200,7 @@ public sealed partial class MainForm : Form
         _addFilesMenuItem.Image = UiIconFactory.Add;
         _addFolderMenuItem.Image = UiIconFactory.FolderAdd;
         _removeTargetMenuItem.Image = UiIconFactory.Remove;
+        _mergeSelectedMenuItem.Image = UiIconFactory.FolderAdd;
         _clearTargetsMenuItem.Image = UiIconFactory.Clear;
         _addRenameMenuItem.Image = UiIconFactory.Rename;
         _addWrapMenuItem.Image = UiIconFactory.Wrap;
@@ -215,6 +221,7 @@ public sealed partial class MainForm : Form
         _removeTargetToolButton.Image = UiIconFactory.Remove;
         _moveTargetUpToolButton.Image = UiIconFactory.MoveUp;
         _moveTargetDownToolButton.Image = UiIconFactory.MoveDown;
+        _mergeSelectedToolButton.Image = UiIconFactory.FolderAdd;
         _clearTargetsToolButton.Image = UiIconFactory.Clear;
 
         _addRenameToolButton.Image = UiIconFactory.Rename;
@@ -332,6 +339,102 @@ public sealed partial class MainForm : Form
         RefreshTargetGrid();
         SelectTargetRows(selectedTargets);
         UpdateCommandStates();
+    }
+
+    private void MergeSelectedTargets()
+    {
+        var selectedTargets = GetSelectedTargets()
+            .Where(static target => File.Exists(target.Path) || Directory.Exists(target.Path))
+            .ToArray();
+        if (selectedTargets.Length < 2)
+        {
+            MessageBox.Show(
+                Localizer.Get("FolderMergeNeedsMultipleTargets"),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            return;
+        }
+
+        if (selectedTargets.Any(static target => target.Steps.Count > 0))
+        {
+            MessageBox.Show(
+                Localizer.Get("FolderMergePlannedStepsMessage"),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            return;
+        }
+
+        var targetFolder = FolderMergeOperations.PreviewTargetFolderPath(
+            selectedTargets.Select(static target => target.Path),
+            _settings);
+        if (string.IsNullOrWhiteSpace(targetFolder))
+        {
+            MessageBox.Show(
+                Localizer.Get("PlanPreviewUnavailable"),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+            return;
+        }
+
+        var confirmation = MessageBox.Show(
+            Localizer.Format("FolderMergeConfirmFormat", selectedTargets.Length, targetFolder),
+            FileToolsEnvironment.AppName,
+            MessageBoxButtons.OKCancel,
+            MessageBoxIcon.Question,
+            MessageBoxDefaultButton.Button2);
+        if (confirmation != DialogResult.OK)
+        {
+            return;
+        }
+
+        var mergeResult = FolderMergeOperations.MergeIntoFolder(
+            selectedTargets.Select(static target => target.Path),
+            _settings);
+        var result = mergeResult.OperationResult;
+        foreach (var message in result.Messages)
+        {
+            AppendLog(message);
+        }
+
+        foreach (var error in result.Errors)
+        {
+            AppendLog(Localizer.Format("LogErrorFormat", error));
+        }
+
+        AppendLog(Localizer.Format(
+            "FolderMergeCompletedFormat",
+            mergeResult.TargetFolderPath ?? "",
+            result.AppliedCount,
+            result.SkippedCount,
+            result.Errors.Count));
+
+        foreach (var target in selectedTargets.Where(static target => !File.Exists(target.Path) && !Directory.Exists(target.Path)))
+        {
+            _targets.Remove(target);
+        }
+
+        if (!string.IsNullOrWhiteSpace(mergeResult.TargetFolderPath) && Directory.Exists(mergeResult.TargetFolderPath))
+        {
+            AddPaths([mergeResult.TargetFolderPath]);
+        }
+        else
+        {
+            RefreshTargetGrid();
+            RefreshPlanList();
+            UpdateCommandStates();
+        }
+
+        if (result.HasErrors)
+        {
+            MessageBox.Show(
+                result.ToUserMessage(Localizer.Get("ButtonMergeSelectedTargets")),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
     }
 
     private void ClearTargets()
@@ -970,6 +1073,10 @@ public sealed partial class MainForm : Form
         var canWrap = canModify && hasSelectedTargets && selectedTargets.All(static target => File.Exists(target.Path));
         var canUnwrap = canModify && hasSelectedTargets && selectedTargets.All(static target => Directory.Exists(target.Path));
         var canRelocate = canModify && hasSelectedTargets && selectedTargets.All(IsExistingTarget);
+        var canMerge = canModify &&
+                       selectedTargets.Length >= 2 &&
+                       selectedTargets.All(IsExistingTarget) &&
+                       selectedTargets.All(static target => target.Steps.Count == 0);
         var canRemoveStep = canModify && GetSelectedStep() is not null;
         var canClearSteps = canModify && selectedTarget?.Steps.Count > 0;
         var canRun = hasTargets && anyPlannedSteps;
@@ -977,6 +1084,7 @@ public sealed partial class MainForm : Form
         _addFilesMenuItem.Enabled = canModify;
         _addFolderMenuItem.Enabled = canModify;
         _removeTargetMenuItem.Enabled = canModify && hasSelectedTargets;
+        _mergeSelectedMenuItem.Enabled = canMerge;
         _clearTargetsMenuItem.Enabled = canModify && hasTargets;
         _addRenameMenuItem.Enabled = canRename;
         _addWrapMenuItem.Enabled = canWrap;
@@ -993,6 +1101,7 @@ public sealed partial class MainForm : Form
         _removeTargetToolButton.Enabled = canModify && hasSelectedTargets;
         _moveTargetUpToolButton.Enabled = canModify && CanMoveSelectedTargets(-1);
         _moveTargetDownToolButton.Enabled = canModify && CanMoveSelectedTargets(1);
+        _mergeSelectedToolButton.Enabled = canMerge;
         _clearTargetsToolButton.Enabled = canModify && hasTargets;
 
         _addRenameToolButton.Enabled = canRename;

@@ -24,6 +24,7 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
    - 선택한 폴더가 단일 파일 폴더이면 풀고, 그렇지 않으면 바로 아래의 자식 파일을 상위로 이동합니다.
    - 단일 파일 폴더를 풀 때 기존 파일 이름 유지, 폴더 이름으로 변경, `folder-file` 형식 변경 중 하나를 선택할 수 있습니다.
    - wrapping/unwrapping 이름 계산은 공용 이름 템플릿 기반을 사용하며, 설정에서 wrap 폴더명, unwrap 불일치 파일명, 충돌 번호 규칙을 조정할 수 있습니다.
+   - 선택한 여러 파일/폴더를 생성된 하나의 폴더로 병합할 수 있습니다. 폴더는 원본 폴더명을 유지한 하위 폴더로 이동합니다.
    - 기존 대상 파일은 덮어쓰지 않습니다.
 
 3. **폴더 자동 재배치**
@@ -333,6 +334,7 @@ Explorer는 선택 항목마다 프로세스를 하나씩 시작하는 경우가
 - 기존 대상 파일/폴더는 덮어쓰지 않습니다.
 - 파일명 교정은 기본적으로 변경 적용 전에 검토되며, 해당 검토 모드를 선택한 경우 생성 행에 검토가 필요하거나 충돌이 있을 때만 검토됩니다.
 - AutoRelocation은 대상이 이미 있으면 `(2)`, `(3)` 접미사를 적용합니다.
+- 선택 항목 병합은 실행 전 대상 폴더를 확인받고, 충돌하는 파일/폴더명에는 자동 번호를 붙입니다.
 - 폴더는 unwrapping 또는 자식 파일 이동 후 비어 있을 때만 삭제됩니다.
 - 폴더 unwrapping은 바로 아래의 자식 파일만 이동하며, 중첩 폴더 내용은 평탄화하지 않습니다.
 - folder wrap/unwrap 이름 템플릿과 충돌 정책의 내부 설계는 `docs/name-template-and-collision-policy.md`에 정리되어 있습니다.
@@ -373,6 +375,7 @@ FileTools provides three current-user ContextMenu actions for selected files and
    - Selected folders are unwrapped when they are single-file folders, otherwise direct child files are moved up.
    - Single-file folder unwrapping can keep the original filename, rename to the folder name, rename to `folder-file`, or use a custom template.
    - Wrapping/unwrapping name generation uses a shared name-template foundation, and settings can adjust wrap folder names, unwrap mismatch names, and conflict numbering rules.
+   - Multiple selected files and folders can be merged into one generated folder. Source folders are moved as named child folders.
    - Existing destination files are not overwritten.
 
 3. **폴더 자동 재배치**
@@ -688,6 +691,7 @@ Explorer often starts one process per selected item. FileTools waits briefly, me
 - Existing destination files/folders are not overwritten.
 - Filename correction is reviewed before applying changes by default, or only when generated rows need review or have conflicts if that review mode is selected.
 - AutoRelocation applies `(2)`, `(3)` suffixes when a target already exists.
+- Selected-target merge asks for confirmation before moving items and auto-numbers colliding file or folder names.
 - Folders are deleted only when empty after unwrapping/moving child files.
 - Folder unwrapping only moves direct child files; nested folder contents are not flattened.
 - Internal folder wrap/unwrap name-template and collision-policy design is documented in `docs/name-template-and-collision-policy.md`.
