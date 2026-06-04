@@ -39,6 +39,8 @@ The current dialog uses a two-pane editor: a read-only item list on the left and
 - Shows resolved conflict rows with a green background after user edits clear the conflict state.
 - Validates rows after filename edit completion.
 - Disables Apply/OK while a row has a blocking validation error such as an empty name, invalid filename, duplicate target, or existing target path.
+- Rechecks invalid names, duplicate targets, and existing destination paths in `RenameOperations.Apply` before any file-system move, so non-dialog apply paths keep the same blocking safety guard.
+- Shows a non-blocking warning when a file target's extension changes through direct filename editing.
 - Sanitizes edited filenames through `WindowsFileNameSafety.MakeSafeFileName` after edit completion.
 - Adds cell tooltips for full source path, target path, and validation status.
 - Replaced grid-cell filename editing with a selected-item editor.
@@ -70,13 +72,12 @@ Recommended next change:
 
 - Add an optional diagnostic details view if extraction reasons become important during real use.
 
-### 3. Extension changes are still possible through direct filename editing
+### 3. Extension changes now show a non-blocking warning
 
-The structured extension field is read-only, but users can still edit the whole target filename directly. This is flexible, but accidental extension removal or replacement is possible.
+The structured extension field is read-only, but users can still edit the whole target filename directly. The dialog now warns when the original file extension would be removed or replaced. The warning does not block Apply/OK because deliberate extension changes are still valid user intent.
 
 Recommended next change:
 
-- Warn when a file target's extension changes.
 - Consider a future split editor with stem and extension fields if accidental extension edits become common.
 
 ### 4. Size persistence is not implemented
@@ -90,7 +91,7 @@ Recommended next change:
 ## Suggested Next Priority
 
 1. Decide whether generated conflict suffixes should show as `Conflict` or `Auto-resolved conflict`.
-2. Add extension-change warnings for file targets.
-3. Remember the last dialog size after real-use validation.
+2. Remember the last dialog size after real-use validation.
+3. Consider a split stem/extension editor if extension warnings are still too easy to miss.
 4. Consider in-dialog common phrase add/remove after the editor is validated in real use.
 5. Consider a non-modal rule trace panel if users need to compare traces across many rows.

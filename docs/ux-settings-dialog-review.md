@@ -76,9 +76,9 @@ Implemented change:
 
 The old boolean rename-review setting has been replaced with a `RenameReviewMode` selection. The default is always review, and the secondary option opens the review dialog only when a generated row needs review or has a conflict.
 
-Remaining note:
+Implemented stability guard:
 
-- Keep validation mandatory for invalid names, duplicate targets, and dangerous conflicts even when the secondary automation mode is enabled.
+- `RenameOperations.Apply` now rechecks invalid target names, duplicate target paths, and existing destination paths before any file-system move. This keeps blocking validation mandatory even when the secondary automation mode skips opening the review dialog.
 
 ### 5. Hidden group flags are forced on
 
@@ -130,7 +130,7 @@ Add or change settings only where they protect repeat workflows:
 - Rename correction rules: implemented in a dedicated editor so built-in rule visibility, enabled state, mode, and stage-scoped order can be managed without turning the main settings screen into a rule builder. Existing rename dictionary, review insert phrase, candidate-profile, and parser-profile settings are now edited in the rule editor's `Details` tab for the relevant built-in rule. Candidate customization is limited to obfuscated Hangul scoring words and protected English words stored in `rename-candidate-profile.json`; parser customization is limited to tag words, author prefixes, episode prefixes/units, and title noise words stored in `rename-parser-profile.json`. Character replacement tables and full regex editing remain internal.
 - Explorer menu group toggles: useful if users want to hide whole feature families, not just individual commands.
 - AutoRelocation default target root: useful only if users repeatedly send files to one library folder. Otherwise keep target selection per run.
-- Collision handling: folder wrap/unwrap now has a dedicated name-template dialog with `skip` and `auto number`. The engine keeps `ask` as a reserved policy, but it should not be exposed until an actual prompt flow exists for planner and context-menu execution.
+- Collision handling: folder wrap/unwrap now has a dedicated name-template dialog with `skip` and `auto number`. The engine keeps `ask` as a reserved policy, but settings load/save and folder collision option creation normalize it to `skip` until an actual prompt flow exists for planner and context-menu execution.
 - Folder unwrap preview examples: implemented in the name-template dialog for wrap, unwrap mismatch, and conflict suffix samples.
 
 Avoid adding these as global settings for now:

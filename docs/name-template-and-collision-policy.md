@@ -88,6 +88,8 @@ Folder unwrap target file: Skip by default
 
 `MergeIntoExisting` for folder wrap preserves the old behavior where an existing same-name folder can receive the file if the child file path is not already present.
 
+`Ask` remains a reserved engine value only. Current settings load/save and folder-structure collision option creation normalize `Ask` to `Skip`, because no prompt flow exists yet for planner or context-menu execution.
+
 The default auto-number conflict template is:
 
 ```text

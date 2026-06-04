@@ -595,7 +595,9 @@ internal sealed partial class RenameReviewDialog
                 ? row.SuggestedName
                 : row.TargetPath,
             nameof(RenameRow.Status) => string.IsNullOrWhiteSpace(row.ValidationMessage)
-                ? row.Status
+                ? string.IsNullOrWhiteSpace(row.WarningMessage)
+                    ? row.Status
+                    : row.WarningMessage
                 : row.ValidationMessage,
             _ => ""
         };

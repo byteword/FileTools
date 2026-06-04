@@ -408,6 +408,7 @@ internal sealed partial class RenameReviewDialog : Form
             {
                 row.BlockingError = false;
                 row.ValidationMessage = "";
+                row.WarningMessage = "";
                 row.TargetPath = "";
 
                 if (row.IsSkipped)
@@ -433,6 +434,7 @@ internal sealed partial class RenameReviewDialog : Form
                 var safeName = WindowsFileNameSafety.MakeSafeFileName(suggestedName);
                 var directory = Path.GetDirectoryName(row.Preview.OriginalPath) ?? "";
                 row.TargetPath = Path.Combine(directory, safeName);
+                row.WarningMessage = GetExtensionChangeWarning(row, safeName);
                 if (!targetGroups.TryGetValue(row.TargetPath, out var group))
                 {
                     group = [];
@@ -582,9 +584,7 @@ internal sealed partial class RenameReviewDialog : Form
             return;
         }
 
-        _validationLabel.Text = string.IsNullOrWhiteSpace(row.ValidationMessage)
-            ? row.Status
-            : row.ValidationMessage;
+        _validationLabel.Text = GetSelectedValidationText(row);
 
         switch (row.State)
         {
@@ -602,11 +602,30 @@ internal sealed partial class RenameReviewDialog : Form
                 _validationLabel.BackColor = Color.FromArgb(226, 246, 232);
                 _validationLabel.ForeColor = Color.FromArgb(18, 92, 54);
                 break;
+            case RenameRowState.Ready when !string.IsNullOrWhiteSpace(row.WarningMessage):
+                _validationLabel.BackColor = Color.FromArgb(255, 249, 219);
+                _validationLabel.ForeColor = Color.FromArgb(86, 65, 0);
+                break;
             default:
                 _validationLabel.BackColor = SystemColors.Control;
                 _validationLabel.ForeColor = SystemColors.ControlText;
                 break;
         }
+    }
+
+    private static string GetSelectedValidationText(RenameRow row)
+    {
+        if (!string.IsNullOrWhiteSpace(row.ValidationMessage))
+        {
+            return row.ValidationMessage;
+        }
+
+        if (!string.IsNullOrWhiteSpace(row.WarningMessage))
+        {
+            return row.WarningMessage;
+        }
+
+        return row.Status;
     }
 
     private void SelectNextIssue()
@@ -831,6 +850,33 @@ internal sealed partial class RenameReviewDialog : Form
         return state is RenameRowState.Invalid or RenameRowState.Conflict or RenameRowState.NeedsReview;
     }
 
+    private static string GetExtensionChangeWarning(RenameRow row, string safeName)
+    {
+        var originalExtension = row.Preview.Parts.Extension;
+        if (string.IsNullOrWhiteSpace(originalExtension))
+        {
+            return "";
+        }
+
+        var targetExtension = Path.GetExtension(safeName);
+        if (string.Equals(originalExtension, targetExtension, StringComparison.OrdinalIgnoreCase))
+        {
+            return "";
+        }
+
+        return Localizer.Format(
+            "RenameExtensionChangedWarningFormat",
+            FormatExtension(originalExtension),
+            FormatExtension(targetExtension));
+    }
+
+    private static string FormatExtension(string extension)
+    {
+        return string.IsNullOrWhiteSpace(extension)
+            ? Localizer.Get("RenameExtensionNone")
+            : extension;
+    }
+
     private static string[] LoadCommonPhrases()
     {
         try
@@ -1011,6 +1057,8 @@ internal sealed partial class RenameReviewDialog : Form
         public string TargetPath { get; set; } = "";
 
         public string ValidationMessage { get; set; } = "";
+
+        public string WarningMessage { get; set; } = "";
 
         public void ResetDraft()
         {

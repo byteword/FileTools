@@ -836,7 +836,7 @@ internal static class FolderStructureCollisionOptions
 
     private static NameCollisionPolicy NormalizePolicy(NameCollisionPolicy policy)
     {
-        return policy == NameCollisionPolicy.MergeIntoExisting
+        return policy is NameCollisionPolicy.MergeIntoExisting or NameCollisionPolicy.Ask
             ? NameCollisionPolicy.Skip
             : policy;
     }

@@ -166,7 +166,7 @@ internal static class SettingsStore
         settings.FolderStructureConflictNameTemplate = NormalizeTemplate(
             settings.FolderStructureConflictNameTemplate,
             NameTemplateDefaults.DefaultConflictNameTemplate);
-        if (settings.FolderStructureConflictPolicy == NameCollisionPolicy.MergeIntoExisting)
+        if (settings.FolderStructureConflictPolicy is NameCollisionPolicy.MergeIntoExisting or NameCollisionPolicy.Ask)
         {
             settings.FolderStructureConflictPolicy = NameCollisionPolicy.Skip;
         }

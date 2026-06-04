@@ -338,6 +338,8 @@
   <data name="RenameStatusInvalid" xml:space="preserve"><value>Invalid</value></data>
   <data name="RenameInvalidNameMessage" xml:space="preserve"><value>Enter a valid new name for every item.</value></data>
   <data name="RenameDuplicateNameMessage" xml:space="preserve"><value>Two or more items target the same name.</value></data>
+  <data name="RenameExtensionChangedWarningFormat" xml:space="preserve"><value>Warning: extension changes from {0} to {1}.</value></data>
+  <data name="RenameExtensionNone" xml:space="preserve"><value>(none)</value></data>
   <data name="RenameEditorItems" xml:space="preserve"><value>Items</value></data>
   <data name="RenameEditorSelectedItem" xml:space="preserve"><value>Selected item</value></data>
   <data name="RenameEditorExtractedParts" xml:space="preserve"><value>Extracted parts</value></data>

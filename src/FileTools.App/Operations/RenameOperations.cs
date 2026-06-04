@@ -30,7 +30,15 @@ internal static class RenameOperations
     public static OperationResult Apply(IEnumerable<RenamePreview> previews)
     {
         var result = new OperationResult();
-        foreach (var preview in previews)
+        var previewList = previews.ToList();
+        var targetGroups = previewList
+            .Where(static preview => preview.Status != RenamePreviewStatus.Unchanged)
+            .Where(static preview => preview.Status != RenamePreviewStatus.Skipped)
+            .Where(static preview => !PathComparer.Equals(preview.OriginalPath, preview.SuggestedPath))
+            .GroupBy(static preview => preview.SuggestedPath, PathComparer)
+            .ToDictionary(static group => group.Key, static group => group.Count(), PathComparer);
+
+        foreach (var preview in previewList)
         {
             result.AddCandidate();
             try
@@ -50,6 +58,13 @@ internal static class RenameOperations
                 if (PathComparer.Equals(preview.OriginalPath, preview.SuggestedPath))
                 {
                     result.AddSkipped(preview.OriginalFileName + " 대상 경로 동일");
+                    continue;
+                }
+
+                var blockingMessage = GetBlockingApplyMessage(preview, targetGroups);
+                if (!string.IsNullOrWhiteSpace(blockingMessage))
+                {
+                    result.AddSkipped(preview.OriginalFileName + " " + blockingMessage);
                     continue;
                 }
 
@@ -77,6 +92,39 @@ internal static class RenameOperations
         }
 
         return result;
+    }
+
+    private static string GetBlockingApplyMessage(
+        RenamePreview preview,
+        IReadOnlyDictionary<string, int> targetGroups)
+    {
+        var suggestedName = preview.SuggestedFileName.Trim();
+        var safeName = WindowsFileNameSafety.MakeSafeFileName(suggestedName);
+        if (string.IsNullOrWhiteSpace(suggestedName) ||
+            suggestedName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 ||
+            !string.Equals(suggestedName, safeName, StringComparison.Ordinal))
+        {
+            return Localizer.Get("RenameInvalidNameMessage");
+        }
+
+        if (string.IsNullOrWhiteSpace(preview.SuggestedPath) ||
+            string.IsNullOrWhiteSpace(Path.GetDirectoryName(preview.SuggestedPath)))
+        {
+            return Localizer.Get("RenameInvalidNameMessage");
+        }
+
+        if (targetGroups.TryGetValue(preview.SuggestedPath, out var count) && count > 1)
+        {
+            return Localizer.Get("RenameDuplicateNameMessage");
+        }
+
+        if (!PathComparer.Equals(preview.OriginalPath, preview.SuggestedPath) &&
+            (File.Exists(preview.SuggestedPath) || Directory.Exists(preview.SuggestedPath)))
+        {
+            return Localizer.Format("PlanPreviewTargetExistsFormat", preview.SuggestedPath);
+        }
+
+        return "";
     }
 
     private static KoreanFileNameCorrector CreateFileNameCorrector(FileToolsSettings settings)
