@@ -126,14 +126,22 @@ internal sealed class FileToolRunner
             return;
         }
 
-        var folderName = WindowsFileNameSafety.MakeSafeFileName(Path.GetFileNameWithoutExtension(filePath));
-        var targetFolder = Path.Combine(parent, folderName);
-        if (File.Exists(targetFolder))
+        var folderName = FolderStructureNameTemplates.ResolveWrapFolderName(filePath);
+        var folderCollision = NameCollisionResolver.Resolve(
+            parent,
+            folderName,
+            new NameCollisionOptions
+            {
+                Policy = NameCollisionPolicy.MergeIntoExisting,
+                TargetKind = NameCollisionTargetKind.Folder
+            });
+        if (!folderCollision.IsReady)
         {
             result.AddSkipped(Path.GetFileName(filePath) + " wrapping 대상 폴더명과 같은 파일 존재");
             return;
         }
 
+        var targetFolder = folderCollision.TargetPath;
         var targetPath = Path.Combine(targetFolder, Path.GetFileName(filePath));
         if (File.Exists(targetPath) || Directory.Exists(targetPath))
         {
@@ -156,14 +164,25 @@ internal sealed class FileToolRunner
             return false;
         }
 
-        var targetFileName = ResolveUnwrappedFileName(dir.Name, file.Name);
-        var targetPath = Path.Combine(dir.Parent!.FullName, targetFileName);
-        if (File.Exists(targetPath) || Directory.Exists(targetPath))
+        var targetFileName = FolderStructureNameTemplates.ResolveUnwrappedFileNameFromFolderPath(
+            dir.FullName,
+            file.Name,
+            _settings.FolderUnwrapNameMismatchMode);
+        var fileCollision = NameCollisionResolver.Resolve(
+            dir.Parent!.FullName,
+            targetFileName,
+            new NameCollisionOptions
+            {
+                Policy = NameCollisionPolicy.Skip,
+                TargetKind = NameCollisionTargetKind.File
+            });
+        if (!fileCollision.IsReady)
         {
             result.AddSkipped(targetFileName + " 대상 경로 이미 존재");
             return false;
         }
 
+        var targetPath = fileCollision.TargetPath;
         File.Move(file.FullName, targetPath);
         if (!Directory.EnumerateFileSystemEntries(dir.FullName).Any())
         {
@@ -173,25 +192,6 @@ internal sealed class FileToolRunner
         result.AddApplied(dir.Name + "\\" + file.Name + " -> " + targetFileName);
         FileToolsEnvironment.Log("UNWRAP", file.FullName + " -> " + targetPath);
         return true;
-    }
-
-    private string ResolveUnwrappedFileName(string folderName, string fileName)
-    {
-        var fileStem = Path.GetFileNameWithoutExtension(fileName);
-        if (string.Equals(folderName, fileStem, StringComparison.OrdinalIgnoreCase))
-        {
-            return fileName;
-        }
-
-        var extension = Path.GetExtension(fileName);
-        return _settings.FolderUnwrapNameMismatchMode switch
-        {
-            FolderUnwrapNameMismatchMode.UseFolderName =>
-                WindowsFileNameSafety.MakeSafeFileName(folderName + extension),
-            FolderUnwrapNameMismatchMode.PrefixFolderName =>
-                WindowsFileNameSafety.MakeSafeFileName(folderName + "-" + fileStem + extension),
-            _ => fileName
-        };
     }
 
     private static bool CanUnwrapSingleFileFolder(

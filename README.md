@@ -23,6 +23,7 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
    - 자동 모드에서는 선택한 파일을 같은 이름의 폴더로 감쌉니다.
    - 선택한 폴더가 단일 파일 폴더이면 풀고, 그렇지 않으면 바로 아래의 자식 파일을 상위로 이동합니다.
    - 단일 파일 폴더를 풀 때 기존 파일 이름 유지, 폴더 이름으로 변경, `folder-file` 형식 변경 중 하나를 선택할 수 있습니다.
+   - wrapping/unwrapping 이름 계산은 공용 이름 템플릿 기반을 사용하므로, 향후 여러 파일/폴더/압축 병합 규칙과 같은 확장에 재사용할 수 있습니다.
    - 기존 대상 파일은 덮어쓰지 않습니다.
 
 3. **폴더 자동 재배치**
@@ -334,6 +335,7 @@ Explorer는 선택 항목마다 프로세스를 하나씩 시작하는 경우가
 - AutoRelocation은 대상이 이미 있으면 `(2)`, `(3)` 접미사를 적용합니다.
 - 폴더는 unwrapping 또는 자식 파일 이동 후 비어 있을 때만 삭제됩니다.
 - 폴더 unwrapping은 바로 아래의 자식 파일만 이동하며, 중첩 폴더 내용은 평탄화하지 않습니다.
+- folder wrap/unwrap 이름 템플릿과 충돌 정책의 내부 설계는 `docs/name-template-and-collision-policy.md`에 정리되어 있습니다.
 
 ### 로그
 
@@ -370,6 +372,7 @@ FileTools provides three current-user ContextMenu actions for selected files and
    - In automatic mode, selected files are wrapped into same-stem folders.
    - Selected folders are unwrapped when they are single-file folders, otherwise direct child files are moved up.
    - Single-file folder unwrapping can keep the original filename, rename to the folder name, or rename to `folder-file`.
+   - Wrapping/unwrapping name generation uses a shared name-template foundation that can be reused by future file, folder, and archive merge rules.
    - Existing destination files are not overwritten.
 
 3. **폴더 자동 재배치**
@@ -687,6 +690,7 @@ Explorer often starts one process per selected item. FileTools waits briefly, me
 - AutoRelocation applies `(2)`, `(3)` suffixes when a target already exists.
 - Folders are deleted only when empty after unwrapping/moving child files.
 - Folder unwrapping only moves direct child files; nested folder contents are not flattened.
+- Internal folder wrap/unwrap name-template and collision-policy design is documented in `docs/name-template-and-collision-policy.md`.
 
 ### Log
 

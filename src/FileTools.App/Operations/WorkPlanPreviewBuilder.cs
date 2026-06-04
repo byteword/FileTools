@@ -92,10 +92,18 @@ internal sealed class WorkPlanPreviewBuilder
             return CreateWarning(number, step, state, Localizer.Get("PlanPreviewNoParent"));
         }
 
-        var folderName = WindowsFileNameSafety.MakeSafeFileName(Path.GetFileNameWithoutExtension(state.Path));
-        var targetFolder = Path.Combine(parent, folderName);
+        var folderName = FolderStructureNameTemplates.ResolveWrapFolderName(state.Path);
+        var folderCollision = NameCollisionResolver.Resolve(
+            parent,
+            folderName,
+            new NameCollisionOptions
+            {
+                Policy = NameCollisionPolicy.MergeIntoExisting,
+                TargetKind = NameCollisionTargetKind.Folder
+            });
+        var targetFolder = folderCollision.TargetPath;
         var targetFilePath = Path.Combine(targetFolder, Path.GetFileName(state.Path));
-        if (File.Exists(targetFolder))
+        if (!folderCollision.IsReady)
         {
             return CreateWarning(number, step, state, Localizer.Format("PlanPreviewTargetExistsFormat", targetFolder));
         }
@@ -155,9 +163,20 @@ internal sealed class WorkPlanPreviewBuilder
             return CreateWarning(number, step, state, Localizer.Format("PlanPreviewSameNameMismatchFormat", childFileName));
         }
 
-        var targetFileName = ResolveUnwrappedFileName(folderName, childFileName, step.FolderUnwrapNameMismatchMode);
-        var targetPath = Path.Combine(parent, targetFileName);
-        if (File.Exists(targetPath) || Directory.Exists(targetPath))
+        var targetFileName = FolderStructureNameTemplates.ResolveUnwrappedFileNameFromFolderPath(
+            state.Path,
+            childFileName,
+            step.FolderUnwrapNameMismatchMode);
+        var fileCollision = NameCollisionResolver.Resolve(
+            parent,
+            targetFileName,
+            new NameCollisionOptions
+            {
+                Policy = NameCollisionPolicy.Skip,
+                TargetKind = NameCollisionTargetKind.File
+            });
+        var targetPath = fileCollision.TargetPath;
+        if (!fileCollision.IsReady)
         {
             return CreateWarning(number, step, state, Localizer.Format("PlanPreviewTargetExistsFormat", targetPath));
         }
@@ -367,28 +386,6 @@ internal sealed class WorkPlanPreviewBuilder
         }
 
         return files[0].Name;
-    }
-
-    private static string ResolveUnwrappedFileName(
-        string folderName,
-        string fileName,
-        FolderUnwrapNameMismatchMode mismatchMode)
-    {
-        var fileStem = Path.GetFileNameWithoutExtension(fileName);
-        if (string.Equals(folderName, fileStem, StringComparison.OrdinalIgnoreCase))
-        {
-            return fileName;
-        }
-
-        var extension = Path.GetExtension(fileName);
-        return mismatchMode switch
-        {
-            FolderUnwrapNameMismatchMode.UseFolderName =>
-                WindowsFileNameSafety.MakeSafeFileName(folderName + extension),
-            FolderUnwrapNameMismatchMode.PrefixFolderName =>
-                WindowsFileNameSafety.MakeSafeFileName(folderName + "-" + fileStem + extension),
-            _ => fileName
-        };
     }
 
     private static string FormatPathTransition(string inputPath, string outputPath)

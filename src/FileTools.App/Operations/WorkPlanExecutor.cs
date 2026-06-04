@@ -183,7 +183,7 @@ internal sealed class WorkPlanExecutor
             return null;
         }
 
-        var folderName = WindowsFileNameSafety.MakeSafeFileName(Path.GetFileNameWithoutExtension(path));
+        var folderName = FolderStructureNameTemplates.ResolveWrapFolderName(path);
         return Path.Combine(parent, folderName);
     }
 
@@ -263,29 +263,9 @@ internal sealed class WorkPlanExecutor
             return null;
         }
 
-        return Path.Combine(dir.Parent.FullName, ResolveUnwrappedFileName(dir.Name, files[0].Name, mismatchMode));
-    }
-
-    private static string ResolveUnwrappedFileName(
-        string folderName,
-        string fileName,
-        FolderUnwrapNameMismatchMode mismatchMode)
-    {
-        var fileStem = Path.GetFileNameWithoutExtension(fileName);
-        if (string.Equals(folderName, fileStem, StringComparison.OrdinalIgnoreCase))
-        {
-            return fileName;
-        }
-
-        var extension = Path.GetExtension(fileName);
-        return mismatchMode switch
-        {
-            FolderUnwrapNameMismatchMode.UseFolderName =>
-                WindowsFileNameSafety.MakeSafeFileName(folderName + extension),
-            FolderUnwrapNameMismatchMode.PrefixFolderName =>
-                WindowsFileNameSafety.MakeSafeFileName(folderName + "-" + fileStem + extension),
-            _ => fileName
-        };
+        return Path.Combine(
+            dir.Parent.FullName,
+            FolderStructureNameTemplates.ResolveUnwrappedFileNameFromFolderPath(dir.FullName, files[0].Name, mismatchMode));
     }
 
     private RelocationContextWithRoot? CreateRelocationContext(string path, string? targetRootOverride)
