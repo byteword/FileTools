@@ -14,6 +14,7 @@ internal static class UiIconFactory
     public static Image Rename { get; } = CreateIcon(DrawRename, Color.FromArgb(41, 99, 163));
     public static Image Wrap { get; } = CreateIcon(DrawWrap, Color.FromArgb(32, 123, 67));
     public static Image Unwrap { get; } = CreateIcon(DrawUnwrap, Color.FromArgb(152, 84, 33));
+    public static Image ArchiveMerge { get; } = CreateIcon(DrawArchiveMerge, Color.FromArgb(20, 116, 148));
     public static Image Relocate { get; } = CreateIcon(DrawRelocate, Color.FromArgb(96, 80, 170));
     public static Image RemoveStep { get; } = CreateIcon(DrawRemoveStep, Color.FromArgb(170, 59, 48));
     public static Image Settings { get; } = CreateIcon(DrawSettings, Color.FromArgb(70, 83, 102));
@@ -150,6 +151,29 @@ internal static class UiIconFactory
             new Point(bounds.Left + 7, bounds.Top + 10),
             new Point(bounds.Right - 7, bounds.Top + 10)
         });
+    }
+
+    private static void DrawArchiveMerge(Graphics graphics, Rectangle bounds, Color color)
+    {
+        using var pen = new Pen(color, 1.7F);
+        using var brush = new SolidBrush(Color.FromArgb(232, 247, 250));
+        var left = new Rectangle(bounds.Left + 2, bounds.Top + 3, 8, 10);
+        var right = new Rectangle(bounds.Right - 10, bounds.Top + 3, 8, 10);
+        var output = new Rectangle(bounds.Left + 6, bounds.Bottom - 9, bounds.Width - 12, 7);
+        graphics.FillRectangle(brush, left);
+        graphics.FillRectangle(brush, right);
+        graphics.FillRectangle(brush, output);
+        graphics.DrawRectangle(pen, left);
+        graphics.DrawRectangle(pen, right);
+        graphics.DrawRectangle(pen, output);
+        using var arrowPen = new Pen(color, 2F)
+        {
+            StartCap = LineCap.Round,
+            EndCap = LineCap.Round
+        };
+        graphics.DrawLine(arrowPen, bounds.Left + 7, bounds.Top + 14, bounds.Left + 10, bounds.Bottom - 10);
+        graphics.DrawLine(arrowPen, bounds.Right - 7, bounds.Top + 14, bounds.Right - 10, bounds.Bottom - 10);
+        graphics.DrawLine(arrowPen, bounds.Left + 10, bounds.Bottom - 10, bounds.Right - 10, bounds.Bottom - 10);
     }
 
     private static void DrawRelocate(Graphics graphics, Rectangle bounds, Color color)

@@ -14,12 +14,21 @@ internal sealed partial class SettingsForm : Form
     private readonly CheckBox _contextMenuFolderMoveInnerFilesCheckBox = new();
     private readonly CheckBox _contextMenuRelocationCurrentCheckBox = new();
     private readonly CheckBox _contextMenuRelocationChooseTargetCheckBox = new();
+    private readonly CheckBox _contextMenuArchiveMergeGroupByArchiveNameCheckBox = new();
+    private readonly CheckBox _contextMenuArchiveMergePreserveInternalPathsCheckBox = new();
     private readonly ComboBox _contextMenuLayoutCombo = new();
     private readonly ComboBox _defaultFolderOperationCombo = new();
     private readonly ComboBox _folderMismatchCombo = new();
     private readonly ComboBox _defaultTemplateCombo = new();
     private readonly ComboBox _renameReviewModeCombo = new();
+    private readonly ComboBox _archiveMergeLayoutCombo = new();
+    private readonly ComboBox _archiveMergeCollisionCombo = new();
+    private readonly ComboBox _archiveMergeDuplicateCombo = new();
+    private readonly ComboBox _archiveMergeFailureCombo = new();
+    private readonly ComboBox _archiveMergeOutputNameCombo = new();
+    private readonly ComboBox _archiveMergeCompressionCombo = new();
     private readonly CheckBox _renameDictionaryCheckBox = new();
+    private readonly CheckBox _archiveMergeDeleteOriginalsCheckBox = new();
     private readonly Label _statusTitleLabel = new();
     private readonly Label _statusDetailLabel = new();
     private readonly Label _statusHintLabel = new();
@@ -29,6 +38,7 @@ internal sealed partial class SettingsForm : Form
     private CollapsibleSettingsGroup? _renameGroup;
     private CollapsibleSettingsGroup? _folderGroup;
     private CollapsibleSettingsGroup? _relocationGroup;
+    private CollapsibleSettingsGroup? _archiveMergeGroup;
 
     public SettingsForm(FileToolsSettings settings)
     {
@@ -57,7 +67,10 @@ internal sealed partial class SettingsForm : Form
         _contextMenuFolderMoveInnerFilesCheckBox.Checked = Settings.ContextMenuFolderMoveInnerFilesUp;
         _contextMenuRelocationCurrentCheckBox.Checked = Settings.ContextMenuAutoRelocationCurrentFolder;
         _contextMenuRelocationChooseTargetCheckBox.Checked = Settings.ContextMenuAutoRelocationChooseTarget;
+        _contextMenuArchiveMergeGroupByArchiveNameCheckBox.Checked = Settings.ContextMenuArchiveMergeGroupByArchiveName;
+        _contextMenuArchiveMergePreserveInternalPathsCheckBox.Checked = Settings.ContextMenuArchiveMergePreserveInternalPaths;
         _renameDictionaryCheckBox.Checked = Settings.RenameUseDictionary;
+        _archiveMergeDeleteOriginalsCheckBox.Checked = Settings.ArchiveMergeDeleteOriginals;
 
         ConfigureCombo(_renameReviewModeCombo, Enum.GetValues<RenameReviewMode>()
             .Select(mode => new ComboOption<RenameReviewMode>(ToolModeText.GetDisplayName(mode), mode))
@@ -78,6 +91,36 @@ internal sealed partial class SettingsForm : Form
             .Select(mode => new ComboOption<FolderUnwrapNameMismatchMode>(ToolModeText.GetDisplayName(mode), mode))
             .ToArray());
         SelectComboValue(_folderMismatchCombo, Settings.FolderUnwrapNameMismatchMode);
+
+        ConfigureCombo(_archiveMergeLayoutCombo, Enum.GetValues<ArchiveMergeLayout>()
+            .Select(value => new ComboOption<ArchiveMergeLayout>(ArchiveMergeText.GetDisplayName(value), value))
+            .ToArray());
+        SelectComboValue(_archiveMergeLayoutCombo, Settings.ArchiveMergeLayout);
+
+        ConfigureCombo(_archiveMergeCollisionCombo, Enum.GetValues<ArchiveMergeCollisionPolicy>()
+            .Select(value => new ComboOption<ArchiveMergeCollisionPolicy>(ArchiveMergeText.GetDisplayName(value), value))
+            .ToArray());
+        SelectComboValue(_archiveMergeCollisionCombo, Settings.ArchiveMergeCollisionPolicy);
+
+        ConfigureCombo(_archiveMergeDuplicateCombo, Enum.GetValues<ArchiveMergeDuplicatePolicy>()
+            .Select(value => new ComboOption<ArchiveMergeDuplicatePolicy>(ArchiveMergeText.GetDisplayName(value), value))
+            .ToArray());
+        SelectComboValue(_archiveMergeDuplicateCombo, Settings.ArchiveMergeDuplicatePolicy);
+
+        ConfigureCombo(_archiveMergeFailureCombo, Enum.GetValues<ArchiveMergeFailurePolicy>()
+            .Select(value => new ComboOption<ArchiveMergeFailurePolicy>(ArchiveMergeText.GetDisplayName(value), value))
+            .ToArray());
+        SelectComboValue(_archiveMergeFailureCombo, Settings.ArchiveMergeFailurePolicy);
+
+        ConfigureCombo(_archiveMergeOutputNameCombo, Enum.GetValues<ArchiveMergeOutputNamePolicy>()
+            .Select(value => new ComboOption<ArchiveMergeOutputNamePolicy>(ArchiveMergeText.GetDisplayName(value), value))
+            .ToArray());
+        SelectComboValue(_archiveMergeOutputNameCombo, Settings.ArchiveMergeOutputNamePolicy);
+
+        ConfigureCombo(_archiveMergeCompressionCombo, Enum.GetValues<ArchiveMergeCompressionLevel>()
+            .Select(value => new ComboOption<ArchiveMergeCompressionLevel>(ArchiveMergeText.GetDisplayName(value), value))
+            .ToArray());
+        SelectComboValue(_archiveMergeCompressionCombo, Settings.ArchiveMergeCompressionLevel);
 
         RefreshTemplateCombo(Settings.AutoRelocationTemplateId);
     }
@@ -101,7 +144,10 @@ internal sealed partial class SettingsForm : Form
             _contextMenuFolderMoveInnerFilesCheckBox,
             _contextMenuRelocationCurrentCheckBox,
             _contextMenuRelocationChooseTargetCheckBox,
-            _renameDictionaryCheckBox
+            _contextMenuArchiveMergeGroupByArchiveNameCheckBox,
+            _contextMenuArchiveMergePreserveInternalPathsCheckBox,
+            _renameDictionaryCheckBox,
+            _archiveMergeDeleteOriginalsCheckBox
         })
         {
             checkBox.CheckedChanged += (_, _) => UpdateUiState();
@@ -113,7 +159,13 @@ internal sealed partial class SettingsForm : Form
             _contextMenuLayoutCombo,
             _defaultFolderOperationCombo,
             _folderMismatchCombo,
-            _defaultTemplateCombo
+            _defaultTemplateCombo,
+            _archiveMergeLayoutCombo,
+            _archiveMergeCollisionCombo,
+            _archiveMergeDuplicateCombo,
+            _archiveMergeFailureCombo,
+            _archiveMergeOutputNameCombo,
+            _archiveMergeCompressionCombo
         })
         {
             combo.SelectedIndexChanged += (_, _) => UpdateUiState();
@@ -167,6 +219,14 @@ internal sealed partial class SettingsForm : Form
         return TrimSummary(GetComboText(_defaultTemplateCombo), 64);
     }
 
+    private string GetArchiveMergeSummary()
+    {
+        return Localizer.Format(
+            "SettingsSummaryPairFormat",
+            GetComboText(_archiveMergeLayoutCombo),
+            GetComboText(_archiveMergeCompressionCombo));
+    }
+
     private int GetEnabledContextMenuCommandCount()
     {
         return new[]
@@ -178,7 +238,9 @@ internal sealed partial class SettingsForm : Form
             _contextMenuFolderUnwrapSingleFileCheckBox,
             _contextMenuFolderMoveInnerFilesCheckBox,
             _contextMenuRelocationCurrentCheckBox,
-            _contextMenuRelocationChooseTargetCheckBox
+            _contextMenuRelocationChooseTargetCheckBox,
+            _contextMenuArchiveMergeGroupByArchiveNameCheckBox,
+            _contextMenuArchiveMergePreserveInternalPathsCheckBox
         }.Count(static checkBox => checkBox.Checked);
     }
 
@@ -211,7 +273,10 @@ internal sealed partial class SettingsForm : Form
         Settings.ContextMenuAutoRelocation = true;
         Settings.ContextMenuAutoRelocationCurrentFolder = _contextMenuRelocationCurrentCheckBox.Checked;
         Settings.ContextMenuAutoRelocationChooseTarget = _contextMenuRelocationChooseTargetCheckBox.Checked;
+        Settings.ContextMenuArchiveMergeGroupByArchiveName = _contextMenuArchiveMergeGroupByArchiveNameCheckBox.Checked;
+        Settings.ContextMenuArchiveMergePreserveInternalPaths = _contextMenuArchiveMergePreserveInternalPathsCheckBox.Checked;
         Settings.RenameUseDictionary = _renameDictionaryCheckBox.Checked;
+        Settings.ArchiveMergeDeleteOriginals = _archiveMergeDeleteOriginalsCheckBox.Checked;
 
         if (_renameReviewModeCombo.SelectedItem is ComboOption<RenameReviewMode> renameReviewMode)
         {
@@ -236,6 +301,36 @@ internal sealed partial class SettingsForm : Form
         if (_defaultTemplateCombo.SelectedItem is ComboOption<string> template)
         {
             Settings.AutoRelocationTemplateId = template.Value;
+        }
+
+        if (_archiveMergeLayoutCombo.SelectedItem is ComboOption<ArchiveMergeLayout> archiveLayout)
+        {
+            Settings.ArchiveMergeLayout = archiveLayout.Value;
+        }
+
+        if (_archiveMergeCollisionCombo.SelectedItem is ComboOption<ArchiveMergeCollisionPolicy> archiveCollision)
+        {
+            Settings.ArchiveMergeCollisionPolicy = archiveCollision.Value;
+        }
+
+        if (_archiveMergeDuplicateCombo.SelectedItem is ComboOption<ArchiveMergeDuplicatePolicy> archiveDuplicate)
+        {
+            Settings.ArchiveMergeDuplicatePolicy = archiveDuplicate.Value;
+        }
+
+        if (_archiveMergeFailureCombo.SelectedItem is ComboOption<ArchiveMergeFailurePolicy> archiveFailure)
+        {
+            Settings.ArchiveMergeFailurePolicy = archiveFailure.Value;
+        }
+
+        if (_archiveMergeOutputNameCombo.SelectedItem is ComboOption<ArchiveMergeOutputNamePolicy> archiveOutputName)
+        {
+            Settings.ArchiveMergeOutputNamePolicy = archiveOutputName.Value;
+        }
+
+        if (_archiveMergeCompressionCombo.SelectedItem is ComboOption<ArchiveMergeCompressionLevel> archiveCompression)
+        {
+            Settings.ArchiveMergeCompressionLevel = archiveCompression.Value;
         }
     }
 

@@ -173,6 +173,7 @@ internal static class Program
             ToolMode.FileNameCorrection => ContextMenuCommand.FileNameCorrection,
             ToolMode.FolderStructure => ContextMenuCommand.FolderStructure,
             ToolMode.AutoRelocation => ContextMenuCommand.AutoRelocation,
+            ToolMode.ArchiveMerge => ContextMenuCommand.ArchiveMergeGroupByArchiveName,
             _ => default
         };
         return true;
@@ -190,6 +191,11 @@ internal static class Program
         if (command == ContextMenuCommand.FileNameCorrection)
         {
             return RenameReviewDialog.ShowAndApply(paths, settings);
+        }
+
+        if (command is ContextMenuCommand.ArchiveMergeGroupByArchiveName or ContextMenuCommand.ArchiveMergePreserveInternalPaths)
+        {
+            return ExecuteArchiveMergeContextCommand(command, paths, settings);
         }
 
         var mode = command switch
@@ -245,6 +251,25 @@ internal static class Program
         }
 
         return new FileToolRunner(settings).Run(mode, paths);
+    }
+
+    private static OperationResult ExecuteArchiveMergeContextCommand(
+        ContextMenuCommand command,
+        IReadOnlyList<string> paths,
+        FileToolsSettings settings)
+    {
+        var layout = command == ContextMenuCommand.ArchiveMergePreserveInternalPaths
+            ? ArchiveMergeLayout.PreserveInternalPaths
+            : ArchiveMergeLayout.GroupByArchiveName;
+        var options = ArchiveMergeOperations.CreateDefaultOptions(paths, settings, layout);
+        if (options is null)
+        {
+            var result = new OperationResult();
+            result.AddSkipped(Localizer.Get("ArchiveMergeNeedsMultipleArchives"));
+            return result;
+        }
+
+        return ArchiveMergeProgressDialog.Run(owner: null, options) ?? new OperationResult();
     }
 
     private static string? ChooseRelocationTargetRoot()

@@ -7,10 +7,12 @@ internal sealed class WorkPlanExecutor
         : StringComparer.Ordinal;
 
     private readonly FileToolsSettings _baseSettings;
+    private readonly IArchiveMergeQuestionSink? _archiveMergeQuestionSink;
 
-    public WorkPlanExecutor(FileToolsSettings baseSettings)
+    public WorkPlanExecutor(FileToolsSettings baseSettings, IArchiveMergeQuestionSink? archiveMergeQuestionSink = null)
     {
         _baseSettings = baseSettings;
+        _archiveMergeQuestionSink = archiveMergeQuestionSink;
     }
 
     public OperationResult Run(IEnumerable<WorkTargetPlan> targets)
@@ -24,6 +26,7 @@ internal sealed class WorkPlanExecutor
         IProgress<string>? progress)
     {
         var aggregate = new OperationResult();
+        var executedArchiveMergePlanIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var target in targets)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -32,7 +35,7 @@ internal sealed class WorkPlanExecutor
             }
 
             progress?.Report(Localizer.Format("LogTargetStartingFormat", Path.GetFileName(target.Path)));
-            if (!RunTarget(target, aggregate, cancellationToken, progress))
+            if (!RunTarget(target, aggregate, executedArchiveMergePlanIds, cancellationToken, progress))
             {
                 break;
             }
@@ -44,6 +47,7 @@ internal sealed class WorkPlanExecutor
     private bool RunTarget(
         WorkTargetPlan target,
         OperationResult aggregate,
+        HashSet<string> executedArchiveMergePlanIds,
         CancellationToken cancellationToken,
         IProgress<string>? progress)
     {
@@ -59,6 +63,12 @@ internal sealed class WorkPlanExecutor
             if (cancellationToken.IsCancellationRequested)
             {
                 return false;
+            }
+
+            if (step.Kind == WorkPlanStepKind.ArchiveMerge)
+            {
+                RunArchiveMergeStep(step, aggregate, executedArchiveMergePlanIds, cancellationToken, progress, _archiveMergeQuestionSink);
+                continue;
             }
 
             if (!File.Exists(currentPath) && !Directory.Exists(currentPath))
@@ -80,6 +90,34 @@ internal sealed class WorkPlanExecutor
         }
 
         return true;
+    }
+
+    private static void RunArchiveMergeStep(
+        WorkPlanStep step,
+        OperationResult aggregate,
+        HashSet<string> executedArchiveMergePlanIds,
+        CancellationToken cancellationToken,
+        IProgress<string>? progress,
+        IArchiveMergeQuestionSink? questionSink)
+    {
+        if (step.ArchiveMergeOptions is null)
+        {
+            aggregate.AddSkipped(Localizer.Get("ArchiveMergePlanMissingOptions"));
+            return;
+        }
+
+        if (!executedArchiveMergePlanIds.Add(step.ArchiveMergeOptions.PlanId))
+        {
+            return;
+        }
+
+        progress?.Report(Localizer.Format(
+            "LogArchiveMergeStartingFormat",
+            step.ArchiveMergeOptions.SourcePaths.Count,
+            Path.GetFileName(step.ArchiveMergeOptions.OutputPath)));
+        var result = ArchiveMergeOperations.Merge(step.ArchiveMergeOptions, cancellationToken, progress, questionSink);
+        aggregate.Merge(result);
+        ReportStepResult(result, progress);
     }
 
     private static void ReportStepResult(OperationResult result, IProgress<string>? progress)
@@ -148,6 +186,7 @@ internal sealed class WorkPlanExecutor
                 step.FolderOperation,
                 step.FolderUnwrapNameMismatchMode),
             WorkPlanStepKind.AutoRelocation => PredictAutoRelocationPath(step, path),
+            WorkPlanStepKind.ArchiveMerge => step.ArchiveMergeOptions?.OutputPath,
             _ => null
         };
     }

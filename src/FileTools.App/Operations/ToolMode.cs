@@ -4,7 +4,8 @@ internal enum ToolMode
 {
     FileNameCorrection,
     FolderStructure,
-    AutoRelocation
+    AutoRelocation,
+    ArchiveMerge
 }
 
 internal enum FolderStructureOperation
@@ -49,7 +50,9 @@ internal enum ContextMenuCommand
     FolderMoveInnerFilesUp,
     AutoRelocation,
     AutoRelocationCurrentFolder,
-    AutoRelocationChooseTarget
+    AutoRelocationChooseTarget,
+    ArchiveMergeGroupByArchiveName,
+    ArchiveMergePreserveInternalPaths
 }
 
 internal static class ToolModeText
@@ -61,6 +64,7 @@ internal static class ToolModeText
         ToolMode.FileNameCorrection => Localizer.Get("ToolFileNameCorrection"),
         ToolMode.FolderStructure => Localizer.Get("ToolFolderStructure"),
         ToolMode.AutoRelocation => Localizer.Get("ToolAutoRelocation"),
+        ToolMode.ArchiveMerge => Localizer.Get("ToolArchiveMerge"),
         _ => mode.ToString()
     };
 
@@ -111,6 +115,8 @@ internal static class ToolModeText
         ContextMenuCommand.AutoRelocation => GetDisplayName(ToolMode.AutoRelocation),
         ContextMenuCommand.AutoRelocationCurrentFolder => Localizer.Get("ContextCommandAutoRelocationCurrentFolder"),
         ContextMenuCommand.AutoRelocationChooseTarget => Localizer.Get("ContextCommandAutoRelocationChooseTarget"),
+        ContextMenuCommand.ArchiveMergeGroupByArchiveName => Localizer.Get("ContextCommandArchiveMergeGroupByArchiveName"),
+        ContextMenuCommand.ArchiveMergePreserveInternalPaths => Localizer.Get("ContextCommandArchiveMergePreserveInternalPaths"),
         _ => command.ToString()
     };
 }

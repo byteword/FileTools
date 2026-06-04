@@ -55,6 +55,24 @@ internal sealed class FileToolsSettings
 
     public bool RenameUseDictionary { get; set; } = true;
 
+    public ArchiveMergeLayout ArchiveMergeLayout { get; set; } = ArchiveMergeLayout.GroupByArchiveName;
+
+    public ArchiveMergeCollisionPolicy ArchiveMergeCollisionPolicy { get; set; } = ArchiveMergeCollisionPolicy.AutoNumber;
+
+    public ArchiveMergeDuplicatePolicy ArchiveMergeDuplicatePolicy { get; set; } = ArchiveMergeDuplicatePolicy.KeepBoth;
+
+    public ArchiveMergeFailurePolicy ArchiveMergeFailurePolicy { get; set; } = ArchiveMergeFailurePolicy.AbortAll;
+
+    public ArchiveMergeOutputNamePolicy ArchiveMergeOutputNamePolicy { get; set; } = ArchiveMergeOutputNamePolicy.CommonStem;
+
+    public ArchiveMergeCompressionLevel ArchiveMergeCompressionLevel { get; set; } = ArchiveMergeCompressionLevel.Default;
+
+    public bool ArchiveMergeDeleteOriginals { get; set; }
+
+    public bool ContextMenuArchiveMergeGroupByArchiveName { get; set; } = true;
+
+    public bool ContextMenuArchiveMergePreserveInternalPaths { get; set; } = true;
+
     public bool IsContextMenuToolEnabled(ToolMode mode)
     {
         return mode switch
@@ -62,6 +80,7 @@ internal sealed class FileToolsSettings
             ToolMode.FileNameCorrection => ContextMenuFileNameCorrection,
             ToolMode.FolderStructure => ContextMenuFolderStructure && IsAnyContextMenuFolderOperationEnabled,
             ToolMode.AutoRelocation => ContextMenuAutoRelocation && IsAnyContextMenuAutoRelocationOperationEnabled,
+            ToolMode.ArchiveMerge => IsAnyContextMenuArchiveMergeOperationEnabled,
             _ => false
         };
     }
@@ -75,6 +94,10 @@ internal sealed class FileToolsSettings
     public bool IsAnyContextMenuAutoRelocationOperationEnabled =>
         ContextMenuAutoRelocationCurrentFolder ||
         ContextMenuAutoRelocationChooseTarget;
+
+    public bool IsAnyContextMenuArchiveMergeOperationEnabled =>
+        ContextMenuArchiveMergeGroupByArchiveName ||
+        ContextMenuArchiveMergePreserveInternalPaths;
 
     public FileToolsSettings Clone()
     {
@@ -110,7 +133,16 @@ internal sealed class FileToolsSettings
             ContextMenuAutoRelocationCurrentFolder = ContextMenuAutoRelocationCurrentFolder,
             ContextMenuAutoRelocationChooseTarget = ContextMenuAutoRelocationChooseTarget,
             RenameReviewMode = RenameReviewMode,
-            RenameUseDictionary = RenameUseDictionary
+            RenameUseDictionary = RenameUseDictionary,
+            ArchiveMergeLayout = ArchiveMergeLayout,
+            ArchiveMergeCollisionPolicy = ArchiveMergeCollisionPolicy,
+            ArchiveMergeDuplicatePolicy = ArchiveMergeDuplicatePolicy,
+            ArchiveMergeFailurePolicy = ArchiveMergeFailurePolicy,
+            ArchiveMergeOutputNamePolicy = ArchiveMergeOutputNamePolicy,
+            ArchiveMergeCompressionLevel = ArchiveMergeCompressionLevel,
+            ArchiveMergeDeleteOriginals = ArchiveMergeDeleteOriginals,
+            ContextMenuArchiveMergeGroupByArchiveName = ContextMenuArchiveMergeGroupByArchiveName,
+            ContextMenuArchiveMergePreserveInternalPaths = ContextMenuArchiveMergePreserveInternalPaths
         };
     }
 }

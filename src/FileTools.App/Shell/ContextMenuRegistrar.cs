@@ -65,6 +65,16 @@ internal static class ContextMenuRegistrar
             ContextMenuTargetKind.File | ContextMenuTargetKind.Directory,
             settings => settings.ContextMenuAutoRelocation && settings.ContextMenuAutoRelocationChooseTarget),
         new(
+            "FileTools_08_ArchiveMergeGroupByArchiveName",
+            ContextMenuCommand.ArchiveMergeGroupByArchiveName,
+            ContextMenuTargetKind.File,
+            settings => settings.ContextMenuArchiveMergeGroupByArchiveName),
+        new(
+            "FileTools_09_ArchiveMergePreserveInternalPaths",
+            ContextMenuCommand.ArchiveMergePreserveInternalPaths,
+            ContextMenuTargetKind.File,
+            settings => settings.ContextMenuArchiveMergePreserveInternalPaths),
+        new(
             "FileTools_99_Open",
             ContextMenuCommand.OpenApp,
             ContextMenuTargetKind.File | ContextMenuTargetKind.Directory,
@@ -83,7 +93,9 @@ internal static class ContextMenuRegistrar
         "FolderUnwrap_SingleFile",
         "FolderUnwrap_MoveAll",
         "FileTools_04a_FolderUnwrapUseFolderName",
-        "FileTools_04b_FolderUnwrapKeepFileName"
+        "FileTools_04b_FolderUnwrapKeepFileName",
+        "FileTools_08_ArchiveMergeGroupByArchiveName",
+        "FileTools_09_ArchiveMergePreserveInternalPaths"
     ];
 
     public static string Install(string executablePath, FileToolsSettings settings)
@@ -316,6 +328,8 @@ internal static class ContextMenuRegistrar
                 options.SetValue(nameof(FileToolsSettings.ContextMenuFolderMoveInnerFilesUp), settings.ContextMenuFolderMoveInnerFilesUp ? 1 : 0, RegistryValueKind.DWord);
                 options.SetValue(nameof(FileToolsSettings.ContextMenuAutoRelocationCurrentFolder), settings.ContextMenuAutoRelocationCurrentFolder ? 1 : 0, RegistryValueKind.DWord);
                 options.SetValue(nameof(FileToolsSettings.ContextMenuAutoRelocationChooseTarget), settings.ContextMenuAutoRelocationChooseTarget ? 1 : 0, RegistryValueKind.DWord);
+                options.SetValue(nameof(FileToolsSettings.ContextMenuArchiveMergeGroupByArchiveName), settings.ContextMenuArchiveMergeGroupByArchiveName ? 1 : 0, RegistryValueKind.DWord);
+                options.SetValue(nameof(FileToolsSettings.ContextMenuArchiveMergePreserveInternalPaths), settings.ContextMenuArchiveMergePreserveInternalPaths ? 1 : 0, RegistryValueKind.DWord);
             }
         }
 

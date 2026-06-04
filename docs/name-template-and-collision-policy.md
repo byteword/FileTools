@@ -149,13 +149,20 @@ Folder layout: PreserveSourceFolder
 
 Files are moved directly into the generated folder. Folders are moved as named child folders, preserving their original structure. Selected targets with planned steps are not merged until those steps are cleared, because moving them would invalidate their per-target plan.
 
-## Future Merge Operations
+## Archive Merge
 
-The template foundation leaves room for these operations:
+Archive merge combines two or more selected archive files into one new ZIP archive. The original archives are never modified while the output is being written.
+
+The implementation uses an archive abstraction so merge policy, progress UI, and plan integration do not depend on one concrete library:
 
 ```text
-Multiple archives -> one archive
+IArchiveReader -> SharpCompress ZIP reader
+IArchiveWriter -> SharpZipLib ZIP writer
 ```
+
+The first implementation uses SharpCompress for reading because it supports ZIP filename encodings and exposes normalized entry metadata such as creation, modification, access time, size, attributes, and comments through a common archive API. It uses SharpZipLib for writing because ZIP output needs direct control of UTF-8 entry names, external attributes, comments, compression level, and NTFS timestamp extra fields.
+
+Output is always ZIP in the first implementation. Metadata preservation is normalized preservation: FileTools reads the metadata the reader exposes and writes equivalent ZIP metadata back to the new archive. It does not promise byte-for-byte preservation of every original ZIP extra field.
 
 Reserved default templates:
 
@@ -164,6 +171,131 @@ MultiFileMergeFolderNameTemplate   = {CommonStem}
 MultiFolderMergeFolderNameTemplate = {CommonStem}
 ArchiveMergeFileNameTemplate       = {CommonStem}{TargetExtension}
 ```
+
+The default output filename uses `ArchiveMergeFileNameTemplate` with `{TargetExtension}` set to `.zip`. If `{CommonStem}` cannot produce a useful name, the parent folder name is used; if that is unavailable, a timestamped `Merged-yyyyMMdd-HHmmss.zip` fallback is used.
+
+### Archive Merge Layout
+
+Two layout policies are supported:
+
+```text
+GroupByArchiveName
+PreserveInternalPaths
+```
+
+`GroupByArchiveName` is the default. Each source archive becomes a root folder named from the archive filename, and entries are written under that folder. The root folder name still goes through collision handling because two selected archives from different folders can have the same filename.
+
+`PreserveInternalPaths` writes entries using their original internal paths. It can create many collisions and should only be used with an explicit collision policy.
+
+Archive entry paths are normalized before collision checks. Normalization rejects or rewrites absolute paths, drive-qualified paths, `..` traversal, empty segments, invalid Windows names, reserved device names, repeated separators, and case-only collisions on Windows. Long paths are shown in UI with ellipsis but full paths remain available in tooltips.
+
+Empty directory entries are preserved by default.
+
+### Archive Merge Collision and Duplicate Policy
+
+Internal path collision and duplicate content are separate decisions:
+
+```text
+Internal path collision: AutoNumber, SameContentKeepFirst, Ask, Abort
+Duplicate content: KeepBoth, SameContentKeepFirst, Ask
+```
+
+`AutoNumber` is the default for internal path collisions that remain after the selected layout has been applied. It uses the existing conflict template, such as `{Stem} ({Index}){Extension}`.
+
+`KeepBoth` is the default duplicate-content policy. Automatic duplicate elimination uses content hash and keeps the first item in selected archive order.
+
+The `Ask` policies require a decision container in the progress window. The current implementation exposes these policies in settings/options but stops with an explicit error until the conflict/duplicate decision container is implemented. Encoding ambiguity is already handled through a dedicated encoding selection dialog.
+
+### Archive Merge Failure Policy
+
+Failures are classified by where they occur:
+
+```text
+ArchiveOpenFailure    -> central directory/header cannot be interpreted or the format is unsupported
+EntryReadFailure      -> the archive opens, but one entry cannot be read or validated
+OutputWriteFailure    -> temp ZIP creation, copying, disk space, permission, or final rename fails
+```
+
+Failure policy:
+
+```text
+AbortAll
+SkipFailedArchive
+SkipFailedEntry
+```
+
+`AbortAll` is the default. `SkipFailedArchive` can only continue past `ArchiveOpenFailure` or archive-level errors. `SkipFailedEntry` can keep remaining entries when a single entry fails, but the result must be reported as partial.
+
+`OutputWriteFailure` is never a partial-success condition. The temp output is deleted and originals are left untouched.
+
+### Archive Merge Encoding
+
+ZIP names with the UTF-8 flag are read as UTF-8. Legacy ZIP names are opened with candidate encodings and scored by filename quality, valid path segments, suspicious replacement characters, extension patterns, and collision amplification.
+
+The encoding picker shows both a display name and a short explanation:
+
+```text
+Korean (EUC-KR / CP949)        Common for Korean Windows ZIP files
+Japanese (Shift-JIS / CP932)   Common for Japanese Windows ZIP files
+Simplified Chinese (GBK / CP936)
+Traditional Chinese (Big5 / CP950)
+ZIP default (CP437)
+UTF-8
+System default
+```
+
+If the score is ambiguous, the progress window opens a dedicated encoding selection dialog and shows a preview of decoded entry names.
+
+### Archive Merge Rollback and Source Deletion
+
+The output ZIP is written to a hidden temp file in the final output directory:
+
+```text
+.FileTools.Merge.tmp-{guid}.zip
+```
+
+Only after all required entries are written and the new archive can be reopened for verification is the temp file moved to the final filename. If the final path exists, the normal output file collision policy applies before writing starts.
+
+Source deletion is an optional post-success step and is off by default. It runs only after the final ZIP exists and has been verified. With partial-success policies, only fully merged source archives are eligible for deletion. When `SkipFailedEntry` creates a partial result, source deletion should stay disabled unless the user explicitly confirms the risk.
+
+### Archive Merge UI
+
+Settings provide default archive merge policy:
+
+```text
+Default layout
+Collision policy
+Duplicate content policy
+Failure policy
+Output filename policy/template
+Delete originals after verified success
+Context menu entry visibility for both layout styles
+ZIP compression level: Store only, Fast, Default, Maximum
+```
+
+The context menu exposes two archive merge entry points:
+
+```text
+Merge ZIPs: group by ZIP name
+Merge ZIPs: preserve internal folders
+```
+
+The main window stores archive merge as a shared plan step. Every participating target shows the same shared row, but execution deduplicates by plan ID so the merge runs once. Double-clicking the row opens an archive merge options dialog for output path and policy changes.
+
+The progress window reports these phases:
+
+```text
+Validate sources
+Detect filename encoding
+Scan entries
+Resolve collisions and duplicates
+Write temp ZIP
+Verify output ZIP
+Move to final filename
+Delete originals
+```
+
+## Future Merge Operations
 
 Multiple-folder merge will need a separate merge layout policy:
 

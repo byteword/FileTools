@@ -5,7 +5,8 @@ internal enum WorkPlanStepKind
     FileNameCorrection,
     FolderWrap,
     FolderUnwrap,
-    AutoRelocation
+    AutoRelocation,
+    ArchiveMerge
 }
 
 internal sealed class WorkTargetPlan
@@ -40,12 +41,15 @@ internal sealed class WorkPlanStep
 
     public string? ManualTargetRootPath { get; set; }
 
+    public ArchiveMergeOptions? ArchiveMergeOptions { get; set; }
+
     public string DisplayName => Kind switch
     {
         WorkPlanStepKind.FileNameCorrection => ToolModeText.GetDisplayName(ToolMode.FileNameCorrection),
         WorkPlanStepKind.FolderWrap => ToolModeText.GetDisplayName(FolderStructureOperation.WrapFiles),
         WorkPlanStepKind.FolderUnwrap => FormatFolderUnwrapName(),
         WorkPlanStepKind.AutoRelocation => FormatAutoRelocationName(),
+        WorkPlanStepKind.ArchiveMerge => FormatArchiveMergeName(),
         _ => Kind.ToString()
     };
 
@@ -58,7 +62,8 @@ internal sealed class WorkPlanStep
             FolderUnwrapNameMismatchMode = FolderUnwrapNameMismatchMode,
             ManualRenameFileName = ManualRenameFileName,
             AutoRelocationTemplateId = AutoRelocationTemplateId,
-            ManualTargetRootPath = ManualTargetRootPath
+            ManualTargetRootPath = ManualTargetRootPath,
+            ArchiveMergeOptions = ArchiveMergeOptions?.Clone()
         };
     }
 
@@ -75,6 +80,20 @@ internal sealed class WorkPlanStep
         return string.IsNullOrWhiteSpace(ManualTargetRootPath)
             ? $"{ToolModeText.GetDisplayName(ToolMode.AutoRelocation)} ({template})"
             : $"{ToolModeText.GetDisplayName(ToolMode.AutoRelocation)} ({template} -> {ManualTargetRootPath})";
+    }
+
+    private string FormatArchiveMergeName()
+    {
+        if (ArchiveMergeOptions is null)
+        {
+            return ToolModeText.GetDisplayName(ToolMode.ArchiveMerge);
+        }
+
+        return Localizer.Format(
+            "ArchiveMergeStepDisplayFormat",
+            ArchiveMergeOptions.SourcePaths.Count,
+            Path.GetFileName(ArchiveMergeOptions.OutputPath),
+            ArchiveMergeText.GetDisplayName(ArchiveMergeOptions.Layout));
     }
 
     private string FormatFolderUnwrapName()

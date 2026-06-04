@@ -452,4 +452,101 @@
   <data name="FolderMergeFileNameCollisionFormat" xml:space="preserve"><value>{0} 대상 파일명 충돌</value></data>
   <data name="FolderMergeSourceContainsTargetFormat" xml:space="preserve"><value>{0} 원본 하위로 병합 불가</value></data>
   <data name="FolderMergeFolderNameCollisionFormat" xml:space="preserve"><value>{0} 대상 폴더명 충돌</value></data>
+  <data name="ToolArchiveMerge" xml:space="preserve"><value>압축 병합</value></data>
+  <data name="ContextCommandArchiveMergeGroupByArchiveName" xml:space="preserve"><value>ZIP 병합: 압축파일명 폴더로</value></data>
+  <data name="ContextCommandArchiveMergePreserveInternalPaths" xml:space="preserve"><value>ZIP 병합: 내부 경로 유지</value></data>
+  <data name="ButtonAddArchiveMergeStep" xml:space="preserve"><value>압축 병합 추가</value></data>
+  <data name="ToolTipAddArchiveMerge" xml:space="preserve"><value>선택한 ZIP 파일들에 공유 ZIP 병합 작업을 추가합니다.</value></data>
+  <data name="PlanActionArchiveMerge" xml:space="preserve"><value>압축 병합</value></data>
+  <data name="GroupArchiveMergeContextMenu" xml:space="preserve"><value>압축 병합</value></data>
+  <data name="TabArchiveMerge" xml:space="preserve"><value>압축 병합</value></data>
+  <data name="ArchiveMergeNeedsMultipleArchives" xml:space="preserve"><value>ZIP 압축파일 2개 이상을 선택하세요.</value></data>
+  <data name="ArchiveMergePlannedStepsMessage" xml:space="preserve"><value>선택한 ZIP 파일의 계획 단계를 먼저 비운 뒤 압축 병합을 추가하세요.</value></data>
+  <data name="ArchiveMergeOutputPathRequired" xml:space="preserve"><value>출력 ZIP 경로를 선택하세요.</value></data>
+  <data name="ArchiveMergeOutputCannotBeSource" xml:space="preserve"><value>출력 ZIP은 선택한 원본 압축파일 중 하나일 수 없습니다.</value></data>
+  <data name="ArchiveMergeProgressValidateSources" xml:space="preserve"><value>원본 압축파일 확인 중...</value></data>
+  <data name="ArchiveMergeProgressScanEntries" xml:space="preserve"><value>압축 엔트리 스캔 중...</value></data>
+  <data name="ArchiveMergeProgressValidateEntries" xml:space="preserve"><value>엔트리 스트림 검증 중...</value></data>
+  <data name="ArchiveMergeProgressResolveCollisions" xml:space="preserve"><value>중복/충돌 정책 적용 중...</value></data>
+  <data name="ArchiveMergeProgressWriteTemp" xml:space="preserve"><value>임시 ZIP 작성 중...</value></data>
+  <data name="ArchiveMergeProgressVerifyOutput" xml:space="preserve"><value>임시 ZIP 검증 중...</value></data>
+  <data name="ArchiveMergeProgressMoveFinal" xml:space="preserve"><value>최종 파일명으로 이동 중...</value></data>
+  <data name="ArchiveMergeProgressDeleteOriginals" xml:space="preserve"><value>원본 압축파일 삭제 중...</value></data>
+  <data name="ArchiveMergeProgressReadArchiveFormat" xml:space="preserve"><value>{0} 읽는 중...</value></data>
+  <data name="ArchiveMergeProgressDialogTitle" xml:space="preserve"><value>압축 병합 진행</value></data>
+  <data name="ArchiveMergeProgressPreparing" xml:space="preserve"><value>압축 병합 준비 중...</value></data>
+  <data name="ArchiveMergeProgressCompleted" xml:space="preserve"><value>압축 병합 완료.</value></data>
+  <data name="ArchiveMergeProgressCompletedWithErrors" xml:space="preserve"><value>오류와 함께 압축 병합 완료.</value></data>
+  <data name="ArchiveMergeNoReadableArchives" xml:space="preserve"><value>읽을 수 있는 압축파일이 남아 있지 않습니다.</value></data>
+  <data name="ArchiveMergeNoEntriesToWrite" xml:space="preserve"><value>쓸 압축 엔트리가 남아 있지 않습니다.</value></data>
+  <data name="ArchiveMergeCanceled" xml:space="preserve"><value>압축 병합이 취소되었습니다.</value></data>
+  <data name="ArchiveMergeWriteFailedFormat" xml:space="preserve"><value>압축 병합 실패: {0}</value></data>
+  <data name="ArchiveMergeOpenFailedFormat" xml:space="preserve"><value>{0}을(를) 열 수 없습니다: {1}</value></data>
+  <data name="ArchiveMergeUnsupportedArchiveFormat" xml:space="preserve"><value>{0}은(는) 지원하지 않는 압축 형식입니다.</value></data>
+  <data name="ArchiveMergeInvalidEntryPathFormat" xml:space="preserve"><value>잘못된 압축 엔트리 경로를 건너뜀: {0}</value></data>
+  <data name="ArchiveMergeEntryReadFailedFormat" xml:space="preserve"><value>{0}:{1}을(를) 읽을 수 없습니다: {2}</value></data>
+  <data name="ArchiveMergeSkippedArchiveFormat" xml:space="preserve"><value>{0}은(는) 압축파일 실패 정책에 따라 건너뜁니다.</value></data>
+  <data name="ArchiveMergeAskPolicyRequiresUi" xml:space="preserve"><value>묻기 정책은 대화형 결정 컨테이너가 필요합니다.</value></data>
+  <data name="ArchiveMergeDuplicateContentSkippedFormat" xml:space="preserve"><value>동일 내용 파일 건너뜀: {0}</value></data>
+  <data name="ArchiveMergeDuplicateDirectorySkippedFormat" xml:space="preserve"><value>중복 폴더 건너뜀: {0}</value></data>
+  <data name="ArchiveMergeInternalCollisionFormat" xml:space="preserve"><value>압축 내부 경로 충돌: {0}</value></data>
+  <data name="ArchiveMergeCreatedFormat" xml:space="preserve"><value>{0} 생성됨 (파일 {1}개, 폴더 {2}개).</value></data>
+  <data name="ArchiveMergeOriginalDeleteSkippedFormat" xml:space="preserve"><value>부분 병합이므로 원본 압축파일 삭제 안 함: {0}</value></data>
+  <data name="ArchiveMergeOriginalDeletedFormat" xml:space="preserve"><value>원본 압축파일 삭제됨: {0}</value></data>
+  <data name="ArchiveMergeOriginalDeleteFailedFormat" xml:space="preserve"><value>원본 압축파일을 삭제할 수 없습니다: {0} - {1}</value></data>
+  <data name="ArchiveMergeVerificationCountMismatchFormat" xml:space="preserve"><value>출력 검증 실패. 예상 엔트리 {0}개, 실제 {1}개.</value></data>
+  <data name="ArchiveMergeOutputCollisionUnresolved" xml:space="preserve"><value>사용 가능한 출력 파일명을 찾지 못했습니다.</value></data>
+  <data name="ArchiveMergeNoEncodingCandidate" xml:space="preserve"><value>이 ZIP을 열 수 있는 파일명 인코딩 후보가 없습니다.</value></data>
+  <data name="ArchiveMergePlanOptionsFormat" xml:space="preserve"><value>{0} | 실패: {1} | 중복: {2}</value></data>
+  <data name="ArchiveMergeStepDisplayFormat" xml:space="preserve"><value>ZIP {0}개를 {1}(으)로 병합 ({2})</value></data>
+  <data name="ArchiveMergePreviewFormat" xml:space="preserve"><value>ZIP {0}개 -&gt; {1}</value></data>
+  <data name="ArchiveMergePlanMissingOptions" xml:space="preserve"><value>압축 병합 옵션이 없습니다.</value></data>
+  <data name="LogArchiveMergeStartingFormat" xml:space="preserve"><value>압축파일 {0}개를 {1}(으)로 병합</value></data>
+  <data name="ArchiveMergeLayoutGroupByArchiveName" xml:space="preserve"><value>압축파일명 폴더로 묶기</value></data>
+  <data name="ArchiveMergeLayoutPreserveInternalPaths" xml:space="preserve"><value>내부 경로 그대로 합치기</value></data>
+  <data name="ArchiveMergeCollisionAutoNumber" xml:space="preserve"><value>충돌 이름 자동 번호</value></data>
+  <data name="ArchiveMergeCollisionSameContentKeepFirst" xml:space="preserve"><value>동일 내용이면 첫 항목 유지</value></data>
+  <data name="ArchiveMergeCollisionAsk" xml:space="preserve"><value>이름 충돌 시 묻기</value></data>
+  <data name="ArchiveMergeCollisionAbort" xml:space="preserve"><value>이름 충돌 시 중단</value></data>
+  <data name="ArchiveMergeDuplicateKeepBoth" xml:space="preserve"><value>중복 파일 둘 다 보존</value></data>
+  <data name="ArchiveMergeDuplicateSameContentKeepFirst" xml:space="preserve"><value>동일 내용이면 첫 항목 유지</value></data>
+  <data name="ArchiveMergeDuplicateAsk" xml:space="preserve"><value>중복 파일마다 묻기</value></data>
+  <data name="ArchiveMergeFailureAbortAll" xml:space="preserve"><value>실패 시 전체 중단</value></data>
+  <data name="ArchiveMergeFailureSkipArchive" xml:space="preserve"><value>실패한 압축파일 건너뛰기</value></data>
+  <data name="ArchiveMergeFailureSkipEntry" xml:space="preserve"><value>실패한 엔트리만 건너뛰기</value></data>
+  <data name="ArchiveMergeOutputCommonStem" xml:space="preserve"><value>선택 파일 공통 이름</value></data>
+  <data name="ArchiveMergeOutputParentFolder" xml:space="preserve"><value>상위 폴더 이름</value></data>
+  <data name="ArchiveMergeOutputTimestamp" xml:space="preserve"><value>타임스탬프 자동 이름</value></data>
+  <data name="ArchiveMergeOutputManual" xml:space="preserve"><value>대화상자에서 수동 경로</value></data>
+  <data name="ArchiveMergeCompressionStoreOnly" xml:space="preserve"><value>압축 안 함</value></data>
+  <data name="ArchiveMergeCompressionFast" xml:space="preserve"><value>빠른 압축</value></data>
+  <data name="ArchiveMergeCompressionDefault" xml:space="preserve"><value>기본 압축</value></data>
+  <data name="ArchiveMergeCompressionMaximum" xml:space="preserve"><value>최대 압축</value></data>
+  <data name="ArchiveMergeLabelLayout" xml:space="preserve"><value>병합 방식</value></data>
+  <data name="ArchiveMergeLabelCollision" xml:space="preserve"><value>이름 충돌</value></data>
+  <data name="ArchiveMergeLabelDuplicate" xml:space="preserve"><value>중복 내용</value></data>
+  <data name="ArchiveMergeLabelFailure" xml:space="preserve"><value>실패 처리</value></data>
+  <data name="ArchiveMergeLabelOutputName" xml:space="preserve"><value>출력 파일명</value></data>
+  <data name="ArchiveMergeLabelCompression" xml:space="preserve"><value>압축률</value></data>
+  <data name="ArchiveMergeLabelOutputPath" xml:space="preserve"><value>출력 ZIP</value></data>
+  <data name="ArchiveMergeCheckDeleteOriginals" xml:space="preserve"><value>완전 성공 후 원본 압축파일 삭제</value></data>
+  <data name="ArchiveMergeLayoutHelp" xml:space="preserve"><value>압축파일명 폴더로 묶으면 내부 이름 충돌을 기본적으로 피할 수 있습니다.</value></data>
+  <data name="ArchiveMergeCollisionHelp" xml:space="preserve"><value>선택한 병합 방식에서 같은 내부 ZIP 경로가 둘 이상 생길 때 사용합니다.</value></data>
+  <data name="ArchiveMergeDuplicateHelp" xml:space="preserve"><value>동일 내용 감지는 쓰기 전에 파일 엔트리를 읽고 해시합니다.</value></data>
+  <data name="ArchiveMergeFailureHelp" xml:space="preserve"><value>압축파일 열기 실패와 엔트리 읽기 실패를 전체 중단 또는 부분 출력으로 처리합니다.</value></data>
+  <data name="ArchiveMergeOutputNameHelp" xml:space="preserve"><value>병합 계획 생성 시 기본 출력 ZIP 경로를 정하는 데 사용합니다.</value></data>
+  <data name="ArchiveMergeCompressionHelp" xml:space="preserve"><value>새로 작성하는 출력 ZIP의 작은 압축률 설정입니다.</value></data>
+  <data name="ArchiveMergeOptionsDialogTitle" xml:space="preserve"><value>압축 병합 옵션</value></data>
+  <data name="ArchiveMergeOptionsHeader" xml:space="preserve"><value>선택한 ZIP 압축파일을 하나의 출력 ZIP으로 병합합니다.</value></data>
+  <data name="ArchiveMergeOutputHelp" xml:space="preserve"><value>먼저 임시 ZIP에 작성한 뒤 이 최종 경로로 이동합니다.</value></data>
+  <data name="ArchiveMergeSourcesGroup" xml:space="preserve"><value>원본 압축파일</value></data>
+  <data name="ArchiveMergeOutputDialogTitle" xml:space="preserve"><value>출력 ZIP 선택</value></data>
+  <data name="ArchiveMergeOutputDialogFilter" xml:space="preserve"><value>ZIP 압축파일 (*.zip)|*.zip</value></data>
+  <data name="ArchiveEncodingDialogTitle" xml:space="preserve"><value>ZIP 파일명 인코딩 선택</value></data>
+  <data name="ArchiveEncodingDialogHeader" xml:space="preserve"><value>이 압축파일의 파일명에 사용된 인코딩을 선택하세요.</value></data>
+  <data name="ArchiveEncodingColumnEncoding" xml:space="preserve"><value>인코딩</value></data>
+  <data name="ArchiveEncodingColumnDescription" xml:space="preserve"><value>설명</value></data>
+  <data name="ArchiveEncodingColumnScore" xml:space="preserve"><value>점수</value></data>
+  <data name="ArchiveEncodingColumnPreview" xml:space="preserve"><value>파일명 미리보기</value></data>
+  <data name="ArchiveEncodingScoreFormat" xml:space="preserve"><value>점수: {0}</value></data>
 </root>

@@ -99,10 +99,12 @@ internal sealed partial class SettingsForm
         _contextMenuGroup = CreateContextMenuGroup();
         _renameGroup = CreateRenameGroup();
         _folderGroup = CreateFolderGroup();
+        _archiveMergeGroup = CreateArchiveMergeGroup();
         _relocationGroup = CreateRelocationGroup();
         _settingsStack.Controls.Add(_contextMenuGroup);
         _settingsStack.Controls.Add(_renameGroup);
         _settingsStack.Controls.Add(_folderGroup);
+        _settingsStack.Controls.Add(_archiveMergeGroup);
         _settingsStack.Controls.Add(_relocationGroup);
 
         scrollHost.Resize += (_, _) => ResizeGroups(scrollHost);
@@ -166,6 +168,10 @@ internal sealed partial class SettingsForm
         ConfigureCheckBox(_contextMenuRelocationCurrentCheckBox);
         _contextMenuRelocationChooseTargetCheckBox.Text = Localizer.Get("ContextCommandAutoRelocationChooseTarget");
         ConfigureCheckBox(_contextMenuRelocationChooseTargetCheckBox);
+        _contextMenuArchiveMergeGroupByArchiveNameCheckBox.Text = Localizer.Get("ContextCommandArchiveMergeGroupByArchiveName");
+        ConfigureCheckBox(_contextMenuArchiveMergeGroupByArchiveNameCheckBox);
+        _contextMenuArchiveMergePreserveInternalPathsCheckBox.Text = Localizer.Get("ContextCommandArchiveMergePreserveInternalPaths");
+        ConfigureCheckBox(_contextMenuArchiveMergePreserveInternalPathsCheckBox);
 
         var group = new CollapsibleSettingsGroup(
             Localizer.Get("GroupContextMenu"),
@@ -188,12 +194,54 @@ internal sealed partial class SettingsForm
         group.AddBodyControl(CreateSectionLabel(Localizer.Get("GroupAutoRelocationContextMenu")));
         group.AddBodyControl(_contextMenuRelocationCurrentCheckBox);
         group.AddBodyControl(_contextMenuRelocationChooseTargetCheckBox);
+        group.AddBodyControl(CreateSectionLabel(Localizer.Get("GroupArchiveMergeContextMenu")));
+        group.AddBodyControl(_contextMenuArchiveMergeGroupByArchiveNameCheckBox);
+        group.AddBodyControl(_contextMenuArchiveMergePreserveInternalPathsCheckBox);
         group.AddBodyControl(CreateSectionLabel(Localizer.Get("GroupApplicationContextMenu")));
         group.AddBodyControl(_contextMenuOpenCheckBox);
         group.AddBodyControl(CreateContextMenuButtons());
         group.AddBodyControl(CreateSectionLabel(Localizer.Get("GroupWindows11NativeContextMenu")));
         group.AddBodyControl(CreateHelperText(Localizer.Get("SettingsWindows11NativeContextMenuHelp")));
         group.AddBodyControl(CreateWindows11NativeContextMenuButtons());
+        RegisterGroup(group);
+        return group;
+    }
+
+    private CollapsibleSettingsGroup CreateArchiveMergeGroup()
+    {
+        _archiveMergeDeleteOriginalsCheckBox.Text = Localizer.Get("ArchiveMergeCheckDeleteOriginals");
+        ConfigureCheckBox(_archiveMergeDeleteOriginalsCheckBox);
+
+        var group = new CollapsibleSettingsGroup(
+            Localizer.Get("TabArchiveMerge"),
+            Color.FromArgb(20, 116, 148),
+            GetArchiveMergeSummary,
+            expanded: true);
+        group.AddBodyControl(CreateComboRow(
+            Localizer.Get("ArchiveMergeLabelLayout"),
+            _archiveMergeLayoutCombo,
+            Localizer.Get("ArchiveMergeLayoutHelp")));
+        group.AddBodyControl(CreateComboRow(
+            Localizer.Get("ArchiveMergeLabelCollision"),
+            _archiveMergeCollisionCombo,
+            Localizer.Get("ArchiveMergeCollisionHelp")));
+        group.AddBodyControl(CreateComboRow(
+            Localizer.Get("ArchiveMergeLabelDuplicate"),
+            _archiveMergeDuplicateCombo,
+            Localizer.Get("ArchiveMergeDuplicateHelp")));
+        group.AddBodyControl(CreateComboRow(
+            Localizer.Get("ArchiveMergeLabelFailure"),
+            _archiveMergeFailureCombo,
+            Localizer.Get("ArchiveMergeFailureHelp")));
+        group.AddBodyControl(CreateComboRow(
+            Localizer.Get("ArchiveMergeLabelOutputName"),
+            _archiveMergeOutputNameCombo,
+            Localizer.Get("ArchiveMergeOutputNameHelp")));
+        group.AddBodyControl(CreateComboRow(
+            Localizer.Get("ArchiveMergeLabelCompression"),
+            _archiveMergeCompressionCombo,
+            Localizer.Get("ArchiveMergeCompressionHelp")));
+        group.AddBodyControl(_archiveMergeDeleteOriginalsCheckBox);
         RegisterGroup(group);
         return group;
     }

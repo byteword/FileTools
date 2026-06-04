@@ -29,6 +29,8 @@ enum class CommandKind
     FolderMoveInnerFilesUp,
     AutoRelocationCurrentFolder,
     AutoRelocationChooseTarget,
+    ArchiveMergeGroupByArchiveName,
+    ArchiveMergePreserveInternalPaths,
     OpenApp
 };
 
@@ -50,6 +52,8 @@ constexpr CommandDefinition SubCommands[] =
     { CommandKind::FolderMoveInnerFilesUp, L"폴더 내부 파일 상위로 이동", L"FolderMoveInnerFilesUp", L"ContextMenuFolderMoveInnerFilesUp" },
     { CommandKind::AutoRelocationCurrentFolder, L"현재 폴더에서 자동 재배치", L"AutoRelocationCurrentFolder", L"ContextMenuAutoRelocationCurrentFolder" },
     { CommandKind::AutoRelocationChooseTarget, L"선택한 폴더로 자동 재배치", L"AutoRelocationChooseTarget", L"ContextMenuAutoRelocationChooseTarget" },
+    { CommandKind::ArchiveMergeGroupByArchiveName, L"ZIP 병합: 압축파일명 폴더로", L"ArchiveMergeGroupByArchiveName", L"ContextMenuArchiveMergeGroupByArchiveName" },
+    { CommandKind::ArchiveMergePreserveInternalPaths, L"ZIP 병합: 내부 경로 유지", L"ArchiveMergePreserveInternalPaths", L"ContextMenuArchiveMergePreserveInternalPaths" },
     { CommandKind::OpenApp, L"FileTools 열기", L"OpenApp", L"ContextMenuOpenApp" }
 };
 
@@ -225,6 +229,26 @@ bool SelectionAllFiles(const std::vector<std::wstring>& paths)
     return !paths.empty() && std::all_of(paths.begin(), paths.end(), IsPathFile);
 }
 
+bool HasZipExtension(const std::wstring& path)
+{
+    const size_t dot = path.find_last_of(L'.');
+    if (dot == std::wstring::npos)
+    {
+        return false;
+    }
+
+    return EqualsIgnoreCase(path.substr(dot), L".zip");
+}
+
+bool SelectionAllZipFiles(const std::vector<std::wstring>& paths)
+{
+    return paths.size() >= 2 &&
+        std::all_of(paths.begin(), paths.end(), [](const std::wstring& path)
+        {
+            return IsPathFile(path) && HasZipExtension(path);
+        });
+}
+
 bool SelectionAllDirectories(const std::vector<std::wstring>& paths)
 {
     return !paths.empty() && std::all_of(paths.begin(), paths.end(), IsPathDirectory);
@@ -292,6 +316,10 @@ bool IsCommandVisible(CommandKind kind, const std::vector<std::wstring>& paths)
         return SelectionAllDirectories(paths);
     case CommandKind::AutoRelocationCurrentFolder:
     case CommandKind::AutoRelocationChooseTarget:
+        return SelectionAnyFileSystemItem(paths);
+    case CommandKind::ArchiveMergeGroupByArchiveName:
+    case CommandKind::ArchiveMergePreserveInternalPaths:
+        return SelectionAllZipFiles(paths);
     case CommandKind::OpenApp:
         return SelectionAnyFileSystemItem(paths);
     default:

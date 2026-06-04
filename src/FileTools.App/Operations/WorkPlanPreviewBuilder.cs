@@ -51,8 +51,41 @@ internal sealed class WorkPlanPreviewBuilder
             WorkPlanStepKind.FolderWrap => BuildWrapPreview(number, step, state),
             WorkPlanStepKind.FolderUnwrap => BuildUnwrapPreview(number, step, state),
             WorkPlanStepKind.AutoRelocation => BuildRelocationPreview(number, step, state),
+            WorkPlanStepKind.ArchiveMerge => BuildArchiveMergePreview(number, step),
             _ => CreateWarning(number, step, state, Localizer.Get("PlanPreviewUnavailable"))
         };
+    }
+
+    private PreviewBuildResult BuildArchiveMergePreview(int number, WorkPlanStep step)
+    {
+        var options = step.ArchiveMergeOptions;
+        if (options is null)
+        {
+            return new PreviewBuildResult(
+                new WorkPlanStepPreview(number, step, Localizer.Get("ArchiveMergePlanMissingOptions"), step.DisplayName, HasWarning: true),
+                NextState: null);
+        }
+
+        var missing = options.SourcePaths.FirstOrDefault(static path => !File.Exists(path));
+        if (!string.IsNullOrWhiteSpace(missing))
+        {
+            return new PreviewBuildResult(
+                new WorkPlanStepPreview(
+                    number,
+                    step,
+                    Localizer.Format("PlanPreviewInputMissingFormat", missing),
+                    CreateArchiveMergeToolTip(step, options, Localizer.Format("PlanPreviewInputMissingFormat", missing)),
+                    HasWarning: true),
+                NextState: null);
+        }
+
+        var preview = Localizer.Format(
+            "ArchiveMergePreviewFormat",
+            options.SourcePaths.Count,
+            Path.GetFileName(options.OutputPath));
+        return new PreviewBuildResult(
+            new WorkPlanStepPreview(number, step, preview, CreateArchiveMergeToolTip(step, options, warning: ""), HasWarning: false),
+            NextState: null);
     }
 
     private PreviewBuildResult BuildRenamePreview(int number, WorkPlanStep step, PreviewPathState state)
@@ -285,7 +318,29 @@ internal sealed class WorkPlanPreviewBuilder
             return Localizer.Format("PlanOptionManualRenameFormat", step.ManualRenameFileName);
         }
 
+        if (step.Kind == WorkPlanStepKind.ArchiveMerge && step.ArchiveMergeOptions is { } options)
+        {
+            return ArchiveMergeOperations.DescribeOptions(options);
+        }
+
         return step.DisplayName;
+    }
+
+    private static string CreateArchiveMergeToolTip(WorkPlanStep step, ArchiveMergeOptions options, string warning)
+    {
+        var lines = new List<string>
+        {
+            step.DisplayName,
+            Localizer.Format("PlanTooltipOptionsFormat", ArchiveMergeOperations.DescribeOptions(options)),
+            Localizer.Format("PlanTooltipOutputFormat", options.OutputPath)
+        };
+        if (!string.IsNullOrWhiteSpace(warning))
+        {
+            lines.Add(Localizer.Format("PlanTooltipWarningFormat", warning));
+        }
+
+        lines.AddRange(options.SourcePaths.Take(12));
+        return string.Join(Environment.NewLine, lines);
     }
 
     private RenamePreview CreateManualRenamePreview(string path, string fileName)

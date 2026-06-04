@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
+using System.Text;
 using System.Windows.Forms;
 
 namespace FileTools;
@@ -86,6 +87,8 @@ public sealed partial class MainForm : Form
         _addMoveInnerFilesUpMenuItem.Click += (_, _) => AddStep(CreateUnwrapStep(
             FolderStructureOperation.MoveInnerFilesUp,
             _settings.FolderUnwrapNameMismatchMode));
+        _addArchiveMergeGroupMenuItem.Click += (_, _) => AddArchiveMergeStep(ArchiveMergeLayout.GroupByArchiveName);
+        _addArchiveMergePreserveMenuItem.Click += (_, _) => AddArchiveMergeStep(ArchiveMergeLayout.PreserveInternalPaths);
         _addRelocationMenuItem.Click += (_, _) => AddStep(CreateAutoRelocationStep());
         _removeStepMenuItem.Click += (_, _) => RemoveSelectedStep();
         _clearStepsMenuItem.Click += (_, _) => ClearSelectedTargetSteps();
@@ -120,6 +123,9 @@ public sealed partial class MainForm : Form
         _addMoveInnerFilesUpToolItem.Click += (_, _) => AddStep(CreateUnwrapStep(
             FolderStructureOperation.MoveInnerFilesUp,
             _settings.FolderUnwrapNameMismatchMode));
+        _addArchiveMergeToolButton.ButtonClick += (_, _) => AddArchiveMergeStep(ArchiveMergeLayout.GroupByArchiveName);
+        _addArchiveMergeGroupToolItem.Click += (_, _) => AddArchiveMergeStep(ArchiveMergeLayout.GroupByArchiveName);
+        _addArchiveMergePreserveToolItem.Click += (_, _) => AddArchiveMergeStep(ArchiveMergeLayout.PreserveInternalPaths);
         _addRelocationToolButton.Click += (_, _) => AddStep(CreateAutoRelocationStep());
         _removeStepToolButton.Click += (_, _) => RemoveSelectedStep();
         _clearStepsToolButton.Click += (_, _) => ClearSelectedTargetSteps();
@@ -149,6 +155,8 @@ public sealed partial class MainForm : Form
         _addUseFolderNameUnwrapMenuItem.Text = FormatUnwrapSingleMenuText(FolderUnwrapNameMismatchMode.UseFolderName);
         _addPrefixFolderNameUnwrapMenuItem.Text = FormatUnwrapSingleMenuText(FolderUnwrapNameMismatchMode.PrefixFolderName);
         _addMoveInnerFilesUpMenuItem.Text = ToolModeText.GetDisplayName(FolderStructureOperation.MoveInnerFilesUp);
+        _addArchiveMergeGroupMenuItem.Text = Localizer.Get("ContextCommandArchiveMergeGroupByArchiveName");
+        _addArchiveMergePreserveMenuItem.Text = Localizer.Get("ContextCommandArchiveMergePreserveInternalPaths");
         _addRelocationMenuItem.Text = Localizer.Get("ButtonAddRelocationStep");
         _removeStepMenuItem.Text = Localizer.Get("ButtonRemoveStep");
         _clearStepsMenuItem.Text = Localizer.Get("ButtonClearSteps");
@@ -181,6 +189,10 @@ public sealed partial class MainForm : Form
         _addUseFolderNameUnwrapToolItem.Text = FormatUnwrapSingleMenuText(FolderUnwrapNameMismatchMode.UseFolderName);
         _addPrefixFolderNameUnwrapToolItem.Text = FormatUnwrapSingleMenuText(FolderUnwrapNameMismatchMode.PrefixFolderName);
         _addMoveInnerFilesUpToolItem.Text = ToolModeText.GetDisplayName(FolderStructureOperation.MoveInnerFilesUp);
+        _addArchiveMergeToolButton.Text = Localizer.Get("ButtonAddArchiveMergeStep");
+        _addArchiveMergeToolButton.ToolTipText = Localizer.Get("ToolTipAddArchiveMerge");
+        _addArchiveMergeGroupToolItem.Text = Localizer.Get("ContextCommandArchiveMergeGroupByArchiveName");
+        _addArchiveMergePreserveToolItem.Text = Localizer.Get("ContextCommandArchiveMergePreserveInternalPaths");
         _addRelocationToolButton.Text = Localizer.Get("ButtonAddRelocationStep");
         _addRelocationToolButton.ToolTipText = Localizer.Get("ToolTipAddRelocation");
         _removeStepToolButton.Text = Localizer.Get("ButtonRemoveStep");
@@ -210,6 +222,8 @@ public sealed partial class MainForm : Form
         _addUseFolderNameUnwrapMenuItem.Image = UiIconFactory.Unwrap;
         _addPrefixFolderNameUnwrapMenuItem.Image = UiIconFactory.Unwrap;
         _addMoveInnerFilesUpMenuItem.Image = UiIconFactory.MoveUp;
+        _addArchiveMergeGroupMenuItem.Image = UiIconFactory.ArchiveMerge;
+        _addArchiveMergePreserveMenuItem.Image = UiIconFactory.ArchiveMerge;
         _addRelocationMenuItem.Image = UiIconFactory.Relocate;
         _removeStepMenuItem.Image = UiIconFactory.RemoveStep;
         _clearStepsMenuItem.Image = UiIconFactory.Clear;
@@ -233,6 +247,9 @@ public sealed partial class MainForm : Form
         _addUseFolderNameUnwrapToolItem.Image = UiIconFactory.Unwrap;
         _addPrefixFolderNameUnwrapToolItem.Image = UiIconFactory.Unwrap;
         _addMoveInnerFilesUpToolItem.Image = UiIconFactory.MoveUp;
+        _addArchiveMergeToolButton.Image = UiIconFactory.ArchiveMerge;
+        _addArchiveMergeGroupToolItem.Image = UiIconFactory.ArchiveMerge;
+        _addArchiveMergePreserveToolItem.Image = UiIconFactory.ArchiveMerge;
         _addRelocationToolButton.Image = UiIconFactory.Relocate;
         _removeStepToolButton.Image = UiIconFactory.RemoveStep;
         _clearStepsToolButton.Image = UiIconFactory.Clear;
@@ -577,6 +594,60 @@ public sealed partial class MainForm : Form
         return EditStep(step) ? step : null;
     }
 
+    private void AddArchiveMergeStep(ArchiveMergeLayout layout)
+    {
+        var targets = GetSelectedTargets().ToArray();
+        if (targets.Length < 2 ||
+            !targets.All(static target => ArchiveMergeOperations.IsSupportedArchivePath(target.Path)))
+        {
+            MessageBox.Show(
+                Localizer.Get("ArchiveMergeNeedsMultipleArchives"),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            return;
+        }
+
+        if (targets.Any(static target => target.Steps.Count > 0))
+        {
+            MessageBox.Show(
+                Localizer.Get("ArchiveMergePlannedStepsMessage"),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            return;
+        }
+
+        var options = ArchiveMergeOperations.CreateDefaultOptions(
+            targets.Select(static target => target.Path),
+            _settings,
+            layout);
+        if (options is null)
+        {
+            MessageBox.Show(
+                Localizer.Get("ArchiveMergeNeedsMultipleArchives"),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            return;
+        }
+
+        var step = new WorkPlanStep
+        {
+            Kind = WorkPlanStepKind.ArchiveMerge,
+            ArchiveMergeOptions = options
+        };
+        foreach (var target in targets)
+        {
+            target.Steps.Add(step);
+        }
+
+        RefreshTargetGridRows();
+        RefreshPlanList();
+        SelectPlanRow(GetSelectedTarget()?.Steps.IndexOf(step) ?? -1);
+        UpdateCommandStates();
+    }
+
     private void EditSelectedStep()
     {
         var step = GetSelectedStep();
@@ -605,6 +676,23 @@ public sealed partial class MainForm : Form
             return true;
         }
 
+        if (step.Kind == WorkPlanStepKind.ArchiveMerge)
+        {
+            if (step.ArchiveMergeOptions is null)
+            {
+                return false;
+            }
+
+            using var archiveMergeDialog = new ArchiveMergeOptionsDialog(step.ArchiveMergeOptions);
+            if (archiveMergeDialog.ShowDialog(this) != DialogResult.OK)
+            {
+                return false;
+            }
+
+            step.ArchiveMergeOptions = archiveMergeDialog.Options;
+            return true;
+        }
+
         using var dialog = new PlanStepDialog(step, _settings);
         return dialog.ShowDialog(this) == DialogResult.OK;
     }
@@ -619,7 +707,7 @@ public sealed partial class MainForm : Form
         }
 
         var removedIndex = target.Steps.IndexOf(step);
-        target.Steps.Remove(step);
+        RemoveStepFromPlans(target, step);
         RefreshTargetGridRows();
         RefreshPlanList();
         SelectPlanRow(Math.Min(removedIndex, target.Steps.Count - 1));
@@ -634,7 +722,16 @@ public sealed partial class MainForm : Form
             return;
         }
 
+        var steps = target.Steps.ToArray();
         target.Steps.Clear();
+        foreach (var step in steps)
+        {
+            if (step.Kind == WorkPlanStepKind.ArchiveMerge)
+            {
+                RemoveSharedArchiveMergeStep(step);
+            }
+        }
+
         RefreshTargetGridRows();
         RefreshPlanList();
         UpdateCommandStates();
@@ -690,7 +787,8 @@ public sealed partial class MainForm : Form
         try
         {
             var progress = new Progress<string>(AppendLog);
-            var result = await Task.Run(() => new WorkPlanExecutor(_settings)
+            var questionSink = new UiArchiveMergeQuestionSink(this);
+            var result = await Task.Run(() => new WorkPlanExecutor(_settings, questionSink)
                 .Run(targets, cancellation.Token, progress));
 
             AppendLog(Localizer.Format(
@@ -1073,6 +1171,10 @@ public sealed partial class MainForm : Form
         var canWrap = canModify && hasSelectedTargets && selectedTargets.All(static target => File.Exists(target.Path));
         var canUnwrap = canModify && hasSelectedTargets && selectedTargets.All(static target => Directory.Exists(target.Path));
         var canRelocate = canModify && hasSelectedTargets && selectedTargets.All(IsExistingTarget);
+        var canArchiveMerge = canModify &&
+                              selectedTargets.Length >= 2 &&
+                              selectedTargets.All(static target => ArchiveMergeOperations.IsSupportedArchivePath(target.Path)) &&
+                              selectedTargets.All(static target => target.Steps.Count == 0);
         var canMerge = canModify &&
                        selectedTargets.Length >= 2 &&
                        selectedTargets.All(IsExistingTarget) &&
@@ -1089,6 +1191,7 @@ public sealed partial class MainForm : Form
         _addRenameMenuItem.Enabled = canRename;
         _addWrapMenuItem.Enabled = canWrap;
         SetUnwrapItemsEnabled(canUnwrap);
+        SetArchiveMergeItemsEnabled(canArchiveMerge);
         _addRelocationMenuItem.Enabled = canRelocate;
         _removeStepMenuItem.Enabled = canRemoveStep;
         _clearStepsMenuItem.Enabled = canClearSteps;
@@ -1107,6 +1210,7 @@ public sealed partial class MainForm : Form
         _addRenameToolButton.Enabled = canRename;
         _addWrapToolButton.Enabled = canWrap;
         _addUnwrapToolButton.Enabled = canUnwrap;
+        _addArchiveMergeToolButton.Enabled = canArchiveMerge;
         _addRelocationToolButton.Enabled = canRelocate;
         _removeStepToolButton.Enabled = canRemoveStep;
         _clearStepsToolButton.Enabled = canClearSteps;
@@ -1129,6 +1233,14 @@ public sealed partial class MainForm : Form
         _addUseFolderNameUnwrapToolItem.Enabled = enabled;
         _addPrefixFolderNameUnwrapToolItem.Enabled = enabled;
         _addMoveInnerFilesUpToolItem.Enabled = enabled;
+    }
+
+    private void SetArchiveMergeItemsEnabled(bool enabled)
+    {
+        _addArchiveMergeGroupMenuItem.Enabled = enabled;
+        _addArchiveMergePreserveMenuItem.Enabled = enabled;
+        _addArchiveMergeGroupToolItem.Enabled = enabled;
+        _addArchiveMergePreserveToolItem.Enabled = enabled;
     }
 
     private void ApplyRunStopButtonState()
@@ -1206,6 +1318,7 @@ public sealed partial class MainForm : Form
             WorkPlanStepKind.FolderWrap => "\u21B4",
             WorkPlanStepKind.FolderUnwrap => "\u21B1",
             WorkPlanStepKind.AutoRelocation => "\u21C4",
+            WorkPlanStepKind.ArchiveMerge => "\u21C6",
             _ => "\u2022"
         };
         return icon + " " + GetPlanActionName(step);
@@ -1219,8 +1332,41 @@ public sealed partial class MainForm : Form
             WorkPlanStepKind.FolderWrap => Localizer.Get("PlanActionWrap"),
             WorkPlanStepKind.FolderUnwrap => Localizer.Get("PlanActionUnwrap"),
             WorkPlanStepKind.AutoRelocation => Localizer.Get("PlanActionRelocate"),
+            WorkPlanStepKind.ArchiveMerge => Localizer.Get("PlanActionArchiveMerge"),
             _ => step.DisplayName
         };
+    }
+
+    private void RemoveStepFromPlans(WorkTargetPlan currentTarget, WorkPlanStep step)
+    {
+        if (step.Kind == WorkPlanStepKind.ArchiveMerge)
+        {
+            RemoveSharedArchiveMergeStep(step);
+            return;
+        }
+
+        currentTarget.Steps.Remove(step);
+    }
+
+    private void RemoveSharedArchiveMergeStep(WorkPlanStep step)
+    {
+        var planId = step.ArchiveMergeOptions?.PlanId;
+        if (string.IsNullOrWhiteSpace(planId))
+        {
+            foreach (var target in _targets)
+            {
+                target.Steps.Remove(step);
+            }
+
+            return;
+        }
+
+        foreach (var target in _targets)
+        {
+            target.Steps.RemoveAll(candidate =>
+                candidate.Kind == WorkPlanStepKind.ArchiveMerge &&
+                string.Equals(candidate.ArchiveMergeOptions?.PlanId, planId, StringComparison.OrdinalIgnoreCase));
+        }
     }
 
     private static bool IsExistingTarget(WorkTargetPlan target)
@@ -1254,6 +1400,32 @@ public sealed partial class MainForm : Form
     private static bool IsDesignerHosted()
     {
         return LicenseManager.UsageMode == LicenseUsageMode.Designtime;
+    }
+
+    private sealed class UiArchiveMergeQuestionSink : IArchiveMergeQuestionSink
+    {
+        private readonly Form _owner;
+
+        public UiArchiveMergeQuestionSink(Form owner)
+        {
+            _owner = owner;
+        }
+
+        public Encoding? ChooseEncoding(ArchiveEncodingQuestion question)
+        {
+            if (_owner.IsDisposed)
+            {
+                return null;
+            }
+
+            if (_owner.InvokeRequired)
+            {
+                return (Encoding?)_owner.Invoke(new Func<Encoding?>(() => ChooseEncoding(question)));
+            }
+
+            using var dialog = new ArchiveEncodingDialog(question);
+            return dialog.ShowDialog(_owner) == DialogResult.OK ? dialog.SelectedEncoding : null;
+        }
     }
 
 }

@@ -22,6 +22,8 @@ partial class MainForm
     private ToolStripMenuItem _addUseFolderNameUnwrapMenuItem = null!;
     private ToolStripMenuItem _addPrefixFolderNameUnwrapMenuItem = null!;
     private ToolStripMenuItem _addMoveInnerFilesUpMenuItem = null!;
+    private ToolStripMenuItem _addArchiveMergeGroupMenuItem = null!;
+    private ToolStripMenuItem _addArchiveMergePreserveMenuItem = null!;
     private ToolStripMenuItem _addRelocationMenuItem = null!;
     private ToolStripMenuItem _removeStepMenuItem = null!;
     private ToolStripMenuItem _clearStepsMenuItem = null!;
@@ -51,6 +53,9 @@ partial class MainForm
     private ToolStripMenuItem _addUseFolderNameUnwrapToolItem = null!;
     private ToolStripMenuItem _addPrefixFolderNameUnwrapToolItem = null!;
     private ToolStripMenuItem _addMoveInnerFilesUpToolItem = null!;
+    private ToolStripSplitButton _addArchiveMergeToolButton = null!;
+    private ToolStripMenuItem _addArchiveMergeGroupToolItem = null!;
+    private ToolStripMenuItem _addArchiveMergePreserveToolItem = null!;
     private ToolStripButton _addRelocationToolButton = null!;
     private GroupBox _planGroup = null!;
     private Label _planScopeLabel = null!;
@@ -91,6 +96,8 @@ partial class MainForm
         _addUseFolderNameUnwrapMenuItem = new ToolStripMenuItem();
         _addPrefixFolderNameUnwrapMenuItem = new ToolStripMenuItem();
         _addMoveInnerFilesUpMenuItem = new ToolStripMenuItem();
+        _addArchiveMergeGroupMenuItem = new ToolStripMenuItem();
+        _addArchiveMergePreserveMenuItem = new ToolStripMenuItem();
         _addRelocationMenuItem = new ToolStripMenuItem();
         _removeStepMenuItem = new ToolStripMenuItem();
         _clearStepsMenuItem = new ToolStripMenuItem();
@@ -120,6 +127,9 @@ partial class MainForm
         _addUseFolderNameUnwrapToolItem = new ToolStripMenuItem();
         _addPrefixFolderNameUnwrapToolItem = new ToolStripMenuItem();
         _addMoveInnerFilesUpToolItem = new ToolStripMenuItem();
+        _addArchiveMergeToolButton = new ToolStripSplitButton();
+        _addArchiveMergeGroupToolItem = new ToolStripMenuItem();
+        _addArchiveMergePreserveToolItem = new ToolStripMenuItem();
         _addRelocationToolButton = new ToolStripButton();
         _planGroup = new GroupBox();
         _planScopeLabel = new Label();
@@ -193,6 +203,10 @@ partial class MainForm
             _addUseFolderNameUnwrapMenuItem,
             _addPrefixFolderNameUnwrapMenuItem,
             _addMoveInnerFilesUpMenuItem,
+            new ToolStripSeparator(),
+            _addArchiveMergeGroupMenuItem,
+            _addArchiveMergePreserveMenuItem,
+            new ToolStripSeparator(),
             _addRelocationMenuItem,
             new ToolStripSeparator(),
             _removeStepMenuItem,
@@ -225,6 +239,12 @@ partial class MainForm
 
         _addMoveInnerFilesUpMenuItem.Name = "_addMoveInnerFilesUpMenuItem";
         _addMoveInnerFilesUpMenuItem.Text = "Move inner files up";
+
+        _addArchiveMergeGroupMenuItem.Name = "_addArchiveMergeGroupMenuItem";
+        _addArchiveMergeGroupMenuItem.Text = "Merge ZIPs by archive name";
+
+        _addArchiveMergePreserveMenuItem.Name = "_addArchiveMergePreserveMenuItem";
+        _addArchiveMergePreserveMenuItem.Text = "Merge ZIPs preserving paths";
 
         _addRelocationMenuItem.Name = "_addRelocationMenuItem";
         _addRelocationMenuItem.Text = "Add relocation";
@@ -352,6 +372,7 @@ partial class MainForm
             _addRenameToolButton,
             _addWrapToolButton,
             _addUnwrapToolButton,
+            _addArchiveMergeToolButton,
             _addRelocationToolButton
         });
         _actionToolStrip.Name = "_actionToolStrip";
@@ -399,6 +420,22 @@ partial class MainForm
 
         _addMoveInnerFilesUpToolItem.Name = "_addMoveInnerFilesUpToolItem";
         _addMoveInnerFilesUpToolItem.Text = "Move inner files up";
+
+        _addArchiveMergeToolButton.DisplayStyle = ToolStripItemDisplayStyle.Image;
+        _addArchiveMergeToolButton.DropDownItems.AddRange(new ToolStripItem[]
+        {
+            _addArchiveMergeGroupToolItem,
+            _addArchiveMergePreserveToolItem
+        });
+        _addArchiveMergeToolButton.ImageTransparentColor = Color.Magenta;
+        _addArchiveMergeToolButton.Name = "_addArchiveMergeToolButton";
+        _addArchiveMergeToolButton.Text = "Add archive merge";
+
+        _addArchiveMergeGroupToolItem.Name = "_addArchiveMergeGroupToolItem";
+        _addArchiveMergeGroupToolItem.Text = "Merge ZIPs by archive name";
+
+        _addArchiveMergePreserveToolItem.Name = "_addArchiveMergePreserveToolItem";
+        _addArchiveMergePreserveToolItem.Text = "Merge ZIPs preserving paths";
 
         _addRelocationToolButton.DisplayStyle = ToolStripItemDisplayStyle.Image;
         _addRelocationToolButton.ImageTransparentColor = Color.Magenta;

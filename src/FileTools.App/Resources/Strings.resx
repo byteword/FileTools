@@ -452,4 +452,101 @@
   <data name="FolderMergeFileNameCollisionFormat" xml:space="preserve"><value>{0} target file name collision</value></data>
   <data name="FolderMergeSourceContainsTargetFormat" xml:space="preserve"><value>{0} cannot merge into its own child path</value></data>
   <data name="FolderMergeFolderNameCollisionFormat" xml:space="preserve"><value>{0} target folder name collision</value></data>
+  <data name="ToolArchiveMerge" xml:space="preserve"><value>Merge archives</value></data>
+  <data name="ContextCommandArchiveMergeGroupByArchiveName" xml:space="preserve"><value>Merge ZIPs by archive name</value></data>
+  <data name="ContextCommandArchiveMergePreserveInternalPaths" xml:space="preserve"><value>Merge ZIPs preserving internal paths</value></data>
+  <data name="ButtonAddArchiveMergeStep" xml:space="preserve"><value>Add archive merge</value></data>
+  <data name="ToolTipAddArchiveMerge" xml:space="preserve"><value>Add a shared ZIP merge action to selected ZIP files.</value></data>
+  <data name="PlanActionArchiveMerge" xml:space="preserve"><value>Archive merge</value></data>
+  <data name="GroupArchiveMergeContextMenu" xml:space="preserve"><value>Archive merge</value></data>
+  <data name="TabArchiveMerge" xml:space="preserve"><value>Archive Merge</value></data>
+  <data name="ArchiveMergeNeedsMultipleArchives" xml:space="preserve"><value>Select two or more ZIP archives.</value></data>
+  <data name="ArchiveMergePlannedStepsMessage" xml:space="preserve"><value>Archive merge can be added only after clearing planned steps from the selected ZIP files.</value></data>
+  <data name="ArchiveMergeOutputPathRequired" xml:space="preserve"><value>Select an output ZIP path.</value></data>
+  <data name="ArchiveMergeOutputCannotBeSource" xml:space="preserve"><value>The output ZIP cannot be one of the selected source archives.</value></data>
+  <data name="ArchiveMergeProgressValidateSources" xml:space="preserve"><value>Checking source archives...</value></data>
+  <data name="ArchiveMergeProgressScanEntries" xml:space="preserve"><value>Scanning archive entries...</value></data>
+  <data name="ArchiveMergeProgressValidateEntries" xml:space="preserve"><value>Validating entry streams...</value></data>
+  <data name="ArchiveMergeProgressResolveCollisions" xml:space="preserve"><value>Resolving duplicate and collision policy...</value></data>
+  <data name="ArchiveMergeProgressWriteTemp" xml:space="preserve"><value>Writing temporary ZIP...</value></data>
+  <data name="ArchiveMergeProgressVerifyOutput" xml:space="preserve"><value>Verifying temporary ZIP...</value></data>
+  <data name="ArchiveMergeProgressMoveFinal" xml:space="preserve"><value>Moving ZIP to the final name...</value></data>
+  <data name="ArchiveMergeProgressDeleteOriginals" xml:space="preserve"><value>Deleting original archives...</value></data>
+  <data name="ArchiveMergeProgressReadArchiveFormat" xml:space="preserve"><value>Reading {0}...</value></data>
+  <data name="ArchiveMergeProgressDialogTitle" xml:space="preserve"><value>Archive merge progress</value></data>
+  <data name="ArchiveMergeProgressPreparing" xml:space="preserve"><value>Preparing archive merge...</value></data>
+  <data name="ArchiveMergeProgressCompleted" xml:space="preserve"><value>Archive merge completed.</value></data>
+  <data name="ArchiveMergeProgressCompletedWithErrors" xml:space="preserve"><value>Archive merge completed with errors.</value></data>
+  <data name="ArchiveMergeNoReadableArchives" xml:space="preserve"><value>No readable archives remain.</value></data>
+  <data name="ArchiveMergeNoEntriesToWrite" xml:space="preserve"><value>No archive entries remain to write.</value></data>
+  <data name="ArchiveMergeCanceled" xml:space="preserve"><value>Archive merge was canceled.</value></data>
+  <data name="ArchiveMergeWriteFailedFormat" xml:space="preserve"><value>Archive merge failed: {0}</value></data>
+  <data name="ArchiveMergeOpenFailedFormat" xml:space="preserve"><value>{0} could not be opened: {1}</value></data>
+  <data name="ArchiveMergeUnsupportedArchiveFormat" xml:space="preserve"><value>{0} is not a supported archive format.</value></data>
+  <data name="ArchiveMergeInvalidEntryPathFormat" xml:space="preserve"><value>Invalid archive entry path skipped: {0}</value></data>
+  <data name="ArchiveMergeEntryReadFailedFormat" xml:space="preserve"><value>{0}:{1} could not be read: {2}</value></data>
+  <data name="ArchiveMergeSkippedArchiveFormat" xml:space="preserve"><value>{0} skipped by archive failure policy.</value></data>
+  <data name="ArchiveMergeAskPolicyRequiresUi" xml:space="preserve"><value>The Ask policy requires an interactive decision container.</value></data>
+  <data name="ArchiveMergeDuplicateContentSkippedFormat" xml:space="preserve"><value>Duplicate content skipped: {0}</value></data>
+  <data name="ArchiveMergeDuplicateDirectorySkippedFormat" xml:space="preserve"><value>Duplicate directory skipped: {0}</value></data>
+  <data name="ArchiveMergeInternalCollisionFormat" xml:space="preserve"><value>Archive internal path collision: {0}</value></data>
+  <data name="ArchiveMergeCreatedFormat" xml:space="preserve"><value>Created {0} ({1} files, {2} folders).</value></data>
+  <data name="ArchiveMergeOriginalDeleteSkippedFormat" xml:space="preserve"><value>Original archive not deleted because the merge was partial: {0}</value></data>
+  <data name="ArchiveMergeOriginalDeletedFormat" xml:space="preserve"><value>Original archive deleted: {0}</value></data>
+  <data name="ArchiveMergeOriginalDeleteFailedFormat" xml:space="preserve"><value>Original archive could not be deleted: {0} - {1}</value></data>
+  <data name="ArchiveMergeVerificationCountMismatchFormat" xml:space="preserve"><value>Output verification failed. Expected {0} entries, found {1}.</value></data>
+  <data name="ArchiveMergeOutputCollisionUnresolved" xml:space="preserve"><value>Could not find an available output filename.</value></data>
+  <data name="ArchiveMergeNoEncodingCandidate" xml:space="preserve"><value>No filename encoding candidate could open this ZIP.</value></data>
+  <data name="ArchiveMergePlanOptionsFormat" xml:space="preserve"><value>{0} | failure: {1} | duplicates: {2}</value></data>
+  <data name="ArchiveMergeStepDisplayFormat" xml:space="preserve"><value>Merge {0} ZIPs to {1} ({2})</value></data>
+  <data name="ArchiveMergePreviewFormat" xml:space="preserve"><value>{0} ZIPs -&gt; {1}</value></data>
+  <data name="ArchiveMergePlanMissingOptions" xml:space="preserve"><value>Archive merge options are missing.</value></data>
+  <data name="LogArchiveMergeStartingFormat" xml:space="preserve"><value>Merge {0} archives into {1}</value></data>
+  <data name="ArchiveMergeLayoutGroupByArchiveName" xml:space="preserve"><value>Group by archive filename</value></data>
+  <data name="ArchiveMergeLayoutPreserveInternalPaths" xml:space="preserve"><value>Preserve internal paths</value></data>
+  <data name="ArchiveMergeCollisionAutoNumber" xml:space="preserve"><value>Auto number conflicting names</value></data>
+  <data name="ArchiveMergeCollisionSameContentKeepFirst" xml:space="preserve"><value>Same content: keep first</value></data>
+  <data name="ArchiveMergeCollisionAsk" xml:space="preserve"><value>Ask when names collide</value></data>
+  <data name="ArchiveMergeCollisionAbort" xml:space="preserve"><value>Abort on name collision</value></data>
+  <data name="ArchiveMergeDuplicateKeepBoth" xml:space="preserve"><value>Keep both duplicate files</value></data>
+  <data name="ArchiveMergeDuplicateSameContentKeepFirst" xml:space="preserve"><value>Same content: keep first</value></data>
+  <data name="ArchiveMergeDuplicateAsk" xml:space="preserve"><value>Ask for duplicate files</value></data>
+  <data name="ArchiveMergeFailureAbortAll" xml:space="preserve"><value>Abort all on failure</value></data>
+  <data name="ArchiveMergeFailureSkipArchive" xml:space="preserve"><value>Skip failed archive</value></data>
+  <data name="ArchiveMergeFailureSkipEntry" xml:space="preserve"><value>Skip failed entry</value></data>
+  <data name="ArchiveMergeOutputCommonStem" xml:space="preserve"><value>Common selected filename</value></data>
+  <data name="ArchiveMergeOutputParentFolder" xml:space="preserve"><value>Parent folder name</value></data>
+  <data name="ArchiveMergeOutputTimestamp" xml:space="preserve"><value>Generated timestamp name</value></data>
+  <data name="ArchiveMergeOutputManual" xml:space="preserve"><value>Manual path in dialog</value></data>
+  <data name="ArchiveMergeCompressionStoreOnly" xml:space="preserve"><value>Store only</value></data>
+  <data name="ArchiveMergeCompressionFast" xml:space="preserve"><value>Fast compression</value></data>
+  <data name="ArchiveMergeCompressionDefault" xml:space="preserve"><value>Default compression</value></data>
+  <data name="ArchiveMergeCompressionMaximum" xml:space="preserve"><value>Maximum compression</value></data>
+  <data name="ArchiveMergeLabelLayout" xml:space="preserve"><value>Layout</value></data>
+  <data name="ArchiveMergeLabelCollision" xml:space="preserve"><value>Name collision</value></data>
+  <data name="ArchiveMergeLabelDuplicate" xml:space="preserve"><value>Duplicate content</value></data>
+  <data name="ArchiveMergeLabelFailure" xml:space="preserve"><value>Failure handling</value></data>
+  <data name="ArchiveMergeLabelOutputName" xml:space="preserve"><value>Output filename</value></data>
+  <data name="ArchiveMergeLabelCompression" xml:space="preserve"><value>Compression</value></data>
+  <data name="ArchiveMergeLabelOutputPath" xml:space="preserve"><value>Output ZIP</value></data>
+  <data name="ArchiveMergeCheckDeleteOriginals" xml:space="preserve"><value>Delete original archives after full success</value></data>
+  <data name="ArchiveMergeLayoutHelp" xml:space="preserve"><value>Grouping by archive filename avoids internal name collisions by default.</value></data>
+  <data name="ArchiveMergeCollisionHelp" xml:space="preserve"><value>Used when the selected layout produces the same internal ZIP path more than once.</value></data>
+  <data name="ArchiveMergeDuplicateHelp" xml:space="preserve"><value>Same-content detection reads and hashes file entries before writing.</value></data>
+  <data name="ArchiveMergeFailureHelp" xml:space="preserve"><value>Archive-open and entry-read failures can abort or produce a partial output.</value></data>
+  <data name="ArchiveMergeOutputNameHelp" xml:space="preserve"><value>Used for the default output ZIP path when a merge plan is created.</value></data>
+  <data name="ArchiveMergeCompressionHelp" xml:space="preserve"><value>Small ZIP compression setting for newly written output archives.</value></data>
+  <data name="ArchiveMergeOptionsDialogTitle" xml:space="preserve"><value>Archive merge options</value></data>
+  <data name="ArchiveMergeOptionsHeader" xml:space="preserve"><value>Merge selected ZIP archives into one output ZIP.</value></data>
+  <data name="ArchiveMergeOutputHelp" xml:space="preserve"><value>The output is written to a temporary ZIP first, then moved to this final path.</value></data>
+  <data name="ArchiveMergeSourcesGroup" xml:space="preserve"><value>Source archives</value></data>
+  <data name="ArchiveMergeOutputDialogTitle" xml:space="preserve"><value>Select output ZIP</value></data>
+  <data name="ArchiveMergeOutputDialogFilter" xml:space="preserve"><value>ZIP archive (*.zip)|*.zip</value></data>
+  <data name="ArchiveEncodingDialogTitle" xml:space="preserve"><value>Select ZIP filename encoding</value></data>
+  <data name="ArchiveEncodingDialogHeader" xml:space="preserve"><value>Select the encoding used by this archive's filenames.</value></data>
+  <data name="ArchiveEncodingColumnEncoding" xml:space="preserve"><value>Encoding</value></data>
+  <data name="ArchiveEncodingColumnDescription" xml:space="preserve"><value>Description</value></data>
+  <data name="ArchiveEncodingColumnScore" xml:space="preserve"><value>Score</value></data>
+  <data name="ArchiveEncodingColumnPreview" xml:space="preserve"><value>Preview names</value></data>
+  <data name="ArchiveEncodingScoreFormat" xml:space="preserve"><value>Score: {0}</value></data>
 </root>
