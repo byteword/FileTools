@@ -64,6 +64,7 @@ partial class MainForm
     private ToolStripButton _removeStepToolButton = null!;
     private ToolStripButton _clearStepsToolButton = null!;
     private Panel _executionPanel = null!;
+    private ArchiveMergeDecisionPanel _archiveMergeDecisionPanel = null!;
     private TextBox _logBox = null!;
     private Button _runStopButton = null!;
 
@@ -138,6 +139,7 @@ partial class MainForm
         _removeStepToolButton = new ToolStripButton();
         _clearStepsToolButton = new ToolStripButton();
         _executionPanel = new Panel();
+        _archiveMergeDecisionPanel = new ArchiveMergeDecisionPanel();
         _logBox = new TextBox();
         _runStopButton = new Button();
         _menuStrip.SuspendLayout();
@@ -501,7 +503,13 @@ partial class MainForm
         _executionPanel.Name = "_executionPanel";
         _executionPanel.Padding = new Padding(0, 8, 0, 0);
         _executionPanel.Controls.Add(_logBox);
+        _executionPanel.Controls.Add(_archiveMergeDecisionPanel);
         _executionPanel.Controls.Add(_runStopButton);
+
+        _archiveMergeDecisionPanel.Dock = DockStyle.Right;
+        _archiveMergeDecisionPanel.Name = "_archiveMergeDecisionPanel";
+        _archiveMergeDecisionPanel.Visible = false;
+        _archiveMergeDecisionPanel.Width = 310;
 
         _logBox.BackColor = SystemColors.Window;
         _logBox.BorderStyle = BorderStyle.FixedSingle;

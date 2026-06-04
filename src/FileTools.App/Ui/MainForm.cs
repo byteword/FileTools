@@ -15,6 +15,8 @@ public sealed partial class MainForm : Form
     private const string PlanOrderColumnName = "PlanOrder";
     private const string PlanActionColumnName = "PlanAction";
     private const string PlanPreviewColumnName = "PlanPreview";
+    private const int ExecutionPanelDefaultHeight = 96;
+    private const int ExecutionPanelDecisionHeight = 220;
 
     private readonly string[] _initialPaths;
     private readonly BindingList<WorkTargetPlan> _targets = [];
@@ -130,6 +132,9 @@ public sealed partial class MainForm : Form
         _removeStepToolButton.Click += (_, _) => RemoveSelectedStep();
         _clearStepsToolButton.Click += (_, _) => ClearSelectedTargetSteps();
         _runStopButton.Click += (_, _) => RunOrStopPlan();
+        _archiveMergeDecisionPanel.DecisionAdded += (_, e) =>
+            AppendLog(Localizer.Format("ArchiveMergeDecisionAddedFormat", e.Title));
+        _archiveMergeDecisionPanel.PendingCountChanged += (_, _) => UpdateArchiveMergeDecisionPanelVisibility();
     }
 
     private void ApplyLocalization()
@@ -744,6 +749,7 @@ public sealed partial class MainForm : Form
             if (!_executionCancellation.IsCancellationRequested)
             {
                 _executionCancellation.Cancel();
+                _archiveMergeDecisionPanel.CancelPendingDecisions();
                 AppendLog(Localizer.Get("LogStopRequested"));
                 UpdateCommandStates();
             }
@@ -780,6 +786,9 @@ public sealed partial class MainForm : Form
         _executionCancellation = cancellation;
         var targets = _targets.ToArray();
         var stepCount = targets.Sum(static target => target.Steps.Count);
+        _archiveMergeDecisionPanel.CancelPendingDecisions();
+        UpdateArchiveMergeDecisionPanelVisibility();
+        EnsureArchiveMergeDecisionPanelHandle();
         ClearLog();
         AppendLog(Localizer.Format("LogExecutionStartingFormat", targets.Length, stepCount));
         UpdateCommandStates();
@@ -787,7 +796,7 @@ public sealed partial class MainForm : Form
         try
         {
             var progress = new Progress<string>(AppendLog);
-            var questionSink = new UiArchiveMergeQuestionSink(this);
+            var questionSink = new UiArchiveMergeQuestionSink(this, _archiveMergeDecisionPanel, cancellation.Token);
             var result = await Task.Run(() => new WorkPlanExecutor(_settings, questionSink)
                 .Run(targets, cancellation.Token, progress));
 
@@ -814,6 +823,8 @@ public sealed partial class MainForm : Form
             }
 
             cancellation.Dispose();
+            _archiveMergeDecisionPanel.CancelPendingDecisions();
+            UpdateArchiveMergeDecisionPanelVisibility();
             RefreshTargetGrid();
             RefreshPlanList();
             UpdateCommandStates();
@@ -1286,6 +1297,29 @@ public sealed partial class MainForm : Form
         _logBox.Clear();
     }
 
+    private void UpdateArchiveMergeDecisionPanelVisibility()
+    {
+        if (InvokeRequired)
+        {
+            BeginInvoke((MethodInvoker)UpdateArchiveMergeDecisionPanelVisibility);
+            return;
+        }
+
+        var hasPendingDecisions = _archiveMergeDecisionPanel.PendingCount > 0;
+        _archiveMergeDecisionPanel.Visible = hasPendingDecisions;
+        _executionPanel.Height = hasPendingDecisions
+            ? ExecutionPanelDecisionHeight
+            : ExecutionPanelDefaultHeight;
+    }
+
+    private void EnsureArchiveMergeDecisionPanelHandle()
+    {
+        if (!_archiveMergeDecisionPanel.IsHandleCreated)
+        {
+            _ = _archiveMergeDecisionPanel.Handle;
+        }
+    }
+
     private void AppendLog(string message)
     {
         if (InvokeRequired)
@@ -1405,10 +1439,17 @@ public sealed partial class MainForm : Form
     private sealed class UiArchiveMergeQuestionSink : IArchiveMergeQuestionSink
     {
         private readonly Form _owner;
+        private readonly ArchiveMergeDecisionPanel _decisionPanel;
+        private readonly CancellationToken _cancellationToken;
 
-        public UiArchiveMergeQuestionSink(Form owner)
+        public UiArchiveMergeQuestionSink(
+            Form owner,
+            ArchiveMergeDecisionPanel decisionPanel,
+            CancellationToken cancellationToken)
         {
             _owner = owner;
+            _decisionPanel = decisionPanel;
+            _cancellationToken = cancellationToken;
         }
 
         public Encoding? ChooseEncoding(ArchiveEncodingQuestion question)
@@ -1434,37 +1475,7 @@ public sealed partial class MainForm : Form
                 return ArchiveMergeNameCollisionDecision.Abort;
             }
 
-            if (_owner.InvokeRequired)
-            {
-                return (ArchiveMergeNameCollisionDecision)_owner.Invoke(
-                    new Func<ArchiveMergeNameCollisionDecision>(() => ResolveNameCollision(question)));
-            }
-
-            var message = string.Join(Environment.NewLine, new[]
-            {
-                Localizer.Format("ArchiveMergeDecisionTargetPathFormat", question.TargetPath),
-                "",
-                Localizer.Get("ArchiveMergeDecisionExistingHeader"),
-                FormatQuestionEntry(question.ExistingEntry),
-                "",
-                Localizer.Get("ArchiveMergeDecisionCurrentHeader"),
-                FormatQuestionEntry(question.CurrentEntry),
-                "",
-                Localizer.Get("ArchiveMergeNameCollisionMessageBoxHelp")
-            });
-            var response = MessageBox.Show(
-                _owner,
-                message,
-                Localizer.Get("ArchiveMergeNameCollisionMessageBoxTitle"),
-                MessageBoxButtons.YesNoCancel,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button1);
-            return response switch
-            {
-                DialogResult.Yes => ArchiveMergeNameCollisionDecision.AutoNumberCurrent,
-                DialogResult.No => ArchiveMergeNameCollisionDecision.SkipCurrent,
-                _ => ArchiveMergeNameCollisionDecision.Abort
-            };
+            return _decisionPanel.ResolveNameCollision(question, _cancellationToken);
         }
 
         public ArchiveMergeDuplicateContentDecision ResolveDuplicateContent(ArchiveMergeDuplicateContentQuestion question)
@@ -1474,48 +1485,7 @@ public sealed partial class MainForm : Form
                 return ArchiveMergeDuplicateContentDecision.Abort;
             }
 
-            if (_owner.InvokeRequired)
-            {
-                return (ArchiveMergeDuplicateContentDecision)_owner.Invoke(
-                    new Func<ArchiveMergeDuplicateContentDecision>(() => ResolveDuplicateContent(question)));
-            }
-
-            var message = string.Join(Environment.NewLine, new[]
-            {
-                Localizer.Format("ArchiveMergeDecisionHashFormat", question.Hash),
-                "",
-                Localizer.Get("ArchiveMergeDecisionExistingHeader"),
-                FormatQuestionEntry(question.FirstEntry),
-                "",
-                Localizer.Get("ArchiveMergeDecisionCurrentHeader"),
-                FormatQuestionEntry(question.CurrentEntry),
-                "",
-                Localizer.Get("ArchiveMergeDuplicateMessageBoxHelp")
-            });
-            var response = MessageBox.Show(
-                _owner,
-                message,
-                Localizer.Get("ArchiveMergeDuplicateMessageBoxTitle"),
-                MessageBoxButtons.YesNoCancel,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button1);
-            return response switch
-            {
-                DialogResult.Yes => ArchiveMergeDuplicateContentDecision.KeepBoth,
-                DialogResult.No => ArchiveMergeDuplicateContentDecision.SkipCurrent,
-                _ => ArchiveMergeDuplicateContentDecision.Abort
-            };
-        }
-
-        private static string FormatQuestionEntry(ArchiveMergeQuestionEntry entry)
-        {
-            return string.Join(Environment.NewLine, new[]
-            {
-                Localizer.Format("ArchiveMergeDecisionArchiveFormat", entry.SourceArchivePath),
-                Localizer.Format("ArchiveMergeDecisionOriginalPathFormat", entry.OriginalPath),
-                Localizer.Format("ArchiveMergeDecisionTargetPathFormat", entry.TargetPath),
-                Localizer.Format("ArchiveMergeDecisionSizeFormat", entry.Size)
-            });
+            return _decisionPanel.ResolveDuplicateContent(question, _cancellationToken);
         }
     }
 

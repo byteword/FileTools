@@ -204,7 +204,7 @@ Duplicate content: KeepBoth, SameContentKeepFirst, Ask
 
 `KeepBoth` is the default duplicate-content policy. Automatic duplicate elimination and duplicate-content questions use content hash and keep the first item in selected archive order when the user chooses to skip the duplicate.
 
-The `Ask` policies use a decision container in the progress window. Name-collision questions offer these choices: auto-number and keep the current entry, skip the current entry, or abort the merge. Duplicate-content questions offer these choices: keep both, skip the current duplicate, or abort the merge. When a merge is run from the main plan without the dedicated progress window, FileTools falls back to a modal decision prompt with the same choices.
+The `Ask` policies use a shared decision container in the archive-merge progress window and in the main window execution area. Name-collision questions offer these choices: auto-number and keep the current entry, skip the current entry, or abort the merge. Duplicate-content questions offer these choices: keep both, skip the current duplicate, or abort the merge.
 
 ### Archive Merge Failure Policy
 
@@ -291,7 +291,7 @@ Move to final filename
 Delete originals
 ```
 
-When an `Ask` policy produces a question, the progress window adds it to a pending-decision list. Selecting a question shows the existing entry, current entry, target path, source archive, and size. Answering a question removes it from the list and unblocks that merge point.
+When an `Ask` policy produces a question, the active execution UI adds it to a pending-decision list. Selecting a question shows the existing entry, current entry, target path, source archive, and size. Answering a question removes it from the list and unblocks that merge point. In the main window, the execution log area expands while pending decisions exist and collapses again after they are answered or canceled.
 
 ## Future Merge Operations
 
