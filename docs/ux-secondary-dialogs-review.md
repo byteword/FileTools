@@ -34,6 +34,7 @@ The secondary editing dialogs now better match the newer settings and rename edi
 - Rename dictionary and common phrase editor OK/Enter handling commits the current edited row before closing; validation failures keep the dialog open with the inline status message.
 - File kind classification now manages the file kind list itself: users can add a kind, delete a kind and its extension rules, and rename the representative KnownFileKind value.
 - File kind representative names are validated before saving so reserved fallbacks (`Folder`, `Other`), duplicates, empty names, and Windows-invalid path characters are rejected.
+- Dialog UI construction is split into `*.Designer.cs` partial files so layout/control edits stay separate from validation, persistence, and operation logic.
 
 ## Remaining Notes
 

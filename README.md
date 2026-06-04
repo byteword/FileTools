@@ -129,6 +129,7 @@ src\FileTools.App\Ui\MainForm.resx
 ```
 
 레이아웃/컨트롤 선언은 `MainForm.Designer.cs`에 두고, 런타임 동작과 현지화 텍스트 바인딩은 `MainForm.cs`에 둡니다.
+보조 다이얼로그도 같은 규칙을 따릅니다. `Ui\*Dialog.Designer.cs`에는 컨트롤 선언과 레이아웃 빌더를 두고, 해당 `Ui\*Dialog.cs`에는 데이터 바인딩, 검증, 저장/실행 로직을 둡니다.
 `Ui\MainForm.ko.resx` 같은 폼 수준 문화권 리소스는 의도적으로 빌드에서 제외되어 있습니다. UI 문자열은 `Resources\Strings*.resx`에만 추가하세요.
 Designer 파일은 Visual Studio가 런타임 현지화를 실행하지 않고도 폼을 렌더링할 수 있도록 중립 영어 텍스트와 placeholder 콤보 항목을 유지합니다. 앱은 시작 시 해당 값을 `Resources\Strings*.resx`에서 읽은 값으로 덮어씁니다.
 
@@ -480,6 +481,7 @@ src\FileTools.App\Ui\MainForm.resx
 ```
 
 Keep layout/control declarations in `MainForm.Designer.cs`, and keep runtime behavior and localized text binding in `MainForm.cs`.
+Secondary dialogs follow the same split. Keep control declarations and layout builders in `Ui\*Dialog.Designer.cs`, and keep data binding, validation, save, and execution behavior in the matching `Ui\*Dialog.cs`.
 Form-level culture resources such as `Ui\MainForm.ko.resx` are intentionally excluded from the build; add UI strings only to `Resources\Strings*.resx`.
 The Designer file keeps neutral English text and placeholder combo items so Visual Studio can render the form without running runtime localization; the app overwrites those values from `Resources\Strings*.resx` at startup.
 

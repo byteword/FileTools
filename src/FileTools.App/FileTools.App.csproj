@@ -21,6 +21,33 @@
     <Compile Update="Ui\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Update="Ui\AutoRelocationTemplateEditorDialog.Designer.cs">
+      <DependentUpon>AutoRelocationTemplateEditorDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Ui\FileKindClassificationEditorDialog.Designer.cs">
+      <DependentUpon>FileKindClassificationEditorDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Ui\NameTemplateSettingsDialog.Designer.cs">
+      <DependentUpon>NameTemplateSettingsDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Ui\PlanStepDialog.Designer.cs">
+      <DependentUpon>PlanStepDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Ui\RenameDictionaryEditorDialog.Designer.cs">
+      <DependentUpon>RenameDictionaryEditorDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Ui\RenameReviewDialog.Designer.cs">
+      <DependentUpon>RenameReviewDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Ui\RenameRuleEditorDialog.Designer.cs">
+      <DependentUpon>RenameRuleEditorDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Ui\SettingsForm.Designer.cs">
+      <DependentUpon>SettingsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Update="Ui\StringListEditorDialog.Designer.cs">
+      <DependentUpon>StringListEditorDialog.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Update="Resources\Strings.ko.resx">
       <DependentUpon>Strings.resx</DependentUpon>
     </EmbeddedResource>
