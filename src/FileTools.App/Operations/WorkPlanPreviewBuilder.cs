@@ -92,25 +92,28 @@ internal sealed class WorkPlanPreviewBuilder
             return CreateWarning(number, step, state, Localizer.Get("PlanPreviewNoParent"));
         }
 
-        var folderName = FolderStructureNameTemplates.ResolveWrapFolderName(state.Path);
-        var folderCollision = NameCollisionResolver.Resolve(
-            parent,
-            folderName,
-            new NameCollisionOptions
-            {
-                Policy = NameCollisionPolicy.MergeIntoExisting,
-                TargetKind = NameCollisionTargetKind.Folder
-            });
-        var targetFolder = folderCollision.TargetPath;
-        var targetFilePath = Path.Combine(targetFolder, Path.GetFileName(state.Path));
-        if (!folderCollision.IsReady)
+        var folderName = FolderStructureNameTemplates.ResolveWrapFolderName(state.Path, _settings);
+        var targetFolder = Path.Combine(parent, folderName);
+        if (!Directory.Exists(targetFolder))
         {
-            return CreateWarning(number, step, state, Localizer.Format("PlanPreviewTargetExistsFormat", targetFolder));
+            var folderCollision = NameCollisionResolver.Resolve(
+                parent,
+                folderName,
+                FolderStructureCollisionOptions.Create(_settings, NameCollisionTargetKind.Folder));
+            targetFolder = folderCollision.TargetPath;
+            if (!folderCollision.IsReady)
+            {
+                return CreateWarning(number, step, state, Localizer.Format("PlanPreviewTargetExistsFormat", targetFolder));
+            }
         }
 
-        if (File.Exists(targetFilePath) || Directory.Exists(targetFilePath))
+        var fileCollision = NameCollisionResolver.Resolve(
+            targetFolder,
+            Path.GetFileName(state.Path),
+            FolderStructureCollisionOptions.Create(_settings, NameCollisionTargetKind.File));
+        if (!fileCollision.IsReady)
         {
-            return CreateWarning(number, step, state, Localizer.Format("PlanPreviewTargetExistsFormat", targetFilePath));
+            return CreateWarning(number, step, state, Localizer.Format("PlanPreviewTargetExistsFormat", fileCollision.TargetPath));
         }
 
         var nextState = new PreviewPathState(
@@ -166,15 +169,12 @@ internal sealed class WorkPlanPreviewBuilder
         var targetFileName = FolderStructureNameTemplates.ResolveUnwrappedFileNameFromFolderPath(
             state.Path,
             childFileName,
-            step.FolderUnwrapNameMismatchMode);
+            step.FolderUnwrapNameMismatchMode,
+            _settings);
         var fileCollision = NameCollisionResolver.Resolve(
             parent,
             targetFileName,
-            new NameCollisionOptions
-            {
-                Policy = NameCollisionPolicy.Skip,
-                TargetKind = NameCollisionTargetKind.File
-            });
+            FolderStructureCollisionOptions.Create(_settings, NameCollisionTargetKind.File));
         var targetPath = fileCollision.TargetPath;
         if (!fileCollision.IsReady)
         {

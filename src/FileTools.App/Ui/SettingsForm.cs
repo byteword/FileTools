@@ -382,6 +382,18 @@ internal sealed partial class SettingsForm : Form
         UpdateUiState();
     }
 
+    private void OpenNameTemplateSettings()
+    {
+        SaveSettingsFromUi();
+        using var dialog = new NameTemplateSettingsDialog(Settings);
+        if (dialog.ShowDialog(this) == DialogResult.OK)
+        {
+            Settings = dialog.Settings.Clone();
+            LoadSettings();
+            UpdateUiState();
+        }
+    }
+
     private void OpenFileKindClassificationEditor()
     {
         using var dialog = new FileKindClassificationEditorDialog(Settings.FileKindExtensionRules);

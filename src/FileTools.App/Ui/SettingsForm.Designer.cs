@@ -233,6 +233,7 @@ internal sealed partial class SettingsForm
             Localizer.Get("LabelFolderUnwrapMismatch"),
             _folderMismatchCombo,
             Localizer.Get("SettingsFolderMismatchExample")));
+        group.AddBodyControl(CreateFolderNameTemplateButton());
         RegisterGroup(group);
         return group;
     }
@@ -330,6 +331,25 @@ internal sealed partial class SettingsForm
         classificationButton.Click += (_, _) => OpenFileKindClassificationEditor();
         panel.Controls.Add(templateButton);
         panel.Controls.Add(classificationButton);
+        return panel;
+    }
+
+    private Control CreateFolderNameTemplateButton()
+    {
+        var panel = new FlowLayoutPanel
+        {
+            Height = 40,
+            WrapContents = false,
+            Margin = new Padding(0, 6, 0, 0)
+        };
+        var button = new Button
+        {
+            Text = Localizer.Get("ButtonEditNameTemplates"),
+            Width = 190,
+            Height = 30
+        };
+        button.Click += (_, _) => OpenNameTemplateSettings();
+        panel.Controls.Add(button);
         return panel;
     }
 

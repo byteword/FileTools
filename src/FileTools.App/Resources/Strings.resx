@@ -71,6 +71,7 @@
   <data name="FolderUnwrapMismatchKeepFileName" xml:space="preserve"><value>Keep file name</value></data>
   <data name="FolderUnwrapMismatchUseFolderName" xml:space="preserve"><value>Rename to folder name</value></data>
   <data name="FolderUnwrapMismatchPrefixFolderName" xml:space="preserve"><value>Rename to folder-file name</value></data>
+  <data name="FolderUnwrapMismatchCustomTemplate" xml:space="preserve"><value>Use custom template</value></data>
   <data name="ContextCommandAutoRelocationCurrentFolder" xml:space="preserve"><value>Auto relocate in current folder</value></data>
   <data name="ContextCommandAutoRelocationChooseTarget" xml:space="preserve"><value>Auto relocate to selected folder</value></data>
   <data name="ContextMenuLayoutGrouped" xml:space="preserve"><value>Grouped: FileTools submenu</value></data>
@@ -265,6 +266,7 @@
   <data name="EditorDuplicateValueMessage" xml:space="preserve"><value>This value is already registered.</value></data>
   <data name="LabelDefaultTemplate" xml:space="preserve"><value>Default template</value></data>
   <data name="ButtonEditTemplates" xml:space="preserve"><value>Edit templates...</value></data>
+  <data name="ButtonEditNameTemplates" xml:space="preserve"><value>Name templates...</value></data>
   <data name="ButtonEditFileKindClassification" xml:space="preserve"><value>Edit file kinds...</value></data>
   <data name="DialogFileKindClassificationTitle" xml:space="preserve"><value>File kind classification</value></data>
   <data name="FileKindClassificationHelp" xml:space="preserve"><value>Edit the extensions AutoRelocation uses for KnownFileKind. Folder and Other are fixed fallbacks; registered system extensions are shown only as a reference.</value></data>
@@ -410,4 +412,30 @@
   <data name="PlanTooltipWarningFormat" xml:space="preserve"><value>Warning: {0}</value></data>
   <data name="PlanOptionManualRenameFormat" xml:space="preserve"><value>Manual filename: {0}</value></data>
   <data name="FolderOptionsFutureMessage" xml:space="preserve"><value>Folder wrapping and unwrapping options are intentionally kept here for future expansion.</value></data>
+  <data name="DialogNameTemplateSettingsTitle" xml:space="preserve"><value>Folder name templates</value></data>
+  <data name="GroupFolderNameTemplates" xml:space="preserve"><value>Folder wrap/unwrap templates</value></data>
+  <data name="GroupNameCollisionPolicy" xml:space="preserve"><value>Name collision policy</value></data>
+  <data name="GroupNameTemplatePreview" xml:space="preserve"><value>Preview</value></data>
+  <data name="LabelFolderWrapTemplate" xml:space="preserve"><value>Wrap folder template</value></data>
+  <data name="LabelFolderUnwrapTemplate" xml:space="preserve"><value>Unwrap mismatch template</value></data>
+  <data name="LabelNameCollisionPolicy" xml:space="preserve"><value>Collision policy</value></data>
+  <data name="LabelConflictNameTemplate" xml:space="preserve"><value>Conflict name template</value></data>
+  <data name="LabelConflictIndexStyle" xml:space="preserve"><value>Index label style</value></data>
+  <data name="ButtonResetDefaults" xml:space="preserve"><value>Reset defaults</value></data>
+  <data name="NameCollisionPolicySkip" xml:space="preserve"><value>Skip</value></data>
+  <data name="NameCollisionPolicyAutoNumber" xml:space="preserve"><value>Auto number</value></data>
+  <data name="NameCollisionPolicyAsk" xml:space="preserve"><value>Ask before applying</value></data>
+  <data name="NameCollisionPolicyMergeIntoExisting" xml:space="preserve"><value>Merge into existing</value></data>
+  <data name="ConflictIndexStyleNumber" xml:space="preserve"><value>2, 3, 4</value></data>
+  <data name="ConflictIndexStyleZeroPadded3" xml:space="preserve"><value>002, 003, 004</value></data>
+  <data name="ConflictIndexStyleRoman" xml:space="preserve"><value>II, III, IV</value></data>
+  <data name="ConflictIndexStyleKoreanNumber" xml:space="preserve"><value>둘, 셋, 넷</value></data>
+  <data name="ConflictIndexStyleKoreanHeavenlyStem" xml:space="preserve"><value>을, 병, 정</value></data>
+  <data name="ConflictIndexStyleAlphabet" xml:space="preserve"><value>B, C, D</value></data>
+  <data name="NameTemplateTokensHelp" xml:space="preserve"><value>Available tokens include {FileName}, {FileStem}, {Extension}, {FolderName}, {CorrectedFileStem}, {Title}, and {EpisodeRange}.</value></data>
+  <data name="ConflictTemplateTokensHelp" xml:space="preserve"><value>Use {Stem}, {Extension}, {Index}, or {IndexLabel}. Example: {Stem} ({Index}){Extension}</value></data>
+  <data name="NameTemplatePreviewWrapFormat" xml:space="preserve"><value>Wrap: Book 01.zip -> {0}\</value></data>
+  <data name="NameTemplatePreviewUnwrapFormat" xml:space="preserve"><value>Unwrap mismatch: FolderA\Image01.jpg -> {0}</value></data>
+  <data name="NameTemplatePreviewConflictFormat" xml:space="preserve"><value>Conflict ({0}): Book.zip -> {1}</value></data>
+  <data name="NameTemplateValidationFailedFormat" xml:space="preserve"><value>{0} is invalid: {1}</value></data>
 </root>

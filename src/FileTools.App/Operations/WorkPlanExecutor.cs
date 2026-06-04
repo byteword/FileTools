@@ -170,7 +170,7 @@ internal sealed class WorkPlanExecutor
         }
     }
 
-    private static string? PredictWrapPath(string path)
+    private string? PredictWrapPath(string path)
     {
         if (!File.Exists(path))
         {
@@ -183,8 +183,27 @@ internal sealed class WorkPlanExecutor
             return null;
         }
 
-        var folderName = FolderStructureNameTemplates.ResolveWrapFolderName(path);
-        return Path.Combine(parent, folderName);
+        var folderName = FolderStructureNameTemplates.ResolveWrapFolderName(path, _baseSettings);
+        var targetFolder = Path.Combine(parent, folderName);
+        if (!Directory.Exists(targetFolder))
+        {
+            var folderCollision = NameCollisionResolver.Resolve(
+                parent,
+                folderName,
+                FolderStructureCollisionOptions.Create(_baseSettings, NameCollisionTargetKind.Folder));
+            if (!folderCollision.IsReady)
+            {
+                return null;
+            }
+
+            targetFolder = folderCollision.TargetPath;
+        }
+
+        var fileCollision = NameCollisionResolver.Resolve(
+            targetFolder,
+            Path.GetFileName(path),
+            FolderStructureCollisionOptions.Create(_baseSettings, NameCollisionTargetKind.File));
+        return fileCollision.IsReady ? targetFolder : null;
     }
 
     private string? PredictAutoRelocationPath(WorkPlanStep step, string path)
@@ -229,7 +248,7 @@ internal sealed class WorkPlanExecutor
         }
     }
 
-    private static string? PredictUnwrapPath(
+    private string? PredictUnwrapPath(
         string path,
         FolderStructureOperation operation,
         FolderUnwrapNameMismatchMode mismatchMode)
@@ -263,9 +282,16 @@ internal sealed class WorkPlanExecutor
             return null;
         }
 
-        return Path.Combine(
+        var targetFileName = FolderStructureNameTemplates.ResolveUnwrappedFileNameFromFolderPath(
+            dir.FullName,
+            files[0].Name,
+            mismatchMode,
+            _baseSettings);
+        var fileCollision = NameCollisionResolver.Resolve(
             dir.Parent.FullName,
-            FolderStructureNameTemplates.ResolveUnwrappedFileNameFromFolderPath(dir.FullName, files[0].Name, mismatchMode));
+            targetFileName,
+            FolderStructureCollisionOptions.Create(_baseSettings, NameCollisionTargetKind.File));
+        return fileCollision.IsReady ? fileCollision.TargetPath : null;
     }
 
     private RelocationContextWithRoot? CreateRelocationContext(string path, string? targetRootOverride)

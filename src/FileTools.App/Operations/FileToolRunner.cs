@@ -116,7 +116,7 @@ internal sealed class FileToolRunner
         }
     }
 
-    private static void WrapFile(string filePath, OperationResult result)
+    private void WrapFile(string filePath, OperationResult result)
     {
         result.AddCandidate();
         var parent = Path.GetDirectoryName(filePath);
@@ -126,30 +126,35 @@ internal sealed class FileToolRunner
             return;
         }
 
-        var folderName = FolderStructureNameTemplates.ResolveWrapFolderName(filePath);
-        var folderCollision = NameCollisionResolver.Resolve(
-            parent,
-            folderName,
-            new NameCollisionOptions
-            {
-                Policy = NameCollisionPolicy.MergeIntoExisting,
-                TargetKind = NameCollisionTargetKind.Folder
-            });
-        if (!folderCollision.IsReady)
+        var folderName = FolderStructureNameTemplates.ResolveWrapFolderName(filePath, _settings);
+        var targetFolder = Path.Combine(parent, folderName);
+        if (!Directory.Exists(targetFolder))
         {
-            result.AddSkipped(Path.GetFileName(filePath) + " wrapping 대상 폴더명과 같은 파일 존재");
-            return;
+            var folderCollision = NameCollisionResolver.Resolve(
+                parent,
+                folderName,
+                FolderStructureCollisionOptions.Create(_settings, NameCollisionTargetKind.Folder));
+            if (!folderCollision.IsReady)
+            {
+                result.AddSkipped(Path.GetFileName(filePath) + " wrapping 대상 폴더명과 같은 파일 존재");
+                return;
+            }
+
+            targetFolder = folderCollision.TargetPath;
         }
 
-        var targetFolder = folderCollision.TargetPath;
-        var targetPath = Path.Combine(targetFolder, Path.GetFileName(filePath));
-        if (File.Exists(targetPath) || Directory.Exists(targetPath))
+        var fileCollision = NameCollisionResolver.Resolve(
+            targetFolder,
+            Path.GetFileName(filePath),
+            FolderStructureCollisionOptions.Create(_settings, NameCollisionTargetKind.File));
+        if (!fileCollision.IsReady)
         {
             result.AddSkipped(Path.GetFileName(filePath) + " 대상 파일 이미 존재");
             return;
         }
 
         Directory.CreateDirectory(targetFolder);
+        var targetPath = fileCollision.TargetPath;
         File.Move(filePath, targetPath);
         result.AddApplied(Path.GetFileName(filePath) + " -> " + Path.GetFileName(targetFolder) + "\\");
         FileToolsEnvironment.Log("WRAP", filePath + " -> " + targetPath);
@@ -167,15 +172,12 @@ internal sealed class FileToolRunner
         var targetFileName = FolderStructureNameTemplates.ResolveUnwrappedFileNameFromFolderPath(
             dir.FullName,
             file.Name,
-            _settings.FolderUnwrapNameMismatchMode);
+            _settings.FolderUnwrapNameMismatchMode,
+            _settings);
         var fileCollision = NameCollisionResolver.Resolve(
             dir.Parent!.FullName,
             targetFileName,
-            new NameCollisionOptions
-            {
-                Policy = NameCollisionPolicy.Skip,
-                TargetKind = NameCollisionTargetKind.File
-            });
+            FolderStructureCollisionOptions.Create(_settings, NameCollisionTargetKind.File));
         if (!fileCollision.IsReady)
         {
             result.AddSkipped(targetFileName + " 대상 경로 이미 존재");

@@ -4,7 +4,7 @@ This document records the naming design used by folder wrap/unwrap and the exten
 
 ## Scope
 
-The current implementation adds a shared naming foundation and applies it to folder wrap/unwrap execution, work-plan prediction, and work-plan preview. It does not yet expose a settings UI for custom templates.
+The current implementation adds a shared naming foundation and applies it to folder wrap/unwrap execution, work-plan prediction, and work-plan preview. Folder name templates and collision policy can be edited from the folder-structure settings group.
 
 ## Template Evaluation
 
@@ -26,6 +26,12 @@ Supported initial tokens:
 {Stem}
 {Index}
 {IndexLabel}
+{CorrectedFileName}
+{CorrectedFileStem}
+{Title}
+{EpisodeRange}
+{Author}
+{Tags}
 ```
 
 `{Extension}` includes the dot, such as `.jpg`. `{ExtensionNoDot}` omits it.
@@ -75,9 +81,9 @@ MergeIntoExisting
 Current folder wrap/unwrap behavior remains conservative:
 
 ```text
-Folder wrap target folder: MergeIntoExisting
-Folder wrap target file: Skip
-Folder unwrap target file: Skip
+Folder wrap existing target folder: MergeIntoExisting
+Folder wrap target file: Skip by default
+Folder unwrap target file: Skip by default
 ```
 
 `MergeIntoExisting` for folder wrap preserves the old behavior where an existing same-name folder can receive the file if the child file path is not already present.
@@ -99,11 +105,11 @@ KoreanHeavenlyStem
 Alphabet
 ```
 
-These labels are prepared for future user-visible conflict settings and merge features.
+These labels are available in the folder name template settings dialog and are also reserved for future merge features.
 
 ## Rename Correction Integration
 
-The safest current integration is work-plan chaining:
+The safest integration remains work-plan chaining:
 
 ```text
 File name correction -> Folder wrap
@@ -111,7 +117,7 @@ File name correction -> Folder wrap
 
 In that chain, `{FileStem}` is evaluated from the already-renamed file path.
 
-A future `RenameCorrectionTokenProvider` can add tokens such as:
+`RenameCorrectionNameTemplateTokenProvider` adds correction-derived tokens:
 
 ```text
 {CorrectedFileName}
@@ -123,6 +129,8 @@ A future `RenameCorrectionTokenProvider` can add tokens such as:
 ```
 
 Correction-derived tokens must carry review state. If the correction preview requires review or has a conflict, non-interactive context-menu execution should skip or fall back instead of silently applying an uncertain generated name.
+
+In the current implementation, correction-derived tokens are unavailable when the correction preview is `NeedsReview`, `Conflict`, or `Skipped`. A template that depends on those tokens then falls back to the operation's safe default name.
 
 ## Future Merge Operations
 

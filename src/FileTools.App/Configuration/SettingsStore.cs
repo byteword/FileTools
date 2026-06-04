@@ -9,6 +9,17 @@ internal sealed class FileToolsSettings
 
     public FolderUnwrapNameMismatchMode FolderUnwrapNameMismatchMode { get; set; } = FolderUnwrapNameMismatchMode.KeepFileName;
 
+    public string FolderWrapFolderNameTemplate { get; set; } = NameTemplateDefaults.FolderWrapFolderNameTemplate;
+
+    public string FolderUnwrapMismatchFileNameTemplate { get; set; } =
+        NameTemplateDefaults.FolderUnwrapPrefixFolderNameTemplate;
+
+    public NameCollisionPolicy FolderStructureConflictPolicy { get; set; } = NameCollisionPolicy.Skip;
+
+    public string FolderStructureConflictNameTemplate { get; set; } = NameTemplateDefaults.DefaultConflictNameTemplate;
+
+    public ConflictIndexStyle FolderStructureConflictIndexStyle { get; set; } = ConflictIndexStyle.Number;
+
     public string AutoRelocationTemplateId { get; set; } = AutoRelocationTemplateDefaults.DefaultTemplateId;
 
     public string? AutoRelocationTargetRootPath { get; set; }
@@ -71,6 +82,11 @@ internal sealed class FileToolsSettings
         {
             FolderStructureOperation = FolderStructureOperation,
             FolderUnwrapNameMismatchMode = FolderUnwrapNameMismatchMode,
+            FolderWrapFolderNameTemplate = FolderWrapFolderNameTemplate,
+            FolderUnwrapMismatchFileNameTemplate = FolderUnwrapMismatchFileNameTemplate,
+            FolderStructureConflictPolicy = FolderStructureConflictPolicy,
+            FolderStructureConflictNameTemplate = FolderStructureConflictNameTemplate,
+            FolderStructureConflictIndexStyle = FolderStructureConflictIndexStyle,
             AutoRelocationTemplateId = AutoRelocationTemplateId,
             AutoRelocationTargetRootPath = AutoRelocationTargetRootPath,
             FileKindExtensionRules = AutoRelocationFileTypeClassifier
@@ -141,6 +157,20 @@ internal static class SettingsStore
 
     private static void Normalize(FileToolsSettings settings)
     {
+        settings.FolderWrapFolderNameTemplate = NormalizeTemplate(
+            settings.FolderWrapFolderNameTemplate,
+            NameTemplateDefaults.FolderWrapFolderNameTemplate);
+        settings.FolderUnwrapMismatchFileNameTemplate = NormalizeTemplate(
+            settings.FolderUnwrapMismatchFileNameTemplate,
+            NameTemplateDefaults.FolderUnwrapPrefixFolderNameTemplate);
+        settings.FolderStructureConflictNameTemplate = NormalizeTemplate(
+            settings.FolderStructureConflictNameTemplate,
+            NameTemplateDefaults.DefaultConflictNameTemplate);
+        if (settings.FolderStructureConflictPolicy == NameCollisionPolicy.MergeIntoExisting)
+        {
+            settings.FolderStructureConflictPolicy = NameCollisionPolicy.Skip;
+        }
+
         settings.FileKindExtensionRules = AutoRelocationFileTypeClassifier
             .NormalizeExtensionRules(settings.FileKindExtensionRules)
             .Select(static rule => new FileKindExtensionRule
@@ -149,6 +179,11 @@ internal static class SettingsStore
                 Extensions = rule.Extensions.ToList()
             })
             .ToList();
+    }
+
+    private static string NormalizeTemplate(string? template, string fallback)
+    {
+        return string.IsNullOrWhiteSpace(template) ? fallback : template.Trim();
     }
 
     private static JsonSerializerOptions CreateJsonOptions()

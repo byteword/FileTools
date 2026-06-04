@@ -20,7 +20,8 @@ internal enum FolderUnwrapNameMismatchMode
 {
     KeepFileName,
     UseFolderName,
-    PrefixFolderName
+    PrefixFolderName,
+    CustomTemplate
 }
 
 internal enum ContextMenuLayout
@@ -78,6 +79,7 @@ internal static class ToolModeText
         FolderUnwrapNameMismatchMode.KeepFileName => Localizer.Get("FolderUnwrapMismatchKeepFileName"),
         FolderUnwrapNameMismatchMode.UseFolderName => Localizer.Get("FolderUnwrapMismatchUseFolderName"),
         FolderUnwrapNameMismatchMode.PrefixFolderName => Localizer.Get("FolderUnwrapMismatchPrefixFolderName"),
+        FolderUnwrapNameMismatchMode.CustomTemplate => Localizer.Get("FolderUnwrapMismatchCustomTemplate"),
         _ => mode.ToString()
     };
 

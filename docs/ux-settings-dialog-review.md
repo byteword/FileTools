@@ -130,8 +130,8 @@ Add or change settings only where they protect repeat workflows:
 - Rename correction rules: implemented in a dedicated editor so built-in rule visibility, enabled state, mode, and stage-scoped order can be managed without turning the main settings screen into a rule builder. Existing rename dictionary, review insert phrase, candidate-profile, and parser-profile settings are now edited in the rule editor's `Details` tab for the relevant built-in rule. Candidate customization is limited to obfuscated Hangul scoring words and protected English words stored in `rename-candidate-profile.json`; parser customization is limited to tag words, author prefixes, episode prefixes/units, and title noise words stored in `rename-parser-profile.json`. Character replacement tables and full regex editing remain internal.
 - Explorer menu group toggles: useful if users want to hide whole feature families, not just individual commands.
 - AutoRelocation default target root: useful only if users repeatedly send files to one library folder. Otherwise keep target selection per run.
-- Collision handling: consider `skip`, `unique suffix`, or `ask` only if users need consistent behavior across rename, wrap, unwrap, and relocation. Today the app uses mixed safety behavior by operation.
-- Folder unwrap preview examples: this is more important than adding more folder settings.
+- Collision handling: folder wrap/unwrap now has a dedicated name-template dialog with `skip` and `auto number`. The engine keeps `ask` as a reserved policy, but it should not be exposed until an actual prompt flow exists for planner and context-menu execution.
+- Folder unwrap preview examples: implemented in the name-template dialog for wrap, unwrap mismatch, and conflict suffix samples.
 
 Avoid adding these as global settings for now:
 

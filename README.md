@@ -23,7 +23,7 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
    - 자동 모드에서는 선택한 파일을 같은 이름의 폴더로 감쌉니다.
    - 선택한 폴더가 단일 파일 폴더이면 풀고, 그렇지 않으면 바로 아래의 자식 파일을 상위로 이동합니다.
    - 단일 파일 폴더를 풀 때 기존 파일 이름 유지, 폴더 이름으로 변경, `folder-file` 형식 변경 중 하나를 선택할 수 있습니다.
-   - wrapping/unwrapping 이름 계산은 공용 이름 템플릿 기반을 사용하므로, 향후 여러 파일/폴더/압축 병합 규칙과 같은 확장에 재사용할 수 있습니다.
+   - wrapping/unwrapping 이름 계산은 공용 이름 템플릿 기반을 사용하며, 설정에서 wrap 폴더명, unwrap 불일치 파일명, 충돌 번호 규칙을 조정할 수 있습니다.
    - 기존 대상 파일은 덮어쓰지 않습니다.
 
 3. **폴더 자동 재배치**
@@ -371,8 +371,8 @@ FileTools provides three current-user ContextMenu actions for selected files and
 2. **폴더 wrapping / unwrapping**
    - In automatic mode, selected files are wrapped into same-stem folders.
    - Selected folders are unwrapped when they are single-file folders, otherwise direct child files are moved up.
-   - Single-file folder unwrapping can keep the original filename, rename to the folder name, or rename to `folder-file`.
-   - Wrapping/unwrapping name generation uses a shared name-template foundation that can be reused by future file, folder, and archive merge rules.
+   - Single-file folder unwrapping can keep the original filename, rename to the folder name, rename to `folder-file`, or use a custom template.
+   - Wrapping/unwrapping name generation uses a shared name-template foundation, and settings can adjust wrap folder names, unwrap mismatch names, and conflict numbering rules.
    - Existing destination files are not overwritten.
 
 3. **폴더 자동 재배치**
