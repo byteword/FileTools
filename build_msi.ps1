@@ -5,7 +5,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$version = '1.1.1.1'
+$version = '1.2.0.0'
 $solution = Join-Path $PSScriptRoot 'installer\FileTools.Installer.sln'
 $installerProject = Join-Path $PSScriptRoot 'installer\FileTools.Installer\FileTools.Installer.wixproj'
 $bundleProject = Join-Path $PSScriptRoot 'installer\FileTools.Bundle\FileTools.Bundle.wixproj'

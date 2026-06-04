@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: Existing release tag to build, for example v1.1.1.1.
+        description: Existing release tag to build, for example v1.2.0.0.
         required: true
         type: string
       draft:
@@ -89,7 +89,11 @@ jobs:
           Set-Content -Path $checksumPath -Value $checksums -Encoding ascii
 
           $notesPath = Join-Path $dist 'release-notes.md'
-          $releaseNotes = @"
+          $versionNotesPath = Join-Path $PWD "docs\release-notes\$tag.md"
+          if (Test-Path $versionNotesPath) {
+            Copy-Item $versionNotesPath $notesPath -Force
+          } else {
+            $releaseNotes = @"
           FileTools $tag
 
           Assets:
@@ -103,7 +107,8 @@ jobs:
           Setup installs the Windows 11 native context menu support files only. FileTools settings can import the certificate into the current user's Trusted People store and register the sparse package identity when the user explicitly chooses that action.
           Verify the SHA256 hashes and GitHub artifact attestations before installing.
           "@
-          Set-Content -Path $notesPath -Value $releaseNotes -Encoding utf8
+            Set-Content -Path $notesPath -Value $releaseNotes -Encoding utf8
+          }
 
           "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           "dist=$dist" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8

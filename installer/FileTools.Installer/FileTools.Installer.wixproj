@@ -3,7 +3,7 @@
     <OutputName>FileTools</OutputName>
     <OutputType>Package</OutputType>
     <InstallerPlatform>x64</InstallerPlatform>
-    <ProductVersion>1.1.1.1</ProductVersion>
+    <ProductVersion>1.2.0.0</ProductVersion>
     <SuppressIces>ICE91</SuppressIces>
     <AppPublishDir>$(MSBuildThisFileDirectory)..\..\artifacts\publish\FileTools-win-x64\</AppPublishDir>
     <AppIconPath>$(MSBuildThisFileDirectory)..\..\src\FileTools.App\Resources\FileToolsIcon.ico</AppIconPath>

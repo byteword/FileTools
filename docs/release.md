@@ -39,7 +39,7 @@ Repository prerequisites:
 - `FILETOOLS_SIGNING_PFX_BASE64` and `FILETOOLS_SIGNING_PASSWORD` must be set in
   GitHub Secrets.
 
-Before running it, create and push a version tag such as `v1.1.1.1`. Then run
+Before running it, create and push a version tag such as `v1.2.0.0`. Then run
 the `Release` workflow from GitHub Actions and provide that existing tag.
 
 The workflow builds and uploads:
@@ -58,6 +58,9 @@ and troubleshooting.
 
 By default, the workflow creates a draft GitHub Release. Publish the draft only
 after checking the assets and release notes.
+
+If `docs/release-notes/<tag>.md` exists, the workflow uses that file as the
+GitHub Release notes. Otherwise it falls back to generated asset notes.
 
 ## Documentation And Wiki Timing
 
@@ -125,7 +128,7 @@ make Windows trust the self-signed certificate.
 After downloading a release asset, verify its SHA256 hash:
 
 ```powershell
-Get-FileHash .\FileTools-1.1.1.1-win-x64-setup.exe -Algorithm SHA256
+Get-FileHash .\FileTools-1.2.0.0-win-x64-setup.exe -Algorithm SHA256
 ```
 
 Compare the result with `checksums.txt`.
@@ -133,19 +136,19 @@ Compare the result with `checksums.txt`.
 Users with GitHub CLI can also verify artifact attestations:
 
 ```powershell
-gh attestation verify .\FileTools-1.1.1.1-win-x64-setup.exe -R byteword/FileTools
-gh attestation verify .\FileTools-1.1.1.1-win-x64.msi -R byteword/FileTools
-gh attestation verify .\FileTools-1.1.1.1-win-x64-identity.msix -R byteword/FileTools
-gh attestation verify .\FileTools-1.1.1.1-msix-self-signed.cer -R byteword/FileTools
+gh attestation verify .\FileTools-1.2.0.0-win-x64-setup.exe -R byteword/FileTools
+gh attestation verify .\FileTools-1.2.0.0-win-x64.msi -R byteword/FileTools
+gh attestation verify .\FileTools-1.2.0.0-win-x64-identity.msix -R byteword/FileTools
+gh attestation verify .\FileTools-1.2.0.0-msix-self-signed.cer -R byteword/FileTools
 gh attestation verify .\checksums.txt -R byteword/FileTools
 ```
 
 On Windows, the self-signed Authenticode/MSIX signatures can also be inspected:
 
 ```powershell
-Get-AuthenticodeSignature .\FileTools-1.1.1.1-win-x64-setup.exe
-Get-AuthenticodeSignature .\FileTools-1.1.1.1-win-x64.msi
-Get-AuthenticodeSignature .\FileTools-1.1.1.1-win-x64-identity.msix
+Get-AuthenticodeSignature .\FileTools-1.2.0.0-win-x64-setup.exe
+Get-AuthenticodeSignature .\FileTools-1.2.0.0-win-x64.msi
+Get-AuthenticodeSignature .\FileTools-1.2.0.0-win-x64-identity.msix
 ```
 
 Before the self-signed CER is trusted, `Get-AuthenticodeSignature` may report an
