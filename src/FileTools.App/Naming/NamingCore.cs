@@ -12,6 +12,8 @@ internal sealed record CorrectionOptions
 
     public string[] CommonPhrases { get; init; } = [];
 
+    public RenameCandidateProfileDocument CandidateProfile { get; init; } = RenameCandidateProfileStore.CreateDefaultDocument();
+
     public IReadOnlyList<RenameCorrectionRule> Rules { get; init; } = RenameRuleStore.CreateDefaultDocument().Rules;
 }
 
@@ -118,8 +120,9 @@ internal sealed partial class KoreanFileNameCorrector
     {
         _options = options ?? new CorrectionOptions();
         var parserProfile = RenameParserProfileStore.Normalize(_options.ParserProfile);
+        var candidateProfile = RenameCandidateProfileStore.Normalize(_options.CandidateProfile);
         _knownTags = new HashSet<string>(parserProfile.KnownTags, StringComparer.OrdinalIgnoreCase);
-        _obfuscatedHangulCandidateGenerator = new ObfuscatedHangulCandidateGenerator(new KoreanLexicon(_options.CommonPhrases));
+        _obfuscatedHangulCandidateGenerator = new ObfuscatedHangulCandidateGenerator(candidateProfile.ObfuscatedHangul);
         _rules = RenameRuleStore.NormalizeRules(_options.Rules);
         _episodeUnitRangeRegex = CreateEpisodeUnitRangeRegex(parserProfile);
         _episodeCompoundRegex = CreateEpisodeCompoundRegex(parserProfile);
@@ -972,10 +975,16 @@ internal static class KoreanJamoNormalizer
 internal sealed partial class ObfuscatedHangulCandidateGenerator
 {
     private readonly KoreanLexicon _lexicon;
+    private readonly HashSet<string> _protectedEnglishWords;
 
-    public ObfuscatedHangulCandidateGenerator(KoreanLexicon? lexicon = null)
+    public ObfuscatedHangulCandidateGenerator(ObfuscatedHangulCandidateProfile? profile = null)
     {
-        _lexicon = lexicon ?? new KoreanLexicon();
+        var normalizedProfile = RenameCandidateProfileStore.Normalize(new RenameCandidateProfileDocument
+        {
+            ObfuscatedHangul = profile ?? new ObfuscatedHangulCandidateProfile()
+        }).ObfuscatedHangul;
+        _lexicon = new KoreanLexicon(normalizedProfile.ScoringWords);
+        _protectedEnglishWords = new HashSet<string>(normalizedProfile.ProtectedEnglishWords, StringComparer.OrdinalIgnoreCase);
     }
 
     public IReadOnlyList<NameCorrectionCandidate> Generate(string value)
@@ -1107,9 +1116,15 @@ internal sealed partial class ObfuscatedHangulCandidateGenerator
         return ch is 'r' or 'R' or 'o' or 'O' or '0' or 'l' or 'I' or '|';
     }
 
-    private static bool ContainsProtectedEnglishWord(string value)
+    private bool ContainsProtectedEnglishWord(string value)
     {
-        return ProtectedEnglishRegex().IsMatch(value);
+        if (_protectedEnglishWords.Count == 0)
+        {
+            return false;
+        }
+
+        return EnglishTokenRegex().Matches(value)
+            .Any(match => _protectedEnglishWords.Contains(match.Value));
     }
 
     [GeneratedRegex("[가-힣ㄱ-ㅎㅏ-ㅣA-Za-z0-9|]{2,}")]
@@ -1118,8 +1133,8 @@ internal sealed partial class ObfuscatedHangulCandidateGenerator
     [GeneratedRegex("[가-힣ㄱ-ㅎㅏ-ㅣ](?:\\s+[가-힣ㄱ-ㅎㅏ-ㅣ]){1,}")]
     private static partial Regex SplitJamoWhitespaceRegex();
 
-    [GeneratedRegex("\\b(?:idol|lol|no|vol|season|special|episode|ep)\\b", RegexOptions.IgnoreCase)]
-    private static partial Regex ProtectedEnglishRegex();
+    [GeneratedRegex("[A-Za-z0-9]+")]
+    private static partial Regex EnglishTokenRegex();
 }
 
 internal sealed class KoreanLexicon

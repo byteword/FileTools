@@ -359,13 +359,15 @@ internal sealed partial class SettingsForm : Form
         var document = RenameRuleStore.Load();
         var dictionary = RenameDictionaryStore.Load();
         var parserProfile = RenameParserProfileStore.Load();
-        using var dialog = new RenameRuleEditorDialog(document.Rules, dictionary, parserProfile);
+        var candidateProfile = RenameCandidateProfileStore.Load(dictionary.CommonPhrases);
+        using var dialog = new RenameRuleEditorDialog(document.Rules, dictionary, parserProfile, candidateProfile);
         if (dialog.ShowDialog(this) == DialogResult.OK)
         {
             document.Rules = dialog.Rules.ToList();
             RenameRuleStore.Save(document);
             RenameDictionaryStore.Save(dialog.RenameDictionary);
             RenameParserProfileStore.Save(dialog.ParserProfile);
+            RenameCandidateProfileStore.Save(dialog.CandidateProfile);
         }
     }
 

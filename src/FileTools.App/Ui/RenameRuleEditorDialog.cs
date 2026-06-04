@@ -53,6 +53,10 @@ internal sealed class RenameRuleEditorDialog : Form
     private readonly TextBox _commonPhraseBox = new();
     private readonly Label _commonPhraseStatusLabel = new();
 
+    private readonly BindingList<string> _candidateScoringWords;
+    private readonly BindingList<string> _protectedEnglishWords;
+    private readonly StringListDetailEditor _candidateScoringWordsEditor;
+    private readonly StringListDetailEditor _protectedEnglishWordsEditor;
     private readonly BindingList<string> _knownTags;
     private readonly BindingList<string> _authorPrefixes;
     private readonly BindingList<string> _episodePrefixes;
@@ -70,7 +74,8 @@ internal sealed class RenameRuleEditorDialog : Form
     public RenameRuleEditorDialog(
         IEnumerable<RenameCorrectionRule> rules,
         RenameDictionaryDocument? renameDictionary = null,
-        RenameParserProfileDocument? parserProfile = null)
+        RenameParserProfileDocument? parserProfile = null,
+        RenameCandidateProfileDocument? candidateProfile = null)
     {
         _rules = RenameRuleStore.NormalizeRules(rules)
             .Select(static rule => rule.Clone())
@@ -91,12 +96,19 @@ internal sealed class RenameRuleEditorDialog : Form
             .Where(static phrase => phrase.Length > 0)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList());
-        var profile = RenameParserProfileStore.Normalize(parserProfile ?? RenameParserProfileStore.Load());
-        _knownTags = new BindingList<string>(profile.KnownTags.ToList());
-        _authorPrefixes = new BindingList<string>(profile.AuthorPrefixes.ToList());
-        _episodePrefixes = new BindingList<string>(profile.EpisodePrefixes.ToList());
-        _episodeUnits = new BindingList<string>(profile.EpisodeUnits.ToList());
-        _titleNoiseWords = new BindingList<string>(profile.TitleNoiseWords.ToList());
+        var normalizedCandidateProfile = RenameCandidateProfileStore.Normalize(
+            candidateProfile ?? RenameCandidateProfileStore.CreateDefaultDocument(dictionary.CommonPhrases));
+        _candidateScoringWords = new BindingList<string>(normalizedCandidateProfile.ObfuscatedHangul.ScoringWords.ToList());
+        _protectedEnglishWords = new BindingList<string>(normalizedCandidateProfile.ObfuscatedHangul.ProtectedEnglishWords.ToList());
+        _candidateScoringWordsEditor = new StringListDetailEditor(_candidateScoringWords);
+        _protectedEnglishWordsEditor = new StringListDetailEditor(_protectedEnglishWords);
+
+        var normalizedParserProfile = RenameParserProfileStore.Normalize(parserProfile ?? RenameParserProfileStore.Load());
+        _knownTags = new BindingList<string>(normalizedParserProfile.KnownTags.ToList());
+        _authorPrefixes = new BindingList<string>(normalizedParserProfile.AuthorPrefixes.ToList());
+        _episodePrefixes = new BindingList<string>(normalizedParserProfile.EpisodePrefixes.ToList());
+        _episodeUnits = new BindingList<string>(normalizedParserProfile.EpisodeUnits.ToList());
+        _titleNoiseWords = new BindingList<string>(normalizedParserProfile.TitleNoiseWords.ToList());
         _knownTagsEditor = new StringListDetailEditor(_knownTags);
         _authorPrefixesEditor = new StringListDetailEditor(_authorPrefixes);
         _episodePrefixesEditor = new StringListDetailEditor(_episodePrefixes);
@@ -145,6 +157,15 @@ internal sealed class RenameRuleEditorDialog : Form
         EpisodePrefixes = _episodePrefixes.ToList(),
         EpisodeUnits = _episodeUnits.ToList(),
         TitleNoiseWords = _titleNoiseWords.ToList()
+    });
+
+    public RenameCandidateProfileDocument CandidateProfile => RenameCandidateProfileStore.Normalize(new RenameCandidateProfileDocument
+    {
+        ObfuscatedHangul = new ObfuscatedHangulCandidateProfile
+        {
+            ScoringWords = _candidateScoringWords.ToList(),
+            ProtectedEnglishWords = _protectedEnglishWords.ToList()
+        }
     });
 
     private void BuildLayout()
@@ -527,7 +548,7 @@ internal sealed class RenameRuleEditorDialog : Form
             return;
         }
 
-        if (!CommitPendingDetailEdit())
+        if (!CommitPendingDetailEdits())
         {
             _editorTabs.SelectedTab = _detailsTab;
             return;
@@ -618,7 +639,7 @@ internal sealed class RenameRuleEditorDialog : Form
             }
             else if (rule?.Kind == RenameCorrectionRuleKind.BuiltInObfuscatedHangulCandidate)
             {
-                BuildCommonPhraseDetailPanel();
+                BuildObfuscatedHangulCandidateDetailPanel();
             }
             else if (rule?.Kind == RenameCorrectionRuleKind.BuiltInBracketMetadataExtraction)
             {
@@ -672,6 +693,8 @@ internal sealed class RenameRuleEditorDialog : Form
             () => UpdateDictionaryEntry(),
             DeleteDictionaryEntry);
         AddDetailControl(buttons);
+
+        BuildCommonPhraseDetailPanel();
     }
 
     private void BuildCommonPhraseDetailPanel()
@@ -697,6 +720,35 @@ internal sealed class RenameRuleEditorDialog : Form
             () => UpdateCommonPhrase(),
             DeleteCommonPhrase);
         AddDetailControl(buttons);
+    }
+
+    private void BuildObfuscatedHangulCandidateDetailPanel()
+    {
+        AddDetailHeader(
+            Localizer.Get("RenameRuleSpecificObfuscatedHangulTitle"),
+            Localizer.Get("RenameRuleSpecificObfuscatedHangulHelp"));
+
+        var grid = new TableLayoutPanel
+        {
+            Height = 370,
+            ColumnCount = 2,
+            RowCount = 1,
+            Margin = new Padding(0, 8, 0, 10)
+        };
+        grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+        grid.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        grid.Controls.Add(CreateStringListEditorPanel(
+            _candidateScoringWordsEditor,
+            Localizer.Get("LabelCandidateScoringWord"),
+            Localizer.Get("RenameRuleDetailCandidateScoringWordsHelp"),
+            new Padding(0, 0, 8, 0)), 0, 0);
+        grid.Controls.Add(CreateStringListEditorPanel(
+            _protectedEnglishWordsEditor,
+            Localizer.Get("LabelProtectedEnglishWord"),
+            Localizer.Get("RenameRuleDetailProtectedEnglishWordsHelp"),
+            new Padding(8, 0, 0, 0)), 1, 0);
+        AddDetailControl(grid);
     }
 
     private void BuildKnownTagsDetailPanel()
@@ -931,24 +983,17 @@ internal sealed class RenameRuleEditorDialog : Form
         }
     }
 
-    private bool CommitPendingDetailEdit()
+    private bool CommitPendingDetailEdits()
     {
-        if (_ruleList.SelectedItem is not RenameCorrectionRule rule)
-        {
-            return true;
-        }
-
-        return rule.Kind switch
-        {
-            RenameCorrectionRuleKind.BuiltInRenameDictionary => CommitPendingDictionaryEdit(),
-            RenameCorrectionRuleKind.BuiltInObfuscatedHangulCandidate => CommitPendingCommonPhraseEdit(),
-            RenameCorrectionRuleKind.BuiltInBracketMetadataExtraction => _knownTagsEditor.CommitPending(),
-            RenameCorrectionRuleKind.BuiltInAuthorExtraction => _authorPrefixesEditor.CommitPending(),
-            RenameCorrectionRuleKind.BuiltInEpisodeExtraction => _episodePrefixesEditor.CommitPending() &&
-                _episodeUnitsEditor.CommitPending(),
-            RenameCorrectionRuleKind.BuiltInTitleCleanup => _titleNoiseWordsEditor.CommitPending(),
-            _ => true
-        };
+        return CommitPendingDictionaryEdit() &&
+            CommitPendingCommonPhraseEdit() &&
+            _candidateScoringWordsEditor.CommitPending() &&
+            _protectedEnglishWordsEditor.CommitPending() &&
+            _knownTagsEditor.CommitPending() &&
+            _authorPrefixesEditor.CommitPending() &&
+            _episodePrefixesEditor.CommitPending() &&
+            _episodeUnitsEditor.CommitPending() &&
+            _titleNoiseWordsEditor.CommitPending();
     }
 
     private void LoadSelectedDictionaryEntry()
@@ -1152,6 +1197,8 @@ internal sealed class RenameRuleEditorDialog : Form
     {
         _dictionaryStatusLabel.Text = "";
         _commonPhraseStatusLabel.Text = "";
+        _candidateScoringWordsEditor.ClearStatus();
+        _protectedEnglishWordsEditor.ClearStatus();
         _knownTagsEditor.ClearStatus();
         _authorPrefixesEditor.ClearStatus();
         _episodePrefixesEditor.ClearStatus();

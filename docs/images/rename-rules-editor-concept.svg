@@ -33,11 +33,11 @@
   <text class="body" x="94" y="183">010 [전처리] On - Unicode NFC/한글 자모 결합</text>
   <rect class="row" x="76" y="206" width="380" height="42"/>
   <text class="body" x="94" y="231">020 [전처리] On - UTF-8/Latin-1 깨짐 복구</text>
-  <rect class="selected" x="76" y="254" width="380" height="42"/>
+  <rect class="row" x="76" y="254" width="380" height="42"/>
   <text class="body" x="94" y="279">010 [사용자 보정] On - 기존 이름변경 사전 적용</text>
   <rect class="row" x="76" y="302" width="380" height="42"/>
   <text class="body" x="94" y="327">020 [사용자 보정] On - 구분자/공백 정규화</text>
-  <rect class="row" x="76" y="350" width="380" height="42"/>
+  <rect class="selected" x="76" y="350" width="380" height="42"/>
   <text class="body" x="94" y="375">010 [후보 생성] On - 왜곡 한글 복원 후보</text>
   <rect class="mutedRow" x="76" y="398" width="380" height="42"/>
   <text class="small" x="94" y="423">010 [최종 안전화] On - Windows 파일명 안전화</text>
@@ -59,22 +59,32 @@
   <rect class="tabActive" x="638" y="134" width="132" height="34" rx="4"/>
   <text class="body" x="675" y="156">세부 설정</text>
 
-  <text class="label" x="526" y="198">이름변경 사전</text>
-  <text class="small" x="526" y="220">선택한 내장 규칙이 사용하는 source -&gt; replacement 항목을 같은 창에서 편집</text>
+  <text class="label" x="526" y="198">왜곡 한글 후보</text>
+  <text class="small" x="526" y="220">후보 점수 단어와 보호 영어 단어를 후보 프로필에서 편집</text>
 
-  <rect class="panel" x="526" y="244" width="478" height="164" rx="3"/>
-  <rect class="selected" x="544" y="264" width="442" height="34"/>
-  <text class="body" x="560" y="286">sample_ -&gt; </text>
-  <rect class="row" x="544" y="304" width="442" height="34"/>
-  <text class="body" x="560" y="326">vol. -&gt; 권</text>
-  <rect class="row" x="544" y="344" width="442" height="34"/>
-  <text class="body" x="560" y="366">[RAW] -&gt; 원본</text>
+  <text class="label" x="526" y="252">후보 점수 단어</text>
+  <rect class="panel" x="526" y="268" width="230" height="140" rx="3"/>
+  <rect class="selected" x="544" y="288" width="194" height="30"/>
+  <text class="body" x="560" y="309">아가씨</text>
+  <rect class="row" x="544" y="324" width="194" height="30"/>
+  <text class="body" x="560" y="345">사랑</text>
+  <rect class="row" x="544" y="360" width="194" height="30"/>
+  <text class="body" x="560" y="381">이세계</text>
 
-  <text class="small" x="526" y="440">원본 문구</text>
+  <text class="label" x="774" y="252">보호 영어 단어</text>
+  <rect class="panel" x="774" y="268" width="230" height="140" rx="3"/>
+  <rect class="selected" x="792" y="288" width="194" height="30"/>
+  <text class="body" x="808" y="309">idol</text>
+  <rect class="row" x="792" y="324" width="194" height="30"/>
+  <text class="body" x="808" y="345">vol</text>
+  <rect class="row" x="792" y="360" width="194" height="30"/>
+  <text class="body" x="808" y="381">episode</text>
+
+  <text class="small" x="526" y="440">선택 값</text>
   <rect class="input" x="646" y="424" width="358" height="30" rx="3"/>
-  <text class="body" x="660" y="444">sample_</text>
-  <text class="small" x="526" y="482">변경 문구</text>
-  <rect class="input" x="646" y="466" width="358" height="30" rx="3"/>
+  <text class="body" x="660" y="444">아가씨</text>
+  <text class="small" x="526" y="482">문자 치환표</text>
+  <text class="small" x="646" y="486">내부 규칙으로 유지</text>
 
   <rect class="button" x="646" y="516" width="82" height="30" rx="4"/>
   <text class="body" x="671" y="536">추가</text>

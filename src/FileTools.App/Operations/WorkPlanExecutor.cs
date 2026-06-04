@@ -390,12 +390,14 @@ internal sealed class WorkPlanExecutor
     {
         var dictionary = RenameDictionaryStore.Load();
         var parserProfile = RenameParserProfileStore.Load();
+        var candidateProfile = RenameCandidateProfileStore.Load(dictionary.CommonPhrases);
         var rules = RenameRuleStore.Load();
         return new KoreanFileNameCorrector(new CorrectionOptions
         {
             ParserProfile = parserProfile,
             RenameDictionary = _baseSettings.RenameUseDictionary ? dictionary.Replacements : [],
             CommonPhrases = _baseSettings.RenameUseDictionary ? dictionary.CommonPhrases.ToArray() : [],
+            CandidateProfile = _baseSettings.RenameUseDictionary ? candidateProfile : RenameCandidateProfileStore.CreateDefaultDocument(),
             Rules = rules.Rules
         });
     }

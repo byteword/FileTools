@@ -495,12 +495,14 @@ internal sealed class FileToolRunner
     {
         var dictionary = RenameDictionaryStore.Load();
         var parserProfile = RenameParserProfileStore.Load();
+        var candidateProfile = RenameCandidateProfileStore.Load(dictionary.CommonPhrases);
         var rules = RenameRuleStore.Load();
         return new KoreanFileNameCorrector(new CorrectionOptions
         {
             ParserProfile = parserProfile,
             RenameDictionary = _settings.RenameUseDictionary ? dictionary.Replacements : [],
             CommonPhrases = _settings.RenameUseDictionary ? dictionary.CommonPhrases.ToArray() : [],
+            CandidateProfile = _settings.RenameUseDictionary ? candidateProfile : RenameCandidateProfileStore.CreateDefaultDocument(),
             Rules = rules.Rules
         });
     }

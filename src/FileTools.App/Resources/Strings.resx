@@ -228,8 +228,10 @@
   <data name="RenameRuleSpecificDictionaryHelp" xml:space="preserve"><value>Manage source-to-replacement entries used by the built-in dictionary rule.</value></data>
   <data name="RenameRuleSpecificObfuscatedHangulTitle" xml:space="preserve"><value>Obfuscated Hangul candidates</value></data>
   <data name="RenameRuleSpecificObfuscatedHangulHelp" xml:space="preserve"><value>Manage candidate scoring words and protected English words without exposing character replacement internals.</value></data>
-  <data name="RenameRuleDetailCommonPhrasesTitle" xml:space="preserve"><value>Candidate scoring words</value></data>
-  <data name="RenameRuleDetailCommonPhrasesHelp" xml:space="preserve"><value>Edit common phrases used by the obfuscated Hangul candidate scorer. Protected English words still remain internal.</value></data>
+  <data name="RenameRuleDetailCommonPhrasesTitle" xml:space="preserve"><value>Review insert phrases</value></data>
+  <data name="RenameRuleDetailCommonPhrasesHelp" xml:space="preserve"><value>Edit common phrases shown as insert chips in the rename review dialog.</value></data>
+  <data name="RenameRuleDetailCandidateScoringWordsHelp" xml:space="preserve"><value>Words and phrases that raise the obfuscated Hangul candidate score when they appear in restored output.</value></data>
+  <data name="RenameRuleDetailProtectedEnglishWordsHelp" xml:space="preserve"><value>English tokens that should stay English and lower the obfuscated Hangul candidate score.</value></data>
   <data name="RenameRuleSpecificBracketMetadataTitle" xml:space="preserve"><value>Bracket metadata extraction</value></data>
   <data name="RenameRuleSpecificBracketMetadataHelp" xml:space="preserve"><value>Manage words that should be treated as tags when bracket metadata is extracted.</value></data>
   <data name="RenameRuleSpecificAuthorExtractionTitle" xml:space="preserve"><value>Author extraction</value></data>
@@ -245,6 +247,8 @@
   <data name="ButtonEditEpisodePrefixes" xml:space="preserve"><value>Edit episode prefixes...</value></data>
   <data name="ButtonEditEpisodeUnits" xml:space="preserve"><value>Edit episode units...</value></data>
   <data name="ButtonEditTitleNoiseWords" xml:space="preserve"><value>Edit title noise words...</value></data>
+  <data name="LabelCandidateScoringWord" xml:space="preserve"><value>Scoring word</value></data>
+  <data name="LabelProtectedEnglishWord" xml:space="preserve"><value>Protected English</value></data>
   <data name="LabelKnownTag" xml:space="preserve"><value>Tag word</value></data>
   <data name="LabelAuthorPrefix" xml:space="preserve"><value>Author prefix</value></data>
   <data name="LabelEpisodePrefix" xml:space="preserve"><value>Episode prefix</value></data>

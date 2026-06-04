@@ -68,8 +68,8 @@ Windows filename safety is required and remains active even when shown in the ru
 
 Currently exposed detail panels are limited to settings that have backing storage:
 
-- Existing rename dictionary application: inline `source -> replacement` editor backed by `rename-dictionary.json`.
-- Obfuscated Hangul candidate generation: inline common-phrase editor for the candidate scoring lexicon, also backed by `rename-dictionary.json`.
+- Existing rename dictionary application: inline `source -> replacement` editor backed by `rename-dictionary.json`, plus review insert phrases used by the rename review dialog.
+- Obfuscated Hangul candidate generation: inline candidate scoring word and protected English word editors backed by `rename-candidate-profile.json`.
 - Bracket metadata extraction: inline known-tag word editor backed by `rename-parser-profile.json`.
 - Author extraction: inline author-prefix editor backed by `rename-parser-profile.json`.
 - Episode extraction: inline episode-prefix and episode-unit editors backed by `rename-parser-profile.json`.
@@ -79,9 +79,10 @@ The settings window no longer exposes separate rename dictionary and common-phra
 
 Deferred detail panels and internals:
 
-- Protected English words for obfuscated Hangul scoring.
 - Regex internals for parser extraction.
 - Character replacement tables for obfuscated Hangul candidate generation.
+
+The candidate profile separates obfuscated Hangul scoring data from review insert phrases. When `rename-candidate-profile.json` is first created, legacy common phrases are copied into the scoring word list once so existing scoring behavior is not lost; future edits are independent.
 
 Parser profile lists are exposed as words, prefixes, and units only. User input is escaped before dynamic regex construction, so full regex editing remains intentionally unavailable.
 

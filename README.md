@@ -73,7 +73,7 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
 
 별도 대화상자는 다음 용도로 제공됩니다.
 
-- 이름 변경 교정 규칙. 내장 규칙 표시 여부, 활성 상태, 단계별 순서, 자동/검토/후보 전용 모드를 포함합니다. 오른쪽 `세부 설정` 탭은 기존 이름변경 사전(`source -> replacement`), 왜곡 한글 후보 점수 문구, 파서 프로파일의 태그 단어/작가 접두어/회차 접두어와 단위/제목 노이즈 단어를 선택 규칙 맥락에서 직접 편집합니다. 파서 프로파일은 `rename-parser-profile.json`에 저장하며, 스크립트 기반 규칙은 보류 중이고 `docs/ux-rename-rule-management.md`에 문서화되어 있습니다.
+- 이름 변경 교정 규칙. 내장 규칙 표시 여부, 활성 상태, 단계별 순서, 자동/검토/후보 전용 모드를 포함합니다. 오른쪽 `세부 설정` 탭은 기존 이름변경 사전(`source -> replacement`), 검토창 삽입 문구, 왜곡 한글 후보 점수 단어와 보호 영어 단어, 파서 프로파일의 태그 단어/작가 접두어/회차 접두어와 단위/제목 노이즈 단어를 선택 규칙 맥락에서 직접 편집합니다. 후보 프로파일은 `rename-candidate-profile.json`, 파서 프로파일은 `rename-parser-profile.json`에 저장하며, 스크립트 기반 규칙은 보류 중이고 `docs/ux-rename-rule-management.md`에 문서화되어 있습니다.
 - AutoRelocation 템플릿 편집. 경로 규칙 단계는 순서대로 평가되므로 템플릿은 `{KnownFileKind}\[{Initial}]\{EpisodeRange}` 같은 경로를 만들 수 있습니다. 템플릿 편집기와 단계별 작업 대화상자는 긴 템플릿 이름, 경로, 현지화된 라벨을 위해 크기를 조절할 수 있습니다.
 
 AutoRelocation 템플릿은 의도적으로 파일에서 파생된 값만 사용합니다.
@@ -100,6 +100,8 @@ AutoRelocation 템플릿은 의도적으로 파일에서 파생된 값만 사용
 %APPDATA%\FileTools
 %APPDATA%\FileTools\settings.json
 %APPDATA%\FileTools\rename-dictionary.json
+%APPDATA%\FileTools\rename-candidate-profile.json
+%APPDATA%\FileTools\rename-parser-profile.json
 %APPDATA%\FileTools\Relocate
 ```
 
@@ -418,7 +420,7 @@ UX review notes for the current rename dialog are tracked in `docs/ux-rename-dia
 
 Separate dialogs are available for:
 
-- Rename correction rules, including built-in rule visibility, enabled state, stage-scoped ordering, and automatic/review/candidate-only modes. The right-side `Details` tab edits existing rename dictionary entries (`source -> replacement`), common phrases used by the obfuscated Hangul scorer, and parser-profile lists for tag words, author prefixes, episode prefixes/units, and title noise words in the context of the selected rule. Parser lists are stored in `rename-parser-profile.json`. Script-backed rules are deferred and documented in `docs/ux-rename-rule-management.md`.
+- Rename correction rules, including built-in rule visibility, enabled state, stage-scoped ordering, and automatic/review/candidate-only modes. The right-side `Details` tab edits existing rename dictionary entries (`source -> replacement`), rename-review insert phrases, obfuscated Hangul candidate scoring words and protected English words, and parser-profile lists for tag words, author prefixes, episode prefixes/units, and title noise words in the context of the selected rule. Candidate lists are stored in `rename-candidate-profile.json`, and parser lists are stored in `rename-parser-profile.json`. Script-backed rules are deferred and documented in `docs/ux-rename-rule-management.md`.
 - AutoRelocation template editing. Path rule steps are evaluated in order, so a template can produce paths such as `{KnownFileKind}\[{Initial}]\{EpisodeRange}`. The template editor and per-step action dialogs resize for long template names, paths, and localized labels.
 
 AutoRelocation templates intentionally use only file-derived values:
@@ -445,6 +447,8 @@ Settings and templates are stored under:
 %APPDATA%\FileTools
 %APPDATA%\FileTools\settings.json
 %APPDATA%\FileTools\rename-dictionary.json
+%APPDATA%\FileTools\rename-candidate-profile.json
+%APPDATA%\FileTools\rename-parser-profile.json
 %APPDATA%\FileTools\Relocate
 ```
 

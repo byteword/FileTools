@@ -228,8 +228,10 @@
   <data name="RenameRuleSpecificDictionaryHelp" xml:space="preserve"><value>내장 사전 규칙이 사용하는 원본-변경 항목을 관리합니다.</value></data>
   <data name="RenameRuleSpecificObfuscatedHangulTitle" xml:space="preserve"><value>왜곡 한글 후보</value></data>
   <data name="RenameRuleSpecificObfuscatedHangulHelp" xml:space="preserve"><value>문자 치환 내부 규칙은 숨기고, 후보 점수 단어와 보호할 영어 단어만 관리합니다.</value></data>
-  <data name="RenameRuleDetailCommonPhrasesTitle" xml:space="preserve"><value>후보 점수 단어</value></data>
-  <data name="RenameRuleDetailCommonPhrasesHelp" xml:space="preserve"><value>왜곡 한글 후보 점수 계산에 쓰는 자주 쓰는 문구를 편집합니다. 보호 영어 단어는 아직 내부 규칙으로 유지합니다.</value></data>
+  <data name="RenameRuleDetailCommonPhrasesTitle" xml:space="preserve"><value>검토 삽입 문구</value></data>
+  <data name="RenameRuleDetailCommonPhrasesHelp" xml:space="preserve"><value>이름변경 검토창에서 삽입 칩으로 보여줄 자주 쓰는 문구를 편집합니다.</value></data>
+  <data name="RenameRuleDetailCandidateScoringWordsHelp" xml:space="preserve"><value>복원 결과에 포함되면 왜곡 한글 후보 점수를 올릴 단어와 문구입니다.</value></data>
+  <data name="RenameRuleDetailProtectedEnglishWordsHelp" xml:space="preserve"><value>영어 토큰으로 남겨야 하므로 한글 왜곡 후보 점수를 낮출 단어입니다.</value></data>
   <data name="RenameRuleSpecificBracketMetadataTitle" xml:space="preserve"><value>괄호 메타데이터 추출</value></data>
   <data name="RenameRuleSpecificBracketMetadataHelp" xml:space="preserve"><value>괄호 메타데이터에서 태그로 취급할 단어를 관리합니다.</value></data>
   <data name="RenameRuleSpecificAuthorExtractionTitle" xml:space="preserve"><value>작가 표기 추출</value></data>
@@ -245,6 +247,8 @@
   <data name="ButtonEditEpisodePrefixes" xml:space="preserve"><value>회차 접두어 편집...</value></data>
   <data name="ButtonEditEpisodeUnits" xml:space="preserve"><value>회차 단위 편집...</value></data>
   <data name="ButtonEditTitleNoiseWords" xml:space="preserve"><value>제목 노이즈 단어 편집...</value></data>
+  <data name="LabelCandidateScoringWord" xml:space="preserve"><value>후보 점수 단어</value></data>
+  <data name="LabelProtectedEnglishWord" xml:space="preserve"><value>보호 영어 단어</value></data>
   <data name="LabelKnownTag" xml:space="preserve"><value>태그 단어</value></data>
   <data name="LabelAuthorPrefix" xml:space="preserve"><value>작가 접두어</value></data>
   <data name="LabelEpisodePrefix" xml:space="preserve"><value>회차 접두어</value></data>
