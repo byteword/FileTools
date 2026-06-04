@@ -172,7 +172,7 @@ MultiFolderMergeFolderNameTemplate = {CommonStem}
 ArchiveMergeFileNameTemplate       = {CommonStem}{TargetExtension}
 ```
 
-The default output filename uses `ArchiveMergeFileNameTemplate` with `{TargetExtension}` set to `.zip`. If `{CommonStem}` cannot produce a useful name, the parent folder name is used; if that is unavailable, a timestamped `Merged-yyyyMMdd-HHmmss.zip` fallback is used.
+The default output filename uses `ArchiveMergeFileNameTemplate` with `{TargetExtension}` set to `.zip`. If `{CommonStem}` cannot produce a useful name, the parent folder name is used; if that is unavailable, a timestamped `Merged-yyyyMMdd-HHmmss.zip` fallback is used. When the output filename policy is `Manual`, context-menu archive merge opens a save dialog before the progress window and uses the selected path as the final ZIP path.
 
 ### Archive Merge Layout
 
@@ -232,16 +232,12 @@ SkipFailedEntry
 
 ZIP names with the UTF-8 flag are read as UTF-8. Legacy ZIP names are opened with candidate encodings and scored by filename quality, valid path segments, suspicious replacement characters, extension patterns, and collision amplification.
 
-The encoding picker shows both a display name and a short explanation:
+The encoding picker shows both a localized display name and a short explanation:
 
 ```text
-Korean (EUC-KR / CP949)        Common for Korean Windows ZIP files
-Japanese (Shift-JIS / CP932)   Common for Japanese Windows ZIP files
-Simplified Chinese (GBK / CP936)
-Traditional Chinese (Big5 / CP950)
-ZIP default (CP437)
-UTF-8
-System default
+Korean UI: 한국어 (EUC-KR / CP949) - 한국어 Windows ZIP 파일에서 흔한 레거시 파일명 인코딩입니다.
+English UI: Korean (EUC-KR / CP949) - Common legacy filename encoding for Korean Windows ZIP files.
+Other candidates: Japanese, Simplified Chinese, Traditional Chinese, ZIP default, UTF-8, System default
 ```
 
 If the score is ambiguous, the progress window opens a dedicated encoding selection dialog and shows a preview of decoded entry names.

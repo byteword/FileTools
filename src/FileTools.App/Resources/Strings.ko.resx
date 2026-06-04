@@ -549,6 +549,20 @@
   <data name="ArchiveEncodingColumnScore" xml:space="preserve"><value>점수</value></data>
   <data name="ArchiveEncodingColumnPreview" xml:space="preserve"><value>파일명 미리보기</value></data>
   <data name="ArchiveEncodingScoreFormat" xml:space="preserve"><value>점수: {0}</value></data>
+  <data name="ArchiveEncodingCandidateKoreanName" xml:space="preserve"><value>한국어 (EUC-KR / CP949)</value></data>
+  <data name="ArchiveEncodingCandidateKoreanDescription" xml:space="preserve"><value>한국어 Windows ZIP 파일에서 흔한 레거시 파일명 인코딩입니다.</value></data>
+  <data name="ArchiveEncodingCandidateJapaneseName" xml:space="preserve"><value>일본어 (Shift-JIS / CP932)</value></data>
+  <data name="ArchiveEncodingCandidateJapaneseDescription" xml:space="preserve"><value>일본어 Windows ZIP 파일에서 흔한 레거시 파일명 인코딩입니다.</value></data>
+  <data name="ArchiveEncodingCandidateSimplifiedChineseName" xml:space="preserve"><value>중국어 간체 (GBK / CP936)</value></data>
+  <data name="ArchiveEncodingCandidateSimplifiedChineseDescription" xml:space="preserve"><value>중국어 간체 Windows ZIP 파일에서 흔한 레거시 파일명 인코딩입니다.</value></data>
+  <data name="ArchiveEncodingCandidateTraditionalChineseName" xml:space="preserve"><value>중국어 번체 (Big5 / CP950)</value></data>
+  <data name="ArchiveEncodingCandidateTraditionalChineseDescription" xml:space="preserve"><value>중국어 번체 Windows ZIP 파일에서 흔한 레거시 파일명 인코딩입니다.</value></data>
+  <data name="ArchiveEncodingCandidateZipDefaultName" xml:space="preserve"><value>ZIP 기본값 (CP437)</value></data>
+  <data name="ArchiveEncodingCandidateZipDefaultDescription" xml:space="preserve"><value>ZIP 명세의 레거시 기본 파일명 인코딩입니다.</value></data>
+  <data name="ArchiveEncodingCandidateUtf8Name" xml:space="preserve"><value>UTF-8</value></data>
+  <data name="ArchiveEncodingCandidateUtf8Description" xml:space="preserve"><value>최신 ZIP 압축파일에서 사용하는 유니코드 파일명 인코딩입니다.</value></data>
+  <data name="ArchiveEncodingCandidateSystemDefaultName" xml:space="preserve"><value>시스템 기본값</value></data>
+  <data name="ArchiveEncodingCandidateSystemDefaultDescription" xml:space="preserve"><value>현재 Windows 시스템 코드 페이지입니다.</value></data>
   <data name="ArchiveMergeDuplicateDecisionAbortedFormat" xml:space="preserve"><value>중복 내용 결정으로 병합을 중단했습니다: {0}</value></data>
   <data name="ArchiveMergeCollisionDecisionAbortedFormat" xml:space="preserve"><value>이름 충돌 결정으로 병합을 중단했습니다: {0}</value></data>
   <data name="ArchiveMergeCollisionSkippedFormat" xml:space="preserve"><value>이름 충돌로 건너뜀: {0}</value></data>

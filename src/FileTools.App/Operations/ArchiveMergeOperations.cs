@@ -1361,13 +1361,13 @@ internal static class ArchiveEncodingDetector
 {
     private static readonly ArchiveEncodingCandidate[] Candidates =
     [
-        new("Korean (EUC-KR / CP949)", "Common for Korean Windows ZIP files", 949),
-        new("Japanese (Shift-JIS / CP932)", "Common for Japanese Windows ZIP files", 932),
-        new("Simplified Chinese (GBK / CP936)", "Common for Simplified Chinese Windows ZIP files", 936),
-        new("Traditional Chinese (Big5 / CP950)", "Common for Traditional Chinese Windows ZIP files", 950),
-        new("ZIP default (CP437)", "Legacy ZIP specification default", 437),
-        new("UTF-8", "Unicode ZIP filename encoding", 65001),
-        new("System default", "Current Windows code page", 0)
+        new("ArchiveEncodingCandidateKoreanName", "ArchiveEncodingCandidateKoreanDescription", 949),
+        new("ArchiveEncodingCandidateJapaneseName", "ArchiveEncodingCandidateJapaneseDescription", 932),
+        new("ArchiveEncodingCandidateSimplifiedChineseName", "ArchiveEncodingCandidateSimplifiedChineseDescription", 936),
+        new("ArchiveEncodingCandidateTraditionalChineseName", "ArchiveEncodingCandidateTraditionalChineseDescription", 950),
+        new("ArchiveEncodingCandidateZipDefaultName", "ArchiveEncodingCandidateZipDefaultDescription", 437),
+        new("ArchiveEncodingCandidateUtf8Name", "ArchiveEncodingCandidateUtf8Description", 65001),
+        new("ArchiveEncodingCandidateSystemDefaultName", "ArchiveEncodingCandidateSystemDefaultDescription", 0)
     ];
 
     private static bool _providerRegistered;
@@ -1389,8 +1389,8 @@ internal static class ArchiveEncodingDetector
                     .Take(20)
                     .ToArray();
                 results.Add(new ArchiveEncodingCandidateResult(
-                    candidate.DisplayName,
-                    candidate.Description,
+                    Localizer.Get(candidate.DisplayNameKey),
+                    Localizer.Get(candidate.DescriptionKey),
                     encoding,
                     ScoreNames(names),
                     names));
@@ -1470,7 +1470,7 @@ internal static class ArchiveEncodingDetector
         _providerRegistered = true;
     }
 
-    private sealed record ArchiveEncodingCandidate(string DisplayName, string Description, int CodePage);
+    private sealed record ArchiveEncodingCandidate(string DisplayNameKey, string DescriptionKey, int CodePage);
 }
 
 internal sealed record ArchiveEncodingResolution(Encoding Encoding, string DisplayName, bool IsAmbiguous);

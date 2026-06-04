@@ -549,6 +549,20 @@
   <data name="ArchiveEncodingColumnScore" xml:space="preserve"><value>Score</value></data>
   <data name="ArchiveEncodingColumnPreview" xml:space="preserve"><value>Preview names</value></data>
   <data name="ArchiveEncodingScoreFormat" xml:space="preserve"><value>Score: {0}</value></data>
+  <data name="ArchiveEncodingCandidateKoreanName" xml:space="preserve"><value>Korean (EUC-KR / CP949)</value></data>
+  <data name="ArchiveEncodingCandidateKoreanDescription" xml:space="preserve"><value>Common legacy filename encoding for Korean Windows ZIP files.</value></data>
+  <data name="ArchiveEncodingCandidateJapaneseName" xml:space="preserve"><value>Japanese (Shift-JIS / CP932)</value></data>
+  <data name="ArchiveEncodingCandidateJapaneseDescription" xml:space="preserve"><value>Common legacy filename encoding for Japanese Windows ZIP files.</value></data>
+  <data name="ArchiveEncodingCandidateSimplifiedChineseName" xml:space="preserve"><value>Simplified Chinese (GBK / CP936)</value></data>
+  <data name="ArchiveEncodingCandidateSimplifiedChineseDescription" xml:space="preserve"><value>Common legacy filename encoding for Simplified Chinese Windows ZIP files.</value></data>
+  <data name="ArchiveEncodingCandidateTraditionalChineseName" xml:space="preserve"><value>Traditional Chinese (Big5 / CP950)</value></data>
+  <data name="ArchiveEncodingCandidateTraditionalChineseDescription" xml:space="preserve"><value>Common legacy filename encoding for Traditional Chinese Windows ZIP files.</value></data>
+  <data name="ArchiveEncodingCandidateZipDefaultName" xml:space="preserve"><value>ZIP default (CP437)</value></data>
+  <data name="ArchiveEncodingCandidateZipDefaultDescription" xml:space="preserve"><value>Legacy default encoding from the ZIP specification.</value></data>
+  <data name="ArchiveEncodingCandidateUtf8Name" xml:space="preserve"><value>UTF-8</value></data>
+  <data name="ArchiveEncodingCandidateUtf8Description" xml:space="preserve"><value>Unicode filename encoding used by modern ZIP archives.</value></data>
+  <data name="ArchiveEncodingCandidateSystemDefaultName" xml:space="preserve"><value>System default</value></data>
+  <data name="ArchiveEncodingCandidateSystemDefaultDescription" xml:space="preserve"><value>Current Windows system code page.</value></data>
   <data name="ArchiveMergeDuplicateDecisionAbortedFormat" xml:space="preserve"><value>Duplicate-content decision aborted the merge at {0}.</value></data>
   <data name="ArchiveMergeCollisionDecisionAbortedFormat" xml:space="preserve"><value>Name-collision decision aborted the merge at {0}.</value></data>
   <data name="ArchiveMergeCollisionSkippedFormat" xml:space="preserve"><value>Name collision skipped: {0}</value></data>

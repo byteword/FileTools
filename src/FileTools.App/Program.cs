@@ -269,7 +269,38 @@ internal static class Program
             return result;
         }
 
+        if (settings.ArchiveMergeOutputNamePolicy == ArchiveMergeOutputNamePolicy.Manual)
+        {
+            var outputPath = ChooseArchiveMergeOutputPath(options.OutputPath);
+            if (string.IsNullOrWhiteSpace(outputPath))
+            {
+                var result = new OperationResult();
+                result.AddSkipped(Localizer.Get("ArchiveMergeCanceled"));
+                return result;
+            }
+
+            options.OutputPath = outputPath;
+        }
+
         return ArchiveMergeProgressDialog.Run(owner: null, options) ?? new OperationResult();
+    }
+
+    private static string? ChooseArchiveMergeOutputPath(string suggestedPath)
+    {
+        using var dialog = new SaveFileDialog
+        {
+            Title = Localizer.Get("ArchiveMergeOutputDialogTitle"),
+            Filter = Localizer.Get("ArchiveMergeOutputDialogFilter"),
+            FileName = Path.GetFileName(suggestedPath)
+        };
+
+        var initialDirectory = Path.GetDirectoryName(suggestedPath);
+        if (!string.IsNullOrWhiteSpace(initialDirectory) && Directory.Exists(initialDirectory))
+        {
+            dialog.InitialDirectory = initialDirectory;
+        }
+
+        return dialog.ShowDialog() == DialogResult.OK ? dialog.FileName : null;
     }
 
     private static string? ChooseRelocationTargetRoot()
