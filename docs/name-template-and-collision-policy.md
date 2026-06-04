@@ -228,6 +228,16 @@ SkipFailedEntry
 
 `OutputWriteFailure` is never a partial-success condition. The temp output is deleted and originals are left untouched.
 
+### Archive Merge Automated Regression Tests
+
+`tests\FileTools.Tests` contains the first automated archive merge regression suite. It covers normalized ZIP metadata preservation for written entries, unreadable ZIP handling with `SkipFailedArchive`, per-entry read failure handling with `SkipFailedEntry`, and a deterministic output-path filesystem failure. The tests reference the app assembly and use reflection for the internal merge API so the production app project does not need test-only access changes.
+
+Run only the managed app/test path with:
+
+```powershell
+dotnet test .\tests\FileTools.Tests\FileTools.Tests.csproj
+```
+
 ### Archive Merge Encoding
 
 ZIP names with the UTF-8 flag are read as UTF-8. Legacy ZIP names are opened with candidate encodings and scored by filename quality, valid path segments, suspicious replacement characters, extension patterns, and collision amplification.

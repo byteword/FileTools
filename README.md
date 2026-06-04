@@ -165,6 +165,14 @@ dotnet publish .\src\FileTools.App\FileTools.App.csproj -c Release -r win-x64 --
 src\FileTools.App\bin\Release\net8.0-windows\win-x64\publish\FileTools.exe
 ```
 
+### 테스트
+
+자동 테스트는 `tests\FileTools.Tests`에 있습니다. 현재 회귀 범위는 ZIP 병합의 엔트리 메타데이터 보존, 열 수 없는 ZIP 건너뛰기, 손상 엔트리 건너뛰기, 출력 경로 파일시스템 실패입니다. 테스트 프로젝트는 본 프로그램 소스를 테스트용으로 변경하지 않고 앱 어셈블리를 참조한 뒤 reflection으로 내부 병합 API를 호출합니다.
+
+```powershell
+dotnet test .\tests\FileTools.Tests\FileTools.Tests.csproj
+```
+
 ### 설치 관리자 빌드
 
 설치 관리자는 WiX Toolset SDK 스타일 프로젝트 파일을 사용합니다. 빌드 스크립트는 먼저 Visual Studio MSBuild로 네이티브 ShellExt DLL을 빌드한 다음 WiX MSI와 Burn bundle 프로젝트를 복원/빌드합니다.
@@ -515,6 +523,14 @@ Output:
 
 ```text
 src\FileTools.App\bin\Release\net8.0-windows\win-x64\publish\FileTools.exe
+```
+
+### Tests
+
+Automated tests live in `tests\FileTools.Tests`. The current regression scope covers ZIP merge entry metadata preservation, unreadable ZIP skipping, corrupt-entry skipping, and output-path filesystem failures. The test project does not change the app source for test access; it references the app assembly and calls the internal merge API through reflection.
+
+```powershell
+dotnet test .\tests\FileTools.Tests\FileTools.Tests.csproj
 ```
 
 ### Build Installer
