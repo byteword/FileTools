@@ -549,4 +549,29 @@
   <data name="ArchiveEncodingColumnScore" xml:space="preserve"><value>Score</value></data>
   <data name="ArchiveEncodingColumnPreview" xml:space="preserve"><value>Preview names</value></data>
   <data name="ArchiveEncodingScoreFormat" xml:space="preserve"><value>Score: {0}</value></data>
+  <data name="ArchiveMergeDuplicateDecisionAbortedFormat" xml:space="preserve"><value>Duplicate-content decision aborted the merge at {0}.</value></data>
+  <data name="ArchiveMergeCollisionDecisionAbortedFormat" xml:space="preserve"><value>Name-collision decision aborted the merge at {0}.</value></data>
+  <data name="ArchiveMergeCollisionSkippedFormat" xml:space="preserve"><value>Name collision skipped: {0}</value></data>
+  <data name="ArchiveMergeDecisionGroup" xml:space="preserve"><value>Pending decisions</value></data>
+  <data name="ArchiveMergeDecisionNone" xml:space="preserve"><value>No pending decisions.</value></data>
+  <data name="ArchiveMergeProgressWaitingForDecision" xml:space="preserve"><value>Waiting for a merge decision...</value></data>
+  <data name="ArchiveMergeDecisionAddedFormat" xml:space="preserve"><value>Decision required: {0}</value></data>
+  <data name="ArchiveMergeDecisionAbort" xml:space="preserve"><value>Abort</value></data>
+  <data name="ArchiveMergeDecisionAutoNumberCurrent" xml:space="preserve"><value>Auto number</value></data>
+  <data name="ArchiveMergeDecisionSkipCurrent" xml:space="preserve"><value>Skip current</value></data>
+  <data name="ArchiveMergeDecisionKeepBoth" xml:space="preserve"><value>Keep both</value></data>
+  <data name="ArchiveMergeDecisionSkipDuplicate" xml:space="preserve"><value>Skip duplicate</value></data>
+  <data name="ArchiveMergeNameCollisionDecisionTitleFormat" xml:space="preserve"><value>Name collision: {0}</value></data>
+  <data name="ArchiveMergeDuplicateDecisionTitleFormat" xml:space="preserve"><value>Duplicate content: {0}</value></data>
+  <data name="ArchiveMergeDecisionExistingHeader" xml:space="preserve"><value>Existing entry</value></data>
+  <data name="ArchiveMergeDecisionCurrentHeader" xml:space="preserve"><value>Current entry</value></data>
+  <data name="ArchiveMergeDecisionArchiveFormat" xml:space="preserve"><value>Archive: {0}</value></data>
+  <data name="ArchiveMergeDecisionOriginalPathFormat" xml:space="preserve"><value>Original path: {0}</value></data>
+  <data name="ArchiveMergeDecisionTargetPathFormat" xml:space="preserve"><value>Target path: {0}</value></data>
+  <data name="ArchiveMergeDecisionSizeFormat" xml:space="preserve"><value>Size: {0} bytes</value></data>
+  <data name="ArchiveMergeDecisionHashFormat" xml:space="preserve"><value>Content hash: {0}</value></data>
+  <data name="ArchiveMergeNameCollisionMessageBoxTitle" xml:space="preserve"><value>Archive merge name collision</value></data>
+  <data name="ArchiveMergeNameCollisionMessageBoxHelp" xml:space="preserve"><value>Yes: auto-number and keep current. No: skip current. Cancel: abort merge.</value></data>
+  <data name="ArchiveMergeDuplicateMessageBoxTitle" xml:space="preserve"><value>Archive merge duplicate content</value></data>
+  <data name="ArchiveMergeDuplicateMessageBoxHelp" xml:space="preserve"><value>Yes: keep both. No: skip duplicate. Cancel: abort merge.</value></data>
 </root>

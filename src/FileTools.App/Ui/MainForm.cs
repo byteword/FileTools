@@ -1426,6 +1426,97 @@ public sealed partial class MainForm : Form
             using var dialog = new ArchiveEncodingDialog(question);
             return dialog.ShowDialog(_owner) == DialogResult.OK ? dialog.SelectedEncoding : null;
         }
+
+        public ArchiveMergeNameCollisionDecision ResolveNameCollision(ArchiveMergeNameCollisionQuestion question)
+        {
+            if (_owner.IsDisposed)
+            {
+                return ArchiveMergeNameCollisionDecision.Abort;
+            }
+
+            if (_owner.InvokeRequired)
+            {
+                return (ArchiveMergeNameCollisionDecision)_owner.Invoke(
+                    new Func<ArchiveMergeNameCollisionDecision>(() => ResolveNameCollision(question)));
+            }
+
+            var message = string.Join(Environment.NewLine, new[]
+            {
+                Localizer.Format("ArchiveMergeDecisionTargetPathFormat", question.TargetPath),
+                "",
+                Localizer.Get("ArchiveMergeDecisionExistingHeader"),
+                FormatQuestionEntry(question.ExistingEntry),
+                "",
+                Localizer.Get("ArchiveMergeDecisionCurrentHeader"),
+                FormatQuestionEntry(question.CurrentEntry),
+                "",
+                Localizer.Get("ArchiveMergeNameCollisionMessageBoxHelp")
+            });
+            var response = MessageBox.Show(
+                _owner,
+                message,
+                Localizer.Get("ArchiveMergeNameCollisionMessageBoxTitle"),
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button1);
+            return response switch
+            {
+                DialogResult.Yes => ArchiveMergeNameCollisionDecision.AutoNumberCurrent,
+                DialogResult.No => ArchiveMergeNameCollisionDecision.SkipCurrent,
+                _ => ArchiveMergeNameCollisionDecision.Abort
+            };
+        }
+
+        public ArchiveMergeDuplicateContentDecision ResolveDuplicateContent(ArchiveMergeDuplicateContentQuestion question)
+        {
+            if (_owner.IsDisposed)
+            {
+                return ArchiveMergeDuplicateContentDecision.Abort;
+            }
+
+            if (_owner.InvokeRequired)
+            {
+                return (ArchiveMergeDuplicateContentDecision)_owner.Invoke(
+                    new Func<ArchiveMergeDuplicateContentDecision>(() => ResolveDuplicateContent(question)));
+            }
+
+            var message = string.Join(Environment.NewLine, new[]
+            {
+                Localizer.Format("ArchiveMergeDecisionHashFormat", question.Hash),
+                "",
+                Localizer.Get("ArchiveMergeDecisionExistingHeader"),
+                FormatQuestionEntry(question.FirstEntry),
+                "",
+                Localizer.Get("ArchiveMergeDecisionCurrentHeader"),
+                FormatQuestionEntry(question.CurrentEntry),
+                "",
+                Localizer.Get("ArchiveMergeDuplicateMessageBoxHelp")
+            });
+            var response = MessageBox.Show(
+                _owner,
+                message,
+                Localizer.Get("ArchiveMergeDuplicateMessageBoxTitle"),
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button1);
+            return response switch
+            {
+                DialogResult.Yes => ArchiveMergeDuplicateContentDecision.KeepBoth,
+                DialogResult.No => ArchiveMergeDuplicateContentDecision.SkipCurrent,
+                _ => ArchiveMergeDuplicateContentDecision.Abort
+            };
+        }
+
+        private static string FormatQuestionEntry(ArchiveMergeQuestionEntry entry)
+        {
+            return string.Join(Environment.NewLine, new[]
+            {
+                Localizer.Format("ArchiveMergeDecisionArchiveFormat", entry.SourceArchivePath),
+                Localizer.Format("ArchiveMergeDecisionOriginalPathFormat", entry.OriginalPath),
+                Localizer.Format("ArchiveMergeDecisionTargetPathFormat", entry.TargetPath),
+                Localizer.Format("ArchiveMergeDecisionSizeFormat", entry.Size)
+            });
+        }
     }
 
 }

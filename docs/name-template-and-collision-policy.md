@@ -88,7 +88,7 @@ Folder unwrap target file: Skip by default
 
 `MergeIntoExisting` for folder wrap preserves the old behavior where an existing same-name folder can receive the file if the child file path is not already present.
 
-`Ask` remains a reserved engine value only. Current settings load/save and folder-structure collision option creation normalize `Ask` to `Skip`, because no prompt flow exists yet for planner or context-menu execution.
+For the general folder wrap/unwrap name-collision resolver, `Ask` remains a reserved engine value. Current settings load/save and folder-structure collision option creation normalize `Ask` to `Skip`. Archive merge has its own `Ask` handling, described below, because it can surface merge-specific existing/current entry details.
 
 The default auto-number conflict template is:
 
@@ -202,9 +202,9 @@ Duplicate content: KeepBoth, SameContentKeepFirst, Ask
 
 `AutoNumber` is the default for internal path collisions that remain after the selected layout has been applied. It uses the existing conflict template, such as `{Stem} ({Index}){Extension}`.
 
-`KeepBoth` is the default duplicate-content policy. Automatic duplicate elimination uses content hash and keeps the first item in selected archive order.
+`KeepBoth` is the default duplicate-content policy. Automatic duplicate elimination and duplicate-content questions use content hash and keep the first item in selected archive order when the user chooses to skip the duplicate.
 
-The `Ask` policies require a decision container in the progress window. The current implementation exposes these policies in settings/options but stops with an explicit error until the conflict/duplicate decision container is implemented. Encoding ambiguity is already handled through a dedicated encoding selection dialog.
+The `Ask` policies use a decision container in the progress window. Name-collision questions offer these choices: auto-number and keep the current entry, skip the current entry, or abort the merge. Duplicate-content questions offer these choices: keep both, skip the current duplicate, or abort the merge. When a merge is run from the main plan without the dedicated progress window, FileTools falls back to a modal decision prompt with the same choices.
 
 ### Archive Merge Failure Policy
 
@@ -294,6 +294,8 @@ Verify output ZIP
 Move to final filename
 Delete originals
 ```
+
+When an `Ask` policy produces a question, the progress window adds it to a pending-decision list. Selecting a question shows the existing entry, current entry, target path, source archive, and size. Answering a question removes it from the list and unblocks that merge point.
 
 ## Future Merge Operations
 

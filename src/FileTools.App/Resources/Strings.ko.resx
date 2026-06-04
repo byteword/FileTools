@@ -549,4 +549,29 @@
   <data name="ArchiveEncodingColumnScore" xml:space="preserve"><value>점수</value></data>
   <data name="ArchiveEncodingColumnPreview" xml:space="preserve"><value>파일명 미리보기</value></data>
   <data name="ArchiveEncodingScoreFormat" xml:space="preserve"><value>점수: {0}</value></data>
+  <data name="ArchiveMergeDuplicateDecisionAbortedFormat" xml:space="preserve"><value>중복 내용 결정으로 병합을 중단했습니다: {0}</value></data>
+  <data name="ArchiveMergeCollisionDecisionAbortedFormat" xml:space="preserve"><value>이름 충돌 결정으로 병합을 중단했습니다: {0}</value></data>
+  <data name="ArchiveMergeCollisionSkippedFormat" xml:space="preserve"><value>이름 충돌로 건너뜀: {0}</value></data>
+  <data name="ArchiveMergeDecisionGroup" xml:space="preserve"><value>대기 중인 결정</value></data>
+  <data name="ArchiveMergeDecisionNone" xml:space="preserve"><value>대기 중인 결정이 없습니다.</value></data>
+  <data name="ArchiveMergeProgressWaitingForDecision" xml:space="preserve"><value>병합 결정을 기다리는 중...</value></data>
+  <data name="ArchiveMergeDecisionAddedFormat" xml:space="preserve"><value>결정 필요: {0}</value></data>
+  <data name="ArchiveMergeDecisionAbort" xml:space="preserve"><value>중단</value></data>
+  <data name="ArchiveMergeDecisionAutoNumberCurrent" xml:space="preserve"><value>자동 번호</value></data>
+  <data name="ArchiveMergeDecisionSkipCurrent" xml:space="preserve"><value>현재 항목 건너뛰기</value></data>
+  <data name="ArchiveMergeDecisionKeepBoth" xml:space="preserve"><value>둘 다 보존</value></data>
+  <data name="ArchiveMergeDecisionSkipDuplicate" xml:space="preserve"><value>중복 건너뛰기</value></data>
+  <data name="ArchiveMergeNameCollisionDecisionTitleFormat" xml:space="preserve"><value>이름 충돌: {0}</value></data>
+  <data name="ArchiveMergeDuplicateDecisionTitleFormat" xml:space="preserve"><value>동일 내용: {0}</value></data>
+  <data name="ArchiveMergeDecisionExistingHeader" xml:space="preserve"><value>기존 엔트리</value></data>
+  <data name="ArchiveMergeDecisionCurrentHeader" xml:space="preserve"><value>현재 엔트리</value></data>
+  <data name="ArchiveMergeDecisionArchiveFormat" xml:space="preserve"><value>압축파일: {0}</value></data>
+  <data name="ArchiveMergeDecisionOriginalPathFormat" xml:space="preserve"><value>원래 경로: {0}</value></data>
+  <data name="ArchiveMergeDecisionTargetPathFormat" xml:space="preserve"><value>대상 경로: {0}</value></data>
+  <data name="ArchiveMergeDecisionSizeFormat" xml:space="preserve"><value>크기: {0} bytes</value></data>
+  <data name="ArchiveMergeDecisionHashFormat" xml:space="preserve"><value>내용 해시: {0}</value></data>
+  <data name="ArchiveMergeNameCollisionMessageBoxTitle" xml:space="preserve"><value>압축 병합 이름 충돌</value></data>
+  <data name="ArchiveMergeNameCollisionMessageBoxHelp" xml:space="preserve"><value>예: 현재 항목을 자동 번호로 보존. 아니요: 현재 항목 건너뛰기. 취소: 병합 중단.</value></data>
+  <data name="ArchiveMergeDuplicateMessageBoxTitle" xml:space="preserve"><value>압축 병합 동일 내용</value></data>
+  <data name="ArchiveMergeDuplicateMessageBoxHelp" xml:space="preserve"><value>예: 둘 다 보존. 아니요: 중복 항목 건너뛰기. 취소: 병합 중단.</value></data>
 </root>
