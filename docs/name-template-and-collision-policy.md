@@ -230,7 +230,7 @@ SkipFailedEntry
 
 ### Archive Merge Automated Regression Tests
 
-`tests\FileTools.Tests` contains the automated archive merge regression suite. It covers normalized ZIP metadata preservation for written entries, unreadable ZIP handling with `SkipFailedArchive`, per-entry read failure handling with `SkipFailedEntry`, output parent path failures, and temp ZIP cleanup after final move failures. The tests use `InternalsVisibleTo` for the internal merge API, and deterministic output filesystem failures are injected through the internal `IArchiveMergeFileSystem` adapter.
+`tests\FileTools.Tests` contains the automated regression suite for managed FileTools engines. The archive merge coverage includes normalized ZIP metadata preservation for written entries, unreadable ZIP handling with `SkipFailedArchive`, per-entry read failure handling with `SkipFailedEntry`, output parent path failures, and temp ZIP cleanup after final move failures. The same test project also covers filename correction, name templates, collision resolution, rename apply, folder merge, AutoRelocation planning, work-plan previews, and settings/rule normalization. Deterministic ZIP output filesystem failures are injected through the internal `IArchiveMergeFileSystem` adapter.
 
 Run only the managed app/test path with:
 
