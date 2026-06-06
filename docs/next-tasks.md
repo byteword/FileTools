@@ -27,6 +27,7 @@ Scope reviewed:
 - Split common-filename-based file merge from #4 into #9 and closed #4 as selected-target folder merge.
 - Added `docs/release-notes/next.md` as the working release note draft for the archive merge scope.
 - Added explicit deferred status and resume conditions to #3, #6, #7, #8, and #9.
+- Documented the maintainer release verification checklist in `docs/release.md`.
 
 ## Deferred Follow-Up Tracks
 
@@ -49,10 +50,9 @@ Scope reviewed:
    - Keep the archive merge support note explicit: ZIP input and ZIP output are supported; 7Z input is not yet supported and is tracked by #8.
    - Keep #9 out of the release notes until the common-filename-based file merge flow is actually implemented.
 
-3. Keep release verification honest.
-   - Build and test the managed project with `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj`.
-   - Build the full solution from Visual Studio MSBuild, not `dotnet build FileTools.sln`, because the native C++ ShellExt requires Visual C++ targets.
-   - Update release notes and external wiki only after the release artifacts and checksums are verified.
+3. Run the release verification checklist during the release pass.
+   - Follow the maintainer checklist in `docs/release.md` before publishing the draft GitHub Release.
+   - Keep release notes and external wiki updates gated on verified assets, checksums, signatures, attestations, and install smoke testing.
 
 4. Defer lower-priority feature tracks.
    - #3, #6, #7, #8, and #9 now carry explicit deferred status and resume conditions in GitHub.

@@ -66,6 +66,131 @@ During development, keep the next release draft in `docs/release-notes/next.md`.
 Before tagging, copy that draft to `docs/release-notes/<tag>.md` and adjust the
 title, asset names, and verification notes for the final tag.
 
+## Maintainer Verification Checklist
+
+Use this checklist before publishing a GitHub Release. Keep the release as a
+draft until every required item below is checked.
+
+### Before Tagging
+
+- Confirm the working tree is clean:
+
+```powershell
+git status --short
+```
+
+- Confirm the version is consistent in the app and installer project files:
+
+```powershell
+Select-String -Path src\FileTools.App\FileTools.App.csproj,installer\FileTools.Installer\FileTools.Installer.wixproj,installer\FileTools.Bundle\FileTools.Bundle.wixproj -Pattern '<Version>|<ProductVersion>'
+```
+
+- Run the managed regression suite:
+
+```powershell
+dotnet test tests\FileTools.Tests\FileTools.Tests.csproj
+```
+
+- Build the full mixed solution with Visual Studio MSBuild, not `dotnet build
+  FileTools.sln`. The root solution includes the native C++ ShellExt project and
+  needs Visual C++ targets:
+
+```powershell
+MSBuild.exe FileTools.sln /p:Configuration=Release /p:Platform=x64
+```
+
+- Copy `docs/release-notes/next.md` to the tag-specific file and update the
+  title and asset names:
+
+```powershell
+Copy-Item docs\release-notes\next.md docs\release-notes\v1.2.0.1.md
+```
+
+- Commit the version and release-note changes, then create and push the tag:
+
+```powershell
+git tag v1.2.0.1
+git push origin master
+git push origin v1.2.0.1
+```
+
+### After The Release Workflow Finishes
+
+- Confirm the workflow produced a draft release and these assets:
+
+```text
+FileTools-<version>-win-x64-setup.exe
+FileTools-<version>-win-x64.msi
+FileTools-<version>-win-x64-identity.msix
+FileTools-<version>-msix-self-signed.cer
+checksums.txt
+```
+
+- Download the draft assets to a clean verification directory.
+
+- Verify every downloaded file matches `checksums.txt`:
+
+```powershell
+$expected = Get-Content .\checksums.txt | ForEach-Object {
+    $parts = $_ -split '\s+', 2
+    [pscustomobject]@{ Hash = $parts[0]; Name = $parts[1] }
+}
+
+foreach ($item in $expected) {
+    $actual = (Get-FileHash ".\$($item.Name)" -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($actual -ne $item.Hash) {
+        throw "Checksum mismatch for $($item.Name)"
+    }
+}
+```
+
+- Verify GitHub artifact attestations:
+
+```powershell
+gh attestation verify .\FileTools-<version>-win-x64-setup.exe -R byteword/FileTools
+gh attestation verify .\FileTools-<version>-win-x64.msi -R byteword/FileTools
+gh attestation verify .\FileTools-<version>-win-x64-identity.msix -R byteword/FileTools
+gh attestation verify .\FileTools-<version>-msix-self-signed.cer -R byteword/FileTools
+gh attestation verify .\checksums.txt -R byteword/FileTools
+```
+
+- Inspect Authenticode/MSIX signatures. The certificate may show as untrusted
+  until the self-signed root is trusted, but the files must be signed and the
+  subject must match `CN=FileTools Self-Signed`:
+
+```powershell
+Get-AuthenticodeSignature .\FileTools-<version>-win-x64-setup.exe
+Get-AuthenticodeSignature .\FileTools-<version>-win-x64.msi
+Get-AuthenticodeSignature .\FileTools-<version>-win-x64-identity.msix
+```
+
+### Install Smoke Test
+
+Run the install smoke test on a disposable Windows account, VM, or test machine
+when possible:
+
+- Install with `FileTools-<version>-win-x64-setup.exe`.
+- Launch FileTools from the Start Menu or installed shortcut.
+- Open settings and confirm the Windows 11 native context menu action is
+  present but not automatically executed by setup.
+- Register the legacy Explorer context menu and confirm it appears for files and
+  directories.
+- If testing Windows 11 native context menus, import/register the sparse MSIX
+  identity from FileTools settings, restart Explorer, and confirm the native
+  menu entry appears.
+- Uninstall FileTools and confirm shortcuts, installed files, legacy context menu
+  registration, and sparse identity registration are removed or removable.
+
+### Publish Gate
+
+Publish the draft release only after:
+
+- checksums, signatures, and attestations are verified;
+- the setup smoke test passed or any skipped smoke-test scope is written in the
+  release notes;
+- release notes accurately state supported archive merge scope;
+- the external wiki update is ready to copy after publish.
+
 ## Documentation And Wiki Timing
 
 Keep repository docs current during feature work, but defer the external wiki
