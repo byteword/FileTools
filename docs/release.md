@@ -62,6 +62,10 @@ after checking the assets and release notes.
 If `docs/release-notes/<tag>.md` exists, the workflow uses that file as the
 GitHub Release notes. Otherwise it falls back to generated asset notes.
 
+During development, keep the next release draft in `docs/release-notes/next.md`.
+Before tagging, copy that draft to `docs/release-notes/<tag>.md` and adjust the
+title, asset names, and verification notes for the final tag.
+
 ## Documentation And Wiki Timing
 
 Keep repository docs current during feature work, but defer the external wiki
