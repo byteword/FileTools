@@ -1,11 +1,11 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-06 after GitHub issue split
+Last updated: 2026-06-07 after deferring lower-priority tracks
 
 Scope reviewed:
 
-- Local commits after `v1.2.0.0`, through `7267c8d Document next FileTools tasks`.
+- Local commits after `v1.2.0.0`, including archive merge and issue split documentation through this review.
 - GitHub issues #1 through #9 in `byteword/FileTools`.
 - README, `docs/name-template-and-collision-policy.md`, `docs/release.md`, and `docs/release-notes/next.md`.
 
@@ -26,6 +26,15 @@ Scope reviewed:
 - Split 7Z input archive merge from #5 into #8 and closed #5 as ZIP input/ZIP output archive merge.
 - Split common-filename-based file merge from #4 into #9 and closed #4 as selected-target folder merge.
 - Added `docs/release-notes/next.md` as the working release note draft for the archive merge scope.
+- Added explicit deferred status and resume conditions to #3, #6, #7, #8, and #9.
+
+## Deferred Follow-Up Tracks
+
+- #3 internet dictionary or AI-assisted rename correction: resume only after privacy, cost, network failure, opt-in, and review UX policies are defined.
+- #6 file comparison: resume after ZIP archive merge release readiness is no longer the active risk and the large-file comparison/reporting design is scoped.
+- #7 Windows ARM64 build and installer support: resume only when ARM64 Windows hardware or a VM is available for end-to-end installer and Explorer validation.
+- #8 7Z input archive merge support: resume after ZIP archive merge real-sample validation and release notes are finished, then decide ZIP-only output versus 7Z output scope.
+- #9 common-filename-based file merge flow: resume after rename, extension, collision, and preview UX decisions are made.
 
 ## Next Priority
 
@@ -46,8 +55,5 @@ Scope reviewed:
    - Update release notes and external wiki only after the release artifacts and checksums are verified.
 
 4. Defer lower-priority feature tracks.
-   - 7Z input archive merge (#8) should wait until ZIP archive merge release risk is lower.
-   - Common-filename-based file merge (#9) should wait until the rename, extension, collision, and preview UX is designed.
-   - File comparison (#6) should wait until archive merge release risk is lower.
-   - ARM64 packaging (#7) should wait for actual ARM64 Windows validation.
-   - Internet dictionary or AI-assisted rename correction (#3) should stay research-only until privacy, cost, and review UX are defined.
+   - #3, #6, #7, #8, and #9 now carry explicit deferred status and resume conditions in GitHub.
+   - Do not pull these into the active work queue until the resume conditions in each issue are satisfied.
