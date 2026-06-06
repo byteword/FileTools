@@ -44,6 +44,39 @@ public sealed class ArchiveMergeRegressionTests
     }
 
     [Fact]
+    public void Merge_PreservesZipExtraFieldsByteForByte()
+    {
+        using var temp = TempDirectory.Create();
+        var sourceA = temp.GetPath("source-a.zip");
+        var sourceB = temp.GetPath("source-b.zip");
+        var output = temp.GetPath("merged.zip");
+        var localExtraData = new byte[] { 0xFE, 0xCA, 0x04, 0x00, 0x10, 0x20, 0x30, 0x40 };
+        var centralExtraData = new byte[] { 0xEF, 0xBE, 0x04, 0x00, 0x50, 0x60, 0x70, 0x80 };
+
+        ZipTestData.CreateStoredZip(
+            sourceA,
+            new TestZipEntry(
+                "folder/file.txt",
+                "alpha",
+                new DateTime(2024, 3, 5, 6, 7, 8, DateTimeKind.Unspecified),
+                ExternalAttributes: 0x20,
+                Comment: "extra field comment",
+                LocalExtraData: localExtraData,
+                CentralDirectoryExtraData: centralExtraData));
+        ZipTestData.CreateStoredZip(sourceB, new TestZipEntry("other.txt", "bravo"));
+
+        var result = Merge([sourceA, sourceB], output, compressionLevel: ArchiveMergeCompressionLevel.Default);
+
+        Assert.Empty(result.Errors);
+        var entries = ZipTestData.ReadEntries(output);
+        Assert.Equal("alpha", entries["folder/file.txt"].Content);
+        Assert.Equal("extra field comment", entries["folder/file.txt"].Comment);
+        var extraFields = ZipTestData.ReadExtraFields(output, "folder/file.txt");
+        Assert.Equal(localExtraData, extraFields.LocalHeader);
+        Assert.Equal(centralExtraData, extraFields.CentralDirectory);
+    }
+
+    [Fact]
     public void Merge_SkipFailedArchive_ContinuesWithReadableSources()
     {
         using var temp = TempDirectory.Create();

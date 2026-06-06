@@ -1,9 +1,12 @@
+using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text;
+using ICSharpCode.SharpZipLib.Checksum;
+using ICSharpCode.SharpZipLib.Zip.Compression;
+using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Readers;
-using ICSharpCode.SharpZipLib.Zip;
 
 namespace FileTools;
 
@@ -170,13 +173,21 @@ internal sealed record ArchiveMergeDuplicateContentQuestion(
     ArchiveMergeQuestionEntry FirstEntry,
     ArchiveMergeQuestionEntry CurrentEntry);
 
+internal sealed record ArchiveEntryExtraFields(
+    byte[] LocalHeader,
+    byte[] CentralDirectory);
+
+internal sealed record ZipRawEntryExtraFields(
+    string Name,
+    ArchiveEntryExtraFields ExtraFields);
+
 internal sealed record ArchiveEntryMetadata(
     DateTime? LastModified,
     DateTime? Created,
     DateTime? LastAccessed,
     DateTime? Archived,
     int ExternalAttributes,
-    byte[]? ExtraData,
+    ArchiveEntryExtraFields? ExtraFields,
     string? Comment);
 
 internal sealed record ArchiveEntryInfo(
@@ -1101,7 +1112,7 @@ internal static class ArchiveMergeOperations
                 targetPath,
                 IsDirectory: true,
                 Size: 0,
-                new ArchiveEntryMetadata(DateTime.Now, DateTime.Now, DateTime.Now, Archived: null, 0, ExtraData: null, Comment: null));
+                new ArchiveEntryMetadata(DateTime.Now, DateTime.Now, DateTime.Now, Archived: null, 0, ExtraFields: null, Comment: null));
             return new EntryMergePlan(state.SourcePath, entry, targetPath);
         }
     }
@@ -1149,6 +1160,159 @@ internal sealed class PhysicalArchiveMergeFileSystem : IArchiveMergeFileSystem
     }
 }
 
+internal static class ZipRawExtraFieldReader
+{
+    private const uint LocalFileHeaderSignature = 0x04034b50;
+    private const uint CentralDirectorySignature = 0x02014b50;
+    private const uint EndOfCentralDirectorySignature = 0x06054b50;
+    private const ushort Utf8NameFlag = 0x0800;
+
+    public static IReadOnlyList<ZipRawEntryExtraFields> Read(string path, Encoding defaultEncoding)
+    {
+        try
+        {
+            return Read(File.ReadAllBytes(path), defaultEncoding);
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    private static IReadOnlyList<ZipRawEntryExtraFields> Read(byte[] bytes, Encoding defaultEncoding)
+    {
+        var eocdOffset = FindEndOfCentralDirectory(bytes);
+        if (eocdOffset < 0)
+        {
+            return [];
+        }
+
+        var entryCount = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(eocdOffset + 10, 2));
+        var centralDirectorySize = BinaryPrimitives.ReadUInt32LittleEndian(bytes.AsSpan(eocdOffset + 12, 4));
+        var centralDirectoryOffset = BinaryPrimitives.ReadUInt32LittleEndian(bytes.AsSpan(eocdOffset + 16, 4));
+        if (entryCount == ushort.MaxValue ||
+            centralDirectorySize == uint.MaxValue ||
+            centralDirectoryOffset == uint.MaxValue)
+        {
+            return [];
+        }
+
+        var centralOffset = checked((int)centralDirectoryOffset);
+        var centralSize = checked((int)centralDirectorySize);
+        if (centralOffset < 0 ||
+            centralSize < 0 ||
+            centralSize > bytes.Length ||
+            centralOffset > bytes.Length - centralSize)
+        {
+            return [];
+        }
+
+        var entries = new List<ZipRawEntryExtraFields>(entryCount);
+        var offset = centralOffset;
+        for (var index = 0; index < entryCount; index++)
+        {
+            if (offset + 46 > bytes.Length ||
+                BinaryPrimitives.ReadUInt32LittleEndian(bytes.AsSpan(offset, 4)) != CentralDirectorySignature)
+            {
+                return [];
+            }
+
+            var flags = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(offset + 8, 2));
+            var nameLength = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(offset + 28, 2));
+            var extraLength = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(offset + 30, 2));
+            var commentLength = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(offset + 32, 2));
+            var localHeaderOffset = BinaryPrimitives.ReadUInt32LittleEndian(bytes.AsSpan(offset + 42, 4));
+            var nameStart = offset + 46;
+            var extraStart = nameStart + nameLength;
+            var commentStart = extraStart + extraLength;
+            var nextOffset = commentStart + commentLength;
+            if (nextOffset > bytes.Length)
+            {
+                return [];
+            }
+
+            var name = DecodeEntryName(bytes, nameStart, nameLength, flags, defaultEncoding);
+            var centralExtraData = CopyRange(bytes, extraStart, extraLength);
+            var localExtraData = ReadLocalHeaderExtraData(bytes, localHeaderOffset);
+            if (localExtraData is null)
+            {
+                return [];
+            }
+
+            entries.Add(new ZipRawEntryExtraFields(
+                name,
+                new ArchiveEntryExtraFields(localExtraData, centralExtraData)));
+            offset = nextOffset;
+        }
+
+        return entries;
+    }
+
+    private static int FindEndOfCentralDirectory(byte[] bytes)
+    {
+        var minimumOffset = Math.Max(0, bytes.Length - 22 - ushort.MaxValue);
+        for (var offset = bytes.Length - 22; offset >= minimumOffset; offset--)
+        {
+            if (BinaryPrimitives.ReadUInt32LittleEndian(bytes.AsSpan(offset, 4)) != EndOfCentralDirectorySignature)
+            {
+                continue;
+            }
+
+            var commentLength = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(offset + 20, 2));
+            if (offset + 22 + commentLength == bytes.Length)
+            {
+                return offset;
+            }
+        }
+
+        return -1;
+    }
+
+    private static byte[]? ReadLocalHeaderExtraData(byte[] bytes, uint localHeaderOffset)
+    {
+        if (localHeaderOffset > int.MaxValue)
+        {
+            return null;
+        }
+
+        var offset = (int)localHeaderOffset;
+        if (offset < 0 ||
+            offset + 30 > bytes.Length ||
+            BinaryPrimitives.ReadUInt32LittleEndian(bytes.AsSpan(offset, 4)) != LocalFileHeaderSignature)
+        {
+            return null;
+        }
+
+        var nameLength = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(offset + 26, 2));
+        var extraLength = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(offset + 28, 2));
+        var extraStart = offset + 30 + nameLength;
+        if (extraStart + extraLength > bytes.Length)
+        {
+            return null;
+        }
+
+        return CopyRange(bytes, extraStart, extraLength);
+    }
+
+    private static byte[] CopyRange(byte[] bytes, int start, int length)
+    {
+        if (length == 0)
+        {
+            return [];
+        }
+
+        var result = new byte[length];
+        Buffer.BlockCopy(bytes, start, result, 0, length);
+        return result;
+    }
+
+    private static string DecodeEntryName(byte[] bytes, int start, int length, ushort flags, Encoding defaultEncoding)
+    {
+        var encoding = (flags & Utf8NameFlag) != 0 ? Encoding.UTF8 : defaultEncoding;
+        return encoding.GetString(bytes, start, length);
+    }
+}
+
 internal sealed class SharpCompressArchiveReader : IArchiveReader
 {
     private readonly IArchive _archive;
@@ -1169,8 +1333,10 @@ internal sealed class SharpCompressArchiveReader : IArchiveReader
         };
         _archive = ArchiveFactory.OpenArchive(path, options);
         _archiveEntries = _archive.Entries.ToArray();
+        var rawExtraFields = ZipRawExtraFieldReader.Read(path, encoding);
+        var rawExtraFieldsByName = CreateRawExtraFieldQueues(rawExtraFields);
         _entries = _archiveEntries
-            .Select((entry, index) => CreateEntryInfo(path, entry, index))
+            .Select((entry, index) => CreateEntryInfo(path, entry, index, rawExtraFields, rawExtraFieldsByName))
             .ToArray();
     }
 
@@ -1196,8 +1362,16 @@ internal sealed class SharpCompressArchiveReader : IArchiveReader
         _archive.Dispose();
     }
 
-    private static ArchiveEntryInfo CreateEntryInfo(string path, IArchiveEntry entry, int index)
+    private static ArchiveEntryInfo CreateEntryInfo(
+        string path,
+        IArchiveEntry entry,
+        int index,
+        IReadOnlyList<ZipRawEntryExtraFields> rawExtraFields,
+        Dictionary<string, Queue<ArchiveEntryExtraFields>> rawExtraFieldsByName)
     {
+        var rawExtraField = TakeRawExtraFields(rawExtraFieldsByName, entry.Key ?? "") ??
+                            (index >= 0 && index < rawExtraFields.Count ? rawExtraFields[index].ExtraFields : null);
+
         return new ArchiveEntryInfo(
             path,
             index,
@@ -1210,8 +1384,47 @@ internal sealed class SharpCompressArchiveReader : IArchiveReader
                 entry.LastAccessedTime,
                 entry.ArchivedTime,
                 TryReadExternalAttributes(entry),
-                ExtraData: null,
+                ExtraFields: rawExtraField,
                 TryReadComment(entry)));
+    }
+
+    private static Dictionary<string, Queue<ArchiveEntryExtraFields>> CreateRawExtraFieldQueues(
+        IReadOnlyList<ZipRawEntryExtraFields> entries)
+    {
+        var queues = new Dictionary<string, Queue<ArchiveEntryExtraFields>>(StringComparer.Ordinal);
+        foreach (var entry in entries)
+        {
+            if (!queues.TryGetValue(entry.Name, out var queue))
+            {
+                queue = new Queue<ArchiveEntryExtraFields>();
+                queues.Add(entry.Name, queue);
+            }
+
+            queue.Enqueue(entry.ExtraFields);
+        }
+
+        return queues;
+    }
+
+    private static ArchiveEntryExtraFields? TakeRawExtraFields(
+        Dictionary<string, Queue<ArchiveEntryExtraFields>> rawExtraFieldsByName,
+        string entryName)
+    {
+        if (rawExtraFieldsByName.TryGetValue(entryName, out var queue) &&
+            queue.Count > 0)
+        {
+            return queue.Dequeue();
+        }
+
+        var normalized = entryName.Replace('\\', '/');
+        if (!string.Equals(normalized, entryName, StringComparison.Ordinal) &&
+            rawExtraFieldsByName.TryGetValue(normalized, out queue) &&
+            queue.Count > 0)
+        {
+            return queue.Dequeue();
+        }
+
+        return null;
     }
 
     private static int TryReadExternalAttributes(IArchiveEntry entry)
@@ -1246,15 +1459,22 @@ internal sealed class SharpCompressArchiveReader : IArchiveReader
 
 internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
 {
-    private readonly ZipOutputStream _stream;
+    private const ushort Utf8NameFlag = 0x0800;
+    private const ushort StoredMethod = 0;
+    private const ushort DeflatedMethod = 8;
+    private const ushort VersionNeeded = 20;
+    private const uint LocalFileHeaderSignature = 0x04034b50;
+    private const uint CentralDirectorySignature = 0x02014b50;
+    private const uint EndOfCentralDirectorySignature = 0x06054b50;
+
+    private readonly FileStream _stream;
+    private readonly ArchiveMergeCompressionLevel _compressionLevel;
+    private readonly List<WrittenZipEntry> _entries = [];
 
     private SharpZipLibArchiveWriter(string path, ArchiveMergeCompressionLevel compressionLevel)
     {
-        _stream = new ZipOutputStream(File.Create(path), StringCodec.FromEncoding(Encoding.UTF8))
-        {
-            IsStreamOwner = true
-        };
-        _stream.SetLevel(ToSharpZipLevel(compressionLevel));
+        _stream = File.Create(path);
+        _compressionLevel = compressionLevel;
     }
 
     public static SharpZipLibArchiveWriter Create(string path, ArchiveMergeCompressionLevel compressionLevel)
@@ -1264,34 +1484,80 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
 
     public void WriteDirectory(string entryPath, ArchiveEntryMetadata metadata)
     {
-        var entry = CreateEntry(EnsureDirectoryPath(entryPath), metadata);
-        _stream.PutNextEntry(entry);
-        _stream.CloseEntry();
+        var entry = CreateEntry(EnsureDirectoryPath(entryPath), metadata, _compressionLevel, isDirectory: true);
+        entry.LocalHeaderOffset = _stream.Position;
+        WriteLocalHeader(entry);
+        _entries.Add(entry);
     }
 
     public void WriteFile(string entryPath, Stream source, ArchiveEntryMetadata metadata, CancellationToken cancellationToken)
     {
-        var entry = CreateEntry(entryPath.Replace('\\', '/').TrimStart('/'), metadata);
-        _stream.PutNextEntry(entry);
+        var entry = CreateEntry(entryPath.Replace('\\', '/').TrimStart('/'), metadata, _compressionLevel, isDirectory: false);
+        entry.LocalHeaderOffset = _stream.Position;
+        WriteLocalHeader(entry);
+        var payloadStart = _stream.Position;
+        var crc = new Crc32();
         var buffer = new byte[128 * 1024];
-        while (true)
+
+        if (entry.CompressionMethod == StoredMethod)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            var read = source.Read(buffer, 0, buffer.Length);
-            if (read == 0)
+            while (true)
             {
-                break;
+                cancellationToken.ThrowIfCancellationRequested();
+                var read = source.Read(buffer, 0, buffer.Length);
+                if (read == 0)
+                {
+                    break;
+                }
+
+                crc.Update(new ArraySegment<byte>(buffer, 0, read));
+                entry.UncompressedSize = EnsureUInt32((long)entry.UncompressedSize + read, "uncompressed ZIP entry size");
+                _stream.Write(buffer, 0, read);
+            }
+        }
+        else
+        {
+            var deflater = new Deflater(ToSharpZipLevel(_compressionLevel), noZlibHeaderOrFooter: true);
+            using var deflaterStream = new DeflaterOutputStream(_stream, deflater, buffer.Length)
+            {
+                IsStreamOwner = false
+            };
+            while (true)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var read = source.Read(buffer, 0, buffer.Length);
+                if (read == 0)
+                {
+                    break;
+                }
+
+                crc.Update(new ArraySegment<byte>(buffer, 0, read));
+                entry.UncompressedSize = EnsureUInt32((long)entry.UncompressedSize + read, "uncompressed ZIP entry size");
+                deflaterStream.Write(buffer, 0, read);
             }
 
-            _stream.Write(buffer, 0, read);
+            deflaterStream.Finish();
         }
 
-        _stream.CloseEntry();
+        entry.Crc = checked((uint)crc.Value);
+        entry.CompressedSize = EnsureUInt32(_stream.Position - payloadStart, "compressed ZIP entry size");
+        PatchLocalHeader(entry);
+        _entries.Add(entry);
     }
 
     public void Complete()
     {
-        _stream.Finish();
+        var centralDirectoryOffset = _stream.Position;
+        foreach (var entry in _entries)
+        {
+            WriteCentralDirectoryHeader(entry);
+        }
+
+        var centralDirectorySize = _stream.Position - centralDirectoryOffset;
+        WriteEndOfCentralDirectory(
+            EnsureUInt16(_entries.Count, "ZIP entry count"),
+            EnsureUInt32(centralDirectorySize, "ZIP central directory size"),
+            EnsureUInt32(centralDirectoryOffset, "ZIP central directory offset"));
     }
 
     public void Dispose()
@@ -1299,33 +1565,30 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
         _stream.Dispose();
     }
 
-    private static ZipEntry CreateEntry(string entryPath, ArchiveEntryMetadata metadata)
+    private static WrittenZipEntry CreateEntry(
+        string entryPath,
+        ArchiveEntryMetadata metadata,
+        ArchiveMergeCompressionLevel compressionLevel,
+        bool isDirectory)
     {
-        var isDirectory = entryPath.EndsWith("/", StringComparison.Ordinal);
-        var entry = new ZipEntry(entryPath)
+        var fallbackExtraData = metadata.ExtraFields is null ? CreateFallbackExtraData(metadata) : null;
+        var localExtraData = metadata.ExtraFields?.LocalHeader ?? fallbackExtraData ?? [];
+        var centralExtraData = metadata.ExtraFields?.CentralDirectory ?? fallbackExtraData ?? [];
+        return new WrittenZipEntry
         {
-            IsUnicodeText = true,
-            DateTime = ClampZipDate(metadata.LastModified ?? DateTime.Now),
-            ExternalFileAttributes = metadata.ExternalAttributes != 0 || !isDirectory
-                ? metadata.ExternalAttributes
-                : 16
+            NameBytes = Encoding.UTF8.GetBytes(entryPath),
+            LastModified = ClampZipDate(metadata.LastModified ?? DateTime.Now),
+            CompressionMethod = isDirectory || compressionLevel == ArchiveMergeCompressionLevel.StoreOnly
+                ? StoredMethod
+                : DeflatedMethod,
+            ExternalAttributes = unchecked((uint)(metadata.ExternalAttributes != 0 || !isDirectory ? metadata.ExternalAttributes : 16)),
+            LocalExtraData = localExtraData,
+            CentralDirectoryExtraData = centralExtraData,
+            CommentBytes = string.IsNullOrWhiteSpace(metadata.Comment) ? [] : Encoding.UTF8.GetBytes(metadata.Comment)
         };
-
-        var extraData = CreateExtraData(metadata);
-        if (extraData is { Length: > 0 })
-        {
-            entry.ExtraData = extraData;
-        }
-
-        if (!string.IsNullOrWhiteSpace(metadata.Comment))
-        {
-            entry.Comment = metadata.Comment;
-        }
-
-        return entry;
     }
 
-    private static byte[]? CreateExtraData(ArchiveEntryMetadata metadata)
+    private static byte[]? CreateFallbackExtraData(ArchiveEntryMetadata metadata)
     {
         var times = new[]
         {
@@ -1333,18 +1596,12 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
             metadata.LastAccessed,
             metadata.Created
         };
-        if (metadata.ExtraData is not { Length: > 0 } &&
-            times.All(static time => time is null))
+        if (times.All(static time => time is null))
         {
             return null;
         }
 
         using var stream = new MemoryStream();
-        if (metadata.ExtraData is { Length: > 0 })
-        {
-            stream.Write(metadata.ExtraData);
-        }
-
         var fallback = metadata.LastModified ?? metadata.Created ?? metadata.LastAccessed ?? DateTime.Now;
         using var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
         writer.Write((ushort)0x000A);
@@ -1356,6 +1613,114 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
         writer.Write(ToFileTime(metadata.LastAccessed ?? fallback));
         writer.Write(ToFileTime(metadata.Created ?? fallback));
         return stream.ToArray();
+    }
+
+    private void WriteLocalHeader(WrittenZipEntry entry)
+    {
+        EnsureUInt16(entry.NameBytes.Length, "ZIP entry name length");
+        EnsureUInt16(entry.LocalExtraData.Length, "ZIP local extra field length");
+        WriteUInt32(LocalFileHeaderSignature);
+        WriteUInt16(VersionNeeded);
+        WriteUInt16(Utf8NameFlag);
+        WriteUInt16(entry.CompressionMethod);
+        WriteDosDateTime(entry.LastModified);
+        WriteUInt32(entry.Crc);
+        WriteUInt32(entry.CompressedSize);
+        WriteUInt32(entry.UncompressedSize);
+        WriteUInt16((ushort)entry.NameBytes.Length);
+        WriteUInt16((ushort)entry.LocalExtraData.Length);
+        _stream.Write(entry.NameBytes, 0, entry.NameBytes.Length);
+        _stream.Write(entry.LocalExtraData, 0, entry.LocalExtraData.Length);
+    }
+
+    private void PatchLocalHeader(WrittenZipEntry entry)
+    {
+        var currentPosition = _stream.Position;
+        _stream.Position = entry.LocalHeaderOffset + 14;
+        WriteUInt32(entry.Crc);
+        WriteUInt32(entry.CompressedSize);
+        WriteUInt32(entry.UncompressedSize);
+        _stream.Position = currentPosition;
+    }
+
+    private void WriteCentralDirectoryHeader(WrittenZipEntry entry)
+    {
+        EnsureUInt16(entry.NameBytes.Length, "ZIP entry name length");
+        EnsureUInt16(entry.CentralDirectoryExtraData.Length, "ZIP central directory extra field length");
+        EnsureUInt16(entry.CommentBytes.Length, "ZIP entry comment length");
+        WriteUInt32(CentralDirectorySignature);
+        WriteUInt16(VersionNeeded);
+        WriteUInt16(VersionNeeded);
+        WriteUInt16(Utf8NameFlag);
+        WriteUInt16(entry.CompressionMethod);
+        WriteDosDateTime(entry.LastModified);
+        WriteUInt32(entry.Crc);
+        WriteUInt32(entry.CompressedSize);
+        WriteUInt32(entry.UncompressedSize);
+        WriteUInt16((ushort)entry.NameBytes.Length);
+        WriteUInt16((ushort)entry.CentralDirectoryExtraData.Length);
+        WriteUInt16((ushort)entry.CommentBytes.Length);
+        WriteUInt16(0);
+        WriteUInt16(0);
+        WriteUInt32(entry.ExternalAttributes);
+        WriteUInt32(EnsureUInt32(entry.LocalHeaderOffset, "ZIP local header offset"));
+        _stream.Write(entry.NameBytes, 0, entry.NameBytes.Length);
+        _stream.Write(entry.CentralDirectoryExtraData, 0, entry.CentralDirectoryExtraData.Length);
+        _stream.Write(entry.CommentBytes, 0, entry.CommentBytes.Length);
+    }
+
+    private void WriteEndOfCentralDirectory(ushort entryCount, uint centralDirectorySize, uint centralDirectoryOffset)
+    {
+        WriteUInt32(EndOfCentralDirectorySignature);
+        WriteUInt16(0);
+        WriteUInt16(0);
+        WriteUInt16(entryCount);
+        WriteUInt16(entryCount);
+        WriteUInt32(centralDirectorySize);
+        WriteUInt32(centralDirectoryOffset);
+        WriteUInt16(0);
+    }
+
+    private void WriteDosDateTime(DateTime value)
+    {
+        var dosTime = (ushort)((value.Hour << 11) | (value.Minute << 5) | (value.Second / 2));
+        var dosDate = (ushort)(((value.Year - 1980) << 9) | (value.Month << 5) | value.Day);
+        WriteUInt16(dosTime);
+        WriteUInt16(dosDate);
+    }
+
+    private void WriteUInt16(ushort value)
+    {
+        Span<byte> buffer = stackalloc byte[2];
+        BinaryPrimitives.WriteUInt16LittleEndian(buffer, value);
+        _stream.Write(buffer);
+    }
+
+    private void WriteUInt32(uint value)
+    {
+        Span<byte> buffer = stackalloc byte[4];
+        BinaryPrimitives.WriteUInt32LittleEndian(buffer, value);
+        _stream.Write(buffer);
+    }
+
+    private static ushort EnsureUInt16(int value, string description)
+    {
+        if (value < 0 || value > ushort.MaxValue)
+        {
+            throw new InvalidOperationException(description + " exceeds the ZIP format limit.");
+        }
+
+        return (ushort)value;
+    }
+
+    private static uint EnsureUInt32(long value, string description)
+    {
+        if (value < 0 || value > uint.MaxValue)
+        {
+            throw new InvalidOperationException(description + " exceeds the ZIP32 format limit.");
+        }
+
+        return (uint)value;
     }
 
     private static long ToFileTime(DateTime value)
@@ -1396,6 +1761,31 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
     private static string EnsureDirectoryPath(string path)
     {
         return path.Replace('\\', '/').TrimStart('/').TrimEnd('/') + "/";
+    }
+
+    private sealed class WrittenZipEntry
+    {
+        public byte[] NameBytes { get; init; } = [];
+
+        public DateTime LastModified { get; init; }
+
+        public ushort CompressionMethod { get; init; }
+
+        public uint ExternalAttributes { get; init; }
+
+        public byte[] LocalExtraData { get; init; } = [];
+
+        public byte[] CentralDirectoryExtraData { get; init; } = [];
+
+        public byte[] CommentBytes { get; init; } = [];
+
+        public long LocalHeaderOffset { get; set; }
+
+        public uint Crc { get; set; }
+
+        public uint CompressedSize { get; set; }
+
+        public uint UncompressedSize { get; set; }
     }
 }
 

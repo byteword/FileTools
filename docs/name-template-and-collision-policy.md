@@ -157,12 +157,12 @@ The implementation uses an archive abstraction so merge policy, progress UI, and
 
 ```text
 IArchiveReader -> SharpCompress ZIP reader
-IArchiveWriter -> SharpZipLib ZIP writer
+IArchiveWriter -> ZIP writer with SharpZipLib CRC/deflate support
 ```
 
-The first implementation uses SharpCompress for reading because it supports ZIP filename encodings and exposes normalized entry metadata such as creation, modification, access time, size, attributes, and comments through a common archive API. It uses SharpZipLib for writing because ZIP output needs direct control of UTF-8 entry names, external attributes, comments, compression level, and NTFS timestamp extra fields.
+The first implementation uses SharpCompress for reading because it supports ZIP filename encodings and exposes normalized entry metadata such as creation, modification, access time, size, attributes, and comments through a common archive API. The ZIP writer writes UTF-8 entry names, external attributes, comments, compression level, and ZIP extra fields directly while still using SharpZipLib for CRC and deflate primitives.
 
-Output is always ZIP in the first implementation. Metadata preservation is normalized preservation: FileTools reads the metadata the reader exposes and writes equivalent ZIP metadata back to the new archive. It does not promise byte-for-byte preservation of every original ZIP extra field.
+Output is always ZIP in the first implementation. Metadata preservation keeps the normalized metadata the reader exposes and, when the source ZIP central directory can be parsed, copies each entry's local-header and central-directory extra field bytes back to the corresponding output entry byte-for-byte. If raw extra fields cannot be read safely, FileTools falls back to normalized timestamp/attribute/comment metadata.
 
 Reserved default templates:
 
@@ -230,7 +230,7 @@ SkipFailedEntry
 
 ### Archive Merge Automated Regression Tests
 
-`tests\FileTools.Tests` contains the automated regression suite for managed FileTools engines. The archive merge coverage includes normalized ZIP metadata preservation for written entries, unreadable ZIP handling with `SkipFailedArchive`, per-entry read failure handling with `SkipFailedEntry`, output parent path failures, and temp ZIP cleanup after final move failures. The same test project also covers filename correction, name templates, collision resolution, rename apply, folder merge, AutoRelocation planning, work-plan previews, and settings/rule normalization. Deterministic ZIP output filesystem failures are injected through the internal `IArchiveMergeFileSystem` adapter.
+`tests\FileTools.Tests` contains the automated regression suite for managed FileTools engines. The archive merge coverage includes ZIP metadata preservation for written entries, byte-for-byte local and central extra field preservation, unreadable ZIP handling with `SkipFailedArchive`, per-entry read failure handling with `SkipFailedEntry`, output parent path failures, and temp ZIP cleanup after final move failures. The same test project also covers filename correction, name templates, collision resolution, rename apply, folder merge, AutoRelocation planning, work-plan previews, and settings/rule normalization. Deterministic ZIP output filesystem failures are injected through the internal `IArchiveMergeFileSystem` adapter.
 
 Run only the managed app/test path with:
 

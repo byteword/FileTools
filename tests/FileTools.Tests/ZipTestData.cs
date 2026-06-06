@@ -11,7 +11,9 @@ internal sealed record TestZipEntry(
     DateTime? LastModified = null,
     int ExternalAttributes = 0,
     string? Comment = null,
-    bool IsDirectory = false);
+    bool IsDirectory = false,
+    byte[]? LocalExtraData = null,
+    byte[]? CentralDirectoryExtraData = null);
 
 internal sealed record ZipEntrySnapshot(
     string Name,
@@ -20,6 +22,10 @@ internal sealed record ZipEntrySnapshot(
     DateTime LastModified,
     int ExternalAttributes,
     string? Comment);
+
+internal sealed record ZipExtraFieldSnapshot(
+    byte[] LocalHeader,
+    byte[] CentralDirectory);
 
 internal static class ZipTestData
 {
@@ -35,25 +41,29 @@ internal static class ZipTestData
 
     private static void CreateZip(string path, CompressionMethod compressionMethod, params TestZipEntry[] entries)
     {
-        using var file = File.Create(path);
-        using var zip = new ZipOutputStream(file)
+        using (var file = File.Create(path))
+        using (var zip = new ZipOutputStream(file)
         {
             IsStreamOwner = false
-        };
-        zip.SetLevel(compressionMethod == CompressionMethod.Stored ? 0 : 6);
-
-        foreach (var testEntry in entries)
+        })
         {
-            if (testEntry.IsDirectory)
+            zip.SetLevel(compressionMethod == CompressionMethod.Stored ? 0 : 6);
+
+            foreach (var testEntry in entries)
             {
-                WriteDirectory(zip, testEntry);
-                continue;
+                if (testEntry.IsDirectory)
+                {
+                    WriteDirectory(zip, testEntry);
+                    continue;
+                }
+
+                WriteFile(zip, testEntry, compressionMethod);
             }
 
-            WriteFile(zip, testEntry, compressionMethod);
+            zip.Finish();
         }
 
-        zip.Finish();
+        PatchExtraFields(path, entries);
     }
 
     public static IReadOnlyDictionary<string, ZipEntrySnapshot> ReadEntries(string path)
@@ -122,6 +132,17 @@ internal static class ZipTestData
         File.WriteAllBytes(path, bytes);
     }
 
+    public static ZipExtraFieldSnapshot ReadExtraFields(string path, string entryName)
+    {
+        var bytes = File.ReadAllBytes(path);
+        var location = FindCentralDirectoryLocation(bytes, entryName)
+            ?? throw new InvalidDataException("ZIP entry was not found: " + entryName);
+
+        var centralExtraData = ReadCentralDirectoryExtraData(bytes, location.CentralDirectoryOffset);
+        var localExtraData = ReadLocalExtraData(bytes, location.LocalHeaderOffset);
+        return new ZipExtraFieldSnapshot(localExtraData, centralExtraData);
+    }
+
     private static (int PayloadStart, int CompressedSize)? FindPayloadFromCentralDirectory(byte[] bytes, string entryName)
     {
         var location = FindCentralDirectoryLocation(bytes, entryName);
@@ -183,6 +204,51 @@ internal static class ZipTestData
         return null;
     }
 
+    private static byte[] ReadCentralDirectoryExtraData(byte[] bytes, int centralDirectoryOffset)
+    {
+        var signature = BinaryPrimitives.ReadUInt32LittleEndian(bytes.AsSpan(centralDirectoryOffset, 4));
+        if (signature != 0x02014b50)
+        {
+            throw new InvalidDataException("ZIP central directory signature is invalid.");
+        }
+
+        var nameLength = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(centralDirectoryOffset + 28, 2));
+        var extraLength = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(centralDirectoryOffset + 30, 2));
+        var extraStart = centralDirectoryOffset + 46 + nameLength;
+        return CopyRange(bytes, extraStart, extraLength);
+    }
+
+    private static byte[] ReadLocalExtraData(byte[] bytes, int localHeaderOffset)
+    {
+        var signature = BinaryPrimitives.ReadUInt32LittleEndian(bytes.AsSpan(localHeaderOffset, 4));
+        if (signature != 0x04034b50)
+        {
+            throw new InvalidDataException("ZIP local file header signature is invalid.");
+        }
+
+        var nameLength = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(localHeaderOffset + 26, 2));
+        var extraLength = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(localHeaderOffset + 28, 2));
+        var extraStart = localHeaderOffset + 30 + nameLength;
+        return CopyRange(bytes, extraStart, extraLength);
+    }
+
+    private static byte[] CopyRange(byte[] bytes, int start, int length)
+    {
+        if (start < 0 || length < 0 || start + length > bytes.Length)
+        {
+            throw new InvalidDataException("ZIP extra field extends past the end of the file.");
+        }
+
+        if (length == 0)
+        {
+            return [];
+        }
+
+        var result = new byte[length];
+        Buffer.BlockCopy(bytes, start, result, 0, length);
+        return result;
+    }
+
     private static int GetLocalPayloadStart(byte[] bytes, int localHeaderOffset)
     {
         var localSignature = BinaryPrimitives.ReadUInt32LittleEndian(bytes.AsSpan(localHeaderOffset, 4));
@@ -231,6 +297,65 @@ internal static class ZipTestData
         return null;
     }
 
+    private static void PatchExtraFields(string path, IReadOnlyList<TestZipEntry> entries)
+    {
+        if (!entries.Any(static entry => entry.LocalExtraData is not null || entry.CentralDirectoryExtraData is not null))
+        {
+            return;
+        }
+
+        var bytes = File.ReadAllBytes(path);
+        foreach (var entry in entries)
+        {
+            if (entry.LocalExtraData is null && entry.CentralDirectoryExtraData is null)
+            {
+                continue;
+            }
+
+            var entryName = entry.IsDirectory
+                ? entry.Name.TrimEnd('/') + "/"
+                : entry.Name.Replace('\\', '/');
+            var location = FindCentralDirectoryLocation(bytes, entryName)
+                ?? throw new InvalidDataException("ZIP entry was not found: " + entryName);
+
+            if (entry.LocalExtraData is not null)
+            {
+                PatchLocalExtraData(bytes, location.LocalHeaderOffset, entry.LocalExtraData);
+            }
+
+            if (entry.CentralDirectoryExtraData is not null)
+            {
+                PatchCentralDirectoryExtraData(bytes, location.CentralDirectoryOffset, entry.CentralDirectoryExtraData);
+            }
+        }
+
+        File.WriteAllBytes(path, bytes);
+    }
+
+    private static void PatchLocalExtraData(byte[] bytes, int localHeaderOffset, byte[] extraData)
+    {
+        var nameLength = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(localHeaderOffset + 26, 2));
+        var extraLength = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(localHeaderOffset + 28, 2));
+        if (extraLength != extraData.Length)
+        {
+            throw new InvalidDataException("Replacement local extra field must keep the original length.");
+        }
+
+        Buffer.BlockCopy(extraData, 0, bytes, localHeaderOffset + 30 + nameLength, extraData.Length);
+    }
+
+    private static void PatchCentralDirectoryExtraData(byte[] bytes, int centralDirectoryOffset, byte[] extraData)
+    {
+        var nameLength = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(centralDirectoryOffset + 28, 2));
+        var extraLength = BinaryPrimitives.ReadUInt16LittleEndian(bytes.AsSpan(centralDirectoryOffset + 30, 2));
+        if (extraLength != extraData.Length)
+        {
+            throw new InvalidDataException("Replacement central directory extra field must keep the original length.");
+        }
+
+        Buffer.BlockCopy(extraData, 0, bytes, centralDirectoryOffset + 46 + nameLength, extraData.Length);
+    }
+
     private static void WriteDirectory(ZipOutputStream zip, TestZipEntry testEntry)
     {
         var entry = new ZipEntry(testEntry.Name.TrimEnd('/') + "/")
@@ -239,6 +364,7 @@ internal static class ZipTestData
             ExternalFileAttributes = testEntry.ExternalAttributes == 0 ? 0x10 : testEntry.ExternalAttributes,
             IsUnicodeText = true
         };
+        SetInitialExtraData(entry, testEntry);
         if (!string.IsNullOrWhiteSpace(testEntry.Comment))
         {
             entry.Comment = testEntry.Comment;
@@ -262,6 +388,7 @@ internal static class ZipTestData
             ExternalFileAttributes = testEntry.ExternalAttributes,
             IsUnicodeText = true
         };
+        SetInitialExtraData(entry, testEntry);
         if (!string.IsNullOrWhiteSpace(testEntry.Comment))
         {
             entry.Comment = testEntry.Comment;
@@ -270,5 +397,14 @@ internal static class ZipTestData
         zip.PutNextEntry(entry);
         zip.Write(content, 0, content.Length);
         zip.CloseEntry();
+    }
+
+    private static void SetInitialExtraData(ZipEntry entry, TestZipEntry testEntry)
+    {
+        var extraData = testEntry.LocalExtraData ?? testEntry.CentralDirectoryExtraData;
+        if (extraData is { Length: > 0 })
+        {
+            entry.ExtraData = extraData;
+        }
     }
 }
