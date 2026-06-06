@@ -254,6 +254,8 @@ installer\FileTools.Identity
 └─ Sparse MSIX identity manifest
 ```
 
+현재 정리된 다음 작업 목록은 `docs\next-tasks.md`에서 추적합니다.
+
 ### ContextMenu 설치
 
 도우미 스크립트를 사용합니다.
@@ -619,6 +621,8 @@ installer\FileTools.Installer
 installer\FileTools.Identity
 └─ Sparse MSIX identity manifest
 ```
+
+The current next-task list is tracked in `docs\next-tasks.md`.
 
 ### Install ContextMenu
 
