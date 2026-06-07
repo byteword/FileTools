@@ -1,7 +1,7 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-07 after automated archive merge stabilization
+Last updated: 2026-06-07 after file compare foundation work
 
 Scope reviewed:
 
@@ -16,7 +16,7 @@ Scope reviewed:
 - #3 internet dictionary or AI-assisted rename correction: keep open as a long-term research item.
 - #4 selected-target folder merge: closed as completed. Common-filename-based file merge and preview scope were split to #9.
 - #5 ZIP archive merge: closed as completed. 7Z input archive merge was split to #8.
-- #6 compare two or more files: keep open as the next large standalone feature candidate after archive merge stabilization.
+- #6 compare two or more files: active. The first engine/options slice is implemented; result UI, settings UI wiring, progress/cancel integration, and command placement remain open.
 - #7 Windows ARM64 build and installer support: keep open and deferred until there is ARM64 Windows hardware or VM validation.
 - #8 7Z input archive merge support: keep open as the archive merge follow-up.
 - #9 common-filename-based file merge flow: keep open as the folder/file merge follow-up.
@@ -33,11 +33,17 @@ Scope reviewed:
   auto-numbering.
 - Ran `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` on
   2026-06-07; all 31 managed tests passed.
+- Added `docs/file-compare-design.md` and
+  `docs/images/file-compare-settings-options.svg` for issue #6.
+- Added the file compare option model and engine foundation, including folder
+  expansion into pairwise file comparisons, filename/metadata/content criteria,
+  content range selection, byte-to-byte prefiltering, per-run hash caching, and
+  ZIP entry-order comparison.
 
 ## Deferred Follow-Up Tracks
 
 - #3 internet dictionary or AI-assisted rename correction: resume only after privacy, cost, network failure, opt-in, and review UX policies are defined.
-- #6 file comparison: resume after ZIP archive merge release readiness is no longer the active risk and the large-file comparison/reporting design is scoped.
+- #6 file comparison: continue with result UI, settings UI wiring, progress/cancel integration, and command placement after the engine foundation is verified.
 - #7 Windows ARM64 build and installer support: resume only when ARM64 Windows hardware or a VM is available for end-to-end installer and Explorer validation.
 - #8 7Z input archive merge support: resume after ZIP archive merge real-sample validation and release notes are finished, then decide ZIP-only output versus 7Z output scope.
 - #9 common-filename-based file merge flow: resume after rename, extension, collision, and preview UX decisions are made.
@@ -60,5 +66,5 @@ Scope reviewed:
    - Keep release notes and external wiki updates gated on verified assets, checksums, signatures, attestations, and install smoke testing.
 
 4. Defer lower-priority feature tracks.
-   - #3, #6, #7, #8, and #9 now carry explicit deferred status and resume conditions in GitHub.
+   - #3, #7, #8, and #9 still carry explicit deferred status and resume conditions in GitHub.
    - Do not pull these into the active work queue until the resume conditions in each issue are satisfied.

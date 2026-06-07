@@ -11,10 +11,12 @@ notes.
 - Added ZIP filename encoding selection for archive merge input.
 - Preserved ZIP entry metadata, comments, external attributes, and local/central extra field bytes during ZIP merge.
 - Added regression coverage for archive merge duplicate content, internal path collisions, cancellation cleanup, filesystem failures, temp ZIP cleanup, and metadata preservation.
+- Added the first file-comparison engine foundation for issue #6. The app result UI and settings UI are not enabled yet.
 
 ## Support Scope
 
 - ZIP input and ZIP output are supported for archive merge.
+- File comparison is under active development; the current release draft includes engine/test groundwork only, not the final UI workflow.
 - 7Z input is not supported in this release scope. Track 7Z input archive merge in GitHub issue #8.
 - Common-filename-based file merge is not part of the selected-target folder merge scope. Track that follow-up in GitHub issue #9.
 

@@ -73,6 +73,8 @@ internal sealed class FileToolsSettings
 
     public bool ContextMenuArchiveMergePreserveInternalPaths { get; set; } = true;
 
+    public FileCompareOptions FileCompareOptions { get; set; } = new();
+
     public bool IsContextMenuToolEnabled(ToolMode mode)
     {
         return mode switch
@@ -142,7 +144,8 @@ internal sealed class FileToolsSettings
             ArchiveMergeCompressionLevel = ArchiveMergeCompressionLevel,
             ArchiveMergeDeleteOriginals = ArchiveMergeDeleteOriginals,
             ContextMenuArchiveMergeGroupByArchiveName = ContextMenuArchiveMergeGroupByArchiveName,
-            ContextMenuArchiveMergePreserveInternalPaths = ContextMenuArchiveMergePreserveInternalPaths
+            ContextMenuArchiveMergePreserveInternalPaths = ContextMenuArchiveMergePreserveInternalPaths,
+            FileCompareOptions = FileCompareOptions.Clone()
         };
     }
 }
@@ -211,6 +214,10 @@ internal static class SettingsStore
                 Extensions = rule.Extensions.ToList()
             })
             .ToList();
+        settings.FileCompareOptions ??= new FileCompareOptions();
+        settings.FileCompareOptions.RangeBytes = Math.Max(1, settings.FileCompareOptions.RangeBytes);
+        settings.FileCompareOptions.PartialMatchThreshold = Math.Clamp(settings.FileCompareOptions.PartialMatchThreshold, 0.10, 1);
+        settings.FileCompareOptions.ByteToBytePrefilterRatio = Math.Clamp(settings.FileCompareOptions.ByteToBytePrefilterRatio, 0, 1);
     }
 
     private static string NormalizeTemplate(string? template, string fallback)

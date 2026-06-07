@@ -9,6 +9,10 @@ public sealed class SettingsAndConfigurationTests
     {
         var settings = new FileToolsSettings
         {
+            FileCompareOptions = new FileCompareOptions
+            {
+                RangeBytes = 4096
+            },
             FileKindExtensionRules =
             [
                 new FileKindExtensionRule
@@ -21,9 +25,12 @@ public sealed class SettingsAndConfigurationTests
 
         var clone = settings.Clone();
         clone.FileKindExtensionRules[0].Extensions.Add(".md");
+        clone.FileCompareOptions.RangeBytes = 8192;
 
         Assert.Equal([".txt"], settings.FileKindExtensionRules[0].Extensions);
         Assert.Equal([".txt", ".md"], clone.FileKindExtensionRules[0].Extensions);
+        Assert.Equal(4096, settings.FileCompareOptions.RangeBytes);
+        Assert.Equal(8192, clone.FileCompareOptions.RangeBytes);
     }
 
     [Fact]

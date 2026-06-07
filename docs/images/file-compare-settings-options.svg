@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="760" viewBox="0 0 1100 760" role="img" aria-labelledby="title desc">
+  <title id="title">File compare settings layout</title>
+  <desc id="desc">Wireframe for grouped FileTools file comparison options.</desc>
+  <rect width="1100" height="760" fill="#f4f6f8"/>
+  <rect x="40" y="30" width="1020" height="700" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="72" y="78" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" fill="#111827">File compare settings</text>
+  <text x="72" y="108" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#64748b">Grouped controls with dependent fields disabled when their parent checkbox is off.</text>
+
+  <g transform="translate(72 140)">
+    <rect width="456" height="160" rx="6" fill="#eef6ff" stroke="#2563eb" stroke-width="2"/>
+    <text x="20" y="34" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#1e3a8a">File name</text>
+    <rect x="20" y="58" width="18" height="18" rx="3" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+    <path d="M24 67 L29 72 L36 62" fill="none" stroke="#2563eb" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="50" y="73" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#111827">Compare file name</text>
+    <text x="20" y="110" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#475569">Name match mode</text>
+    <rect x="170" y="91" width="250" height="34" rx="4" fill="#ffffff" stroke="#94a3b8"/>
+    <text x="186" y="113" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#111827">Exact filename</text>
+  </g>
+
+  <g transform="translate(572 140)">
+    <rect width="456" height="160" rx="6" fill="#fff7ed" stroke="#d97706" stroke-width="2"/>
+    <text x="20" y="34" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#7c2d12">Metadata</text>
+    <rect x="20" y="58" width="18" height="18" rx="3" fill="#ffffff" stroke="#d97706" stroke-width="2"/>
+    <text x="50" y="73" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#111827">Created time</text>
+    <rect x="20" y="91" width="18" height="18" rx="3" fill="#ffffff" stroke="#d97706" stroke-width="2"/>
+    <path d="M24 100 L29 105 L36 95" fill="none" stroke="#d97706" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="50" y="106" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#111827">Modified time</text>
+    <rect x="220" y="91" width="18" height="18" rx="3" fill="#ffffff" stroke="#d97706" stroke-width="2"/>
+    <path d="M224 100 L229 105 L236 95" fill="none" stroke="#d97706" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="250" y="106" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#111827">File size</text>
+  </g>
+
+  <g transform="translate(72 330)">
+    <rect width="956" height="250" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+    <text x="20" y="34" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#065f46">Content</text>
+    <rect x="20" y="58" width="18" height="18" rx="3" fill="#ffffff" stroke="#059669" stroke-width="2"/>
+    <path d="M24 67 L29 72 L36 62" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="50" y="73" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#111827">Compare content</text>
+
+    <text x="20" y="112" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#475569">Mode</text>
+    <rect x="120" y="93" width="210" height="34" rx="4" fill="#ffffff" stroke="#94a3b8"/>
+    <text x="136" y="115" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#111827">Hash</text>
+    <text x="370" y="112" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#475569">Range</text>
+    <rect x="470" y="93" width="210" height="34" rx="4" fill="#ffffff" stroke="#94a3b8"/>
+    <text x="486" y="115" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#111827">Front and back</text>
+    <text x="720" y="112" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#475569">Bytes</text>
+    <rect x="780" y="93" width="130" height="34" rx="4" fill="#ffffff" stroke="#94a3b8"/>
+    <text x="796" y="115" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#111827">1,048,576</text>
+
+    <line x1="20" y1="150" x2="936" y2="150" stroke="#bbf7d0"/>
+    <rect x="20" y="170" width="18" height="18" rx="3" fill="#ffffff" stroke="#059669" stroke-width="2"/>
+    <path d="M24 179 L29 184 L36 174" fill="none" stroke="#059669" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="50" y="185" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#111827">Extract ZIP entries for content comparison</text>
+    <text x="370" y="185" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#475569">Entry order</text>
+    <rect x="470" y="166" width="210" height="34" rx="4" fill="#ffffff" stroke="#94a3b8"/>
+    <text x="486" y="188" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#111827">Filename order</text>
+    <text x="720" y="185" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#475569">Byte prefilter</text>
+    <rect x="825" y="166" width="85" height="34" rx="4" fill="#ffffff" stroke="#94a3b8"/>
+    <text x="846" y="188" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#111827">10%</text>
+  </g>
+
+  <g transform="translate(72 610)">
+    <rect width="956" height="84" rx="6" fill="#f8fafc" stroke="#64748b" stroke-width="2"/>
+    <text x="20" y="34" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#334155">Other options</text>
+    <rect x="20" y="52" width="18" height="18" rx="3" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+    <path d="M24 61 L29 66 L36 56" fill="none" stroke="#64748b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="50" y="67" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#111827">Early exit</text>
+    <rect x="190" y="52" width="18" height="18" rx="3" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+    <path d="M194 61 L199 66 L206 56" fill="none" stroke="#64748b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="220" y="67" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#111827">Use run hash cache</text>
+    <text x="450" y="67" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#64748b">Disk cache remains a future option.</text>
+  </g>
+</svg>
