@@ -518,7 +518,7 @@
   <data name="ArchiveMergeFailureAbortAll" xml:space="preserve"><value>Abort all on failure</value></data>
   <data name="ArchiveMergeFailureSkipArchive" xml:space="preserve"><value>Skip failed archive</value></data>
   <data name="ArchiveMergeFailureSkipEntry" xml:space="preserve"><value>Skip failed entry</value></data>
-  <data name="ArchiveMergeOutputCommonStem" xml:space="preserve"><value>Common selected filename</value></data>
+  <data name="ArchiveMergeOutputCommonStem" xml:space="preserve"><value>Common logical filename</value></data>
   <data name="ArchiveMergeOutputParentFolder" xml:space="preserve"><value>Parent folder name</value></data>
   <data name="ArchiveMergeOutputTimestamp" xml:space="preserve"><value>Generated timestamp name</value></data>
   <data name="ArchiveMergeOutputManual" xml:space="preserve"><value>Manual path in dialog</value></data>
@@ -544,6 +544,25 @@
   <data name="ArchiveMergeOptionsHeader" xml:space="preserve"><value>Merge selected ZIP archives into one output ZIP.</value></data>
   <data name="ArchiveMergeOutputHelp" xml:space="preserve"><value>The output is written to a temporary ZIP first, then moved to this final path.</value></data>
   <data name="ArchiveMergeSourcesGroup" xml:space="preserve"><value>Source archives</value></data>
+  <data name="ArchiveMergeEntryPreviewGroup" xml:space="preserve"><value>Detailed file list</value></data>
+  <data name="ArchiveMergeEntryPreviewScanning" xml:space="preserve"><value>Scanning archive entries...</value></data>
+  <data name="ArchiveMergeEntryPreviewSummaryFormat" xml:space="preserve"><value>{0} entries | collision-renamed {1} | skipped {2} | blocked {3}</value></data>
+  <data name="ArchiveMergeEntryPreviewFailedFormat" xml:space="preserve"><value>Preview failed: {0}</value></data>
+  <data name="ArchiveMergeEntryPreviewColumnSource" xml:space="preserve"><value>Source archive</value></data>
+  <data name="ArchiveMergeEntryPreviewColumnOriginal" xml:space="preserve"><value>Original entry</value></data>
+  <data name="ArchiveMergeEntryPreviewColumnTarget" xml:space="preserve"><value>Target entry</value></data>
+  <data name="ArchiveMergeEntryPreviewColumnStatus" xml:space="preserve"><value>Status</value></data>
+  <data name="ArchiveMergeEntryPreviewColumnReason" xml:space="preserve"><value>Reason</value></data>
+  <data name="ArchiveMergeEntryPreviewStatusReady" xml:space="preserve"><value>Ready</value></data>
+  <data name="ArchiveMergeEntryPreviewStatusCollisionRenamed" xml:space="preserve"><value>Collision renamed</value></data>
+  <data name="ArchiveMergeEntryPreviewStatusDuplicateSkipped" xml:space="preserve"><value>Duplicate skipped</value></data>
+  <data name="ArchiveMergeEntryPreviewStatusSkipped" xml:space="preserve"><value>Skipped</value></data>
+  <data name="ArchiveMergeEntryPreviewStatusBlocked" xml:space="preserve"><value>Blocked</value></data>
+  <data name="ArchiveMergePreviewSourceMissing" xml:space="preserve"><value>Source archive is missing.</value></data>
+  <data name="ArchiveMergePreviewSourceUnreadable" xml:space="preserve"><value>Source archive could not be read.</value></data>
+  <data name="ArchiveMergePreviewCollisionRenamed" xml:space="preserve"><value>Internal path collision resolved with an auto-numbered target name.</value></data>
+  <data name="ArchiveMergePreviewDuplicateDecisionRequiredFormat" xml:space="preserve"><value>Duplicate-content decision required against {0}.</value></data>
+  <data name="ArchiveMergePreviewCollisionDecisionRequiredFormat" xml:space="preserve"><value>Name-collision decision required at {0}.</value></data>
   <data name="ArchiveMergeOutputDialogTitle" xml:space="preserve"><value>Select output ZIP</value></data>
   <data name="ArchiveMergeOutputDialogFilter" xml:space="preserve"><value>ZIP archive (*.zip)|*.zip</value></data>
   <data name="ArchiveEncodingDialogTitle" xml:space="preserve"><value>Select ZIP filename encoding</value></data>

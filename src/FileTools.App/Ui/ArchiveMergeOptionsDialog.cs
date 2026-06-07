@@ -7,26 +7,37 @@ internal sealed class ArchiveMergeOptionsDialog : Form
 {
     private const string SourceNameColumnName = "SourceName";
     private const string SourceLocationColumnName = "SourceLocation";
+    private const string EntrySourceColumnName = "EntrySource";
+    private const string EntryOriginalColumnName = "EntryOriginal";
+    private const string EntryTargetColumnName = "EntryTarget";
+    private const string EntryStatusColumnName = "EntryStatus";
+    private const string EntryReasonColumnName = "EntryReason";
 
     private readonly TextBox _outputPathBox = new();
     private readonly DataGridView _sourceGrid = new();
+    private readonly DataGridView _entryPreviewGrid = new();
+    private readonly Label _entryPreviewSummaryLabel = new();
     private readonly ComboBox _layoutCombo = new();
     private readonly ComboBox _collisionCombo = new();
     private readonly ComboBox _duplicateCombo = new();
     private readonly ComboBox _failureCombo = new();
     private readonly ComboBox _compressionCombo = new();
     private readonly CheckBox _deleteOriginalsCheckBox = new();
+    private readonly Button _okButton = new();
+    private bool _isLoadingOptions;
 
     public ArchiveMergeOptionsDialog(ArchiveMergeOptions options)
     {
         Options = options.Clone();
         Text = Localizer.Get("ArchiveMergeOptionsDialogTitle");
         StartPosition = FormStartPosition.CenterParent;
-        Size = new Size(860, 560);
-        MinimumSize = new Size(740, 460);
+        Size = new Size(980, 720);
+        MinimumSize = new Size(820, 580);
 
         BuildLayout();
         LoadOptions();
+        WirePreviewRefreshEvents();
+        RefreshEntryPreview();
     }
 
     public ArchiveMergeOptions Options { get; private set; }
@@ -38,11 +49,12 @@ internal sealed class ArchiveMergeOptionsDialog : Form
             Dock = DockStyle.Fill,
             Padding = new Padding(12),
             ColumnCount = 1,
-            RowCount = 5
+            RowCount = 6
         };
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 72));
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 174));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 118));
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
         Controls.Add(root);
@@ -57,7 +69,8 @@ internal sealed class ArchiveMergeOptionsDialog : Form
         root.Controls.Add(CreateOutputPanel(), 0, 1);
         root.Controls.Add(CreatePolicyPanel(), 0, 2);
         root.Controls.Add(CreateSourcePanel(), 0, 3);
-        root.Controls.Add(CreateButtonPanel(), 0, 4);
+        root.Controls.Add(CreateEntryPreviewPanel(), 0, 4);
+        root.Controls.Add(CreateButtonPanel(), 0, 5);
     }
 
     private Control CreateOutputPanel()
@@ -177,6 +190,84 @@ internal sealed class ArchiveMergeOptionsDialog : Form
         return group;
     }
 
+    private Control CreateEntryPreviewPanel()
+    {
+        var group = new GroupBox
+        {
+            Dock = DockStyle.Fill,
+            Text = Localizer.Get("ArchiveMergeEntryPreviewGroup"),
+            Padding = new Padding(8)
+        };
+        var panel = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 2
+        };
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+        panel.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+
+        _entryPreviewSummaryLabel.Dock = DockStyle.Fill;
+        _entryPreviewSummaryLabel.TextAlign = ContentAlignment.MiddleLeft;
+        _entryPreviewSummaryLabel.ForeColor = Color.FromArgb(71, 85, 105);
+        panel.Controls.Add(_entryPreviewSummaryLabel, 0, 0);
+
+        _entryPreviewGrid.Dock = DockStyle.Fill;
+        _entryPreviewGrid.AllowUserToAddRows = false;
+        _entryPreviewGrid.AllowUserToDeleteRows = false;
+        _entryPreviewGrid.AllowUserToResizeRows = false;
+        _entryPreviewGrid.BackgroundColor = SystemColors.Window;
+        _entryPreviewGrid.BorderStyle = BorderStyle.FixedSingle;
+        _entryPreviewGrid.ReadOnly = true;
+        _entryPreviewGrid.RowHeadersVisible = false;
+        _entryPreviewGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+        _entryPreviewGrid.ShowCellToolTips = true;
+        _entryPreviewGrid.AutoGenerateColumns = false;
+        _entryPreviewGrid.Columns.Add(new DataGridViewTextBoxColumn
+        {
+            Name = EntrySourceColumnName,
+            HeaderText = Localizer.Get("ArchiveMergeEntryPreviewColumnSource"),
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
+            Width = 150,
+            SortMode = DataGridViewColumnSortMode.NotSortable
+        });
+        _entryPreviewGrid.Columns.Add(new DataGridViewTextBoxColumn
+        {
+            Name = EntryOriginalColumnName,
+            HeaderText = Localizer.Get("ArchiveMergeEntryPreviewColumnOriginal"),
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+            FillWeight = 38,
+            SortMode = DataGridViewColumnSortMode.NotSortable
+        });
+        _entryPreviewGrid.Columns.Add(new DataGridViewTextBoxColumn
+        {
+            Name = EntryTargetColumnName,
+            HeaderText = Localizer.Get("ArchiveMergeEntryPreviewColumnTarget"),
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+            FillWeight = 38,
+            SortMode = DataGridViewColumnSortMode.NotSortable
+        });
+        _entryPreviewGrid.Columns.Add(new DataGridViewTextBoxColumn
+        {
+            Name = EntryStatusColumnName,
+            HeaderText = Localizer.Get("ArchiveMergeEntryPreviewColumnStatus"),
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
+            Width = 132,
+            SortMode = DataGridViewColumnSortMode.NotSortable
+        });
+        _entryPreviewGrid.Columns.Add(new DataGridViewTextBoxColumn
+        {
+            Name = EntryReasonColumnName,
+            HeaderText = Localizer.Get("ArchiveMergeEntryPreviewColumnReason"),
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+            FillWeight = 24,
+            SortMode = DataGridViewColumnSortMode.NotSortable
+        });
+        panel.Controls.Add(_entryPreviewGrid, 0, 1);
+        group.Controls.Add(panel);
+        return group;
+    }
+
     private Control CreateButtonPanel()
     {
         var buttons = new FlowLayoutPanel
@@ -186,7 +277,9 @@ internal sealed class ArchiveMergeOptionsDialog : Form
             WrapContents = false,
             Margin = new Padding(0, 10, 0, 0)
         };
-        var okButton = new Button { Text = "OK", Width = 92, Height = 30 };
+        _okButton.Text = "OK";
+        _okButton.Width = 92;
+        _okButton.Height = 30;
         var cancelButton = new Button
         {
             Text = Localizer.Get("ButtonCancel"),
@@ -195,16 +288,17 @@ internal sealed class ArchiveMergeOptionsDialog : Form
             Height = 30,
             Margin = new Padding(8, 0, 0, 0)
         };
-        okButton.Click += (_, _) => SaveAndClose();
+        _okButton.Click += (_, _) => SaveAndClose();
         buttons.Controls.Add(cancelButton);
-        buttons.Controls.Add(okButton);
-        AcceptButton = okButton;
+        buttons.Controls.Add(_okButton);
+        AcceptButton = _okButton;
         CancelButton = cancelButton;
         return buttons;
     }
 
     private void LoadOptions()
     {
+        _isLoadingOptions = true;
         _outputPathBox.Text = Options.OutputPath;
         ConfigureCombo(_layoutCombo, Enum.GetValues<ArchiveMergeLayout>()
             .Select(value => new ComboOption<ArchiveMergeLayout>(ArchiveMergeText.GetDisplayName(value), value))
@@ -239,6 +333,90 @@ internal sealed class ArchiveMergeOptionsDialog : Form
                 cell.ToolTipText = sourcePath;
             }
         }
+
+        _isLoadingOptions = false;
+    }
+
+    private void WirePreviewRefreshEvents()
+    {
+        _layoutCombo.SelectedIndexChanged += (_, _) => RefreshEntryPreview();
+        _collisionCombo.SelectedIndexChanged += (_, _) => RefreshEntryPreview();
+        _duplicateCombo.SelectedIndexChanged += (_, _) => RefreshEntryPreview();
+        _failureCombo.SelectedIndexChanged += (_, _) => RefreshEntryPreview();
+    }
+
+    private void RefreshEntryPreview()
+    {
+        if (_isLoadingOptions)
+        {
+            return;
+        }
+
+        _entryPreviewGrid.Rows.Clear();
+        _entryPreviewSummaryLabel.Text = Localizer.Get("ArchiveMergeEntryPreviewScanning");
+        _okButton.Enabled = false;
+        var oldCursor = Cursor.Current;
+        Cursor.Current = Cursors.WaitCursor;
+        try
+        {
+            var previewOptions = CreateOptionsFromControls(validateOutputPath: false);
+            var preview = ArchiveMergeOperations.CreatePreview(previewOptions);
+            _entryPreviewSummaryLabel.Text = Localizer.Format(
+                "ArchiveMergeEntryPreviewSummaryFormat",
+                preview.Entries.Count,
+                preview.CollisionRenamedCount,
+                preview.SkippedCount,
+                preview.BlockedCount);
+            foreach (var entry in preview.Entries)
+            {
+                var rowIndex = _entryPreviewGrid.Rows.Add();
+                var row = _entryPreviewGrid.Rows[rowIndex];
+                row.Cells[EntrySourceColumnName].Value = Path.GetFileName(entry.SourceArchivePath);
+                row.Cells[EntryOriginalColumnName].Value = entry.OriginalPath;
+                row.Cells[EntryTargetColumnName].Value = entry.TargetPath;
+                row.Cells[EntryStatusColumnName].Value = GetEntryPreviewStatusText(entry.Status);
+                row.Cells[EntryReasonColumnName].Value = entry.Reason;
+                foreach (var cell in row.Cells.Cast<DataGridViewCell>())
+                {
+                    cell.ToolTipText = string.Join(
+                        Environment.NewLine,
+                        entry.SourceArchivePath,
+                        entry.OriginalPath + " -> " + entry.TargetPath,
+                        entry.Reason);
+                }
+
+                ApplyEntryPreviewRowStyle(row, entry.Status);
+            }
+
+            if (preview.Entries.Count == 0 && preview.Sources.Count > 0)
+            {
+                foreach (var source in preview.Sources.Where(static source => source.Status == ArchiveMergePreviewSourceStatus.Blocked))
+                {
+                    var rowIndex = _entryPreviewGrid.Rows.Add();
+                    var row = _entryPreviewGrid.Rows[rowIndex];
+                    row.Cells[EntrySourceColumnName].Value = Path.GetFileName(source.SourcePath);
+                    row.Cells[EntryStatusColumnName].Value = GetEntryPreviewStatusText(ArchiveMergePreviewEntryStatus.Blocked);
+                    row.Cells[EntryReasonColumnName].Value = source.Reason;
+                    ApplyEntryPreviewRowStyle(row, ArchiveMergePreviewEntryStatus.Blocked);
+                }
+            }
+
+            _okButton.Enabled = preview.BlockedCount == 0 && preview.Entries.Count > 0;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidDataException or ArgumentException or InvalidOperationException or NotSupportedException)
+        {
+            _entryPreviewSummaryLabel.Text = Localizer.Format("ArchiveMergeEntryPreviewFailedFormat", ex.Message);
+            var rowIndex = _entryPreviewGrid.Rows.Add();
+            var row = _entryPreviewGrid.Rows[rowIndex];
+            row.Cells[EntryStatusColumnName].Value = GetEntryPreviewStatusText(ArchiveMergePreviewEntryStatus.Blocked);
+            row.Cells[EntryReasonColumnName].Value = ex.Message;
+            ApplyEntryPreviewRowStyle(row, ArchiveMergePreviewEntryStatus.Blocked);
+            _okButton.Enabled = false;
+        }
+        finally
+        {
+            Cursor.Current = oldCursor;
+        }
     }
 
     private void BrowseOutputPath()
@@ -260,47 +438,92 @@ internal sealed class ArchiveMergeOptionsDialog : Form
     {
         try
         {
-            var outputPath = _outputPathBox.Text.Trim().Trim('"');
-            if (string.IsNullOrWhiteSpace(outputPath))
-            {
-                MessageBox.Show(Localizer.Get("ArchiveMergeOutputPathRequired"), FileToolsEnvironment.AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            Options.OutputPath = Path.GetFullPath(outputPath);
-            if (_layoutCombo.SelectedItem is ComboOption<ArchiveMergeLayout> layout)
-            {
-                Options.Layout = layout.Value;
-            }
-
-            if (_collisionCombo.SelectedItem is ComboOption<ArchiveMergeCollisionPolicy> collision)
-            {
-                Options.CollisionPolicy = collision.Value;
-            }
-
-            if (_duplicateCombo.SelectedItem is ComboOption<ArchiveMergeDuplicatePolicy> duplicate)
-            {
-                Options.DuplicatePolicy = duplicate.Value;
-            }
-
-            if (_failureCombo.SelectedItem is ComboOption<ArchiveMergeFailurePolicy> failure)
-            {
-                Options.FailurePolicy = failure.Value;
-            }
-
-            if (_compressionCombo.SelectedItem is ComboOption<ArchiveMergeCompressionLevel> compression)
-            {
-                Options.CompressionLevel = compression.Value;
-            }
-
-            Options.DeleteOriginals = _deleteOriginalsCheckBox.Checked;
+            Options = CreateOptionsFromControls(validateOutputPath: true);
             DialogResult = DialogResult.OK;
             Close();
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException or NotSupportedException)
         {
             MessageBox.Show(ex.Message, FileToolsEnvironment.AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+    }
+
+    private ArchiveMergeOptions CreateOptionsFromControls(bool validateOutputPath)
+    {
+        var outputPath = _outputPathBox.Text.Trim().Trim('"');
+        if (validateOutputPath && string.IsNullOrWhiteSpace(outputPath))
+        {
+            throw new InvalidOperationException(Localizer.Get("ArchiveMergeOutputPathRequired"));
+        }
+
+        var options = Options.Clone();
+        if (!string.IsNullOrWhiteSpace(outputPath))
+        {
+            options.OutputPath = Path.GetFullPath(outputPath);
+        }
+
+        if (_layoutCombo.SelectedItem is ComboOption<ArchiveMergeLayout> layout)
+        {
+            options.Layout = layout.Value;
+        }
+
+        if (_collisionCombo.SelectedItem is ComboOption<ArchiveMergeCollisionPolicy> collision)
+        {
+            options.CollisionPolicy = collision.Value;
+        }
+
+        if (_duplicateCombo.SelectedItem is ComboOption<ArchiveMergeDuplicatePolicy> duplicate)
+        {
+            options.DuplicatePolicy = duplicate.Value;
+        }
+
+        if (_failureCombo.SelectedItem is ComboOption<ArchiveMergeFailurePolicy> failure)
+        {
+            options.FailurePolicy = failure.Value;
+        }
+
+        if (_compressionCombo.SelectedItem is ComboOption<ArchiveMergeCompressionLevel> compression)
+        {
+            options.CompressionLevel = compression.Value;
+        }
+
+        options.DeleteOriginals = _deleteOriginalsCheckBox.Checked;
+        return options;
+    }
+
+    private static string GetEntryPreviewStatusText(ArchiveMergePreviewEntryStatus status)
+    {
+        return status switch
+        {
+            ArchiveMergePreviewEntryStatus.CollisionRenamed => Localizer.Get("ArchiveMergeEntryPreviewStatusCollisionRenamed"),
+            ArchiveMergePreviewEntryStatus.DuplicateSkipped => Localizer.Get("ArchiveMergeEntryPreviewStatusDuplicateSkipped"),
+            ArchiveMergePreviewEntryStatus.Skipped => Localizer.Get("ArchiveMergeEntryPreviewStatusSkipped"),
+            ArchiveMergePreviewEntryStatus.Blocked => Localizer.Get("ArchiveMergeEntryPreviewStatusBlocked"),
+            _ => Localizer.Get("ArchiveMergeEntryPreviewStatusReady")
+        };
+    }
+
+    private static void ApplyEntryPreviewRowStyle(DataGridViewRow row, ArchiveMergePreviewEntryStatus status)
+    {
+        if (status == ArchiveMergePreviewEntryStatus.CollisionRenamed)
+        {
+            row.DefaultCellStyle.BackColor = Color.FromArgb(255, 251, 235);
+            return;
+        }
+
+        if (status is ArchiveMergePreviewEntryStatus.Blocked)
+        {
+            row.DefaultCellStyle.BackColor = Color.FromArgb(254, 242, 242);
+            return;
+        }
+
+        if (status is ArchiveMergePreviewEntryStatus.Skipped or ArchiveMergePreviewEntryStatus.DuplicateSkipped)
+        {
+            row.DefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
+            return;
+        }
+
+        row.DefaultCellStyle.BackColor = Color.FromArgb(240, 253, 244);
     }
 
     private static void AddComboRow(TableLayoutPanel panel, int flatIndex, string labelText, ComboBox combo)
@@ -343,4 +566,3 @@ internal sealed class ArchiveMergeOptionsDialog : Form
         }
     }
 }
-

@@ -172,7 +172,7 @@ MultiFolderMergeFolderNameTemplate = {CommonStem}
 ArchiveMergeFileNameTemplate       = {CommonStem}{TargetExtension}
 ```
 
-The default output filename uses `ArchiveMergeFileNameTemplate` with `{TargetExtension}` set to `.zip`. If `{CommonStem}` cannot produce a useful name, the parent folder name is used; if that is unavailable, a timestamped `Merged-yyyyMMdd-HHmmss.zip` fallback is used. When the output filename policy is `Manual`, context-menu archive merge opens a save dialog before the progress window and uses the selected path as the final ZIP path.
+The default output filename uses `ArchiveMergeFileNameTemplate` with `{TargetExtension}` set to `.zip`. `{CommonStem}` is resolved as a common logical archive-family name first, so numbered sources such as `A 01.zip` and `A 02.zip` produce `A.zip` rather than a raw common prefix like `A 0.zip`. If `{CommonStem}` cannot produce a useful name, the parent folder name is used; if that is unavailable, a timestamped `Merged-yyyyMMdd-HHmmss.zip` fallback is used. When the output filename policy is `Manual`, context-menu archive merge opens a save dialog before the progress window and uses the selected path as the final ZIP path.
 
 ### Archive Merge Layout
 
@@ -286,7 +286,7 @@ Merge ZIPs: group by ZIP name
 Merge ZIPs: preserve internal folders
 ```
 
-The main window stores archive merge as a shared plan step. Every participating target shows the same shared row, but execution deduplicates by plan ID so the merge runs once. Double-clicking the row opens an archive merge options dialog for output path and policy changes.
+The main window stores archive merge as a shared plan step. Every participating target shows the same shared row, but execution deduplicates by plan ID so the merge runs once. Double-clicking the row opens an archive merge options dialog for output path and policy changes. That dialog also scans entries and shows a detailed internal file list with original entry paths, final target entry paths, and collision-renamed targets before execution.
 
 The progress window reports these phases:
 
@@ -304,6 +304,16 @@ Delete originals
 When an `Ask` policy produces a question, the active execution UI adds it to a pending-decision list. Selecting a question shows the existing entry, current entry, target path, source archive, and size. Answering a question removes it from the list and unblocks that merge point. In the main window, the execution log area expands while pending decisions exist and collapses again after they are answered or canceled.
 
 ## Future Merge Operations
+
+Common-filename-based archive merge is tracked by issue #9 and documented in
+`docs/common-file-merge-design.md`. Its primary scenario is merging archives
+such as `A 01.zip` and `A 02.zip` into `A.zip`, not renaming every selected file
+to the same base name. It reuses the archive merge output template
+`{CommonStem}{TargetExtension}` with a logical-family calculation that strips
+trailing sequence markers before falling back to the existing common-prefix
+helper. General file-content merge, such as
+`b.txt + b02.txt -> b.txt`, remains a deferred operation because it needs
+duplicate or overlapping content policy.
 
 Multiple-folder merge will need a separate merge layout policy:
 

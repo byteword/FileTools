@@ -173,6 +173,52 @@ internal sealed record ArchiveMergeDuplicateContentQuestion(
     ArchiveMergeQuestionEntry FirstEntry,
     ArchiveMergeQuestionEntry CurrentEntry);
 
+internal enum ArchiveMergePreviewSourceStatus
+{
+    Ready,
+    Blocked
+}
+
+internal enum ArchiveMergePreviewEntryStatus
+{
+    Ready,
+    CollisionRenamed,
+    DuplicateSkipped,
+    Skipped,
+    Blocked
+}
+
+internal sealed record ArchiveMergePreviewSource(
+    string SourcePath,
+    ArchiveMergePreviewSourceStatus Status,
+    string Reason,
+    int EntryCount);
+
+internal sealed record ArchiveMergePreviewEntry(
+    string SourceArchivePath,
+    string OriginalPath,
+    string TargetPath,
+    bool IsDirectory,
+    long Size,
+    ArchiveMergePreviewEntryStatus Status,
+    string Reason);
+
+internal sealed record ArchiveMergePreview(
+    string OutputPath,
+    IReadOnlyList<ArchiveMergePreviewSource> Sources,
+    IReadOnlyList<ArchiveMergePreviewEntry> Entries)
+{
+    public int ReadyCount => Entries.Count(static entry => entry.Status == ArchiveMergePreviewEntryStatus.Ready);
+
+    public int CollisionRenamedCount => Entries.Count(static entry => entry.Status == ArchiveMergePreviewEntryStatus.CollisionRenamed);
+
+    public int SkippedCount => Entries.Count(static entry => entry.Status is ArchiveMergePreviewEntryStatus.Skipped or ArchiveMergePreviewEntryStatus.DuplicateSkipped);
+
+    public int BlockedCount =>
+        Sources.Count(static source => source.Status == ArchiveMergePreviewSourceStatus.Blocked) +
+        Entries.Count(static entry => entry.Status == ArchiveMergePreviewEntryStatus.Blocked);
+}
+
 internal sealed record ArchiveEntryExtraFields(
     byte[] LocalHeader,
     byte[] CentralDirectory);
@@ -409,6 +455,94 @@ internal static class ArchiveMergeOperations
             ArchiveMergeText.GetDisplayName(options.DuplicatePolicy));
     }
 
+    public static ArchiveMergePreview CreatePreview(
+        ArchiveMergeOptions options,
+        CancellationToken cancellationToken = default)
+    {
+        var sources = new List<ArchiveMergePreviewSource>();
+        var states = new List<SourceArchiveState>();
+        var result = new OperationResult();
+        var sourcePaths = options.SourcePaths
+            .Select(static path => path.Trim().Trim('"'))
+            .Where(static path => path.Length > 0)
+            .Select(path =>
+            {
+                try
+                {
+                    return Path.GetFullPath(path);
+                }
+                catch
+                {
+                    return path;
+                }
+            })
+            .Distinct(PathComparer)
+            .ToArray();
+
+        foreach (var sourcePath in sourcePaths)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!File.Exists(sourcePath))
+            {
+                sources.Add(new ArchiveMergePreviewSource(
+                    sourcePath,
+                    ArchiveMergePreviewSourceStatus.Blocked,
+                    Localizer.Get("ArchiveMergePreviewSourceMissing"),
+                    EntryCount: 0));
+                continue;
+            }
+
+            if (!IsSupportedArchivePath(sourcePath))
+            {
+                sources.Add(new ArchiveMergePreviewSource(
+                    sourcePath,
+                    ArchiveMergePreviewSourceStatus.Blocked,
+                    Localizer.Format("ArchiveMergeUnsupportedArchiveFormat", Path.GetFileName(sourcePath)),
+                    EntryCount: 0));
+                continue;
+            }
+
+            var state = OpenSourceArchive(sourcePath, questionSink: null, result);
+            if (state is null)
+            {
+                var reason = result.Errors.LastOrDefault() ?? Localizer.Get("ArchiveMergePreviewSourceUnreadable");
+                sources.Add(new ArchiveMergePreviewSource(
+                    sourcePath,
+                    ArchiveMergePreviewSourceStatus.Blocked,
+                    reason,
+                    EntryCount: 0));
+                continue;
+            }
+
+            states.Add(state);
+            sources.Add(new ArchiveMergePreviewSource(
+                sourcePath,
+                ArchiveMergePreviewSourceStatus.Ready,
+                "",
+                state.Entries.Count));
+        }
+
+        if (states.Count == 0)
+        {
+            return new ArchiveMergePreview(options.OutputPath, sources, []);
+        }
+
+        result = new OperationResult();
+        var plans = CreateEntryPlans(states, options, result);
+        var originalTargets = plans.ToDictionary(static plan => plan, static plan => plan.TargetPath);
+        if (NeedsEntryHashes(options))
+        {
+            ValidateEntryStreams(states, plans, options, result, progress: null, cancellationToken);
+        }
+
+        ResolvePreviewDuplicatesAndCollisions(plans, options, result, cancellationToken);
+
+        var entries = plans
+            .Select(plan => CreatePreviewEntry(plan, originalTargets[plan]))
+            .ToArray();
+        return new ArchiveMergePreview(options.OutputPath, sources, entries);
+    }
+
     private static SourceArchiveState? OpenSourceArchive(
         string sourcePath,
         IArchiveMergeQuestionSink? questionSink,
@@ -484,10 +618,7 @@ internal static class ArchiveMergeOperations
         IProgress<string>? progress,
         CancellationToken cancellationToken)
     {
-        var needsHash =
-            options.DuplicatePolicy == ArchiveMergeDuplicatePolicy.Ask ||
-            options.DuplicatePolicy == ArchiveMergeDuplicatePolicy.SameContentKeepFirst ||
-            options.CollisionPolicy == ArchiveMergeCollisionPolicy.SameContentKeepFirst;
+        var needsHash = NeedsEntryHashes(options);
 
         foreach (var state in states)
         {
@@ -569,6 +700,13 @@ internal static class ArchiveMergeOperations
         return true;
     }
 
+    private static bool NeedsEntryHashes(ArchiveMergeOptions options)
+    {
+        return options.DuplicatePolicy == ArchiveMergeDuplicatePolicy.Ask ||
+               options.DuplicatePolicy == ArchiveMergeDuplicatePolicy.SameContentKeepFirst ||
+               options.CollisionPolicy == ArchiveMergeCollisionPolicy.SameContentKeepFirst;
+    }
+
     private static bool ResolveDuplicatesAndCollisions(
         IReadOnlyList<EntryMergePlan> plans,
         ArchiveMergeOptions options,
@@ -606,7 +744,7 @@ internal static class ArchiveMergeOperations
                 }
                 else if (options.DuplicatePolicy == ArchiveMergeDuplicatePolicy.SameContentKeepFirst)
                 {
-                    plan.Skip(Localizer.Format("ArchiveMergeDuplicateContentSkippedFormat", plan.Entry.OriginalPath));
+                    plan.SkipDuplicate(Localizer.Format("ArchiveMergeDuplicateContentSkippedFormat", plan.Entry.OriginalPath));
                     result.AddSkipped(plan.SkipReason!);
                     continue;
                 }
@@ -706,7 +844,7 @@ internal static class ArchiveMergeOperations
             !string.IsNullOrWhiteSpace(existing.Hash) &&
             string.Equals(existing.Hash, plan.Hash, StringComparison.OrdinalIgnoreCase))
         {
-            plan.Skip(Localizer.Format("ArchiveMergeDuplicateContentSkippedFormat", plan.Entry.OriginalPath));
+            plan.SkipDuplicate(Localizer.Format("ArchiveMergeDuplicateContentSkippedFormat", plan.Entry.OriginalPath));
             result.AddSkipped(plan.SkipReason!);
             return true;
         }
@@ -734,6 +872,173 @@ internal static class ArchiveMergeOperations
         var resolved = CreateNumberedInternalPath(plan.TargetPath, usedPaths.Keys);
         plan.TargetPath = plan.Entry.IsDirectory ? EnsureDirectoryPath(resolved) : TrimDirectoryPath(resolved);
         return true;
+    }
+
+    private static void ResolvePreviewDuplicatesAndCollisions(
+        IReadOnlyList<EntryMergePlan> plans,
+        ArchiveMergeOptions options,
+        OperationResult result,
+        CancellationToken cancellationToken)
+    {
+        var hashOwners = new Dictionary<string, EntryMergePlan>(StringComparer.OrdinalIgnoreCase);
+        var usedPaths = new Dictionary<string, EntryMergePlan>(InternalPathComparer);
+        var usedDirectoryPaths = new HashSet<string>(InternalPathComparer);
+
+        foreach (var plan in plans)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (plan.IsSkipped)
+            {
+                continue;
+            }
+
+            if (!plan.Entry.IsDirectory && !string.IsNullOrWhiteSpace(plan.Hash))
+            {
+                if (!hashOwners.TryGetValue(plan.Hash, out var hashOwner))
+                {
+                    hashOwners[plan.Hash] = plan;
+                }
+                else if (options.DuplicatePolicy == ArchiveMergeDuplicatePolicy.SameContentKeepFirst)
+                {
+                    plan.SkipDuplicate(Localizer.Format("ArchiveMergeDuplicateContentSkippedFormat", plan.Entry.OriginalPath));
+                    result.AddSkipped(plan.SkipReason!);
+                    continue;
+                }
+                else if (options.DuplicatePolicy == ArchiveMergeDuplicatePolicy.Ask)
+                {
+                    plan.Block(Localizer.Format("ArchiveMergePreviewDuplicateDecisionRequiredFormat", hashOwner.Entry.OriginalPath));
+                    continue;
+                }
+            }
+
+            if (plan.Entry.IsDirectory)
+            {
+                var directoryPath = EnsureDirectoryPath(plan.TargetPath);
+                var canonical = TrimDirectoryPath(directoryPath);
+                if (usedPaths.TryGetValue(canonical, out var existingPathPlan))
+                {
+                    ResolvePreviewInternalPathCollision(plan, existingPathPlan, usedPaths, options, result);
+                    if (plan.IsSkipped || plan.IsBlocked)
+                    {
+                        continue;
+                    }
+
+                    directoryPath = EnsureDirectoryPath(plan.TargetPath);
+                    canonical = TrimDirectoryPath(directoryPath);
+                }
+
+                if (!usedDirectoryPaths.Add(canonical))
+                {
+                    plan.Skip(Localizer.Format("ArchiveMergeDuplicateDirectorySkippedFormat", plan.TargetPath));
+                    continue;
+                }
+
+                plan.TargetPath = directoryPath;
+                usedPaths[canonical] = plan;
+                continue;
+            }
+
+            var fileCanonical = TrimDirectoryPath(plan.TargetPath);
+            if (!usedPaths.TryGetValue(fileCanonical, out var existing))
+            {
+                plan.TargetPath = fileCanonical;
+                usedPaths[fileCanonical] = plan;
+                continue;
+            }
+
+            ResolvePreviewInternalPathCollision(plan, existing, usedPaths, options, result);
+            if (plan.IsSkipped || plan.IsBlocked)
+            {
+                continue;
+            }
+
+            usedPaths[TrimDirectoryPath(plan.TargetPath)] = plan;
+        }
+    }
+
+    private static void ResolvePreviewInternalPathCollision(
+        EntryMergePlan plan,
+        EntryMergePlan existing,
+        Dictionary<string, EntryMergePlan> usedPaths,
+        ArchiveMergeOptions options,
+        OperationResult result)
+    {
+        if (options.CollisionPolicy == ArchiveMergeCollisionPolicy.Abort)
+        {
+            plan.Block(Localizer.Format("ArchiveMergeInternalCollisionFormat", plan.TargetPath));
+            return;
+        }
+
+        if (options.CollisionPolicy == ArchiveMergeCollisionPolicy.SameContentKeepFirst &&
+            !existing.Entry.IsDirectory &&
+            !plan.Entry.IsDirectory &&
+            !string.IsNullOrWhiteSpace(existing.Hash) &&
+            string.Equals(existing.Hash, plan.Hash, StringComparison.OrdinalIgnoreCase))
+        {
+            plan.SkipDuplicate(Localizer.Format("ArchiveMergeDuplicateContentSkippedFormat", plan.Entry.OriginalPath));
+            result.AddSkipped(plan.SkipReason!);
+            return;
+        }
+
+        if (options.CollisionPolicy == ArchiveMergeCollisionPolicy.Ask)
+        {
+            plan.Block(Localizer.Format("ArchiveMergePreviewCollisionDecisionRequiredFormat", plan.TargetPath));
+            return;
+        }
+
+        var resolved = CreateNumberedInternalPath(plan.TargetPath, usedPaths.Keys);
+        plan.TargetPath = plan.Entry.IsDirectory ? EnsureDirectoryPath(resolved) : TrimDirectoryPath(resolved);
+    }
+
+    private static ArchiveMergePreviewEntry CreatePreviewEntry(EntryMergePlan plan, string originalTargetPath)
+    {
+        if (plan.IsBlocked)
+        {
+            return new ArchiveMergePreviewEntry(
+                plan.SourceArchivePath,
+                plan.Entry.OriginalPath,
+                plan.TargetPath,
+                plan.Entry.IsDirectory,
+                plan.Entry.Size,
+                ArchiveMergePreviewEntryStatus.Blocked,
+                plan.BlockReason!);
+        }
+
+        if (plan.IsSkipped)
+        {
+            var status = plan.IsDuplicateSkipped
+                ? ArchiveMergePreviewEntryStatus.DuplicateSkipped
+                : ArchiveMergePreviewEntryStatus.Skipped;
+            return new ArchiveMergePreviewEntry(
+                plan.SourceArchivePath,
+                plan.Entry.OriginalPath,
+                plan.TargetPath,
+                plan.Entry.IsDirectory,
+                plan.Entry.Size,
+                status,
+                plan.SkipReason ?? "");
+        }
+
+        if (!string.Equals(originalTargetPath, plan.TargetPath, StringComparison.Ordinal))
+        {
+            return new ArchiveMergePreviewEntry(
+                plan.SourceArchivePath,
+                plan.Entry.OriginalPath,
+                plan.TargetPath,
+                plan.Entry.IsDirectory,
+                plan.Entry.Size,
+                ArchiveMergePreviewEntryStatus.CollisionRenamed,
+                Localizer.Get("ArchiveMergePreviewCollisionRenamed"));
+        }
+
+        return new ArchiveMergePreviewEntry(
+            plan.SourceArchivePath,
+            plan.Entry.OriginalPath,
+            plan.TargetPath,
+            plan.Entry.IsDirectory,
+            plan.Entry.Size,
+            ArchiveMergePreviewEntryStatus.Ready,
+            "");
     }
 
     private static ArchiveMergeQuestionEntry CreateQuestionEntry(EntryMergePlan plan)
@@ -832,7 +1137,7 @@ internal static class ArchiveMergeOperations
         {
             ArchiveMergeOutputNamePolicy.ParentFolderName => Path.GetFileName(parent),
             ArchiveMergeOutputNamePolicy.Timestamp => "Merged-" + DateTime.Now.ToString("yyyyMMdd-HHmmss"),
-            _ => CreateCommonStem(sourcePaths.Select(Path.GetFileNameWithoutExtension).ToArray())
+            _ => CreateCommonArchiveStem(sourcePaths.Select(Path.GetFileNameWithoutExtension).ToArray())
         };
 
         if (string.IsNullOrWhiteSpace(name))
@@ -909,7 +1214,7 @@ internal static class ArchiveMergeOperations
             .ToArray();
     }
 
-    private static string CreateCommonStem(IReadOnlyList<string?> stems)
+    internal static string CreateCommonArchiveStem(IReadOnlyList<string?> stems)
     {
         var normalized = stems
             .Where(static stem => !string.IsNullOrWhiteSpace(stem))
@@ -920,6 +1225,69 @@ internal static class ArchiveMergeOperations
             return "";
         }
 
+        var logicalStem = CreateCommonLogicalStem(normalized);
+        if (!string.IsNullOrWhiteSpace(logicalStem))
+        {
+            return logicalStem;
+        }
+
+        return CreateCommonPrefixStem(normalized);
+    }
+
+    private static string CreateCommonLogicalStem(IReadOnlyList<string> stems)
+    {
+        if (stems.Count < 2)
+        {
+            return "";
+        }
+
+        var stripped = stems
+            .Select(StripTerminalSequenceMarker)
+            .ToArray();
+        if (stripped.Any(static stem => string.IsNullOrWhiteSpace(stem)))
+        {
+            return "";
+        }
+
+        var first = stripped[0];
+        return stripped.All(stem => string.Equals(first, stem, StringComparison.OrdinalIgnoreCase))
+            ? first
+            : "";
+    }
+
+    private static string StripTerminalSequenceMarker(string stem)
+    {
+        var value = stem.Trim();
+        if (value.Length == 0)
+        {
+            return "";
+        }
+
+        var end = value.Length - 1;
+        while (end >= 0 && char.IsWhiteSpace(value[end]))
+        {
+            end--;
+        }
+
+        var digitEnd = end;
+        while (end >= 0 && char.IsDigit(value[end]))
+        {
+            end--;
+        }
+
+        if (digitEnd == end)
+        {
+            return "";
+        }
+
+        var prefix = value[..(end + 1)].TrimEnd(' ', '.', '-', '_', '[', '(', '{', '#');
+        return string.IsNullOrWhiteSpace(prefix)
+            ? ""
+            : WindowsFileNameSafety.MakeSafeFileName(prefix);
+    }
+
+    private static string CreateCommonPrefixStem(IReadOnlyList<string> normalized)
+    {
         var prefix = normalized[0];
         foreach (var stem in normalized.Skip(1))
         {
@@ -1097,11 +1465,28 @@ internal static class ArchiveMergeOperations
 
         public string? SkipReason { get; private set; }
 
+        public string? BlockReason { get; private set; }
+
         public bool IsSkipped => !string.IsNullOrWhiteSpace(SkipReason);
+
+        public bool IsBlocked => !string.IsNullOrWhiteSpace(BlockReason);
+
+        public bool IsDuplicateSkipped { get; private set; }
 
         public void Skip(string reason)
         {
             SkipReason = reason;
+        }
+
+        public void SkipDuplicate(string reason)
+        {
+            IsDuplicateSkipped = true;
+            Skip(reason);
+        }
+
+        public void Block(string reason)
+        {
+            BlockReason = reason;
         }
 
         public static EntryMergePlan CreateSyntheticDirectory(SourceArchiveState state, string targetPath)

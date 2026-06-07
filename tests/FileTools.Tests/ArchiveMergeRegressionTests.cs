@@ -6,6 +6,52 @@ namespace FileTools.Tests;
 public sealed class ArchiveMergeRegressionTests
 {
     [Fact]
+    public void CreateDefaultOptions_UsesCommonLogicalStemForNumberedArchiveFamily()
+    {
+        using var temp = TempDirectory.Create();
+        var sourceA = temp.GetPath("A 01.zip");
+        var sourceB = temp.GetPath("A 02.zip");
+        ZipTestData.CreateStoredZip(sourceA, new TestZipEntry("one.txt", "one"));
+        ZipTestData.CreateStoredZip(sourceB, new TestZipEntry("two.txt", "two"));
+
+        var options = ArchiveMergeOperations.CreateDefaultOptions(
+            [sourceA, sourceB],
+            new FileToolsSettings(),
+            ArchiveMergeLayout.PreserveInternalPaths);
+
+        Assert.NotNull(options);
+        Assert.Equal(temp.GetPath("A.zip"), options.OutputPath);
+    }
+
+    [Fact]
+    public void CreatePreview_ShowsAutoNumberedInternalPathCollision()
+    {
+        using var temp = TempDirectory.Create();
+        var sourceA = temp.GetPath("A 01.zip");
+        var sourceB = temp.GetPath("A 02.zip");
+        ZipTestData.CreateStoredZip(sourceA, new TestZipEntry("page/001.jpg", "one"));
+        ZipTestData.CreateStoredZip(sourceB, new TestZipEntry("page/001.jpg", "two"));
+        var options = new ArchiveMergeOptions
+        {
+            SourcePaths = [sourceA, sourceB],
+            OutputPath = temp.GetPath("A.zip"),
+            Layout = ArchiveMergeLayout.PreserveInternalPaths,
+            CollisionPolicy = ArchiveMergeCollisionPolicy.AutoNumber,
+            DuplicatePolicy = ArchiveMergeDuplicatePolicy.KeepBoth,
+            FailurePolicy = ArchiveMergeFailurePolicy.AbortAll
+        };
+
+        var preview = ArchiveMergeOperations.CreatePreview(options);
+
+        Assert.Equal(2, preview.Entries.Count);
+        Assert.Equal(1, preview.CollisionRenamedCount);
+        var renamed = Assert.Single(preview.Entries, entry => entry.Status == ArchiveMergePreviewEntryStatus.CollisionRenamed);
+        Assert.Equal(sourceB, renamed.SourceArchivePath);
+        Assert.Equal("page/001.jpg", renamed.OriginalPath);
+        Assert.Equal("page/001 (2).jpg", renamed.TargetPath);
+    }
+
+    [Fact]
     public void Merge_PreservesZipEntryMetadataAndDirectoryEntries()
     {
         using var temp = TempDirectory.Create();

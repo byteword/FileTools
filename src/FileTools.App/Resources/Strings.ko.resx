@@ -518,7 +518,7 @@
   <data name="ArchiveMergeFailureAbortAll" xml:space="preserve"><value>실패 시 전체 중단</value></data>
   <data name="ArchiveMergeFailureSkipArchive" xml:space="preserve"><value>실패한 압축파일 건너뛰기</value></data>
   <data name="ArchiveMergeFailureSkipEntry" xml:space="preserve"><value>실패한 엔트리만 건너뛰기</value></data>
-  <data name="ArchiveMergeOutputCommonStem" xml:space="preserve"><value>선택 파일 공통 이름</value></data>
+  <data name="ArchiveMergeOutputCommonStem" xml:space="preserve"><value>공통 논리 파일명</value></data>
   <data name="ArchiveMergeOutputParentFolder" xml:space="preserve"><value>상위 폴더 이름</value></data>
   <data name="ArchiveMergeOutputTimestamp" xml:space="preserve"><value>타임스탬프 자동 이름</value></data>
   <data name="ArchiveMergeOutputManual" xml:space="preserve"><value>대화상자에서 수동 경로</value></data>
@@ -544,6 +544,25 @@
   <data name="ArchiveMergeOptionsHeader" xml:space="preserve"><value>선택한 ZIP 압축파일을 하나의 출력 ZIP으로 병합합니다.</value></data>
   <data name="ArchiveMergeOutputHelp" xml:space="preserve"><value>먼저 임시 ZIP에 작성한 뒤 이 최종 경로로 이동합니다.</value></data>
   <data name="ArchiveMergeSourcesGroup" xml:space="preserve"><value>원본 압축파일</value></data>
+  <data name="ArchiveMergeEntryPreviewGroup" xml:space="preserve"><value>세부 파일 목록</value></data>
+  <data name="ArchiveMergeEntryPreviewScanning" xml:space="preserve"><value>압축 엔트리 스캔 중...</value></data>
+  <data name="ArchiveMergeEntryPreviewSummaryFormat" xml:space="preserve"><value>엔트리 {0}개 | 충돌 이름 변경 {1}개 | 건너뜀 {2}개 | 차단 {3}개</value></data>
+  <data name="ArchiveMergeEntryPreviewFailedFormat" xml:space="preserve"><value>미리보기 실패: {0}</value></data>
+  <data name="ArchiveMergeEntryPreviewColumnSource" xml:space="preserve"><value>원본 압축파일</value></data>
+  <data name="ArchiveMergeEntryPreviewColumnOriginal" xml:space="preserve"><value>원래 엔트리</value></data>
+  <data name="ArchiveMergeEntryPreviewColumnTarget" xml:space="preserve"><value>대상 엔트리</value></data>
+  <data name="ArchiveMergeEntryPreviewColumnStatus" xml:space="preserve"><value>상태</value></data>
+  <data name="ArchiveMergeEntryPreviewColumnReason" xml:space="preserve"><value>이유</value></data>
+  <data name="ArchiveMergeEntryPreviewStatusReady" xml:space="preserve"><value>준비됨</value></data>
+  <data name="ArchiveMergeEntryPreviewStatusCollisionRenamed" xml:space="preserve"><value>충돌 이름 변경</value></data>
+  <data name="ArchiveMergeEntryPreviewStatusDuplicateSkipped" xml:space="preserve"><value>중복 건너뜀</value></data>
+  <data name="ArchiveMergeEntryPreviewStatusSkipped" xml:space="preserve"><value>건너뜀</value></data>
+  <data name="ArchiveMergeEntryPreviewStatusBlocked" xml:space="preserve"><value>차단됨</value></data>
+  <data name="ArchiveMergePreviewSourceMissing" xml:space="preserve"><value>원본 압축파일이 없습니다.</value></data>
+  <data name="ArchiveMergePreviewSourceUnreadable" xml:space="preserve"><value>원본 압축파일을 읽을 수 없습니다.</value></data>
+  <data name="ArchiveMergePreviewCollisionRenamed" xml:space="preserve"><value>압축 내부 경로 충돌을 자동 번호 대상 이름으로 해결했습니다.</value></data>
+  <data name="ArchiveMergePreviewDuplicateDecisionRequiredFormat" xml:space="preserve"><value>{0} 항목과 동일 내용 결정이 필요합니다.</value></data>
+  <data name="ArchiveMergePreviewCollisionDecisionRequiredFormat" xml:space="preserve"><value>{0} 위치에서 이름 충돌 결정이 필요합니다.</value></data>
   <data name="ArchiveMergeOutputDialogTitle" xml:space="preserve"><value>출력 ZIP 선택</value></data>
   <data name="ArchiveMergeOutputDialogFilter" xml:space="preserve"><value>ZIP 압축파일 (*.zip)|*.zip</value></data>
   <data name="ArchiveEncodingDialogTitle" xml:space="preserve"><value>ZIP 파일명 인코딩 선택</value></data>

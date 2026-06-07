@@ -15,17 +15,18 @@ notes.
 - Prepared an internal-only `/context FileCompare` launch route for Explorer smoke testing; it is not registered in the Explorer menu yet.
 - Expanded file comparison options with common-name thresholds, middle-part start/length ranges, byte/KiB/MiB unit conversion, first-N archive entry scope, same-relative-path archive entry pairing, and a result-dialog splitter initialization fix.
 - Clarified duplicate-delete work-plan steps with delete-candidate preview text, an edit-step button, a two-pane editor for choosing which loaded file targets are deleted or kept, result handoff that includes kept same-content files, large/old-file default keep selection, and group-scoped delete-step resynchronization after edits.
+- Improved archive merge common filename handling so numbered archive families such as `A 01.zip` and `A 02.zip` default to `A.zip`, and added a detailed internal entry preview that shows final target paths after collision auto-numbering.
 
 ## Support Scope
 
 - ZIP input and ZIP output are supported for archive merge.
 - File comparison is under active development; the current release draft includes the first dedicated UI workflow, expanded compare options, modeless progress, JSON export, Recycle-Bin-only duplicate-delete step handoff with a two-pane delete/keep editor, and an unregistered internal context launch route. JSON result import/reload and actual Explorer menu exposure are still deferred.
 - 7Z input is not supported in this release scope. Track 7Z input archive merge in GitHub issue #8.
-- Common-filename-based file merge is not part of the selected-target folder merge scope. Track that follow-up in GitHub issue #9.
+- Archive-first common-filename merge is implemented through archive merge output naming and entry preview. General file-content merge remains deferred under GitHub issue #9.
 
 ## Verification Before Publishing
 
-- Run `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj`. Last automated pass on 2026-06-07 passed 55 managed tests.
+- Run `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj`. Last automated pass on 2026-06-07 passed 57 managed tests.
 - Build the full solution with Visual Studio MSBuild because `FileTools.ShellExt` requires Visual C++ targets.
 - Validate real ZIP samples with legacy filename encodings, comments, directory entries, external attributes, and local/central extra fields.
 - Check large ZIP merge progress, cancellation, temp-file cleanup, and final move failure behavior.

@@ -1,7 +1,7 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-07 after file compare option expansion
+Last updated: 2026-06-07 after common filename archive merge implementation
 
 Scope reviewed:
 
@@ -23,9 +23,9 @@ Scope reviewed:
   manual validation, and optional Explorer context menu integration remain open.
 - #7 Windows ARM64 build and installer support: keep open and deferred until there is ARM64 Windows hardware or VM validation.
 - #8 7Z input archive merge support: keep open as the archive merge follow-up.
-- #9 common-filename-based file merge flow: archive-first design drafted. Keep
-  open for common logical stem calculation, archive merge preview/output naming,
-  collision handling, and regression tests.
+- #9 common-filename-based file merge flow: archive-first implementation slice
+  is done. Common logical output names and detailed archive-entry preview are
+  implemented; general file-content merge remains deferred.
 
 ## Completed Follow-Up
 
@@ -79,6 +79,11 @@ Scope reviewed:
 - Added `docs/common-file-merge-design.md` and
   `docs/images/common-file-merge-flow.svg` for the archive-first issue #9
   design, centered on `A 01.zip + A 02.zip -> A.zip`.
+- Implemented the archive-first #9 slice: numbered archive families now produce
+  common logical output names, and the archive merge options dialog previews
+  internal entry target names including collision auto-numbering.
+- Ran `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` on
+  2026-06-07 after the #9 slice; all 57 managed tests passed.
 
 ## Deferred Follow-Up Tracks
 
@@ -89,9 +94,9 @@ Scope reviewed:
   route is smoke-tested.
 - #7 Windows ARM64 build and installer support: resume only when ARM64 Windows hardware or a VM is available for end-to-end installer and Explorer validation.
 - #8 7Z input archive merge support: resume after ZIP archive merge real-sample validation and release notes are finished, then decide ZIP-only output versus 7Z output scope.
-- #9 common-filename-based file merge flow: archive-first design decisions are
-  documented. General file-content merge is deferred until overlap/duplicate
-  content policy is defined.
+- #9 common-filename-based file merge flow: archive-first slice is implemented.
+  General file-content merge is deferred until overlap/duplicate content policy
+  is defined.
 
 ## Next Priority
 
@@ -104,7 +109,8 @@ Scope reviewed:
 2. Finalize the next release notes.
    - Copy `docs/release-notes/next.md` to `docs/release-notes/<tag>.md` after the next version tag is chosen.
    - Keep the archive merge support note explicit: ZIP input and ZIP output are supported; 7Z input is not yet supported and is tracked by #8.
-   - Keep #9 out of the release notes until the common-filename-based file merge flow is actually implemented.
+   - Keep the #9 release note scoped to archive-first common output naming and
+     entry preview; general file-content merge remains deferred.
 
 3. Run the release verification checklist during the release pass.
    - Follow the maintainer checklist in `docs/release.md` before publishing the draft GitHub Release.
@@ -112,8 +118,8 @@ Scope reviewed:
 
 4. Defer lower-priority feature tracks.
    - #3, #7, and #8 still carry explicit deferred status and resume conditions in GitHub.
-   - #9 now has a local design draft, but should stay out of release scope until
-     the preview/apply implementation and tests exist.
+   - #9 general file-content merge remains deferred; the archive-first output
+     naming and preview slice is implemented.
    - Do not pull these into the active work queue until the resume conditions in each issue are satisfied.
 
 5. Continue issue #6 UI validation when file comparison is exercised manually.
