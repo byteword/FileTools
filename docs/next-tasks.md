@@ -1,7 +1,7 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-07 after common file merge design
+Last updated: 2026-06-07 after internal file compare context launch prep
 
 Scope reviewed:
 
@@ -18,13 +18,14 @@ Scope reviewed:
 - #5 ZIP archive merge: closed as completed. 7Z input archive merge was split to #8.
 - #6 compare two or more files: active. The engine/options slice is implemented,
   the dedicated compare dialog is wired, and the result dialog now includes
-  content-confirmed duplicate groups plus target-list handoff actions. Visible
-  progress reporting, actual duplicate deletion, full result export, and optional
-  Explorer context menu integration remain open.
+  content-confirmed duplicate groups, duplicate-delete step handoff, keep-mode
+  selection, JSON export, and modeless progress reporting. JSON import/reload,
+  manual validation, and optional Explorer context menu integration remain open.
 - #7 Windows ARM64 build and installer support: keep open and deferred until there is ARM64 Windows hardware or VM validation.
 - #8 7Z input archive merge support: keep open as the archive merge follow-up.
-- #9 common-filename-based file merge flow: design drafted. Keep open for the
-  preview dialog, rename-plan engine, collision handling, and regression tests.
+- #9 common-filename-based file merge flow: archive-first design drafted. Keep
+  open for common logical stem calculation, archive merge preview/output naming,
+  collision handling, and regression tests.
 
 ## Completed Follow-Up
 
@@ -57,20 +58,31 @@ Scope reviewed:
   workflow and result action hub.
 - Ran `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` on
   2026-06-07 after the workflow/action wiring; all 38 managed tests passed.
+- Added modeless file compare progress with reopen support, JSON result export,
+  duplicate keep-mode selection, and duplicate-delete work-plan step handoff.
+- Ran `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` on
+  2026-06-07 after the progress/export/delete-step wiring; all 40 managed tests
+  passed.
+- Prepared the internal `/context FileCompare` smoke-test route without adding
+  it to Explorer registration or settings.
+- Ran `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` on
+  2026-06-07 after the internal context launch wiring; all 42 managed tests
+  passed.
 - Added `docs/common-file-merge-design.md` and
-  `docs/images/common-file-merge-flow.svg` for issue #9 design.
+  `docs/images/common-file-merge-flow.svg` for the archive-first issue #9
+  design, centered on `A 01.zip + A 02.zip -> A.zip`.
 
 ## Deferred Follow-Up Tracks
 
 - #3 internet dictionary or AI-assisted rename correction: resume only after privacy, cost, network failure, opt-in, and review UX policies are defined.
-- #6 file comparison: continue with visible progress reporting, a real
-  duplicate-delete operation, full result export, optional Explorer context menu
-  integration, and manual UI validation with large mixed file sets.
+- #6 file comparison: continue with JSON result import/reload, manual UI
+  validation with large mixed file sets, and eventual Explorer menu exposure
+  after the internal `/context FileCompare` route is smoke-tested.
 - #7 Windows ARM64 build and installer support: resume only when ARM64 Windows hardware or a VM is available for end-to-end installer and Explorer validation.
 - #8 7Z input archive merge support: resume after ZIP archive merge real-sample validation and release notes are finished, then decide ZIP-only output versus 7Z output scope.
-- #9 common-filename-based file merge flow: design decisions are documented;
-  implementation remains pending until this feature is pulled into the active
-  work queue.
+- #9 common-filename-based file merge flow: archive-first design decisions are
+  documented. General file-content merge is deferred until overlap/duplicate
+  content policy is defined.
 
 ## Next Priority
 
@@ -99,4 +111,4 @@ Scope reviewed:
    - Use mixed files and folders to verify pair counts, status filtering, and
      criterion details.
    - Validate hash and byte-to-byte range settings with large files before
-     adding full export or destructive duplicate deletion.
+     adding JSON import/reload or exposing the prepared Explorer context command.

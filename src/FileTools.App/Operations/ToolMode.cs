@@ -52,7 +52,8 @@ internal enum ContextMenuCommand
     AutoRelocationCurrentFolder,
     AutoRelocationChooseTarget,
     ArchiveMergeGroupByArchiveName,
-    ArchiveMergePreserveInternalPaths
+    ArchiveMergePreserveInternalPaths,
+    FileCompare
 }
 
 internal static class ToolModeText
@@ -117,6 +118,7 @@ internal static class ToolModeText
         ContextMenuCommand.AutoRelocationChooseTarget => Localizer.Get("ContextCommandAutoRelocationChooseTarget"),
         ContextMenuCommand.ArchiveMergeGroupByArchiveName => Localizer.Get("ContextCommandArchiveMergeGroupByArchiveName"),
         ContextMenuCommand.ArchiveMergePreserveInternalPaths => Localizer.Get("ContextCommandArchiveMergePreserveInternalPaths"),
+        ContextMenuCommand.FileCompare => Localizer.Get("ContextCommandFileCompare"),
         _ => command.ToString()
     };
 }

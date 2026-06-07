@@ -6,7 +6,8 @@ internal enum WorkPlanStepKind
     FolderWrap,
     FolderUnwrap,
     AutoRelocation,
-    ArchiveMerge
+    ArchiveMerge,
+    DuplicateDelete
 }
 
 internal sealed class WorkTargetPlan
@@ -50,6 +51,7 @@ internal sealed class WorkPlanStep
         WorkPlanStepKind.FolderUnwrap => FormatFolderUnwrapName(),
         WorkPlanStepKind.AutoRelocation => FormatAutoRelocationName(),
         WorkPlanStepKind.ArchiveMerge => FormatArchiveMergeName(),
+        WorkPlanStepKind.DuplicateDelete => Localizer.Get("PlanActionDuplicateDelete"),
         _ => Kind.ToString()
     };
 

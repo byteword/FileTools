@@ -145,6 +145,50 @@ public sealed class FileCompareOperationsTests
         Assert.Empty(FileCompareResultActions.BuildDuplicateGroups(report));
     }
 
+    [Fact]
+    public void BuildDuplicateGroups_CanPreferShortestPath()
+    {
+        var first = CreateTarget(@"C:\data\very-long-name.bin");
+        var second = CreateTarget(@"C:\d\b.bin");
+        var report = new FileCompareReport(
+            [first, second],
+            [CreatePair(first, second, "Content", FileCompareStatus.Same)],
+            HashCacheHits: 0,
+            HashCacheMisses: 0);
+
+        var group = Assert.Single(FileCompareResultActions.BuildDuplicateGroups(
+            report,
+            FileCompareDuplicateKeepMode.ShortestPath));
+
+        Assert.Equal(second.Path, group.KeepPath);
+        Assert.Equal([first.Path], group.DeleteCandidates);
+    }
+
+    [Fact]
+    public void CreateExportDocument_IncludesSchemaAndDuplicateGroups()
+    {
+        var first = CreateTarget(@"C:\data\a.bin");
+        var second = CreateTarget(@"C:\data\b.bin");
+        var report = new FileCompareReport(
+            [first, second],
+            [CreatePair(first, second, "Content", FileCompareStatus.Same)],
+            HashCacheHits: 1,
+            HashCacheMisses: 2);
+        var groups = FileCompareResultActions.BuildDuplicateGroups(report);
+
+        var document = FileCompareResultExport.CreateDocument(
+            report,
+            ContentOnlyOptions(FileCompareContentMode.Hash),
+            FileCompareDuplicateKeepMode.ComparisonOrder,
+            groups);
+
+        Assert.Equal(FileCompareResultExport.DocumentType, document.DocumentType);
+        Assert.Equal(FileCompareResultExport.SchemaVersion, document.SchemaVersion);
+        Assert.Equal("ComparisonOrder", document.DuplicateKeepMode);
+        Assert.Single(document.DuplicateGroups);
+        Assert.Equal(second.Path, document.DuplicateGroups[0].DeleteCandidates[0]);
+    }
+
     private static FileCompareOptions ContentOnlyOptions(FileCompareContentMode contentMode)
     {
         return new FileCompareOptions

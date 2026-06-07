@@ -226,14 +226,7 @@ internal static class ContextMenuRegistrar
             throw new InvalidOperationException("레지스트리 command 키 생성 실패: " + definition.KeyName);
         }
 
-        cmd.SetValue("", CreateCommandLine(exePath, definition.Command), RegistryValueKind.String);
-    }
-
-    private static string CreateCommandLine(string exePath, ContextMenuCommand command)
-    {
-        return command == ContextMenuCommand.OpenApp
-            ? $"\"{exePath}\" /open \"%1\""
-            : $"\"{exePath}\" /context {command} \"%1\"";
+        cmd.SetValue("", ContextMenuCommandLine.CreateRegistryCommand(exePath, definition.Command), RegistryValueKind.String);
     }
 
     private static void CopyRuntimeFiles(string executablePath, string installedPath)

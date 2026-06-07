@@ -25,6 +25,7 @@ partial class MainForm
     private ToolStripMenuItem _addArchiveMergeGroupMenuItem = null!;
     private ToolStripMenuItem _addArchiveMergePreserveMenuItem = null!;
     private ToolStripMenuItem _compareSelectedMenuItem = null!;
+    private ToolStripMenuItem _showCompareProgressMenuItem = null!;
     private ToolStripMenuItem _addRelocationMenuItem = null!;
     private ToolStripMenuItem _removeStepMenuItem = null!;
     private ToolStripMenuItem _clearStepsMenuItem = null!;
@@ -58,6 +59,7 @@ partial class MainForm
     private ToolStripMenuItem _addArchiveMergeGroupToolItem = null!;
     private ToolStripMenuItem _addArchiveMergePreserveToolItem = null!;
     private ToolStripButton _compareSelectedToolButton = null!;
+    private ToolStripButton _showCompareProgressToolButton = null!;
     private ToolStripButton _addRelocationToolButton = null!;
     private GroupBox _planGroup = null!;
     private Label _planScopeLabel = null!;
@@ -102,6 +104,7 @@ partial class MainForm
         _addArchiveMergeGroupMenuItem = new ToolStripMenuItem();
         _addArchiveMergePreserveMenuItem = new ToolStripMenuItem();
         _compareSelectedMenuItem = new ToolStripMenuItem();
+        _showCompareProgressMenuItem = new ToolStripMenuItem();
         _addRelocationMenuItem = new ToolStripMenuItem();
         _removeStepMenuItem = new ToolStripMenuItem();
         _clearStepsMenuItem = new ToolStripMenuItem();
@@ -135,6 +138,7 @@ partial class MainForm
         _addArchiveMergeGroupToolItem = new ToolStripMenuItem();
         _addArchiveMergePreserveToolItem = new ToolStripMenuItem();
         _compareSelectedToolButton = new ToolStripButton();
+        _showCompareProgressToolButton = new ToolStripButton();
         _addRelocationToolButton = new ToolStripButton();
         _planGroup = new GroupBox();
         _planScopeLabel = new Label();
@@ -214,6 +218,7 @@ partial class MainForm
             _addArchiveMergePreserveMenuItem,
             new ToolStripSeparator(),
             _compareSelectedMenuItem,
+            _showCompareProgressMenuItem,
             new ToolStripSeparator(),
             _addRelocationMenuItem,
             new ToolStripSeparator(),
@@ -256,6 +261,9 @@ partial class MainForm
 
         _compareSelectedMenuItem.Name = "_compareSelectedMenuItem";
         _compareSelectedMenuItem.Text = "Compare selected";
+
+        _showCompareProgressMenuItem.Name = "_showCompareProgressMenuItem";
+        _showCompareProgressMenuItem.Text = "Show compare progress";
 
         _addRelocationMenuItem.Name = "_addRelocationMenuItem";
         _addRelocationMenuItem.Text = "Add relocation";
@@ -385,6 +393,7 @@ partial class MainForm
             _addUnwrapToolButton,
             _addArchiveMergeToolButton,
             _compareSelectedToolButton,
+            _showCompareProgressToolButton,
             _addRelocationToolButton
         });
         _actionToolStrip.Name = "_actionToolStrip";
@@ -453,6 +462,11 @@ partial class MainForm
         _compareSelectedToolButton.ImageTransparentColor = Color.Magenta;
         _compareSelectedToolButton.Name = "_compareSelectedToolButton";
         _compareSelectedToolButton.Text = "Compare selected";
+
+        _showCompareProgressToolButton.DisplayStyle = ToolStripItemDisplayStyle.Image;
+        _showCompareProgressToolButton.ImageTransparentColor = Color.Magenta;
+        _showCompareProgressToolButton.Name = "_showCompareProgressToolButton";
+        _showCompareProgressToolButton.Text = "Show progress";
 
         _addRelocationToolButton.DisplayStyle = ToolStripItemDisplayStyle.Image;
         _addRelocationToolButton.ImageTransparentColor = Color.Magenta;

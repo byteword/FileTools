@@ -40,6 +40,11 @@ internal sealed class WorkPlanPreviewBuilder
 
     private PreviewBuildResult BuildStepPreview(int number, WorkPlanStep step, PreviewPathState state)
     {
+        if (state.Kind == PreviewPathKind.Deleted)
+        {
+            return CreateWarning(number, step, state, Localizer.Format("PlanPreviewInputDeletedFormat", state.Path));
+        }
+
         if (state.Kind == PreviewPathKind.Unknown && !PathExists(state.Path))
         {
             return CreateWarning(number, step, state, Localizer.Format("PlanPreviewInputMissingFormat", state.Path));
@@ -52,6 +57,7 @@ internal sealed class WorkPlanPreviewBuilder
             WorkPlanStepKind.FolderUnwrap => BuildUnwrapPreview(number, step, state),
             WorkPlanStepKind.AutoRelocation => BuildRelocationPreview(number, step, state),
             WorkPlanStepKind.ArchiveMerge => BuildArchiveMergePreview(number, step),
+            WorkPlanStepKind.DuplicateDelete => BuildDuplicateDeletePreview(number, step, state),
             _ => CreateWarning(number, step, state, Localizer.Get("PlanPreviewUnavailable"))
         };
     }
@@ -265,6 +271,24 @@ internal sealed class WorkPlanPreviewBuilder
         }
     }
 
+    private PreviewBuildResult BuildDuplicateDeletePreview(int number, WorkPlanStep step, PreviewPathState state)
+    {
+        if (state.Kind != PreviewPathKind.File)
+        {
+            return CreateWarning(number, step, state, Localizer.Get("PlanPreviewNotFile"));
+        }
+
+        var preview = Localizer.Format("DuplicateDeletePreviewFormat", Path.GetFileName(state.Path));
+        var toolTip = CreateToolTip(
+            step,
+            state.Path,
+            outputPath: null,
+            warning: Localizer.Get("DuplicateDeleteRecycleBinOnly"));
+        return new PreviewBuildResult(
+            new WorkPlanStepPreview(number, step, preview, toolTip, HasWarning: false),
+            state with { Kind = PreviewPathKind.Deleted });
+    }
+
     private PreviewBuildResult CreateResult(
         int number,
         WorkPlanStep step,
@@ -321,6 +345,11 @@ internal sealed class WorkPlanPreviewBuilder
         if (step.Kind == WorkPlanStepKind.ArchiveMerge && step.ArchiveMergeOptions is { } options)
         {
             return ArchiveMergeOperations.DescribeOptions(options);
+        }
+
+        if (step.Kind == WorkPlanStepKind.DuplicateDelete)
+        {
+            return Localizer.Get("DuplicateDeleteRecycleBinOnly");
         }
 
         return step.DisplayName;
@@ -537,6 +566,7 @@ internal sealed class WorkPlanPreviewBuilder
     {
         Unknown,
         File,
-        Folder
+        Folder,
+        Deleted
     }
 }

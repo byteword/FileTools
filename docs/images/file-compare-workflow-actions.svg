@@ -3,7 +3,7 @@
   <desc id="desc">Wireframe showing the dedicated compare dialog flowing into the result action hub for duplicate candidates and follow-up actions.</desc>
   <rect width="1160" height="760" fill="#f4f6f8"/>
   <text x="52" y="62" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="700" fill="#111827">File compare workflow</text>
-  <text x="52" y="92" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#64748b">Dedicated run setup first, result-driven follow-up actions after comparison.</text>
+  <text x="52" y="92" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#64748b">Dedicated run setup, modeless progress, and result-driven follow-up actions.</text>
 
   <g transform="translate(52 124)">
     <rect width="488" height="580" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
@@ -39,10 +39,19 @@
   <path d="M560 414 H620" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
   <path d="M620 414 L604 402 M620 414 L604 426" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
 
+  <g transform="translate(548 270)">
+    <rect width="88" height="118" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+    <text x="12" y="26" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#1e3a8a">Progress</text>
+    <rect x="12" y="42" width="64" height="10" rx="3" fill="#dbeafe"/>
+    <rect x="12" y="42" width="42" height="10" rx="3" fill="#2563eb"/>
+    <text x="12" y="72" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#334155">Modeless</text>
+    <text x="12" y="92" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#334155">Hide / reopen</text>
+  </g>
+
   <g transform="translate(640 124)">
     <rect width="508" height="580" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
     <text x="24" y="42" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="700" fill="#111827">Result action hub</text>
-    <text x="24" y="70" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#64748b">Inspect pairs, then hand off candidates to the next action.</text>
+    <text x="24" y="70" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#64748b">Inspect pairs, export JSON, then hand off candidates to work steps.</text>
 
     <rect x="24" y="100" width="304" height="232" rx="4" fill="#ffffff" stroke="#cbd5e1"/>
     <rect x="24" y="100" width="304" height="34" fill="#e2e8f0"/>
@@ -74,18 +83,22 @@
 
     <rect x="352" y="100" width="132" height="396" rx="6" fill="#f8fafc" stroke="#94a3b8"/>
     <text x="368" y="128" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#334155">Duplicate</text>
-    <text x="368" y="154" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#64748b">1 group / 1 delete</text>
-    <rect x="368" y="176" width="100" height="86" rx="4" fill="#ffffff" stroke="#cbd5e1"/>
-    <text x="380" y="202" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">Keep: a.jpg</text>
-    <text x="380" y="228" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">Delete:</text>
-    <text x="380" y="248" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">a copy.jpg</text>
-    <rect x="368" y="284" width="100" height="30" rx="4" fill="#2563eb"/>
-    <text x="384" y="304" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#ffffff">Copy</text>
-    <rect x="368" y="324" width="100" height="30" rx="4" fill="#059669"/>
-    <text x="382" y="344" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#ffffff">To targets</text>
-    <text x="368" y="392" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#334155">Pair actions</text>
-    <text x="368" y="420" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">Copy paths</text>
-    <text x="368" y="446" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">Add to targets</text>
-    <text x="368" y="472" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">Open folders</text>
+    <rect x="368" y="144" width="100" height="26" rx="4" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="378" y="162" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#111827">Keep: newest</text>
+    <text x="368" y="190" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#64748b">1 group / 1 delete</text>
+    <rect x="368" y="208" width="100" height="74" rx="4" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="380" y="232" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">Keep: a.jpg</text>
+    <text x="380" y="258" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">Delete:</text>
+    <text x="380" y="276" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="#111827">a copy.jpg</text>
+    <rect x="368" y="300" width="100" height="28" rx="4" fill="#2563eb"/>
+    <text x="384" y="319" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#ffffff">Copy</text>
+    <rect x="368" y="336" width="100" height="28" rx="4" fill="#059669"/>
+    <text x="382" y="355" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="#ffffff">Delete step</text>
+    <rect x="368" y="374" width="100" height="28" rx="4" fill="#7c3aed"/>
+    <text x="389" y="393" font-family="Segoe UI, Arial, sans-serif" font-size="11" fill="#ffffff">Save JSON</text>
+    <text x="368" y="430" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#334155">Pair actions</text>
+    <text x="368" y="454" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">Copy paths</text>
+    <text x="368" y="476" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">Add to targets</text>
+    <text x="368" y="498" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">Open folders</text>
   </g>
 </svg>

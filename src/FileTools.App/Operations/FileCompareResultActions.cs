@@ -1,5 +1,14 @@
 namespace FileTools;
 
+internal enum FileCompareDuplicateKeepMode
+{
+    ComparisonOrder,
+    NewestModified,
+    OldestModified,
+    ShortestPath,
+    LongestPath
+}
+
 internal sealed record FileCompareDuplicateGroup(
     int Number,
     IReadOnlyList<string> Paths)
@@ -11,7 +20,9 @@ internal sealed record FileCompareDuplicateGroup(
 
 internal static class FileCompareResultActions
 {
-    public static IReadOnlyList<FileCompareDuplicateGroup> BuildDuplicateGroups(FileCompareReport report)
+    public static IReadOnlyList<FileCompareDuplicateGroup> BuildDuplicateGroups(
+        FileCompareReport report,
+        FileCompareDuplicateKeepMode keepMode = FileCompareDuplicateKeepMode.ComparisonOrder)
     {
         var orderedPaths = report.Targets
             .Select(static target => target.Path)
@@ -31,7 +42,7 @@ internal static class FileCompareResultActions
         return orderedPaths
             .GroupBy(path => Find(parent, path), GetPathComparer())
             .Where(static group => group.Count() > 1)
-            .Select((group, index) => new FileCompareDuplicateGroup(index + 1, group.ToArray()))
+            .Select((group, index) => new FileCompareDuplicateGroup(index + 1, ApplyKeepMode(group.ToArray(), keepMode)))
             .ToArray();
     }
 
@@ -67,6 +78,49 @@ internal static class FileCompareResultActions
     {
         return string.Equals(name, "Content", StringComparison.OrdinalIgnoreCase) ||
                name.EndsWith(" content", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static IReadOnlyList<string> ApplyKeepMode(IReadOnlyList<string> paths, FileCompareDuplicateKeepMode keepMode)
+    {
+        if (paths.Count <= 1)
+        {
+            return paths;
+        }
+
+        return keepMode switch
+        {
+            FileCompareDuplicateKeepMode.NewestModified => paths
+                .OrderByDescending(GetLastWriteTimeUtc)
+                .ThenBy(static path => path, GetPathComparer())
+                .ToArray(),
+            FileCompareDuplicateKeepMode.OldestModified => paths
+                .OrderBy(GetLastWriteTimeUtc)
+                .ThenBy(static path => path, GetPathComparer())
+                .ToArray(),
+            FileCompareDuplicateKeepMode.ShortestPath => paths
+                .OrderBy(static path => path.Length)
+                .ThenBy(static path => path, GetPathComparer())
+                .ToArray(),
+            FileCompareDuplicateKeepMode.LongestPath => paths
+                .OrderByDescending(static path => path.Length)
+                .ThenBy(static path => path, GetPathComparer())
+                .ToArray(),
+            _ => paths
+        };
+    }
+
+    private static DateTime GetLastWriteTimeUtc(string path)
+    {
+        try
+        {
+            return File.Exists(path)
+                ? File.GetLastWriteTimeUtc(path)
+                : DateTime.MinValue;
+        }
+        catch
+        {
+            return DateTime.MinValue;
+        }
     }
 
     private static void Union(Dictionary<string, string> parent, string left, string right)

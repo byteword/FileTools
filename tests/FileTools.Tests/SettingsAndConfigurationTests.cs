@@ -63,4 +63,23 @@ public sealed class SettingsAndConfigurationTests
         Assert.Equal("Trim prefix", userRule.DisplayName);
         Assert.Equal("raw-", userRule.Source);
     }
+
+    [Fact]
+    public void ContextMenuCommandLine_TryParseCommandAcceptsFileCompare()
+    {
+        var parsed = ContextMenuCommandLine.TryParseCommand("FileCompare", out var command);
+
+        Assert.True(parsed);
+        Assert.Equal(ContextMenuCommand.FileCompare, command);
+    }
+
+    [Fact]
+    public void ContextMenuCommandLine_CreateRegistryCommandBuildsFileCompareContextLaunch()
+    {
+        var commandLine = ContextMenuCommandLine.CreateRegistryCommand(
+            @"C:\Tools\FileTools.exe",
+            ContextMenuCommand.FileCompare);
+
+        Assert.Equal(@"""C:\Tools\FileTools.exe"" /context FileCompare ""%1""", commandLine);
+    }
 }

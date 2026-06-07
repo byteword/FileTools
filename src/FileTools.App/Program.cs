@@ -93,7 +93,7 @@ internal static class Program
 
     private static void RunFromContextMenu(string[] args)
     {
-        if (args.Length < 2 || !TryParseContextCommand(args[0], out var command))
+        if (args.Length < 2 || !ContextMenuCommandLine.TryParseCommand(args[0], out var command))
         {
             FileToolsEnvironment.Log("CONTEXT", "Invalid arguments: " + string.Join(" | ", args));
             return;
@@ -154,36 +154,17 @@ internal static class Program
         }
     }
 
-    private static bool TryParseContextCommand(string value, out ContextMenuCommand command)
-    {
-        if (Enum.TryParse(value, ignoreCase: true, out command) &&
-            Enum.IsDefined(command))
-        {
-            return true;
-        }
-
-        if (!Enum.TryParse(value, ignoreCase: true, out ToolMode mode) ||
-            !Enum.IsDefined(mode))
-        {
-            return false;
-        }
-
-        command = mode switch
-        {
-            ToolMode.FileNameCorrection => ContextMenuCommand.FileNameCorrection,
-            ToolMode.FolderStructure => ContextMenuCommand.FolderStructure,
-            ToolMode.AutoRelocation => ContextMenuCommand.AutoRelocation,
-            ToolMode.ArchiveMerge => ContextMenuCommand.ArchiveMergeGroupByArchiveName,
-            _ => default
-        };
-        return true;
-    }
-
     private static OperationResult? ExecuteContextCommand(ContextMenuCommand command, IReadOnlyList<string> paths)
     {
         if (command == ContextMenuCommand.OpenApp)
         {
             Application.Run(new MainForm(paths));
+            return null;
+        }
+
+        if (command == ContextMenuCommand.FileCompare)
+        {
+            Application.Run(new MainForm(paths, MainFormStartupAction.OpenFileCompare));
             return null;
         }
 

@@ -1035,4 +1035,16 @@ internal static class FileCompareText
             _ => status.ToString()
         };
     }
+
+    public static string GetDisplayName(FileCompareDuplicateKeepMode keepMode)
+    {
+        return keepMode switch
+        {
+            FileCompareDuplicateKeepMode.NewestModified => Localizer.Get("FileCompareKeepNewestModified"),
+            FileCompareDuplicateKeepMode.OldestModified => Localizer.Get("FileCompareKeepOldestModified"),
+            FileCompareDuplicateKeepMode.ShortestPath => Localizer.Get("FileCompareKeepShortestPath"),
+            FileCompareDuplicateKeepMode.LongestPath => Localizer.Get("FileCompareKeepLongestPath"),
+            _ => Localizer.Get("FileCompareKeepComparisonOrder")
+        };
+    }
 }

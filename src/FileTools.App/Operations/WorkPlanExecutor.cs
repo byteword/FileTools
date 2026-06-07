@@ -170,6 +170,8 @@ internal sealed class WorkPlanExecutor
                     ? null
                     : step.ManualTargetRootPath;
                 return runner.Run(ToolMode.AutoRelocation, [path]);
+            case WorkPlanStepKind.DuplicateDelete:
+                return DuplicateDeleteOperations.MoveFileToRecycleBin(path);
             default:
                 return new OperationResult();
         }
@@ -187,6 +189,7 @@ internal sealed class WorkPlanExecutor
                 step.FolderUnwrapNameMismatchMode),
             WorkPlanStepKind.AutoRelocation => PredictAutoRelocationPath(step, path),
             WorkPlanStepKind.ArchiveMerge => step.ArchiveMergeOptions?.OutputPath,
+            WorkPlanStepKind.DuplicateDelete => null,
             _ => null
         };
     }

@@ -105,12 +105,22 @@ The result dialog is the handoff point for follow-up work:
 - A duplicate group panel is built only from `Same` pairs that include a
   same-content criterion. Metadata-only matches are not treated as delete
   candidates.
-- Duplicate groups keep the earliest path in comparison target order and mark
-  the remaining paths as delete candidates.
-- Delete candidates can be copied or sent back to the main target list for a
-  later operation.
+- Duplicate groups can keep the first comparison-order item, newest modified
+  item, oldest modified item, shortest path, or longest path. The remaining
+  paths become delete candidates.
+- Delete candidates can be copied or sent to the main work plan as
+  `DuplicateDelete` steps. The step moves files to the Recycle Bin only.
 - The selected pair can be copied, sent to the main target list, or opened in
   Explorer.
+- Results can be exported to JSON on demand. The JSON document includes a
+  `FileTools.FileCompareResult` document type and schema version so a future
+  import command can reconstruct the result dialog.
+
+## Progress
+
+Comparison progress is shown in a modeless dialog. Closing the dialog hides it
+without cancelling the comparison. The main Tasks menu and toolbar expose a
+"show progress" command that reopens the current progress session.
 
 ## Implemented Work
 
@@ -133,15 +143,21 @@ Implemented on 2026-06-07:
 - Result dialog with summary counts, status filtering, sortable pair rows, and
   per-criterion detail rows.
 - Result action panel with content-confirmed duplicate groups, delete-candidate
-  copy, target-list handoff, selected-pair copy, and selected-folder open.
+  copy, duplicate-delete step handoff, selected-pair copy, selected-folder open,
+  keep-mode selection, and JSON export.
+- Modeless progress dialog with cancel and reopen support.
+- `DuplicateDelete` work-plan step that moves duplicate files to the Recycle Bin.
+- Internal-only Explorer command route: `/context FileCompare "%1"` queues
+  selected files/folders, opens the main window, and preloads the dedicated file
+  compare dialog. It is intentionally not registered or exposed in settings yet.
 - Automated tests for duplicate group construction and metadata-only match
   exclusion.
+- Automated tests for duplicate keep-mode ordering and JSON export schema.
 
 ## Remaining Work
 
-- Add visible progress reporting for large comparison runs.
-- Add a real duplicate-delete operation with preview, recycle-bin behavior, and
-  undo/failure policy.
-- Add full result export after the first manual UI validation pass.
-- Decide whether Explorer context menu integration should be added after the app
-  UI is stable.
+- Add JSON result import and result-dialog reload support.
+- Add manual UI validation feedback from large mixed file sets.
+- After manual smoke testing of `/context FileCompare`, decide whether to expose
+  the command through Explorer registration, settings, and the native ShellExt
+  submenu.

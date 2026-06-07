@@ -455,6 +455,7 @@
   <data name="ToolArchiveMerge" xml:space="preserve"><value>Merge archives</value></data>
   <data name="ContextCommandArchiveMergeGroupByArchiveName" xml:space="preserve"><value>Merge ZIPs by archive name</value></data>
   <data name="ContextCommandArchiveMergePreserveInternalPaths" xml:space="preserve"><value>Merge ZIPs preserving internal paths</value></data>
+  <data name="ContextCommandFileCompare" xml:space="preserve"><value>File compare</value></data>
   <data name="ButtonAddArchiveMergeStep" xml:space="preserve"><value>Add archive merge</value></data>
   <data name="ToolTipAddArchiveMerge" xml:space="preserve"><value>Add a shared ZIP merge action to selected ZIP files.</value></data>
   <data name="PlanActionArchiveMerge" xml:space="preserve"><value>Archive merge</value></data>
@@ -590,9 +591,20 @@
   <data name="ArchiveMergeDuplicateMessageBoxHelp" xml:space="preserve"><value>Yes: keep both. No: skip duplicate. Cancel: abort merge.</value></data>
   <data name="ButtonCompareSelected" xml:space="preserve"><value>File compare...</value></data>
   <data name="ToolTipCompareSelected" xml:space="preserve"><value>Open a dedicated file comparison workflow.</value></data>
+  <data name="ButtonShowCompareProgress" xml:space="preserve"><value>Show compare progress</value></data>
+  <data name="ToolTipShowCompareProgress" xml:space="preserve"><value>Show the current file comparison progress window.</value></data>
   <data name="FileCompareNeedsMultipleTargets" xml:space="preserve"><value>Select two or more files or folders to compare.</value></data>
   <data name="FileCompareStartingFormat" xml:space="preserve"><value>Starting file comparison for {0} input targets.</value></data>
   <data name="FileCompareCompletedFormat" xml:space="preserve"><value>File comparison complete. Files: {0}, pairs: {1}, hash cache hits: {2}, misses: {3}.</value></data>
+  <data name="FileCompareProgressTitle" xml:space="preserve"><value>File compare progress</value></data>
+  <data name="FileCompareProgressPreparing" xml:space="preserve"><value>Preparing comparison...</value></data>
+  <data name="FileCompareProgressRunningFormat" xml:space="preserve"><value>Comparing pairs {0} / {1}</value></data>
+  <data name="FileCompareProgressCompletedFormat" xml:space="preserve"><value>Comparison complete. {0} pairs compared.</value></data>
+  <data name="FileCompareProgressCancelled" xml:space="preserve"><value>Comparison cancelled.</value></data>
+  <data name="FileCompareProgressFailedFormat" xml:space="preserve"><value>Comparison failed: {0}</value></data>
+  <data name="FileCompareProgressInputTargetsFormat" xml:space="preserve"><value>Input targets: {0}</value></data>
+  <data name="FileCompareProgressCurrentPairFormat" xml:space="preserve"><value>Current pair: {0} &lt;-&gt; {1}</value></data>
+  <data name="FileCompareProgressHide" xml:space="preserve"><value>Hide</value></data>
   <data name="FileCompareDialogTitle" xml:space="preserve"><value>File compare</value></data>
   <data name="FileCompareDialogTargets" xml:space="preserve"><value>Compare targets</value></data>
   <data name="FileCompareDialogOptions" xml:space="preserve"><value>Compare options</value></data>
@@ -621,18 +633,37 @@
   <data name="FileCompareDuplicateColumnDeleteCandidates" xml:space="preserve"><value>Delete candidates</value></data>
   <data name="FileCompareActionCopyDeleteCandidates" xml:space="preserve"><value>Copy delete candidates</value></data>
   <data name="FileCompareActionAddDeleteCandidatesToTargets" xml:space="preserve"><value>Add delete candidates to targets</value></data>
+  <data name="FileCompareActionAddDuplicateDeleteSteps" xml:space="preserve"><value>Add duplicate delete step</value></data>
   <data name="FileCompareActionCopySelectedPairPaths" xml:space="preserve"><value>Copy selected pair paths</value></data>
   <data name="FileCompareActionAddSelectedPairToTargets" xml:space="preserve"><value>Add selected pair to targets</value></data>
   <data name="FileCompareActionOpenSelectedPairFolders" xml:space="preserve"><value>Open selected folders</value></data>
+  <data name="FileCompareActionSaveJson" xml:space="preserve"><value>Save JSON...</value></data>
   <data name="FileCompareActionNoPaths" xml:space="preserve"><value>No paths available.</value></data>
   <data name="FileCompareActionCopiedFormat" xml:space="preserve"><value>Copied {0} paths.</value></data>
   <data name="FileCompareActionAddedTargetsFormat" xml:space="preserve"><value>Added {0} paths to targets.</value></data>
+  <data name="FileCompareActionDuplicateDeleteStepsAddedFormat" xml:space="preserve"><value>Added duplicate delete steps for {0} paths.</value></data>
   <data name="FileCompareActionOpenedFoldersFormat" xml:space="preserve"><value>Opened {0} folders.</value></data>
+  <data name="FileCompareActionJsonSavedFormat" xml:space="preserve"><value>Saved JSON result: {0}</value></data>
   <data name="FileCompareResultTargetsAddedFormat" xml:space="preserve"><value>Comparison result sent {0} paths to the target list.</value></data>
+  <data name="FileCompareSaveJsonTitle" xml:space="preserve"><value>Save file compare result</value></data>
+  <data name="FileCompareSaveJsonFilter" xml:space="preserve"><value>JSON files (*.json)|*.json|All files (*.*)|*.*</value></data>
   <data name="FileCompareStatusSame" xml:space="preserve"><value>Same</value></data>
   <data name="FileCompareStatusDifferent" xml:space="preserve"><value>Different</value></data>
   <data name="FileCompareStatusPartialMatch" xml:space="preserve"><value>Partial match</value></data>
   <data name="FileCompareStatusFailed" xml:space="preserve"><value>Failed</value></data>
+  <data name="FileCompareKeepComparisonOrder" xml:space="preserve"><value>Keep first in comparison order</value></data>
+  <data name="FileCompareKeepNewestModified" xml:space="preserve"><value>Keep newest modified</value></data>
+  <data name="FileCompareKeepOldestModified" xml:space="preserve"><value>Keep oldest modified</value></data>
+  <data name="FileCompareKeepShortestPath" xml:space="preserve"><value>Keep shortest path</value></data>
+  <data name="FileCompareKeepLongestPath" xml:space="preserve"><value>Keep longest path</value></data>
+  <data name="PlanActionDuplicateDelete" xml:space="preserve"><value>Duplicate delete</value></data>
+  <data name="DuplicateDeletePreviewFormat" xml:space="preserve"><value>Move duplicate to Recycle Bin: {0}</value></data>
+  <data name="DuplicateDeleteRecycleBinOnly" xml:space="preserve"><value>Moves the file to the Recycle Bin. Permanent deletion is not used.</value></data>
+  <data name="DuplicateDeleteMovedToRecycleBinFormat" xml:space="preserve"><value>Moved duplicate to Recycle Bin: {0}</value></data>
+  <data name="DuplicateDeleteMissingFileFormat" xml:space="preserve"><value>Duplicate file is missing: {0}</value></data>
+  <data name="DuplicateDeleteFailedFormat" xml:space="preserve"><value>Failed to move duplicate to Recycle Bin: {0} ({1})</value></data>
+  <data name="DuplicateDeleteStepsAddedFormat" xml:space="preserve"><value>Added duplicate delete steps to {0} targets.</value></data>
+  <data name="PlanPreviewInputDeletedFormat" xml:space="preserve"><value>Input will be deleted by an earlier step: {0}</value></data>
   <data name="TabFileCompare" xml:space="preserve"><value>File compare</value></data>
   <data name="FileCompareGroupFileName" xml:space="preserve"><value>File name</value></data>
   <data name="FileCompareGroupMetadata" xml:space="preserve"><value>Metadata</value></data>

@@ -10,10 +10,14 @@ internal sealed class FileCompareResultDialog : Form
     private const string FilterAll = "__all";
 
     private readonly FileCompareReport _report;
+    private readonly FileCompareOptions _options;
     private readonly Action<IReadOnlyList<string>>? _addTargetsAction;
-    private readonly IReadOnlyList<FileCompareDuplicateGroup> _duplicateGroups;
+    private readonly Action<IReadOnlyList<string>>? _addDuplicateDeleteStepsAction;
+    private IReadOnlyList<FileCompareDuplicateGroup> _duplicateGroups;
+    private FileCompareDuplicateKeepMode _keepMode = FileCompareDuplicateKeepMode.ComparisonOrder;
     private readonly Label _summaryLabel = new();
     private readonly ComboBox _statusFilterCombo = new();
+    private readonly ComboBox _keepModeCombo = new();
     private readonly DataGridView _pairGrid = new();
     private readonly DataGridView _criteriaGrid = new();
     private readonly DataGridView _duplicateGrid = new();
@@ -24,15 +28,20 @@ internal sealed class FileCompareResultDialog : Form
     private readonly Button _copyPairPathsButton = new();
     private readonly Button _addPairPathsButton = new();
     private readonly Button _openPairFoldersButton = new();
+    private readonly Button _saveJsonButton = new();
     private readonly Button _closeButton = new();
 
     public FileCompareResultDialog(
         FileCompareReport report,
-        Action<IReadOnlyList<string>>? addTargetsAction = null)
+        FileCompareOptions options,
+        Action<IReadOnlyList<string>>? addTargetsAction = null,
+        Action<IReadOnlyList<string>>? addDuplicateDeleteStepsAction = null)
     {
         _report = report;
+        _options = options.Clone();
         _addTargetsAction = addTargetsAction;
-        _duplicateGroups = FileCompareResultActions.BuildDuplicateGroups(report);
+        _addDuplicateDeleteStepsAction = addDuplicateDeleteStepsAction;
+        _duplicateGroups = FileCompareResultActions.BuildDuplicateGroups(report, _keepMode);
         Text = Localizer.Get("FileCompareResultTitle");
         StartPosition = FormStartPosition.CenterParent;
         Size = new Size(1280, 800);
@@ -147,15 +156,17 @@ internal sealed class FileCompareResultDialog : Form
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 10,
+            RowCount = 12,
             Padding = new Padding(8, 0, 0, 0)
         };
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
         panel.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
@@ -170,23 +181,26 @@ internal sealed class FileCompareResultDialog : Form
         };
         panel.Controls.Add(duplicateTitleLabel, 0, 0);
 
+        ConfigureKeepModeCombo();
+        panel.Controls.Add(_keepModeCombo, 0, 1);
+
         _duplicateSummaryLabel.Dock = DockStyle.Fill;
         _duplicateSummaryLabel.TextAlign = ContentAlignment.MiddleLeft;
         _duplicateSummaryLabel.AutoEllipsis = true;
-        panel.Controls.Add(_duplicateSummaryLabel, 0, 1);
-        panel.Controls.Add(_duplicateGrid, 0, 2);
+        panel.Controls.Add(_duplicateSummaryLabel, 0, 2);
+        panel.Controls.Add(_duplicateGrid, 0, 3);
 
         ConfigureActionButton(
             _copyDuplicateCandidatesButton,
             Localizer.Get("FileCompareActionCopyDeleteCandidates"),
             (_, _) => CopyPaths(GetSelectedDuplicateDeleteCandidates()));
-        panel.Controls.Add(_copyDuplicateCandidatesButton, 0, 3);
+        panel.Controls.Add(_copyDuplicateCandidatesButton, 0, 4);
 
         ConfigureActionButton(
             _addDuplicateCandidatesButton,
-            Localizer.Get("FileCompareActionAddDeleteCandidatesToTargets"),
-            (_, _) => AddPathsToTargets(GetSelectedDuplicateDeleteCandidates()));
-        panel.Controls.Add(_addDuplicateCandidatesButton, 0, 4);
+            Localizer.Get("FileCompareActionAddDuplicateDeleteSteps"),
+            (_, _) => AddDuplicateDeleteSteps(GetSelectedDuplicateDeleteCandidates()));
+        panel.Controls.Add(_addDuplicateCandidatesButton, 0, 5);
 
         var pairTitleLabel = new Label
         {
@@ -195,31 +209,56 @@ internal sealed class FileCompareResultDialog : Form
             Font = new Font(Font, FontStyle.Bold),
             TextAlign = ContentAlignment.MiddleLeft
         };
-        panel.Controls.Add(pairTitleLabel, 0, 5);
+        panel.Controls.Add(pairTitleLabel, 0, 6);
 
         ConfigureActionButton(
             _copyPairPathsButton,
             Localizer.Get("FileCompareActionCopySelectedPairPaths"),
             (_, _) => CopyPaths(FileCompareResultActions.GetPairPaths(GetCurrentPair())));
-        panel.Controls.Add(_copyPairPathsButton, 0, 6);
+        panel.Controls.Add(_copyPairPathsButton, 0, 7);
 
         ConfigureActionButton(
             _addPairPathsButton,
             Localizer.Get("FileCompareActionAddSelectedPairToTargets"),
             (_, _) => AddPathsToTargets(FileCompareResultActions.GetPairPaths(GetCurrentPair())));
-        panel.Controls.Add(_addPairPathsButton, 0, 7);
+        panel.Controls.Add(_addPairPathsButton, 0, 8);
 
         ConfigureActionButton(
             _openPairFoldersButton,
             Localizer.Get("FileCompareActionOpenSelectedPairFolders"),
             (_, _) => OpenFolders(FileCompareResultActions.GetPairPaths(GetCurrentPair())));
-        panel.Controls.Add(_openPairFoldersButton, 0, 8);
+        panel.Controls.Add(_openPairFoldersButton, 0, 9);
+
+        ConfigureActionButton(
+            _saveJsonButton,
+            Localizer.Get("FileCompareActionSaveJson"),
+            (_, _) => SaveJson());
+        panel.Controls.Add(_saveJsonButton, 0, 10);
 
         _actionStatusLabel.Dock = DockStyle.Fill;
         _actionStatusLabel.TextAlign = ContentAlignment.MiddleLeft;
         _actionStatusLabel.AutoEllipsis = true;
-        panel.Controls.Add(_actionStatusLabel, 0, 9);
+        panel.Controls.Add(_actionStatusLabel, 0, 11);
         return panel;
+    }
+
+    private void ConfigureKeepModeCombo()
+    {
+        _keepModeCombo.Dock = DockStyle.Fill;
+        _keepModeCombo.DropDownStyle = ComboBoxStyle.DropDownList;
+        _keepModeCombo.DataSource = Enum.GetValues<FileCompareDuplicateKeepMode>()
+            .Select(value => new ComboOption<FileCompareDuplicateKeepMode>(
+                FileCompareText.GetDisplayName(value),
+                value))
+            .ToArray();
+        _keepModeCombo.SelectedIndexChanged += (_, _) =>
+        {
+            if (_keepModeCombo.SelectedItem is ComboOption<FileCompareDuplicateKeepMode> option)
+            {
+                _keepMode = option.Value;
+                RebuildDuplicateGroups();
+            }
+        };
     }
 
     private static void ConfigureActionButton(Button button, string text, EventHandler clickHandler)
@@ -407,6 +446,13 @@ internal sealed class FileCompareResultDialog : Form
             : Localizer.Get("FileCompareNoDuplicateGroups");
     }
 
+    private void RebuildDuplicateGroups()
+    {
+        _duplicateGroups = FileCompareResultActions.BuildDuplicateGroups(_report, _keepMode);
+        RefreshDuplicateGrid();
+        UpdateActionState();
+    }
+
     private void UpdateActionState()
     {
         var hasPair = GetCurrentPair() is not null;
@@ -415,7 +461,8 @@ internal sealed class FileCompareResultDialog : Form
         _addPairPathsButton.Enabled = hasPair && _addTargetsAction is not null;
         _openPairFoldersButton.Enabled = hasPair;
         _copyDuplicateCandidatesButton.Enabled = hasDuplicateCandidates;
-        _addDuplicateCandidatesButton.Enabled = hasDuplicateCandidates && _addTargetsAction is not null;
+        _addDuplicateCandidatesButton.Enabled = hasDuplicateCandidates && _addDuplicateDeleteStepsAction is not null;
+        _saveJsonButton.Enabled = true;
     }
 
     private FileComparePairResult? GetCurrentPair()
@@ -462,6 +509,46 @@ internal sealed class FileCompareResultDialog : Form
         ShowActionStatus(Localizer.Format("FileCompareActionAddedTargetsFormat", paths.Count));
     }
 
+    private void AddDuplicateDeleteSteps(IReadOnlyList<string> paths)
+    {
+        if (paths.Count == 0)
+        {
+            ShowActionStatus(Localizer.Get("FileCompareActionNoPaths"));
+            return;
+        }
+
+        _addDuplicateDeleteStepsAction?.Invoke(paths);
+        ShowActionStatus(Localizer.Format("FileCompareActionDuplicateDeleteStepsAddedFormat", paths.Count));
+    }
+
+    private void SaveJson()
+    {
+        using var dialog = new SaveFileDialog
+        {
+            Title = Localizer.Get("FileCompareSaveJsonTitle"),
+            Filter = Localizer.Get("FileCompareSaveJsonFilter"),
+            DefaultExt = "json",
+            AddExtension = true,
+            OverwritePrompt = true,
+            FileName = CreateDefaultJsonFileName()
+        };
+        if (dialog.ShowDialog(this) != DialogResult.OK)
+        {
+            return;
+        }
+
+        try
+        {
+            FileCompareResultExport.Save(dialog.FileName, _report, _options, _keepMode, _duplicateGroups);
+            ShowActionStatus(Localizer.Format("FileCompareActionJsonSavedFormat", dialog.FileName));
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, FileToolsEnvironment.AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            ShowActionStatus(Localizer.Format("LogExecutionFailedFormat", ex.Message));
+        }
+    }
+
     private void OpenFolders(IReadOnlyList<string> paths)
     {
         var folders = paths
@@ -494,6 +581,11 @@ internal sealed class FileCompareResultDialog : Form
         }
 
         return Path.GetDirectoryName(path);
+    }
+
+    private static string CreateDefaultJsonFileName()
+    {
+        return "file-compare-" + DateTime.Now.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture) + ".json";
     }
 
     private static string FormatRatio(double ratio)
