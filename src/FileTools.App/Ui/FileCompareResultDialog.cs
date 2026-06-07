@@ -12,9 +12,9 @@ internal sealed class FileCompareResultDialog : Form
     private readonly FileCompareReport _report;
     private readonly FileCompareOptions _options;
     private readonly Action<IReadOnlyList<string>>? _addTargetsAction;
-    private readonly Action<IReadOnlyList<string>>? _addDuplicateDeleteStepsAction;
+    private readonly Action<FileCompareDuplicateDeleteHandoff>? _addDuplicateDeleteStepsAction;
     private IReadOnlyList<FileCompareDuplicateGroup> _duplicateGroups;
-    private FileCompareDuplicateKeepMode _keepMode = FileCompareDuplicateKeepMode.ComparisonOrder;
+    private FileCompareDuplicateKeepMode _keepMode = FileCompareDuplicateKeepMode.LargestSizeOldestCreated;
     private readonly Label _summaryLabel = new();
     private readonly ComboBox _statusFilterCombo = new();
     private readonly ComboBox _keepModeCombo = new();
@@ -35,7 +35,7 @@ internal sealed class FileCompareResultDialog : Form
         FileCompareReport report,
         FileCompareOptions options,
         Action<IReadOnlyList<string>>? addTargetsAction = null,
-        Action<IReadOnlyList<string>>? addDuplicateDeleteStepsAction = null)
+        Action<FileCompareDuplicateDeleteHandoff>? addDuplicateDeleteStepsAction = null)
     {
         _report = report;
         _options = options.Clone();
@@ -78,10 +78,12 @@ internal sealed class FileCompareResultDialog : Form
             FixedPanel = FixedPanel.Panel2,
             Orientation = Orientation.Vertical,
             SplitterWidth = 8,
-            Panel2MinSize = 310
+            Panel1MinSize = 0,
+            Panel2MinSize = 0
         };
         split.Panel1.Controls.Add(CreateResultGridLayout());
         split.Panel2.Controls.Add(CreateActionPanel());
+        split.SizeChanged += (_, _) => ClampResultSplitter(split);
         root.Controls.Add(split, 0, 1);
 
         var buttonPanel = new FlowLayoutPanel
@@ -100,6 +102,28 @@ internal sealed class FileCompareResultDialog : Form
 
         AcceptButton = _closeButton;
         CancelButton = _closeButton;
+        Shown += (_, _) => ClampResultSplitter(split);
+    }
+
+    private static void ClampResultSplitter(SplitContainer split)
+    {
+        var availableWidth = split.ClientSize.Width - split.SplitterWidth;
+        if (availableWidth <= 2)
+        {
+            return;
+        }
+
+        const int desiredActionPanelWidth = 330;
+        const int desiredResultPanelMinimum = 360;
+        var minimumResultPanelWidth = Math.Min(desiredResultPanelMinimum, Math.Max(1, availableWidth / 2));
+        var minimumActionPanelWidth = Math.Min(280, Math.Max(1, availableWidth - minimumResultPanelWidth));
+        var minimumDistance = minimumResultPanelWidth;
+        var maximumDistance = Math.Max(minimumDistance, availableWidth - minimumActionPanelWidth);
+        var desiredDistance = Math.Clamp(availableWidth - desiredActionPanelWidth, minimumDistance, maximumDistance);
+        if (split.SplitterDistance != desiredDistance)
+        {
+            split.SplitterDistance = desiredDistance;
+        }
     }
 
     private Control CreateHeader()
@@ -199,7 +223,7 @@ internal sealed class FileCompareResultDialog : Form
         ConfigureActionButton(
             _addDuplicateCandidatesButton,
             Localizer.Get("FileCompareActionAddDuplicateDeleteSteps"),
-            (_, _) => AddDuplicateDeleteSteps(GetSelectedDuplicateDeleteCandidates()));
+            (_, _) => AddDuplicateDeleteSteps(GetSelectedDuplicateGroups()));
         panel.Controls.Add(_addDuplicateCandidatesButton, 0, 5);
 
         var pairTitleLabel = new Label
@@ -472,6 +496,11 @@ internal sealed class FileCompareResultDialog : Form
 
     private IReadOnlyList<string> GetSelectedDuplicateDeleteCandidates()
     {
+        return FileCompareResultActions.GetDeleteCandidates(GetSelectedDuplicateGroups());
+    }
+
+    private IReadOnlyList<FileCompareDuplicateGroup> GetSelectedDuplicateGroups()
+    {
         var groups = _duplicateGrid.SelectedRows
             .Cast<DataGridViewRow>()
             .Select(static row => row.Tag)
@@ -482,7 +511,7 @@ internal sealed class FileCompareResultDialog : Form
             groups = _duplicateGroups.ToArray();
         }
 
-        return FileCompareResultActions.GetDeleteCandidates(groups);
+        return groups;
     }
 
     private void CopyPaths(IReadOnlyList<string> paths)
@@ -509,16 +538,21 @@ internal sealed class FileCompareResultDialog : Form
         ShowActionStatus(Localizer.Format("FileCompareActionAddedTargetsFormat", paths.Count));
     }
 
-    private void AddDuplicateDeleteSteps(IReadOnlyList<string> paths)
+    private void AddDuplicateDeleteSteps(IReadOnlyList<FileCompareDuplicateGroup> groups)
     {
-        if (paths.Count == 0)
+        var handoff = FileCompareResultActions.CreateDuplicateDeleteHandoff(groups);
+        if (handoff.DeletePaths.Count == 0)
         {
             ShowActionStatus(Localizer.Get("FileCompareActionNoPaths"));
             return;
         }
 
-        _addDuplicateDeleteStepsAction?.Invoke(paths);
-        ShowActionStatus(Localizer.Format("FileCompareActionDuplicateDeleteStepsAddedFormat", paths.Count));
+        _addDuplicateDeleteStepsAction?.Invoke(handoff);
+        ShowActionStatus(Localizer.Format(
+            "FileCompareActionDuplicateDeleteStepsAddedFormat",
+            handoff.DeletePaths.Count,
+            handoff.AllPaths.Count - handoff.DeletePaths.Count,
+            handoff.AllPaths.Count));
     }
 
     private void SaveJson()

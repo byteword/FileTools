@@ -19,18 +19,27 @@ internal sealed class FileCompareRequestDialog : Form
 
     private readonly CheckBox _nameCheckBox = new();
     private readonly ComboBox _nameModeCombo = new();
+    private readonly ComboBox _commonNameThresholdModeCombo = new();
+    private readonly TextBox _commonNameThresholdBox = new();
     private readonly CheckBox _createdTimeCheckBox = new();
     private readonly CheckBox _modifiedTimeCheckBox = new();
     private readonly CheckBox _sizeCheckBox = new();
     private readonly CheckBox _contentCheckBox = new();
     private readonly ComboBox _contentModeCombo = new();
     private readonly ComboBox _rangeModeCombo = new();
+    private readonly TextBox _rangeOffsetBox = new();
     private readonly TextBox _rangeBytesBox = new();
+    private readonly ComboBox _rangeUnitCombo = new();
     private readonly CheckBox _extractArchivesCheckBox = new();
     private readonly ComboBox _archiveOrderCombo = new();
+    private readonly ComboBox _archiveLimitModeCombo = new();
+    private readonly TextBox _archiveLimitCountBox = new();
+    private readonly CheckBox _archiveSameRelativePathOnlyCheckBox = new();
     private readonly CheckBox _earlyExitCheckBox = new();
     private readonly CheckBox _hashCacheCheckBox = new();
     private readonly TextBox _prefilterPercentBox = new();
+    private FileCompareRangeUnit _currentRangeUnit = FileCompareRangeUnit.Bytes;
+    private bool _updatingRangeUnit;
 
     public FileCompareRequestDialog(IEnumerable<string> initialPaths, FileCompareOptions options)
     {
@@ -180,10 +189,13 @@ internal sealed class FileCompareRequestDialog : Form
         _nameCheckBox.Text = Localizer.Get("FileCompareCheckFileName");
         _nameCheckBox.AutoSize = true;
         _nameCheckBox.CheckedChanged += (_, _) => UpdateOptionControlState();
+        _nameModeCombo.SelectedIndexChanged += (_, _) => UpdateOptionControlState();
 
         var layout = CreateSectionGroup(Localizer.Get("FileCompareGroupFileName"), out var group);
         layout.Controls.Add(_nameCheckBox, 0, 0);
         layout.Controls.Add(CreateComboRow(Localizer.Get("FileCompareLabelNameMode"), _nameModeCombo), 0, 1);
+        layout.Controls.Add(CreateComboRow(Localizer.Get("FileCompareLabelCommonNameThresholdMode"), _commonNameThresholdModeCombo), 0, 2);
+        layout.Controls.Add(CreateTextRow(Localizer.Get("FileCompareLabelCommonNameThreshold"), _commonNameThresholdBox), 0, 3);
         return group;
     }
 
@@ -212,16 +224,31 @@ internal sealed class FileCompareRequestDialog : Form
         _extractArchivesCheckBox.Text = Localizer.Get("FileCompareCheckExtractArchives");
         _extractArchivesCheckBox.AutoSize = true;
         _extractArchivesCheckBox.CheckedChanged += (_, _) => UpdateOptionControlState();
+        _archiveSameRelativePathOnlyCheckBox.Text = Localizer.Get("FileCompareCheckArchiveSameRelativePathOnly");
+        _archiveSameRelativePathOnlyCheckBox.AutoSize = true;
         _rangeModeCombo.SelectedIndexChanged += (_, _) => UpdateOptionControlState();
         _contentModeCombo.SelectedIndexChanged += (_, _) => UpdateOptionControlState();
+        _archiveLimitModeCombo.SelectedIndexChanged += (_, _) => UpdateOptionControlState();
+        _rangeUnitCombo.SelectedIndexChanged += (_, _) => ChangeRangeUnitFromUi();
 
         var layout = CreateSectionGroup(Localizer.Get("FileCompareGroupContent"), out var group);
         layout.Controls.Add(_contentCheckBox, 0, 0);
         layout.Controls.Add(CreateComboRow(Localizer.Get("FileCompareLabelContentMode"), _contentModeCombo), 0, 1);
         layout.Controls.Add(CreateComboRow(Localizer.Get("FileCompareLabelRangeMode"), _rangeModeCombo), 0, 2);
-        layout.Controls.Add(CreateTextRow(Localizer.Get("FileCompareLabelRangeBytes"), _rangeBytesBox), 0, 3);
-        layout.Controls.Add(_extractArchivesCheckBox, 0, 4);
-        layout.Controls.Add(CreateComboRow(Localizer.Get("FileCompareLabelArchiveOrder"), _archiveOrderCombo), 0, 5);
+        layout.Controls.Add(CreateTextRow(Localizer.Get("FileCompareLabelRangeStart"), _rangeOffsetBox), 0, 3);
+        layout.Controls.Add(CreateTextComboRow(Localizer.Get("FileCompareLabelRangeLength"), _rangeBytesBox, _rangeUnitCombo), 0, 4);
+        layout.Controls.Add(CreateArchiveGroup(), 0, 5);
+        return group;
+    }
+
+    private Control CreateArchiveGroup()
+    {
+        var layout = CreateSectionGroup(Localizer.Get("FileCompareGroupArchiveExtraction"), out var group);
+        layout.Controls.Add(_extractArchivesCheckBox, 0, 0);
+        layout.Controls.Add(CreateComboRow(Localizer.Get("FileCompareLabelArchiveOrder"), _archiveOrderCombo), 0, 1);
+        layout.Controls.Add(CreateComboRow(Localizer.Get("FileCompareLabelArchiveLimitMode"), _archiveLimitModeCombo), 0, 2);
+        layout.Controls.Add(CreateTextRow(Localizer.Get("FileCompareLabelArchiveLimitCount"), _archiveLimitCountBox), 0, 3);
+        layout.Controls.Add(_archiveSameRelativePathOnlyCheckBox, 0, 4);
         return group;
     }
 
@@ -274,6 +301,23 @@ internal sealed class FileCompareRequestDialog : Form
         return CreateInputRow(labelText, textBox);
     }
 
+    private static Control CreateTextComboRow(string labelText, TextBox textBox, ComboBox combo)
+    {
+        textBox.Width = 140;
+        combo.DropDownStyle = ComboBoxStyle.DropDownList;
+        combo.Width = 86;
+        var panel = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Top,
+            AutoSize = true,
+            WrapContents = false,
+            Margin = new Padding(0)
+        };
+        panel.Controls.Add(textBox);
+        panel.Controls.Add(combo);
+        return CreateInputRow(labelText, panel);
+    }
+
     private static Control CreateInputRow(string labelText, Control input)
     {
         var row = new TableLayoutPanel
@@ -303,14 +347,23 @@ internal sealed class FileCompareRequestDialog : Form
         ConfigureCombo(_nameModeCombo, Enum.GetValues<FileCompareNameMatchMode>()
             .Select(value => new ComboOption<FileCompareNameMatchMode>(FileCompareText.GetDisplayName(value), value))
             .ToArray());
+        ConfigureCombo(_commonNameThresholdModeCombo, Enum.GetValues<FileCompareCommonNameThresholdMode>()
+            .Select(value => new ComboOption<FileCompareCommonNameThresholdMode>(FileCompareText.GetDisplayName(value), value))
+            .ToArray());
         ConfigureCombo(_contentModeCombo, Enum.GetValues<FileCompareContentMode>()
             .Select(value => new ComboOption<FileCompareContentMode>(FileCompareText.GetDisplayName(value), value))
             .ToArray());
         ConfigureCombo(_rangeModeCombo, Enum.GetValues<FileCompareRangeMode>()
             .Select(value => new ComboOption<FileCompareRangeMode>(FileCompareText.GetDisplayName(value), value))
             .ToArray());
+        ConfigureCombo(_rangeUnitCombo, Enum.GetValues<FileCompareRangeUnit>()
+            .Select(value => new ComboOption<FileCompareRangeUnit>(FileCompareText.GetDisplayName(value), value))
+            .ToArray());
         ConfigureCombo(_archiveOrderCombo, Enum.GetValues<FileCompareArchiveEntryOrder>()
             .Select(value => new ComboOption<FileCompareArchiveEntryOrder>(FileCompareText.GetDisplayName(value), value))
+            .ToArray());
+        ConfigureCombo(_archiveLimitModeCombo, Enum.GetValues<FileCompareArchiveEntryLimitMode>()
+            .Select(value => new ComboOption<FileCompareArchiveEntryLimitMode>(FileCompareText.GetDisplayName(value), value))
             .ToArray());
     }
 
@@ -322,14 +375,28 @@ internal sealed class FileCompareRequestDialog : Form
         _sizeCheckBox.Checked = _options.CompareFileSize;
         _contentCheckBox.Checked = _options.CompareContent;
         _extractArchivesCheckBox.Checked = _options.ArchiveMode == FileCompareArchiveMode.ExtractEntries;
+        _archiveSameRelativePathOnlyCheckBox.Checked = _options.ArchiveCompareSameRelativePathOnly;
         _earlyExitCheckBox.Checked = _options.EnableEarlyExit;
         _hashCacheCheckBox.Checked = _options.UseHashCache;
-        _rangeBytesBox.Text = _options.RangeBytes.ToString(CultureInfo.CurrentCulture);
+        _currentRangeUnit = _options.RangeUnit;
+        _rangeOffsetBox.Text = FileCompareText
+            .ConvertBytesToRangeValue(_options.RangeOffsetBytes, _currentRangeUnit)
+            .ToString(CultureInfo.CurrentCulture);
+        _rangeBytesBox.Text = FileCompareText
+            .ConvertBytesToRangeValue(_options.RangeBytes, _currentRangeUnit)
+            .ToString(CultureInfo.CurrentCulture);
+        _commonNameThresholdBox.Text = _options.CommonNameThresholdMode == FileCompareCommonNameThresholdMode.Percent
+            ? (_options.CommonNameMinimumPercent * 100).ToString("0.##", CultureInfo.CurrentCulture)
+            : _options.CommonNameMinimumCharacters.ToString(CultureInfo.CurrentCulture);
+        _archiveLimitCountBox.Text = _options.ArchiveEntryLimitCount.ToString(CultureInfo.CurrentCulture);
         _prefilterPercentBox.Text = (_options.ByteToBytePrefilterRatio * 100).ToString("0.##", CultureInfo.CurrentCulture);
         SelectComboValue(_nameModeCombo, _options.NameMatchMode);
+        SelectComboValue(_commonNameThresholdModeCombo, _options.CommonNameThresholdMode);
         SelectComboValue(_contentModeCombo, _options.ContentMode);
         SelectComboValue(_rangeModeCombo, _options.RangeMode);
+        SelectComboValue(_rangeUnitCombo, _currentRangeUnit);
         SelectComboValue(_archiveOrderCombo, _options.ArchiveEntryOrder);
+        SelectComboValue(_archiveLimitModeCombo, _options.ArchiveEntryLimitMode);
     }
 
     private void AddFiles()
@@ -420,13 +487,27 @@ internal sealed class FileCompareRequestDialog : Form
     private void UpdateOptionControlState()
     {
         _nameModeCombo.Enabled = _nameCheckBox.Checked;
+        var commonNameEnabled = _nameCheckBox.Checked &&
+                                GetComboValue(_nameModeCombo, FileCompareNameMatchMode.ExactFileName) ==
+                                FileCompareNameMatchMode.CommonName;
+        _commonNameThresholdModeCombo.Enabled = commonNameEnabled;
+        _commonNameThresholdBox.Enabled = commonNameEnabled;
         var contentEnabled = _contentCheckBox.Checked;
         _contentModeCombo.Enabled = contentEnabled;
         _rangeModeCombo.Enabled = contentEnabled;
         var rangeMode = GetComboValue(_rangeModeCombo, FileCompareRangeMode.Full);
-        _rangeBytesBox.Enabled = contentEnabled && rangeMode != FileCompareRangeMode.Full;
+        var rangeEnabled = contentEnabled && rangeMode != FileCompareRangeMode.Full;
+        _rangeOffsetBox.Enabled = rangeEnabled && rangeMode == FileCompareRangeMode.MiddleBytes;
+        _rangeBytesBox.Enabled = rangeEnabled;
+        _rangeUnitCombo.Enabled = rangeEnabled;
         _extractArchivesCheckBox.Enabled = contentEnabled;
-        _archiveOrderCombo.Enabled = contentEnabled && _extractArchivesCheckBox.Checked;
+        var archiveEnabled = contentEnabled && _extractArchivesCheckBox.Checked;
+        _archiveOrderCombo.Enabled = archiveEnabled;
+        _archiveLimitModeCombo.Enabled = archiveEnabled;
+        _archiveLimitCountBox.Enabled = archiveEnabled &&
+                                        GetComboValue(_archiveLimitModeCombo, FileCompareArchiveEntryLimitMode.All) ==
+                                        FileCompareArchiveEntryLimitMode.FirstN;
+        _archiveSameRelativePathOnlyCheckBox.Enabled = archiveEnabled;
         var contentMode = GetComboValue(_contentModeCombo, FileCompareContentMode.Hash);
         _prefilterPercentBox.Enabled = contentEnabled && contentMode == FileCompareContentMode.ByteToByte;
     }
@@ -467,14 +548,80 @@ internal sealed class FileCompareRequestDialog : Form
         _options.CompareContent = _contentCheckBox.Checked;
         _options.ContentMode = GetComboValue(_contentModeCombo, _options.ContentMode);
         _options.RangeMode = GetComboValue(_rangeModeCombo, _options.RangeMode);
-        _options.RangeBytes = ParseLong(_rangeBytesBox.Text, 1, long.MaxValue);
+        _options.RangeUnit = GetComboValue(_rangeUnitCombo, _currentRangeUnit);
+        _options.RangeOffsetBytes = ParseUnitLong(_rangeOffsetBox.Text, _options.RangeUnit, 0, long.MaxValue);
+        _options.RangeBytes = ParseUnitLong(_rangeBytesBox.Text, _options.RangeUnit, 1, long.MaxValue);
+        _options.CommonNameThresholdMode = GetComboValue(
+            _commonNameThresholdModeCombo,
+            _options.CommonNameThresholdMode);
+        if (_options.CommonNameThresholdMode == FileCompareCommonNameThresholdMode.Percent)
+        {
+            _options.CommonNameMinimumPercent = ParsePercent(_commonNameThresholdBox.Text) / 100;
+        }
+        else
+        {
+            _options.CommonNameMinimumCharacters = (int)ParseLong(_commonNameThresholdBox.Text, 1, int.MaxValue);
+        }
+
         _options.ArchiveMode = _extractArchivesCheckBox.Checked
             ? FileCompareArchiveMode.ExtractEntries
             : FileCompareArchiveMode.AsFile;
         _options.ArchiveEntryOrder = GetComboValue(_archiveOrderCombo, _options.ArchiveEntryOrder);
+        _options.ArchiveEntryLimitMode = GetComboValue(_archiveLimitModeCombo, _options.ArchiveEntryLimitMode);
+        _options.ArchiveEntryLimitCount = (int)ParseLong(_archiveLimitCountBox.Text, 1, int.MaxValue);
+        _options.ArchiveCompareSameRelativePathOnly = _archiveSameRelativePathOnlyCheckBox.Checked;
         _options.EnableEarlyExit = _earlyExitCheckBox.Checked;
         _options.UseHashCache = _hashCacheCheckBox.Checked;
         _options.ByteToBytePrefilterRatio = ParsePercent(_prefilterPercentBox.Text) / 100;
+    }
+
+    private void ChangeRangeUnitFromUi()
+    {
+        if (_updatingRangeUnit ||
+            _rangeUnitCombo.SelectedItem is not ComboOption<FileCompareRangeUnit> option)
+        {
+            return;
+        }
+
+        var newUnit = option.Value;
+        if (newUnit == _currentRangeUnit)
+        {
+            return;
+        }
+
+        try
+        {
+            _updatingRangeUnit = true;
+            ConvertUnitTextBox(_rangeOffsetBox, _currentRangeUnit, newUnit, minimum: 0);
+            ConvertUnitTextBox(_rangeBytesBox, _currentRangeUnit, newUnit, minimum: 1);
+            _currentRangeUnit = newUnit;
+        }
+        catch
+        {
+            SelectComboValue(_rangeUnitCombo, _currentRangeUnit);
+        }
+        finally
+        {
+            _updatingRangeUnit = false;
+        }
+    }
+
+    private static void ConvertUnitTextBox(
+        TextBox textBox,
+        FileCompareRangeUnit oldUnit,
+        FileCompareRangeUnit newUnit,
+        long minimum)
+    {
+        var currentValue = ParseLong(textBox.Text, minimum, long.MaxValue);
+        var bytes = FileCompareText.ConvertRangeValueToBytes(currentValue, oldUnit);
+        var newValue = Math.Max(minimum, FileCompareText.ConvertBytesToRangeValue(bytes, newUnit));
+        textBox.Text = newValue.ToString(CultureInfo.CurrentCulture);
+    }
+
+    private static long ParseUnitLong(string text, FileCompareRangeUnit unit, long minimum, long maximum)
+    {
+        var value = ParseLong(text, minimum, maximum);
+        return Math.Clamp(FileCompareText.ConvertRangeValueToBytes(value, unit), minimum, maximum);
     }
 
     private static long ParseLong(string text, long minimum, long maximum)

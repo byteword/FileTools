@@ -1,7 +1,7 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-07 after internal file compare context launch prep
+Last updated: 2026-06-07 after file compare option expansion
 
 Scope reviewed:
 
@@ -68,6 +68,14 @@ Scope reviewed:
 - Ran `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` on
   2026-06-07 after the internal context launch wiring; all 42 managed tests
   passed.
+- Expanded file comparison options with common-name thresholds, middle-part
+  start/length ranges, byte/KiB/MiB unit conversion, archive entry scope, and
+  same-relative-path archive entry pairing.
+- Fixed the file compare result dialog splitter initialization so small initial
+  layouts do not throw before the action panel is measured.
+- Ran `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` on
+  2026-06-07 after the option expansion and splitter fix; all 48 managed tests
+  passed.
 - Added `docs/common-file-merge-design.md` and
   `docs/images/common-file-merge-flow.svg` for the archive-first issue #9
   design, centered on `A 01.zip + A 02.zip -> A.zip`.
@@ -76,8 +84,9 @@ Scope reviewed:
 
 - #3 internet dictionary or AI-assisted rename correction: resume only after privacy, cost, network failure, opt-in, and review UX policies are defined.
 - #6 file comparison: continue with JSON result import/reload, manual UI
-  validation with large mixed file sets, and eventual Explorer menu exposure
-  after the internal `/context FileCompare` route is smoke-tested.
+  validation with large mixed file sets and narrow result dialog sizes, and
+  eventual Explorer menu exposure after the internal `/context FileCompare`
+  route is smoke-tested.
 - #7 Windows ARM64 build and installer support: resume only when ARM64 Windows hardware or a VM is available for end-to-end installer and Explorer validation.
 - #8 7Z input archive merge support: resume after ZIP archive merge real-sample validation and release notes are finished, then decide ZIP-only output versus 7Z output scope.
 - #9 common-filename-based file merge flow: archive-first design decisions are
@@ -112,3 +121,5 @@ Scope reviewed:
      criterion details.
    - Validate hash and byte-to-byte range settings with large files before
      adding JSON import/reload or exposing the prepared Explorer context command.
+   - Validate the expanded option UI manually, especially common-name thresholds,
+     middle-part start/length units, and archive same-relative-path pairing.

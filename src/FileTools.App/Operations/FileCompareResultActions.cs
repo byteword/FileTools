@@ -2,6 +2,7 @@ namespace FileTools;
 
 internal enum FileCompareDuplicateKeepMode
 {
+    LargestSizeOldestCreated,
     ComparisonOrder,
     NewestModified,
     OldestModified,
@@ -17,6 +18,15 @@ internal sealed record FileCompareDuplicateGroup(
 
     public IReadOnlyList<string> DeleteCandidates => Paths.Skip(1).ToArray();
 }
+
+internal sealed record FileCompareDuplicateDeleteHandoff(
+    IReadOnlyList<string> AllPaths,
+    IReadOnlyList<string> DeletePaths,
+    IReadOnlyList<FileCompareDuplicateDeleteGroupHandoff> Groups);
+
+internal sealed record FileCompareDuplicateDeleteGroupHandoff(
+    IReadOnlyList<string> Paths,
+    IReadOnlyList<string> DeletePaths);
 
 internal static class FileCompareResultActions
 {
@@ -66,6 +76,27 @@ internal static class FileCompareResultActions
             .ToArray();
     }
 
+    public static FileCompareDuplicateDeleteHandoff CreateDuplicateDeleteHandoff(
+        IEnumerable<FileCompareDuplicateGroup> groups)
+    {
+        var selectedGroups = groups.ToArray();
+        var groupHandoffs = selectedGroups
+            .Select(static group => new FileCompareDuplicateDeleteGroupHandoff(
+                group.Paths,
+                group.DeleteCandidates))
+            .ToArray();
+        return new FileCompareDuplicateDeleteHandoff(
+            groupHandoffs
+                .SelectMany(static group => group.Paths)
+                .Distinct(GetPathComparer())
+                .ToArray(),
+            groupHandoffs
+                .SelectMany(static group => group.DeletePaths)
+                .Distinct(GetPathComparer())
+                .ToArray(),
+            groupHandoffs);
+    }
+
     private static bool IsSameContentPair(FileComparePairResult pair)
     {
         return pair.Status == FileCompareStatus.Same &&
@@ -89,6 +120,7 @@ internal static class FileCompareResultActions
 
         return keepMode switch
         {
+            FileCompareDuplicateKeepMode.LargestSizeOldestCreated => ApplyLargestSizeOldestCreatedKeepMode(paths),
             FileCompareDuplicateKeepMode.NewestModified => paths
                 .OrderByDescending(GetLastWriteTimeUtc)
                 .ThenBy(static path => path, GetPathComparer())
@@ -107,6 +139,50 @@ internal static class FileCompareResultActions
                 .ToArray(),
             _ => paths
         };
+    }
+
+    private static IReadOnlyList<string> ApplyLargestSizeOldestCreatedKeepMode(IReadOnlyList<string> paths)
+    {
+        var keepPath = paths
+            .OrderByDescending(GetFileSize)
+            .ThenBy(GetCreationTimeUtc)
+            .ThenBy(static path => path, GetPathComparer())
+            .First();
+        return new[] { keepPath }
+            .Concat(paths
+                .Where(path => !string.Equals(path, keepPath, GetPathComparison()))
+                .OrderBy(GetFileSize)
+                .ThenByDescending(GetCreationTimeUtc)
+                .ThenBy(static path => path, GetPathComparer()))
+            .ToArray();
+    }
+
+    private static long GetFileSize(string path)
+    {
+        try
+        {
+            return File.Exists(path)
+                ? new FileInfo(path).Length
+                : long.MinValue;
+        }
+        catch
+        {
+            return long.MinValue;
+        }
+    }
+
+    private static DateTime GetCreationTimeUtc(string path)
+    {
+        try
+        {
+            return File.Exists(path)
+                ? File.GetCreationTimeUtc(path)
+                : DateTime.MaxValue;
+        }
+        catch
+        {
+            return DateTime.MaxValue;
+        }
     }
 
     private static DateTime GetLastWriteTimeUtc(string path)

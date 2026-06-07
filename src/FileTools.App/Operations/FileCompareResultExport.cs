@@ -16,6 +16,9 @@ internal sealed record FileCompareExportDocument(
 internal sealed record FileCompareExportOptions(
     bool CompareFileName,
     string NameMatchMode,
+    string CommonNameThresholdMode,
+    int CommonNameMinimumCharacters,
+    double CommonNameMinimumPercent,
     bool CompareCreatedTime,
     bool CompareModifiedTime,
     bool CompareFileSize,
@@ -23,8 +26,13 @@ internal sealed record FileCompareExportOptions(
     string ContentMode,
     string RangeMode,
     long RangeBytes,
+    long RangeOffsetBytes,
+    string RangeUnit,
     string ArchiveMode,
     string ArchiveEntryOrder,
+    string ArchiveEntryLimitMode,
+    int ArchiveEntryLimitCount,
+    bool ArchiveCompareSameRelativePathOnly,
     bool EnableEarlyExit,
     bool UseHashCache,
     double PartialMatchThreshold,
@@ -58,7 +66,7 @@ internal sealed record FileCompareExportDuplicateGroup(
 internal static class FileCompareResultExport
 {
     public const string DocumentType = "FileTools.FileCompareResult";
-    public const int SchemaVersion = 1;
+    public const int SchemaVersion = 2;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -117,6 +125,9 @@ internal static class FileCompareResultExport
         return new FileCompareExportOptions(
             options.CompareFileName,
             options.NameMatchMode.ToString(),
+            options.CommonNameThresholdMode.ToString(),
+            options.CommonNameMinimumCharacters,
+            options.CommonNameMinimumPercent,
             options.CompareCreatedTime,
             options.CompareModifiedTime,
             options.CompareFileSize,
@@ -124,8 +135,13 @@ internal static class FileCompareResultExport
             options.ContentMode.ToString(),
             options.RangeMode.ToString(),
             options.RangeBytes,
+            options.RangeOffsetBytes,
+            options.RangeUnit.ToString(),
             options.ArchiveMode.ToString(),
             options.ArchiveEntryOrder.ToString(),
+            options.ArchiveEntryLimitMode.ToString(),
+            options.ArchiveEntryLimitCount,
+            options.ArchiveCompareSameRelativePathOnly,
             options.EnableEarlyExit,
             options.UseHashCache,
             options.PartialMatchThreshold,

@@ -262,6 +262,8 @@ internal sealed partial class SettingsForm
         ConfigureCheckBox(_fileCompareContentCheckBox);
         _fileCompareExtractArchivesCheckBox.Text = Localizer.Get("FileCompareCheckExtractArchives");
         ConfigureCheckBox(_fileCompareExtractArchivesCheckBox);
+        _fileCompareArchiveSameRelativePathOnlyCheckBox.Text = Localizer.Get("FileCompareCheckArchiveSameRelativePathOnly");
+        ConfigureCheckBox(_fileCompareArchiveSameRelativePathOnlyCheckBox);
         _fileCompareEarlyExitCheckBox.Text = Localizer.Get("FileCompareCheckEarlyExit");
         ConfigureCheckBox(_fileCompareEarlyExitCheckBox);
         _fileCompareHashCacheCheckBox.Text = Localizer.Get("FileCompareCheckHashCache");
@@ -278,6 +280,14 @@ internal sealed partial class SettingsForm
             Localizer.Get("FileCompareLabelNameMode"),
             _fileCompareNameModeCombo,
             Localizer.Get("FileCompareNameModeHelp")));
+        group.AddBodyControl(CreateComboRow(
+            Localizer.Get("FileCompareLabelCommonNameThresholdMode"),
+            _fileCompareCommonNameThresholdModeCombo,
+            Localizer.Get("FileCompareCommonNameThresholdModeHelp")));
+        group.AddBodyControl(CreateTextRow(
+            Localizer.Get("FileCompareLabelCommonNameThreshold"),
+            _fileCompareCommonNameThresholdBox,
+            Localizer.Get("FileCompareCommonNameThresholdHelp")));
         group.AddBodyControl(CreateSectionLabel(Localizer.Get("FileCompareGroupMetadata")));
         group.AddBodyControl(_fileCompareCreatedTimeCheckBox);
         group.AddBodyControl(_fileCompareModifiedTimeCheckBox);
@@ -293,14 +303,29 @@ internal sealed partial class SettingsForm
             _fileCompareRangeModeCombo,
             Localizer.Get("FileCompareRangeModeHelp")));
         group.AddBodyControl(CreateTextRow(
-            Localizer.Get("FileCompareLabelRangeBytes"),
+            Localizer.Get("FileCompareLabelRangeStart"),
+            _fileCompareRangeOffsetBox,
+            Localizer.Get("FileCompareRangeStartHelp")));
+        group.AddBodyControl(CreateTextComboRow(
+            Localizer.Get("FileCompareLabelRangeLength"),
             _fileCompareRangeBytesBox,
+            _fileCompareRangeUnitCombo,
             Localizer.Get("FileCompareRangeBytesHelp")));
+        group.AddBodyControl(CreateSectionLabel(Localizer.Get("FileCompareGroupArchiveExtraction")));
         group.AddBodyControl(_fileCompareExtractArchivesCheckBox);
         group.AddBodyControl(CreateComboRow(
             Localizer.Get("FileCompareLabelArchiveOrder"),
             _fileCompareArchiveOrderCombo,
             Localizer.Get("FileCompareArchiveOrderHelp")));
+        group.AddBodyControl(CreateComboRow(
+            Localizer.Get("FileCompareLabelArchiveLimitMode"),
+            _fileCompareArchiveLimitModeCombo,
+            Localizer.Get("FileCompareArchiveLimitModeHelp")));
+        group.AddBodyControl(CreateTextRow(
+            Localizer.Get("FileCompareLabelArchiveLimitCount"),
+            _fileCompareArchiveLimitCountBox,
+            Localizer.Get("FileCompareArchiveLimitCountHelp")));
+        group.AddBodyControl(_fileCompareArchiveSameRelativePathOnlyCheckBox);
         group.AddBodyControl(CreateSectionLabel(Localizer.Get("FileCompareGroupOther")));
         group.AddBodyControl(_fileCompareEarlyExitCheckBox);
         group.AddBodyControl(_fileCompareHashCacheCheckBox);
@@ -580,6 +605,66 @@ internal sealed partial class SettingsForm
             {
                 helpLabel.Left = textBox.Left;
                 helpLabel.Width = textBox.Width;
+            }
+        }
+
+        panel.Resize += (_, _) => ResizeRow();
+        ResizeRow();
+        return panel;
+    }
+
+    private static Panel CreateTextComboRow(string labelText, TextBox textBox, ComboBox combo, string? helpText = null)
+    {
+        var panel = new Panel
+        {
+            Height = string.IsNullOrWhiteSpace(helpText) ? 38 : 64,
+            Margin = new Padding(0, 0, 0, 8)
+        };
+        var label = new Label
+        {
+            Text = labelText,
+            Left = 0,
+            Top = 3,
+            Width = 190,
+            Height = 24,
+            TextAlign = ContentAlignment.MiddleLeft
+        };
+        textBox.Left = 204;
+        textBox.Top = 1;
+        textBox.Height = 26;
+        textBox.Anchor = AnchorStyles.Left | AnchorStyles.Top;
+        combo.Left = 350;
+        combo.Top = 1;
+        combo.Height = 26;
+        combo.DropDownStyle = ComboBoxStyle.DropDownList;
+        combo.Anchor = AnchorStyles.Left | AnchorStyles.Top;
+        panel.Controls.Add(label);
+        panel.Controls.Add(textBox);
+        panel.Controls.Add(combo);
+
+        Label? helpLabel = null;
+        if (!string.IsNullOrWhiteSpace(helpText))
+        {
+            helpLabel = CreateHelperText(helpText);
+            helpLabel.Left = 204;
+            helpLabel.Top = 31;
+            helpLabel.Height = 32;
+            helpLabel.Margin = new Padding(0);
+            panel.Controls.Add(helpLabel);
+        }
+
+        void ResizeRow()
+        {
+            var labelWidth = Math.Clamp(panel.ClientSize.Width / 3, 150, 220);
+            label.Width = labelWidth;
+            textBox.Left = labelWidth + 14;
+            textBox.Width = 132;
+            combo.Left = textBox.Right + 8;
+            combo.Width = 92;
+            if (helpLabel is not null)
+            {
+                helpLabel.Left = textBox.Left;
+                helpLabel.Width = Math.Max(180, panel.ClientSize.Width - helpLabel.Left);
             }
         }
 

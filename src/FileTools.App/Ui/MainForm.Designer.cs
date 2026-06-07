@@ -65,6 +65,7 @@ partial class MainForm
     private Label _planScopeLabel = null!;
     private DataGridView _planGrid = null!;
     private ToolStrip _planToolStrip = null!;
+    private ToolStripButton _editStepToolButton = null!;
     private ToolStripButton _removeStepToolButton = null!;
     private ToolStripButton _clearStepsToolButton = null!;
     private Panel _executionPanel = null!;
@@ -144,6 +145,7 @@ partial class MainForm
         _planScopeLabel = new Label();
         _planGrid = new DataGridView();
         _planToolStrip = new ToolStrip();
+        _editStepToolButton = new ToolStripButton();
         _removeStepToolButton = new ToolStripButton();
         _clearStepsToolButton = new ToolStripButton();
         _executionPanel = new Panel();
@@ -507,6 +509,7 @@ partial class MainForm
         _planToolStrip.ImageScalingSize = new Size(18, 18);
         _planToolStrip.Items.AddRange(new ToolStripItem[]
         {
+            _editStepToolButton,
             _removeStepToolButton,
             _clearStepsToolButton
         });
@@ -514,6 +517,12 @@ partial class MainForm
         _planToolStrip.Name = "_planToolStrip";
         _planToolStrip.Padding = new Padding(2, 2, 2, 2);
         _planToolStrip.Size = new Size(554, 29);
+
+        _editStepToolButton.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
+        _editStepToolButton.ImageTransparentColor = Color.Magenta;
+        _editStepToolButton.Name = "_editStepToolButton";
+        _editStepToolButton.Text = "Edit step";
+        _editStepToolButton.TextImageRelation = TextImageRelation.ImageBeforeText;
 
         _removeStepToolButton.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
         _removeStepToolButton.ImageTransparentColor = Color.Magenta;

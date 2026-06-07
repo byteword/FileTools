@@ -82,4 +82,14 @@ public sealed class SettingsAndConfigurationTests
 
         Assert.Equal(@"""C:\Tools\FileTools.exe"" /context FileCompare ""%1""", commandLine);
     }
+
+    [Fact]
+    public void FileCompareText_ConvertsRangeUnitsWithCeiling()
+    {
+        var kib = FileCompareText.ConvertBytesToRangeValue(1536, FileCompareRangeUnit.KiB);
+        var bytes = FileCompareText.ConvertRangeValueToBytes(kib, FileCompareRangeUnit.KiB);
+
+        Assert.Equal(2, kib);
+        Assert.Equal(2048, bytes);
+    }
 }

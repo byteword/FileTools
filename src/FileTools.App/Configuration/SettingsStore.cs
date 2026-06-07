@@ -215,9 +215,13 @@ internal static class SettingsStore
             })
             .ToList();
         settings.FileCompareOptions ??= new FileCompareOptions();
+        settings.FileCompareOptions.CommonNameMinimumCharacters = Math.Max(1, settings.FileCompareOptions.CommonNameMinimumCharacters);
+        settings.FileCompareOptions.CommonNameMinimumPercent = Math.Clamp(settings.FileCompareOptions.CommonNameMinimumPercent, 0.01, 1);
         settings.FileCompareOptions.RangeBytes = Math.Max(1, settings.FileCompareOptions.RangeBytes);
+        settings.FileCompareOptions.RangeOffsetBytes = Math.Max(0, settings.FileCompareOptions.RangeOffsetBytes);
         settings.FileCompareOptions.PartialMatchThreshold = Math.Clamp(settings.FileCompareOptions.PartialMatchThreshold, 0.10, 1);
         settings.FileCompareOptions.ByteToBytePrefilterRatio = Math.Clamp(settings.FileCompareOptions.ByteToBytePrefilterRatio, 0, 1);
+        settings.FileCompareOptions.ArchiveEntryLimitCount = Math.Max(1, settings.FileCompareOptions.ArchiveEntryLimitCount);
     }
 
     private static string NormalizeTemplate(string? template, string fallback)

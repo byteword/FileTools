@@ -99,6 +99,7 @@
   <data name="ButtonUpdate" xml:space="preserve"><value>Update</value></data>
   <data name="ButtonDelete" xml:space="preserve"><value>Delete</value></data>
   <data name="ButtonClose" xml:space="preserve"><value>Close</value></data>
+  <data name="ButtonOK" xml:space="preserve"><value>OK</value></data>
   <data name="LabelId" xml:space="preserve"><value>ID</value></data>
   <data name="LabelName" xml:space="preserve"><value>Name</value></data>
   <data name="LabelDescription" xml:space="preserve"><value>Description</value></data>
@@ -140,6 +141,7 @@
   <data name="ButtonAddWrapStep" xml:space="preserve"><value>Add wrap</value></data>
   <data name="ButtonAddUnwrapStep" xml:space="preserve"><value>Add unwrap</value></data>
   <data name="ButtonAddRelocationStep" xml:space="preserve"><value>Add relocation</value></data>
+  <data name="ButtonEditStep" xml:space="preserve"><value>Edit step</value></data>
   <data name="ButtonRemoveStep" xml:space="preserve"><value>Remove step</value></data>
   <data name="ButtonExecutePlan" xml:space="preserve"><value>Run plan</value></data>
   <data name="InitialPlanStatus" xml:space="preserve"><value>Add targets on the left, add actions on the right, then run the plan.</value></data>
@@ -383,6 +385,7 @@
   <data name="ToolTipAddWrap" xml:space="preserve"><value>Add a folder wrapping action to selected file targets.</value></data>
   <data name="ToolTipAddUnwrap" xml:space="preserve"><value>Add a folder unwrapping action to selected folder targets.</value></data>
   <data name="ToolTipAddRelocation" xml:space="preserve"><value>Add an auto relocation action to selected targets.</value></data>
+  <data name="ToolTipEditStep" xml:space="preserve"><value>Edit the selected plan step.</value></data>
   <data name="ToolTipRemoveStep" xml:space="preserve"><value>Remove the selected plan step.</value></data>
   <data name="ToolTipClearSteps" xml:space="preserve"><value>Clear every step shown in the current work plan.</value></data>
   <data name="ToolTipRunPlan" xml:space="preserve"><value>Run the current plan.</value></data>
@@ -641,7 +644,7 @@
   <data name="FileCompareActionNoPaths" xml:space="preserve"><value>No paths available.</value></data>
   <data name="FileCompareActionCopiedFormat" xml:space="preserve"><value>Copied {0} paths.</value></data>
   <data name="FileCompareActionAddedTargetsFormat" xml:space="preserve"><value>Added {0} paths to targets.</value></data>
-  <data name="FileCompareActionDuplicateDeleteStepsAddedFormat" xml:space="preserve"><value>Added duplicate delete steps for {0} paths.</value></data>
+  <data name="FileCompareActionDuplicateDeleteStepsAddedFormat" xml:space="preserve"><value>Added duplicate delete handoff: delete {0}, keep {1}, total {2} paths.</value></data>
   <data name="FileCompareActionOpenedFoldersFormat" xml:space="preserve"><value>Opened {0} folders.</value></data>
   <data name="FileCompareActionJsonSavedFormat" xml:space="preserve"><value>Saved JSON result: {0}</value></data>
   <data name="FileCompareResultTargetsAddedFormat" xml:space="preserve"><value>Comparison result sent {0} paths to the target list.</value></data>
@@ -651,23 +654,44 @@
   <data name="FileCompareStatusDifferent" xml:space="preserve"><value>Different</value></data>
   <data name="FileCompareStatusPartialMatch" xml:space="preserve"><value>Partial match</value></data>
   <data name="FileCompareStatusFailed" xml:space="preserve"><value>Failed</value></data>
+  <data name="FileCompareKeepLargestSizeOldestCreated" xml:space="preserve"><value>Keep largest size, oldest created</value></data>
   <data name="FileCompareKeepComparisonOrder" xml:space="preserve"><value>Keep first in comparison order</value></data>
   <data name="FileCompareKeepNewestModified" xml:space="preserve"><value>Keep newest modified</value></data>
   <data name="FileCompareKeepOldestModified" xml:space="preserve"><value>Keep oldest modified</value></data>
   <data name="FileCompareKeepShortestPath" xml:space="preserve"><value>Keep shortest path</value></data>
   <data name="FileCompareKeepLongestPath" xml:space="preserve"><value>Keep longest path</value></data>
-  <data name="PlanActionDuplicateDelete" xml:space="preserve"><value>Duplicate delete</value></data>
-  <data name="DuplicateDeletePreviewFormat" xml:space="preserve"><value>Move duplicate to Recycle Bin: {0}</value></data>
-  <data name="DuplicateDeleteRecycleBinOnly" xml:space="preserve"><value>Moves the file to the Recycle Bin. Permanent deletion is not used.</value></data>
-  <data name="DuplicateDeleteMovedToRecycleBinFormat" xml:space="preserve"><value>Moved duplicate to Recycle Bin: {0}</value></data>
-  <data name="DuplicateDeleteMissingFileFormat" xml:space="preserve"><value>Duplicate file is missing: {0}</value></data>
-  <data name="DuplicateDeleteFailedFormat" xml:space="preserve"><value>Failed to move duplicate to Recycle Bin: {0} ({1})</value></data>
-  <data name="DuplicateDeleteStepsAddedFormat" xml:space="preserve"><value>Added duplicate delete steps to {0} targets.</value></data>
+  <data name="PlanActionDuplicateDelete" xml:space="preserve"><value>Delete duplicate</value></data>
+  <data name="DuplicateDeletePreviewFormat" xml:space="preserve"><value>Delete candidate to Recycle Bin: {0}</value></data>
+  <data name="DuplicateDeleteRecycleBinOnly" xml:space="preserve"><value>Files in the delete-target list are moved to the Recycle Bin. Permanent deletion is not used.</value></data>
+  <data name="DuplicateDeleteMovedToRecycleBinFormat" xml:space="preserve"><value>Moved delete candidate to Recycle Bin: {0}</value></data>
+  <data name="DuplicateDeleteMissingFileFormat" xml:space="preserve"><value>Delete candidate is missing: {0}</value></data>
+  <data name="DuplicateDeleteFailedFormat" xml:space="preserve"><value>Failed to move delete candidate to Recycle Bin: {0} ({1})</value></data>
+  <data name="DuplicateDeleteStepsAddedFormat" xml:space="preserve"><value>Added duplicate delete handoff to targets. Delete {0}, keep {1}, total {2}.</value></data>
+  <data name="DuplicateDeleteDialogTitle" xml:space="preserve"><value>Choose duplicate delete targets</value></data>
+  <data name="DuplicateDeleteDialogHelp" xml:space="preserve"><value>The left list is deleted to the Recycle Bin when the plan runs. The right list is kept.</value></data>
+  <data name="DuplicateDeleteDialogSummaryFormat" xml:space="preserve"><value>Delete {0} · Keep {1} · File targets {2}</value></data>
+  <data name="DuplicateDeleteDialogNoFileTargets" xml:space="preserve"><value>No file targets are available for duplicate deletion.</value></data>
+  <data name="DuplicateDeleteDialogDeleteTargets" xml:space="preserve"><value>Delete targets</value></data>
+  <data name="DuplicateDeleteDialogKeepTargets" xml:space="preserve"><value>Keep targets</value></data>
+  <data name="DuplicateDeleteDialogMoveToDelete" xml:space="preserve"><value>&lt; Delete</value></data>
+  <data name="DuplicateDeleteDialogMoveToKeep" xml:space="preserve"><value>Keep &gt;</value></data>
+  <data name="DuplicateDeleteDialogMoveHint" xml:space="preserve"><value>Double-click also moves the selected file.</value></data>
+  <data name="DuplicateDeleteColumnDelete" xml:space="preserve"><value>Delete</value></data>
+  <data name="DuplicateDeleteColumnResult" xml:space="preserve"><value>Result</value></data>
+  <data name="DuplicateDeleteColumnFileName" xml:space="preserve"><value>File name</value></data>
+  <data name="DuplicateDeleteColumnSize" xml:space="preserve"><value>Size</value></data>
+  <data name="DuplicateDeleteColumnModified" xml:space="preserve"><value>Modified</value></data>
+  <data name="DuplicateDeleteColumnPath" xml:space="preserve"><value>Path</value></data>
+  <data name="DuplicateDeleteActionDelete" xml:space="preserve"><value>Delete</value></data>
+  <data name="DuplicateDeleteActionKeep" xml:space="preserve"><value>Keep</value></data>
+  <data name="DuplicateDeleteFileSizeFormat" xml:space="preserve"><value>{0:N0} B</value></data>
+  <data name="DuplicateDeleteSelectionAppliedFormat" xml:space="preserve"><value>Duplicate delete selection applied. Delete {0}, keep {1}, changed {2} targets.</value></data>
   <data name="PlanPreviewInputDeletedFormat" xml:space="preserve"><value>Input will be deleted by an earlier step: {0}</value></data>
   <data name="TabFileCompare" xml:space="preserve"><value>File compare</value></data>
   <data name="FileCompareGroupFileName" xml:space="preserve"><value>File name</value></data>
   <data name="FileCompareGroupMetadata" xml:space="preserve"><value>Metadata</value></data>
   <data name="FileCompareGroupContent" xml:space="preserve"><value>Content</value></data>
+  <data name="FileCompareGroupArchiveExtraction" xml:space="preserve"><value>Archive extraction comparison</value></data>
   <data name="FileCompareGroupOther" xml:space="preserve"><value>Other options</value></data>
   <data name="FileCompareCheckFileName" xml:space="preserve"><value>Compare file name</value></data>
   <data name="FileCompareCheckCreatedTime" xml:space="preserve"><value>Compare created time</value></data>
@@ -675,34 +699,50 @@
   <data name="FileCompareCheckFileSize" xml:space="preserve"><value>Compare file size</value></data>
   <data name="FileCompareCheckContent" xml:space="preserve"><value>Compare content</value></data>
   <data name="FileCompareCheckExtractArchives" xml:space="preserve"><value>Extract ZIP entries before content comparison</value></data>
+  <data name="FileCompareCheckArchiveSameRelativePathOnly" xml:space="preserve"><value>Compare only entries with the same relative path</value></data>
   <data name="FileCompareCheckEarlyExit" xml:space="preserve"><value>Use early exit when selected criteria already differ</value></data>
   <data name="FileCompareCheckHashCache" xml:space="preserve"><value>Use run-level hash cache</value></data>
   <data name="FileCompareLabelNameMode" xml:space="preserve"><value>Name match mode</value></data>
+  <data name="FileCompareLabelCommonNameThresholdMode" xml:space="preserve"><value>Common-name threshold type</value></data>
+  <data name="FileCompareLabelCommonNameThreshold" xml:space="preserve"><value>Common-name threshold</value></data>
   <data name="FileCompareLabelContentMode" xml:space="preserve"><value>Content mode</value></data>
   <data name="FileCompareLabelRangeMode" xml:space="preserve"><value>Comparison range</value></data>
-  <data name="FileCompareLabelRangeBytes" xml:space="preserve"><value>Range bytes</value></data>
+  <data name="FileCompareLabelRangeStart" xml:space="preserve"><value>Range start</value></data>
+  <data name="FileCompareLabelRangeLength" xml:space="preserve"><value>Range length</value></data>
   <data name="FileCompareLabelArchiveOrder" xml:space="preserve"><value>Archive entry order</value></data>
+  <data name="FileCompareLabelArchiveLimitMode" xml:space="preserve"><value>Archive entry scope</value></data>
+  <data name="FileCompareLabelArchiveLimitCount" xml:space="preserve"><value>First entry count</value></data>
   <data name="FileCompareLabelPrefilterPercent" xml:space="preserve"><value>Byte prefilter percent</value></data>
   <data name="FileCompareNameModeExact" xml:space="preserve"><value>Exact filename</value></data>
   <data name="FileCompareNameModeStem" xml:space="preserve"><value>Stem without extension</value></data>
   <data name="FileCompareNameModeRelativePath" xml:space="preserve"><value>Relative path</value></data>
+  <data name="FileCompareNameModeCommon" xml:space="preserve"><value>Common name overlap</value></data>
   <data name="FileCompareNameModeNone" xml:space="preserve"><value>Do not compare names</value></data>
+  <data name="FileCompareCommonNameThresholdCharacters" xml:space="preserve"><value>Minimum characters</value></data>
+  <data name="FileCompareCommonNameThresholdPercent" xml:space="preserve"><value>Minimum percent</value></data>
   <data name="FileCompareContentModeHash" xml:space="preserve"><value>Hash</value></data>
   <data name="FileCompareContentModeByteToByte" xml:space="preserve"><value>Byte-to-byte</value></data>
   <data name="FileCompareRangeFull" xml:space="preserve"><value>Full content</value></data>
   <data name="FileCompareRangeFront" xml:space="preserve"><value>Front bytes</value></data>
   <data name="FileCompareRangeBack" xml:space="preserve"><value>Back bytes</value></data>
-  <data name="FileCompareRangeMiddle" xml:space="preserve"><value>Middle bytes</value></data>
+  <data name="FileCompareRangeMiddle" xml:space="preserve"><value>Middle part</value></data>
   <data name="FileCompareRangeFrontAndBack" xml:space="preserve"><value>Front and back bytes</value></data>
   <data name="FileCompareArchiveModeAsFile" xml:space="preserve"><value>Compare archive file</value></data>
   <data name="FileCompareArchiveModeExtractEntries" xml:space="preserve"><value>Extract entries</value></data>
   <data name="FileCompareArchiveOrderOriginal" xml:space="preserve"><value>Original entry order</value></data>
   <data name="FileCompareArchiveOrderFileName" xml:space="preserve"><value>Filename order</value></data>
+  <data name="FileCompareArchiveLimitAll" xml:space="preserve"><value>All entries</value></data>
+  <data name="FileCompareArchiveLimitFirstN" xml:space="preserve"><value>First N entries</value></data>
   <data name="FileCompareNameModeHelp" xml:space="preserve"><value>Relative path uses the path inside each selected folder.</value></data>
+  <data name="FileCompareCommonNameThresholdModeHelp" xml:space="preserve"><value>Common-name mode can require a minimum character count or a minimum percentage of the shorter name.</value></data>
+  <data name="FileCompareCommonNameThresholdHelp" xml:space="preserve"><value>Enter characters or percent according to the selected threshold type.</value></data>
   <data name="FileCompareContentModeHelp" xml:space="preserve"><value>Byte-to-byte first checks a small leading hash before the full byte pass.</value></data>
-  <data name="FileCompareRangeModeHelp" xml:space="preserve"><value>Partial ranges reduce I/O but affect hash equality.</value></data>
-  <data name="FileCompareRangeBytesHelp" xml:space="preserve"><value>Used by front, back, middle, and front/back range modes.</value></data>
-  <data name="FileCompareArchiveOrderHelp" xml:space="preserve"><value>Used only when ZIP entries are extracted before comparison.</value></data>
+  <data name="FileCompareRangeModeHelp" xml:space="preserve"><value>Partial ranges reduce I/O but affect hash equality. Middle part uses start plus length.</value></data>
+  <data name="FileCompareRangeStartHelp" xml:space="preserve"><value>Used only by middle part range mode.</value></data>
+  <data name="FileCompareRangeBytesHelp" xml:space="preserve"><value>Used by front, back, middle part, and front/back range modes. Changing the unit converts the input value.</value></data>
+  <data name="FileCompareArchiveOrderHelp" xml:space="preserve"><value>Used when ZIP entries are extracted before comparison.</value></data>
+  <data name="FileCompareArchiveLimitModeHelp" xml:space="preserve"><value>Compare all extracted entries or only the first N entries after ordering.</value></data>
+  <data name="FileCompareArchiveLimitCountHelp" xml:space="preserve"><value>Used only when the archive entry scope is first N entries.</value></data>
   <data name="FileComparePrefilterHelp" xml:space="preserve"><value>Percent of the selected range hashed before byte-to-byte comparison starts.</value></data>
   <data name="FileCompareSummaryContentOff" xml:space="preserve"><value>Content off</value></data>
   <data name="SettingsInvalidNumberFormat" xml:space="preserve"><value>Invalid numeric value: {0}</value></data>

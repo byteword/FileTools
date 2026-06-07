@@ -8,7 +8,14 @@ internal enum FileCompareNameMatchMode
     ExactFileName,
     Stem,
     RelativePath,
+    CommonName,
     None
+}
+
+internal enum FileCompareCommonNameThresholdMode
+{
+    Characters,
+    Percent
 }
 
 internal enum FileCompareContentMode
@@ -26,6 +33,13 @@ internal enum FileCompareRangeMode
     FrontAndBackBytes
 }
 
+internal enum FileCompareRangeUnit
+{
+    Bytes,
+    KiB,
+    MiB
+}
+
 internal enum FileCompareArchiveMode
 {
     AsFile,
@@ -36,6 +50,12 @@ internal enum FileCompareArchiveEntryOrder
 {
     Original,
     FileName
+}
+
+internal enum FileCompareArchiveEntryLimitMode
+{
+    All,
+    FirstN
 }
 
 internal enum FileCompareStatus
@@ -52,6 +72,13 @@ internal sealed class FileCompareOptions
 
     public FileCompareNameMatchMode NameMatchMode { get; set; } = FileCompareNameMatchMode.ExactFileName;
 
+    public FileCompareCommonNameThresholdMode CommonNameThresholdMode { get; set; } =
+        FileCompareCommonNameThresholdMode.Characters;
+
+    public int CommonNameMinimumCharacters { get; set; } = 3;
+
+    public double CommonNameMinimumPercent { get; set; } = 0.50;
+
     public bool CompareCreatedTime { get; set; }
 
     public bool CompareModifiedTime { get; set; } = true;
@@ -66,6 +93,10 @@ internal sealed class FileCompareOptions
 
     public long RangeBytes { get; set; } = 1024 * 1024;
 
+    public long RangeOffsetBytes { get; set; }
+
+    public FileCompareRangeUnit RangeUnit { get; set; } = FileCompareRangeUnit.Bytes;
+
     public double PartialMatchThreshold { get; set; } = 0.10;
 
     public bool EnableEarlyExit { get; set; } = true;
@@ -78,12 +109,22 @@ internal sealed class FileCompareOptions
 
     public FileCompareArchiveEntryOrder ArchiveEntryOrder { get; set; } = FileCompareArchiveEntryOrder.FileName;
 
+    public FileCompareArchiveEntryLimitMode ArchiveEntryLimitMode { get; set; } =
+        FileCompareArchiveEntryLimitMode.All;
+
+    public int ArchiveEntryLimitCount { get; set; } = 10;
+
+    public bool ArchiveCompareSameRelativePathOnly { get; set; }
+
     public FileCompareOptions Clone()
     {
         return new FileCompareOptions
         {
             CompareFileName = CompareFileName,
             NameMatchMode = NameMatchMode,
+            CommonNameThresholdMode = CommonNameThresholdMode,
+            CommonNameMinimumCharacters = CommonNameMinimumCharacters,
+            CommonNameMinimumPercent = CommonNameMinimumPercent,
             CompareCreatedTime = CompareCreatedTime,
             CompareModifiedTime = CompareModifiedTime,
             CompareFileSize = CompareFileSize,
@@ -91,12 +132,17 @@ internal sealed class FileCompareOptions
             ContentMode = ContentMode,
             RangeMode = RangeMode,
             RangeBytes = RangeBytes,
+            RangeOffsetBytes = RangeOffsetBytes,
+            RangeUnit = RangeUnit,
             PartialMatchThreshold = PartialMatchThreshold,
             EnableEarlyExit = EnableEarlyExit,
             UseHashCache = UseHashCache,
             ByteToBytePrefilterRatio = ByteToBytePrefilterRatio,
             ArchiveMode = ArchiveMode,
-            ArchiveEntryOrder = ArchiveEntryOrder
+            ArchiveEntryOrder = ArchiveEntryOrder,
+            ArchiveEntryLimitMode = ArchiveEntryLimitMode,
+            ArchiveEntryLimitCount = ArchiveEntryLimitCount,
+            ArchiveCompareSameRelativePathOnly = ArchiveCompareSameRelativePathOnly
         };
     }
 }
@@ -141,6 +187,10 @@ internal static class FileCompareOperations
     private static readonly StringComparer EntryNameComparer = OperatingSystem.IsWindows()
         ? StringComparer.OrdinalIgnoreCase
         : StringComparer.Ordinal;
+
+    private static readonly StringComparison EntryNameComparison = OperatingSystem.IsWindows()
+        ? StringComparison.OrdinalIgnoreCase
+        : StringComparison.Ordinal;
 
     public static FileCompareReport Compare(
         IEnumerable<string> paths,
@@ -273,15 +323,13 @@ internal static class FileCompareOperations
     {
         if (options.CompareFileName && options.NameMatchMode != FileCompareNameMatchMode.None)
         {
-            var leftName = GetNameForComparison(left, options.NameMatchMode);
-            var rightName = GetNameForComparison(right, options.NameMatchMode);
-            var sameName = EntryNameComparer.Equals(leftName, rightName);
-            criteria.Add(new FileCompareCriterionResult(
+            var nameResult = CompareNames(
                 "File name",
-                sameName ? FileCompareStatus.Same : FileCompareStatus.Different,
-                sameName ? 1 : 0,
-                $"{leftName} <-> {rightName}"));
-            if (!sameName && options.EnableEarlyExit)
+                GetNameForComparison(left, options.NameMatchMode),
+                GetNameForComparison(right, options.NameMatchMode),
+                options);
+            criteria.Add(nameResult);
+            if (nameResult.Status != FileCompareStatus.Same && options.EnableEarlyExit)
             {
                 return CreatePairResult(left, right, criteria, options.PartialMatchThreshold);
             }
@@ -341,18 +389,38 @@ internal static class FileCompareOperations
     {
         using var leftArchive = ZipFile.OpenRead(left.Path);
         using var rightArchive = ZipFile.OpenRead(right.Path);
-        var leftEntries = GetArchiveEntries(leftArchive, options.ArchiveEntryOrder);
-        var rightEntries = GetArchiveEntries(rightArchive, options.ArchiveEntryOrder);
-        var pairedCount = Math.Min(leftEntries.Count, rightEntries.Count);
+        var leftEntries = GetArchiveEntries(leftArchive, options);
+        var rightEntries = GetArchiveEntries(rightArchive, options);
         var entryCriteria = new List<FileCompareCriterionResult>();
 
-        if (leftEntries.Count != rightEntries.Count)
+        IReadOnlyList<(ZipArchiveEntry Left, ZipArchiveEntry Right)> pairedEntries;
+        if (options.ArchiveCompareSameRelativePathOnly)
+        {
+            pairedEntries = PairEntriesByRelativePath(leftEntries, rightEntries, entryCriteria, options);
+        }
+        else
+        {
+            var pairedCount = Math.Min(leftEntries.Count, rightEntries.Count);
+            pairedEntries = Enumerable.Range(0, pairedCount)
+                .Select(index => (leftEntries[index], rightEntries[index]))
+                .ToArray();
+            if (leftEntries.Count != rightEntries.Count)
+            {
+                entryCriteria.Add(new FileCompareCriterionResult(
+                    "Archive entry count",
+                    FileCompareStatus.Different,
+                    0,
+                    $"{leftEntries.Count} <-> {rightEntries.Count}"));
+            }
+        }
+
+        if (options.ArchiveEntryLimitMode == FileCompareArchiveEntryLimitMode.FirstN)
         {
             entryCriteria.Add(new FileCompareCriterionResult(
-                "Archive entry count",
-                FileCompareStatus.Different,
-                0,
-                $"{leftEntries.Count} <-> {rightEntries.Count}"));
+                "Archive entry selection",
+                FileCompareStatus.Same,
+                1,
+                $"First {options.ArchiveEntryLimitCount} entries selected."));
         }
 
         if (options.CompareCreatedTime)
@@ -365,11 +433,10 @@ internal static class FileCompareOperations
         }
 
         var cache = new FileCompareHashCache(enabled: false);
-        for (var index = 0; index < pairedCount; index++)
+        for (var index = 0; index < pairedEntries.Count; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var leftEntry = leftEntries[index];
-            var rightEntry = rightEntries[index];
+            var (leftEntry, rightEntry) = pairedEntries[index];
             CompareArchiveEntry(index, leftEntry, rightEntry, options, entryCriteria, cache, cancellationToken);
         }
 
@@ -377,9 +444,54 @@ internal static class FileCompareOperations
             "Archive entries",
             GetAggregateStatus(entryCriteria, options.PartialMatchThreshold),
             CalculateAverageRatio(entryCriteria),
-            $"{leftEntries.Count} entries <-> {rightEntries.Count} entries ({options.ArchiveEntryOrder})"));
+            CreateArchiveDetail(leftEntries.Count, rightEntries.Count, options)));
         criteria.AddRange(entryCriteria);
         return CreatePairResult(left, right, criteria, options.PartialMatchThreshold);
+    }
+
+    private static IReadOnlyList<(ZipArchiveEntry Left, ZipArchiveEntry Right)> PairEntriesByRelativePath(
+        IReadOnlyList<ZipArchiveEntry> leftEntries,
+        IReadOnlyList<ZipArchiveEntry> rightEntries,
+        List<FileCompareCriterionResult> criteria,
+        FileCompareOptions options)
+    {
+        var usedRightIndexes = new HashSet<int>();
+        var pairs = new List<(ZipArchiveEntry Left, ZipArchiveEntry Right)>();
+        for (var leftIndex = 0; leftIndex < leftEntries.Count; leftIndex++)
+        {
+            var leftName = NormalizeEntryPath(leftEntries[leftIndex].FullName);
+            var rightIndex = -1;
+            for (var candidateIndex = 0; candidateIndex < rightEntries.Count; candidateIndex++)
+            {
+                if (usedRightIndexes.Contains(candidateIndex))
+                {
+                    continue;
+                }
+
+                if (EntryNameComparer.Equals(leftName, NormalizeEntryPath(rightEntries[candidateIndex].FullName)))
+                {
+                    rightIndex = candidateIndex;
+                    break;
+                }
+            }
+
+            if (rightIndex < 0)
+            {
+                continue;
+            }
+
+            usedRightIndexes.Add(rightIndex);
+            pairs.Add((leftEntries[leftIndex], rightEntries[rightIndex]));
+        }
+
+        var totalDistinct = Math.Max(leftEntries.Count, rightEntries.Count);
+        var ratio = totalDistinct == 0 ? 1 : Math.Clamp((double)pairs.Count / totalDistinct, 0, 1);
+        criteria.Add(new FileCompareCriterionResult(
+            "Archive same relative path",
+            ratio >= 1 ? FileCompareStatus.Same : GetThresholdStatus(ratio, options.PartialMatchThreshold),
+            ratio,
+            $"{pairs.Count} matching relative paths from {leftEntries.Count} <-> {rightEntries.Count} entries."));
+        return pairs;
     }
 
     private static void CompareArchiveEntry(
@@ -394,15 +506,13 @@ internal static class FileCompareOperations
         var prefix = $"Entry {index + 1}";
         if (options.CompareFileName && options.NameMatchMode != FileCompareNameMatchMode.None)
         {
-            var leftName = GetEntryNameForComparison(leftEntry.FullName, options.NameMatchMode);
-            var rightName = GetEntryNameForComparison(rightEntry.FullName, options.NameMatchMode);
-            var sameName = EntryNameComparer.Equals(leftName, rightName);
-            criteria.Add(new FileCompareCriterionResult(
+            var nameResult = CompareNames(
                 prefix + " name",
-                sameName ? FileCompareStatus.Same : FileCompareStatus.Different,
-                sameName ? 1 : 0,
-                $"{leftName} <-> {rightName}"));
-            if (!sameName && options.EnableEarlyExit)
+                GetEntryNameForComparison(leftEntry.FullName, options.NameMatchMode),
+                GetEntryNameForComparison(rightEntry.FullName, options.NameMatchMode),
+                options);
+            criteria.Add(nameResult);
+            if (nameResult.Status != FileCompareStatus.Same && options.EnableEarlyExit)
             {
                 return;
             }
@@ -738,7 +848,10 @@ internal static class FileCompareOperations
         {
             FileCompareRangeMode.FrontBytes => new List<ContentRange> { new(0, rangeLength) },
             FileCompareRangeMode.BackBytes => new List<ContentRange> { new(length - rangeLength, rangeLength) },
-            FileCompareRangeMode.MiddleBytes => new List<ContentRange> { new(Math.Max(0, (length - rangeLength) / 2), rangeLength) },
+            FileCompareRangeMode.MiddleBytes => new List<ContentRange>
+            {
+                new(Math.Min(length, Math.Max(0, options.RangeOffsetBytes)), rangeLength)
+            },
             FileCompareRangeMode.FrontAndBackBytes => new List<ContentRange>
             {
                 new(0, rangeLength),
@@ -866,6 +979,7 @@ internal static class FileCompareOperations
         {
             FileCompareNameMatchMode.Stem => Path.GetFileNameWithoutExtension(target.RelativePath),
             FileCompareNameMatchMode.RelativePath => target.RelativePath.Replace('\\', '/'),
+            FileCompareNameMatchMode.CommonName => Path.GetFileNameWithoutExtension(target.RelativePath),
             FileCompareNameMatchMode.None => "",
             _ => Path.GetFileName(target.RelativePath)
         };
@@ -880,6 +994,7 @@ internal static class FileCompareOperations
         {
             FileCompareNameMatchMode.Stem => System.IO.Path.GetFileNameWithoutExtension(fileName),
             FileCompareNameMatchMode.RelativePath => normalized,
+            FileCompareNameMatchMode.CommonName => System.IO.Path.GetFileNameWithoutExtension(fileName),
             FileCompareNameMatchMode.None => "",
             _ => fileName
         };
@@ -887,14 +1002,22 @@ internal static class FileCompareOperations
 
     private static IReadOnlyList<ZipArchiveEntry> GetArchiveEntries(
         ZipArchive archive,
-        FileCompareArchiveEntryOrder order)
+        FileCompareOptions options)
     {
-        var entries = archive.Entries
+        IEnumerable<ZipArchiveEntry> entries = archive.Entries
             .Where(static entry => !string.IsNullOrWhiteSpace(entry.Name))
             .ToList();
-        return order == FileCompareArchiveEntryOrder.FileName
-            ? entries.OrderBy(static entry => entry.FullName, EntryNameComparer).ToList()
-            : entries;
+        if (options.ArchiveEntryOrder == FileCompareArchiveEntryOrder.FileName)
+        {
+            entries = entries.OrderBy(static entry => entry.FullName, EntryNameComparer);
+        }
+
+        if (options.ArchiveEntryLimitMode == FileCompareArchiveEntryLimitMode.FirstN)
+        {
+            entries = entries.Take(options.ArchiveEntryLimitCount);
+        }
+
+        return entries.ToList();
     }
 
     private static bool IsSupportedArchiveContentPath(string path)
@@ -915,9 +1038,13 @@ internal static class FileCompareOperations
     private static FileCompareOptions NormalizeOptions(FileCompareOptions? options)
     {
         var normalized = options?.Clone() ?? new FileCompareOptions();
+        normalized.CommonNameMinimumCharacters = Math.Max(1, normalized.CommonNameMinimumCharacters);
+        normalized.CommonNameMinimumPercent = Math.Clamp(normalized.CommonNameMinimumPercent, 0.01, 1);
         normalized.RangeBytes = Math.Max(1, normalized.RangeBytes);
+        normalized.RangeOffsetBytes = Math.Max(0, normalized.RangeOffsetBytes);
         normalized.PartialMatchThreshold = Math.Clamp(normalized.PartialMatchThreshold, 0.10, 1);
         normalized.ByteToBytePrefilterRatio = Math.Clamp(normalized.ByteToBytePrefilterRatio, 0, 1);
+        normalized.ArchiveEntryLimitCount = Math.Max(1, normalized.ArchiveEntryLimitCount);
         if (!normalized.CompareFileName &&
             !normalized.CompareCreatedTime &&
             !normalized.CompareModifiedTime &&
@@ -928,6 +1055,103 @@ internal static class FileCompareOperations
         }
 
         return normalized;
+    }
+
+    private static FileCompareCriterionResult CompareNames(
+        string criterionName,
+        string leftName,
+        string rightName,
+        FileCompareOptions options)
+    {
+        if (options.NameMatchMode != FileCompareNameMatchMode.CommonName)
+        {
+            var sameName = EntryNameComparer.Equals(leftName, rightName);
+            return new FileCompareCriterionResult(
+                criterionName,
+                sameName ? FileCompareStatus.Same : FileCompareStatus.Different,
+                sameName ? 1 : 0,
+                $"{leftName} <-> {rightName}");
+        }
+
+        var common = FindLongestCommonSubstring(leftName, rightName);
+        var shortestLength = Math.Min(leftName.Length, rightName.Length);
+        var ratio = shortestLength == 0 ? 0 : Math.Clamp((double)common.Length / shortestLength, 0, 1);
+        var same = options.CommonNameThresholdMode == FileCompareCommonNameThresholdMode.Percent
+            ? ratio >= options.CommonNameMinimumPercent
+            : common.Length >= options.CommonNameMinimumCharacters;
+        var detail = options.CommonNameThresholdMode == FileCompareCommonNameThresholdMode.Percent
+            ? $"{leftName} <-> {rightName}; common=\"{common.Value}\" ({ratio:P1})"
+            : $"{leftName} <-> {rightName}; common=\"{common.Value}\" ({common.Length} chars)";
+        return new FileCompareCriterionResult(
+            criterionName,
+            same ? FileCompareStatus.Same : FileCompareStatus.Different,
+            ratio,
+            detail);
+    }
+
+    private static (string Value, int Length) FindLongestCommonSubstring(string left, string right)
+    {
+        if (left.Length == 0 || right.Length == 0)
+        {
+            return ("", 0);
+        }
+
+        var previous = new int[right.Length + 1];
+        var current = new int[right.Length + 1];
+        var bestLength = 0;
+        var bestEnd = 0;
+        for (var leftIndex = 1; leftIndex <= left.Length; leftIndex++)
+        {
+            Array.Clear(current, 0, current.Length);
+            for (var rightIndex = 1; rightIndex <= right.Length; rightIndex++)
+            {
+                if (!string.Equals(
+                        left[(leftIndex - 1)..leftIndex],
+                        right[(rightIndex - 1)..rightIndex],
+                        EntryNameComparison))
+                {
+                    continue;
+                }
+
+                current[rightIndex] = previous[rightIndex - 1] + 1;
+                if (current[rightIndex] > bestLength)
+                {
+                    bestLength = current[rightIndex];
+                    bestEnd = leftIndex;
+                }
+            }
+
+            (previous, current) = (current, previous);
+        }
+
+        return bestLength == 0
+            ? ("", 0)
+            : (left.Substring(bestEnd - bestLength, bestLength), bestLength);
+    }
+
+    private static FileCompareStatus GetThresholdStatus(double ratio, double partialMatchThreshold)
+    {
+        return ratio >= 1
+            ? FileCompareStatus.Same
+            : ratio >= partialMatchThreshold
+                ? FileCompareStatus.PartialMatch
+                : FileCompareStatus.Different;
+    }
+
+    private static string NormalizeEntryPath(string entryPath)
+    {
+        return entryPath.Replace('\\', '/').TrimEnd('/');
+    }
+
+    private static string CreateArchiveDetail(int leftCount, int rightCount, FileCompareOptions options)
+    {
+        var limit = options.ArchiveEntryLimitMode == FileCompareArchiveEntryLimitMode.FirstN
+            ? $", first {options.ArchiveEntryLimitCount}"
+            : "";
+        var pairMode = options.ArchiveCompareSameRelativePathOnly
+            ? ", same relative paths only"
+            : "";
+        return $"{leftCount} entries <-> {rightCount} entries ({options.ArchiveEntryOrder}{limit}{pairMode})";
     }
 
     private readonly record struct ContentRange(long Offset, long Length);
@@ -980,8 +1204,18 @@ internal static class FileCompareText
             FileCompareNameMatchMode.ExactFileName => Localizer.Get("FileCompareNameModeExact"),
             FileCompareNameMatchMode.Stem => Localizer.Get("FileCompareNameModeStem"),
             FileCompareNameMatchMode.RelativePath => Localizer.Get("FileCompareNameModeRelativePath"),
+            FileCompareNameMatchMode.CommonName => Localizer.Get("FileCompareNameModeCommon"),
             FileCompareNameMatchMode.None => Localizer.Get("FileCompareNameModeNone"),
             _ => mode.ToString()
+        };
+    }
+
+    public static string GetDisplayName(FileCompareCommonNameThresholdMode mode)
+    {
+        return mode switch
+        {
+            FileCompareCommonNameThresholdMode.Percent => Localizer.Get("FileCompareCommonNameThresholdPercent"),
+            _ => Localizer.Get("FileCompareCommonNameThresholdCharacters")
         };
     }
 
@@ -1006,6 +1240,16 @@ internal static class FileCompareText
         };
     }
 
+    public static string GetDisplayName(FileCompareRangeUnit unit)
+    {
+        return unit switch
+        {
+            FileCompareRangeUnit.KiB => "KiB",
+            FileCompareRangeUnit.MiB => "MiB",
+            _ => "bytes"
+        };
+    }
+
     public static string GetDisplayName(FileCompareArchiveMode mode)
     {
         return mode switch
@@ -1021,6 +1265,15 @@ internal static class FileCompareText
         {
             FileCompareArchiveEntryOrder.Original => Localizer.Get("FileCompareArchiveOrderOriginal"),
             _ => Localizer.Get("FileCompareArchiveOrderFileName")
+        };
+    }
+
+    public static string GetDisplayName(FileCompareArchiveEntryLimitMode mode)
+    {
+        return mode switch
+        {
+            FileCompareArchiveEntryLimitMode.FirstN => Localizer.Get("FileCompareArchiveLimitFirstN"),
+            _ => Localizer.Get("FileCompareArchiveLimitAll")
         };
     }
 
@@ -1040,11 +1293,45 @@ internal static class FileCompareText
     {
         return keepMode switch
         {
+            FileCompareDuplicateKeepMode.LargestSizeOldestCreated => Localizer.Get("FileCompareKeepLargestSizeOldestCreated"),
             FileCompareDuplicateKeepMode.NewestModified => Localizer.Get("FileCompareKeepNewestModified"),
             FileCompareDuplicateKeepMode.OldestModified => Localizer.Get("FileCompareKeepOldestModified"),
             FileCompareDuplicateKeepMode.ShortestPath => Localizer.Get("FileCompareKeepShortestPath"),
             FileCompareDuplicateKeepMode.LongestPath => Localizer.Get("FileCompareKeepLongestPath"),
             _ => Localizer.Get("FileCompareKeepComparisonOrder")
+        };
+    }
+
+    public static long ConvertRangeValueToBytes(long value, FileCompareRangeUnit unit)
+    {
+        var multiplier = GetRangeUnitMultiplier(unit);
+        if (value > long.MaxValue / multiplier)
+        {
+            return long.MaxValue;
+        }
+
+        return Math.Max(0, value) * multiplier;
+    }
+
+    public static long ConvertBytesToRangeValue(long bytes, FileCompareRangeUnit unit)
+    {
+        var multiplier = GetRangeUnitMultiplier(unit);
+        if (multiplier <= 1)
+        {
+            return Math.Max(0, bytes);
+        }
+
+        var normalized = Math.Max(0, bytes);
+        return (normalized / multiplier) + (normalized % multiplier == 0 ? 0 : 1);
+    }
+
+    private static long GetRangeUnitMultiplier(FileCompareRangeUnit unit)
+    {
+        return unit switch
+        {
+            FileCompareRangeUnit.KiB => 1024,
+            FileCompareRangeUnit.MiB => 1024 * 1024,
+            _ => 1
         };
     }
 }

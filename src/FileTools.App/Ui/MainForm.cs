@@ -142,6 +142,7 @@ public sealed partial class MainForm : Form
         _compareSelectedToolButton.Click += (_, _) => OpenFileCompareDialog();
         _showCompareProgressToolButton.Click += (_, _) => ShowFileCompareProgressDialog();
         _addRelocationToolButton.Click += (_, _) => AddStep(CreateAutoRelocationStep());
+        _editStepToolButton.Click += (_, _) => EditSelectedStep();
         _removeStepToolButton.Click += (_, _) => RemoveSelectedStep();
         _clearStepsToolButton.Click += (_, _) => ClearSelectedTargetSteps();
         _runStopButton.Click += (_, _) => RunOrStopPlan();
@@ -219,6 +220,8 @@ public sealed partial class MainForm : Form
         _showCompareProgressToolButton.ToolTipText = Localizer.Get("ToolTipShowCompareProgress");
         _addRelocationToolButton.Text = Localizer.Get("ButtonAddRelocationStep");
         _addRelocationToolButton.ToolTipText = Localizer.Get("ToolTipAddRelocation");
+        _editStepToolButton.Text = Localizer.Get("ButtonEditStep");
+        _editStepToolButton.ToolTipText = Localizer.Get("ToolTipEditStep");
         _removeStepToolButton.Text = Localizer.Get("ButtonRemoveStep");
         _removeStepToolButton.ToolTipText = Localizer.Get("ToolTipRemoveStep");
         _clearStepsToolButton.Text = Localizer.Get("ButtonClearSteps");
@@ -279,6 +282,7 @@ public sealed partial class MainForm : Form
         _compareSelectedToolButton.Image = UiIconFactory.Compare;
         _showCompareProgressToolButton.Image = UiIconFactory.Compare;
         _addRelocationToolButton.Image = UiIconFactory.Relocate;
+        _editStepToolButton.Image = UiIconFactory.Rename;
         _removeStepToolButton.Image = UiIconFactory.RemoveStep;
         _clearStepsToolButton.Image = UiIconFactory.Clear;
     }
@@ -595,31 +599,22 @@ public sealed partial class MainForm : Form
         AppendLog(Localizer.Format("FileCompareResultTargetsAddedFormat", paths.Count));
     }
 
-    private void AddDuplicateDeleteStepsFromCompare(IReadOnlyList<string> paths)
+    private void AddDuplicateDeleteStepsFromCompare(FileCompareDuplicateDeleteHandoff handoff)
     {
-        AddPaths(paths);
-        var comparer = OperatingSystem.IsWindows()
-            ? StringComparer.OrdinalIgnoreCase
-            : StringComparer.Ordinal;
-        var pathSet = paths.ToHashSet(comparer);
-        var affected = _targets
-            .Where(target => pathSet.Contains(target.Path))
-            .Where(static target => File.Exists(target.Path))
-            .ToArray();
-        foreach (var target in affected)
+        AddPaths(handoff.AllPaths);
+        foreach (var group in handoff.Groups)
         {
-            if (target.Steps.Any(static step => step.Kind == WorkPlanStepKind.DuplicateDelete))
-            {
-                continue;
-            }
-
-            target.Steps.Add(new WorkPlanStep { Kind = WorkPlanStepKind.DuplicateDelete });
+            DuplicateDeleteStepSelection.Apply(_targets, group.DeletePaths, group.Paths);
         }
 
         RefreshTargetGridRows();
         RefreshPlanList();
         UpdateCommandStates();
-        AppendLog(Localizer.Format("DuplicateDeleteStepsAddedFormat", affected.Length));
+        AppendLog(Localizer.Format(
+            "DuplicateDeleteStepsAddedFormat",
+            handoff.DeletePaths.Count,
+            handoff.AllPaths.Count - handoff.DeletePaths.Count,
+            handoff.AllPaths.Count));
     }
 
     private void ShowFileCompareProgressDialog()
@@ -821,12 +816,52 @@ public sealed partial class MainForm : Form
             return;
         }
 
+        if (step.Kind == WorkPlanStepKind.DuplicateDelete)
+        {
+            EditDuplicateDeleteSteps(step);
+            return;
+        }
+
         if (EditStep(step))
         {
             RefreshTargetGridRows();
             RefreshPlanList();
             UpdateCommandStates();
         }
+    }
+
+    private void EditDuplicateDeleteSteps(WorkPlanStep step)
+    {
+        var scopePaths = step.DuplicateDeleteGroupPaths.Count > 0
+            ? step.DuplicateDeleteGroupPaths
+            : _targets.Select(static target => target.Path).ToArray();
+        var candidates = DuplicateDeleteStepSelection.CreateCandidates(_targets, scopePaths);
+        if (candidates.Count == 0)
+        {
+            MessageBox.Show(
+                Localizer.Get("DuplicateDeleteDialogNoFileTargets"),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            return;
+        }
+
+        using var dialog = new DuplicateDeleteStepDialog(candidates);
+        if (dialog.ShowDialog(this) != DialogResult.OK)
+        {
+            return;
+        }
+
+        var deletePaths = dialog.DeletePaths;
+        var changedTargets = DuplicateDeleteStepSelection.Apply(_targets, deletePaths, scopePaths);
+        RefreshTargetGridRows();
+        RefreshPlanList();
+        UpdateCommandStates();
+        AppendLog(Localizer.Format(
+            "DuplicateDeleteSelectionAppliedFormat",
+            deletePaths.Count,
+            candidates.Count - deletePaths.Count,
+            changedTargets));
     }
 
     private bool EditStep(WorkPlanStep step)
@@ -1357,7 +1392,8 @@ public sealed partial class MainForm : Form
                        selectedTargets.Length >= 2 &&
                        selectedTargets.All(IsExistingTarget) &&
                        selectedTargets.All(static target => target.Steps.Count == 0);
-        var canRemoveStep = canModify && GetSelectedStep() is not null;
+        var canEditStep = canModify && GetSelectedStep() is not null;
+        var canRemoveStep = canEditStep;
         var canClearSteps = canModify && selectedTarget?.Steps.Count > 0;
         var canRun = hasTargets && anyPlannedSteps;
 
@@ -1394,6 +1430,7 @@ public sealed partial class MainForm : Form
         _compareSelectedToolButton.Enabled = canCompare;
         _showCompareProgressToolButton.Enabled = canShowCompareProgress;
         _addRelocationToolButton.Enabled = canRelocate;
+        _editStepToolButton.Enabled = canEditStep;
         _removeStepToolButton.Enabled = canRemoveStep;
         _clearStepsToolButton.Enabled = canClearSteps;
         _runStopButton.Enabled = isExecuting ? !cancellationPending : canRun;

@@ -44,6 +44,8 @@ internal sealed class WorkPlanStep
 
     public ArchiveMergeOptions? ArchiveMergeOptions { get; set; }
 
+    public IReadOnlyList<string> DuplicateDeleteGroupPaths { get; set; } = [];
+
     public string DisplayName => Kind switch
     {
         WorkPlanStepKind.FileNameCorrection => ToolModeText.GetDisplayName(ToolMode.FileNameCorrection),
@@ -65,7 +67,8 @@ internal sealed class WorkPlanStep
             ManualRenameFileName = ManualRenameFileName,
             AutoRelocationTemplateId = AutoRelocationTemplateId,
             ManualTargetRootPath = ManualTargetRootPath,
-            ArchiveMergeOptions = ArchiveMergeOptions?.Clone()
+            ArchiveMergeOptions = ArchiveMergeOptions?.Clone(),
+            DuplicateDeleteGroupPaths = DuplicateDeleteGroupPaths.ToArray()
         };
     }
 

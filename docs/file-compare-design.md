@@ -35,10 +35,15 @@ Duplicate physical paths are removed before pair generation.
   - exact filename
   - stem without extension
   - relative path
+  - common name overlap
   - none
 
 Relative path mode is useful when selected folders should keep their internal
 folder context while still comparing files one by one.
+
+Common name overlap finds the longest common substring in the comparison names.
+The threshold can be a minimum character count or a minimum percentage of the
+shorter name.
 
 ### Metadata
 
@@ -58,14 +63,19 @@ exit is enabled, content comparison for that pair is skipped.
   - full content
   - front N bytes
   - back N bytes
-  - middle N bytes
+  - middle part, using start offset plus length
   - front and back N bytes each
+  - byte / KiB / MiB display units, normalized to bytes for execution
 - Archive handling:
   - compare archive file as a normal file
   - extract ZIP entries and compare entry contents
 - Archive entry order:
   - original entry order
   - filename order
+- Archive extraction scope:
+  - all extracted entries
+  - first N entries after ordering
+  - optionally compare only entries with the same relative path
 
 The current archive-content comparison supports ZIP input. Broader archive
 reader work, including 7Z input policy, remains tracked by issue #8.
@@ -108,8 +118,19 @@ The result dialog is the handoff point for follow-up work:
 - Duplicate groups can keep the first comparison-order item, newest modified
   item, oldest modified item, shortest path, or longest path. The remaining
   paths become delete candidates.
+- The default duplicate-delete keep rule preserves the largest file, then the
+  oldest created file when sizes match. Delete candidates are ordered by smaller
+  file size, then newer creation time.
 - Delete candidates can be copied or sent to the main work plan as
-  `DuplicateDelete` steps. The step moves files to the Recycle Bin only.
+  `DuplicateDelete` steps. The handoff sends every path in the selected
+  duplicate group to the main target list, but applies `DuplicateDelete` only to
+  delete candidates. Kept files remain visible in the editor without a delete
+  step. The step preview labels the file as a delete candidate and moves files
+  to the Recycle Bin only.
+- Double-clicking a `DuplicateDelete` step, or pressing the work-plan edit
+  button, opens a two-pane delete/keep editor for all current file targets. The
+  left pane is the Recycle-Bin delete set and the right pane is the keep set, so
+  the user can explicitly move files between outcomes before execution.
 - The selected pair can be copied, sent to the main target list, or opened in
   Explorer.
 - Results can be exported to JSON on demand. The JSON document includes a
@@ -129,12 +150,16 @@ Implemented on 2026-06-07:
 - `FileCompareOptions` option model.
 - Pairwise file/folder target collection.
 - Filename, created time, modified time, size, hash, and byte-to-byte criteria.
-- Full/front/back/middle/front-and-back content ranges.
+- Common-name filename matching with character or percent thresholds.
+- Full/front/back/middle-part/front-and-back content ranges, including middle
+  start offset plus length and byte/KiB/MiB display units.
 - Byte-to-byte 10% leading-range hash prefilter.
 - Per-run hash cache for file hash comparisons.
-- ZIP entry content comparison with original-order or filename-order pairing.
+- ZIP entry content comparison with original-order or filename-order pairing,
+  optional first-N entry scope, and optional same-relative-path entry pairing.
 - Automated tests for folder expansion, partial match threshold, byte prefilter,
-  hash cache reuse, and archive entry ordering.
+  hash cache reuse, archive entry ordering, common-name matching,
+  middle-part ranges, archive entry scoping, and range unit conversion.
 - Selected-target compare command from the main Tasks menu and action toolbar.
 - Dedicated file compare dialog for target collection and per-run options.
 - Grouped settings UI for file name, metadata, content, and other options.
@@ -150,14 +175,27 @@ Implemented on 2026-06-07:
 - Internal-only Explorer command route: `/context FileCompare "%1"` queues
   selected files/folders, opens the main window, and preloads the dedicated file
   compare dialog. It is intentionally not registered or exposed in settings yet.
+- Duplicate-delete step editor opened by double-clicking the work-plan step or
+  pressing the edit step button, with separate delete-target and keep-target
+  panes plus Recycle-Bin-only behavior.
+- Duplicate-delete result handoff now includes the kept same-content file in the
+  main target list so the step editor can show both delete and keep outcomes.
+- Duplicate-delete steps store their source duplicate group paths and editor
+  changes resynchronize that whole group before adding the selected delete
+  steps, preventing stale delete steps from remaining on the previous target.
 - Automated tests for duplicate group construction and metadata-only match
   exclusion.
 - Automated tests for duplicate keep-mode ordering and JSON export schema.
+- Automated tests for duplicate-delete step selection synchronization and
+  delete-candidate preview text.
 
 ## Remaining Work
 
 - Add JSON result import and result-dialog reload support.
 - Add manual UI validation feedback from large mixed file sets.
+- Manually validate the expanded file compare option UI and two-pane
+  duplicate-delete step editor with small and narrow window sizes, including the
+  result dialog action panel splitter.
 - After manual smoke testing of `/context FileCompare`, decide whether to expose
   the command through Explorer registration, settings, and the native ShellExt
   submenu.
