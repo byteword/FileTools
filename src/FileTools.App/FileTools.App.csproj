@@ -7,7 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>FileTools</AssemblyName>
     <RootNamespace>FileTools</RootNamespace>
-    <FileToolsVersion Condition="'$(FileToolsVersion)' == ''">1.2.0.0</FileToolsVersion>
+    <FileToolsVersion Condition="'$(FileToolsVersion)' == ''">1.3.0.0</FileToolsVersion>
     <Version>$(FileToolsVersion)</Version>
     <AssemblyVersion>$(FileToolsVersion)</AssemblyVersion>
     <FileVersion>$(FileToolsVersion)</FileVersion>
@@ -70,7 +70,7 @@
   <Target Name="GenerateFileToolsApplicationManifest" BeforeTargets="GenerateApplicationManifest;CoreCompile">
     <MakeDir Directories="$(IntermediateOutputPath)" />
     <PropertyGroup>
-      <FileToolsApplicationManifestText>$([System.IO.File]::ReadAllText('$(FileToolsManifestTemplate)').Replace('version="1.2.0.0"', 'version="$(FileToolsVersion)"'))</FileToolsApplicationManifestText>
+      <FileToolsApplicationManifestText>$([System.IO.File]::ReadAllText('$(FileToolsManifestTemplate)').Replace('__FILETOOLS_VERSION__', '$(FileToolsVersion)'))</FileToolsApplicationManifestText>
     </PropertyGroup>
     <WriteLinesToFile
       File="$(ApplicationManifest)"

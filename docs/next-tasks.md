@@ -98,7 +98,13 @@ Scope reviewed:
   `build_msi.ps1 -Version v1.2.0.3` check completed with 0 warnings and 0
   errors after sandbox escalation for Windows SDK access, and the generated app
   manifest, app EXE, MSI `ProductVersion`, Burn setup EXE, and sparse MSIX
-  identity all reported `1.2.0.3`.
+  identity all reported `1.2.0.3`. The next beta release target is
+  `v1.3.0.0`, with repository docs, wiki docs, and tag-specific release notes
+  updated before tagging.
+- Ran the `v1.3.0.0` beta release build check on 2026-06-07:
+  `build_msi.ps1 -Version v1.3.0.0` completed with 0 warnings and 0 errors,
+  and the generated app manifest, app EXE, MSI `ProductVersion`, Burn setup
+  EXE, and sparse MSIX identity all reported `1.3.0.0`.
 
 ## Deferred Follow-Up Tracks
 
@@ -125,6 +131,8 @@ Scope reviewed:
    - Decide whether ZIP32 limits are acceptable for the first release or whether Zip64 output support must be added before release.
 
 2. Finalize the next release notes.
+   - `docs/release-notes/v1.3.0.0.md` is the beta release-note document for the
+     next tag.
    - Binary, generated app manifest, MSI, Burn bundle, and sparse MSIX identity
      versions are injected from the release tag through `build_msi.ps1`. Before
      tagging, update only user-facing release documentation such as the README

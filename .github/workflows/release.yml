@@ -4,11 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: Existing release tag to build, for example v1.2.0.0.
+        description: Existing release tag to build, for example v1.3.0.0.
         required: true
         type: string
       draft:
         description: Create a draft GitHub Release.
+        required: true
+        default: true
+        type: boolean
+      prerelease:
+        description: Mark the GitHub Release as a prerelease/beta.
         required: true
         default: true
         type: boolean
@@ -59,7 +64,7 @@ jobs:
           $tag = '${{ inputs.tag_name }}'
           $version = $tag -replace '^v', ''
           if ($version -notmatch '^\d+\.\d+\.\d+\.\d+$') {
-            throw "Release tag '$tag' must use v<major>.<minor>.<build>.<revision>, for example v1.2.0.1."
+            throw "Release tag '$tag' must use v<major>.<minor>.<build>.<revision>, for example v1.3.0.0."
           }
 
           ./build_msi.ps1 -Version $version
@@ -71,7 +76,7 @@ jobs:
           $tag = '${{ inputs.tag_name }}'
           $version = $tag -replace '^v', ''
           if ($version -notmatch '^\d+\.\d+\.\d+\.\d+$') {
-            throw "Release tag '$tag' must use v<major>.<minor>.<build>.<revision>, for example v1.2.0.1."
+            throw "Release tag '$tag' must use v<major>.<minor>.<build>.<revision>, for example v1.3.0.0."
           }
 
           $dist = Join-Path $PWD 'artifacts\release'
@@ -115,6 +120,7 @@ jobs:
           - checksums.txt: SHA256 hashes for the release assets.
 
           These assets are signed with the FileTools self-signed certificate. Windows does not trust this certificate by default.
+          If this GitHub Release is marked as prerelease, treat it as a beta validation release until a later stable release is published.
           Setup installs the Windows 11 native context menu support files only. FileTools settings can import the certificate into the current user's Trusted People store and register the sparse package identity when the user explicitly chooses that action.
           Verify the SHA256 hashes and GitHub artifact attestations before installing.
           "@
@@ -157,7 +163,17 @@ jobs:
           gh release view $tag 2>$null
           if ($LASTEXITCODE -eq 0) {
             gh release upload $tag @assets --clobber
-            exit $LASTEXITCODE
+            $uploadExitCode = $LASTEXITCODE
+            if ($uploadExitCode -ne 0) {
+              exit $uploadExitCode
+            }
+
+            if ('${{ inputs.prerelease }}' -eq 'true') {
+              gh release edit $tag --prerelease
+              exit $LASTEXITCODE
+            }
+
+            exit 0
           }
 
           $releaseArgs = @(
@@ -173,6 +189,9 @@ jobs:
 
           if ('${{ inputs.draft }}' -eq 'true') {
             $releaseArgs += '--draft'
+          }
+          if ('${{ inputs.prerelease }}' -eq 'true') {
+            $releaseArgs += '--prerelease'
           }
 
           $releaseArgs += $assets

@@ -39,9 +39,10 @@ Repository prerequisites:
 - `FILETOOLS_SIGNING_PFX_BASE64` and `FILETOOLS_SIGNING_PASSWORD` must be set in
   GitHub Secrets.
 
-Before running it, create and push a four-part version tag such as `v1.2.0.1`.
-Then run the `Release` workflow from GitHub Actions and provide that existing
-tag. The workflow strips the leading `v` and passes that value to
+Before running it, update repository docs, wiki docs, and the tag-specific
+release notes, then create and push a four-part version tag such as
+`v1.3.0.0`. Then run the `Release` workflow from GitHub Actions and provide
+that existing tag. The workflow strips the leading `v` and passes that value to
 `build_msi.ps1 -Version`, so the app binary, generated app manifest, MSI, Burn
 bundle, and sparse MSIX identity use the same release version.
 
@@ -61,6 +62,10 @@ and troubleshooting.
 
 By default, the workflow creates a draft GitHub Release. Publish the draft only
 after checking the assets and release notes.
+
+For beta distribution, keep the workflow `prerelease` input enabled so GitHub
+marks the Release as a prerelease. Switch it off only for the later stable
+release after the stabilization pass.
 
 If `docs/release-notes/<tag>.md` exists, the workflow uses that file as the
 GitHub Release notes. Otherwise it falls back to generated asset notes.
@@ -86,7 +91,7 @@ git status --short
   the same value:
 
 ```powershell
-.\build_msi.ps1 -Version v1.2.0.1
+.\build_msi.ps1 -Version v1.3.0.0
 ```
 
 For a full release build, `build_msi.ps1` validates the version and passes it
@@ -109,18 +114,28 @@ MSBuild.exe FileTools.sln /p:Configuration=Release /p:Platform=x64
 ```
 
 - Copy `docs/release-notes/next.md` to the tag-specific file and update the
-  title and asset names:
+  title, beta/stable status, asset names, and verification notes:
 
 ```powershell
-Copy-Item docs\release-notes\next.md docs\release-notes\v1.2.0.1.md
+Copy-Item docs\release-notes\next.md docs\release-notes\v1.3.0.0.md
 ```
 
-- Commit the release-note changes, then create and push the tag:
+- Update and push the wiki documentation before tagging:
 
 ```powershell
-git tag v1.2.0.1
+git -C .wiki status --short
+git -C .wiki add .
+git -C .wiki commit -m "Update wiki for FileTools 1.3.0.0 beta"
+git -C .wiki push origin master
+```
+
+- Commit the repository documentation and release-note changes, then create and
+  push the tag:
+
+```powershell
+git tag v1.3.0.0
 git push origin master
-git push origin v1.2.0.1
+git push origin v1.3.0.0
 ```
 
 ### After The Release Workflow Finishes
@@ -198,14 +213,15 @@ Publish the draft release only after:
 - the setup smoke test passed or any skipped smoke-test scope is written in the
   release notes;
 - release notes accurately state supported archive merge scope;
-- the external wiki update is ready to copy after publish.
+- the external wiki update has already been committed and pushed.
 
 ## Documentation And Wiki Timing
 
-Keep repository docs current during feature work, but defer the external wiki
-update until the release pass. The release checklist should copy the finalized
-rename-rule settings notes, screenshots, and user-facing workflow changes to the
-wiki only after the release assets and release notes are verified.
+Keep repository docs current during feature work, but update and push the
+external wiki during the release pass before creating the release tag. The tag
+should point at repository docs that already match the wiki and tag-specific
+release notes. If asset verification later changes user-facing support scope,
+amend the release notes before publishing the draft release.
 
 ## Signing Secrets
 
@@ -266,7 +282,7 @@ make Windows trust the self-signed certificate.
 After downloading a release asset, verify its SHA256 hash:
 
 ```powershell
-Get-FileHash .\FileTools-1.2.0.0-win-x64-setup.exe -Algorithm SHA256
+Get-FileHash .\FileTools-1.3.0.0-win-x64-setup.exe -Algorithm SHA256
 ```
 
 Compare the result with `checksums.txt`.
@@ -274,19 +290,19 @@ Compare the result with `checksums.txt`.
 Users with GitHub CLI can also verify artifact attestations:
 
 ```powershell
-gh attestation verify .\FileTools-1.2.0.0-win-x64-setup.exe -R byteword/FileTools
-gh attestation verify .\FileTools-1.2.0.0-win-x64.msi -R byteword/FileTools
-gh attestation verify .\FileTools-1.2.0.0-win-x64-identity.msix -R byteword/FileTools
-gh attestation verify .\FileTools-1.2.0.0-msix-self-signed.cer -R byteword/FileTools
+gh attestation verify .\FileTools-1.3.0.0-win-x64-setup.exe -R byteword/FileTools
+gh attestation verify .\FileTools-1.3.0.0-win-x64.msi -R byteword/FileTools
+gh attestation verify .\FileTools-1.3.0.0-win-x64-identity.msix -R byteword/FileTools
+gh attestation verify .\FileTools-1.3.0.0-msix-self-signed.cer -R byteword/FileTools
 gh attestation verify .\checksums.txt -R byteword/FileTools
 ```
 
 On Windows, the self-signed Authenticode/MSIX signatures can also be inspected:
 
 ```powershell
-Get-AuthenticodeSignature .\FileTools-1.2.0.0-win-x64-setup.exe
-Get-AuthenticodeSignature .\FileTools-1.2.0.0-win-x64.msi
-Get-AuthenticodeSignature .\FileTools-1.2.0.0-win-x64-identity.msix
+Get-AuthenticodeSignature .\FileTools-1.3.0.0-win-x64-setup.exe
+Get-AuthenticodeSignature .\FileTools-1.3.0.0-win-x64.msi
+Get-AuthenticodeSignature .\FileTools-1.3.0.0-win-x64-identity.msix
 ```
 
 Before the self-signed CER is trusted, `Get-AuthenticodeSignature` may report an
