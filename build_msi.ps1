@@ -1,11 +1,36 @@
 param(
     [string] $Configuration = 'Release',
-    [string] $SigningPublisher = 'CN=FileTools Self-Signed'
+    [string] $SigningPublisher = 'CN=FileTools Self-Signed',
+    [string] $Version = '1.2.0.0'
 )
 
 $ErrorActionPreference = 'Stop'
 
-$version = '1.2.0.0'
+function Resolve-FileToolsReleaseVersion {
+    param([Parameter(Mandatory = $true)][string] $InputVersion)
+
+    $normalized = $InputVersion.Trim()
+    if ($normalized.StartsWith('v', [StringComparison]::OrdinalIgnoreCase)) {
+        $normalized = $normalized.Substring(1)
+    }
+
+    if ($normalized -notmatch '^\d+\.\d+\.\d+\.\d+$') {
+        throw "Version '$InputVersion' must use four numeric parts, for example 1.2.0.1 or v1.2.0.1."
+    }
+
+    $parsed = $null
+    if (-not [version]::TryParse($normalized, [ref] $parsed)) {
+        throw "Version '$InputVersion' is not a valid .NET version."
+    }
+
+    if ($parsed.Major -gt 255 -or $parsed.Minor -gt 255 -or $parsed.Build -gt 65535 -or $parsed.Revision -gt 65535) {
+        throw "Version '$InputVersion' exceeds Windows Installer/MSIX numeric limits."
+    }
+
+    return $normalized
+}
+
+$releaseVersion = Resolve-FileToolsReleaseVersion -InputVersion $Version
 $solution = Join-Path $PSScriptRoot 'installer\FileTools.Installer.sln'
 $installerProject = Join-Path $PSScriptRoot 'installer\FileTools.Installer\FileTools.Installer.wixproj'
 $bundleProject = Join-Path $PSScriptRoot 'installer\FileTools.Bundle\FileTools.Bundle.wixproj'
@@ -19,6 +44,8 @@ $bundleSigningDir = Join-Path $signingOutputDir 'bundle'
 $signingPfx = Join-Path $signingOutputDir 'FileTools.Signing.pfx'
 $msi = Join-Path $PSScriptRoot "installer\FileTools.Installer\bin\$Configuration\FileTools.msi"
 $setup = Join-Path $PSScriptRoot "installer\FileTools.Bundle\bin\$Configuration\FileToolsSetup.exe"
+
+Write-Host "Building FileTools version: $releaseVersion"
 
 if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
     throw 'dotnet SDK was not found. Install .NET 8 SDK first.'
@@ -224,13 +251,15 @@ if ($LASTEXITCODE -ne 0) {
     throw "Shell extension build failed with exit code $LASTEXITCODE."
 }
 
-& $identityPackageScript -Version $version -Publisher $signing.Publisher -OutputPath $identityMsix
+& $identityPackageScript -Version $releaseVersion -Publisher $signing.Publisher -OutputPath $identityMsix
 if ($LASTEXITCODE -ne 0) {
     throw "Identity MSIX build failed with exit code $LASTEXITCODE."
 }
 Invoke-CodeSigning -FilePath $identityMsix -SigningMaterial $signing
 
 dotnet build $installerProject -c $Configuration `
+    /p:FileToolsVersion="$releaseVersion" `
+    /p:ProductVersion="$releaseVersion" `
     /p:IdentityMsixPath="$identityMsix" `
     /p:IdentityCertificatePath="$identityCer"
 if ($LASTEXITCODE -ne 0) {
@@ -243,6 +272,8 @@ if (-not (Test-Path $msi)) {
 Invoke-CodeSigning -FilePath $msi -SigningMaterial $signing
 
 dotnet build $bundleProject -c $Configuration `
+    /p:FileToolsVersion="$releaseVersion" `
+    /p:ProductVersion="$releaseVersion" `
     /p:SkipBuildFileToolsMsi=true
 if ($LASTEXITCODE -ne 0) {
     throw "Setup bootstrapper build failed with exit code $LASTEXITCODE."

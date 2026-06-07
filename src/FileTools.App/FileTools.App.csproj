@@ -7,13 +7,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>FileTools</AssemblyName>
     <RootNamespace>FileTools</RootNamespace>
-    <Version>1.2.0.0</Version>
-    <AssemblyVersion>1.2.0.0</AssemblyVersion>
-    <FileVersion>1.2.0.0</FileVersion>
-    <InformationalVersion>1.2.0.0</InformationalVersion>
+    <FileToolsVersion Condition="'$(FileToolsVersion)' == ''">1.2.0.0</FileToolsVersion>
+    <Version>$(FileToolsVersion)</Version>
+    <AssemblyVersion>$(FileToolsVersion)</AssemblyVersion>
+    <FileVersion>$(FileToolsVersion)</FileVersion>
+    <InformationalVersion>$(FileToolsVersion)</InformationalVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <FileToolsManifestTemplate>$(MSBuildProjectDirectory)\app.manifest</FileToolsManifestTemplate>
+    <FileToolsGeneratedManifest>$(MSBuildProjectDirectory)\obj\$(Configuration)\$(TargetFramework)\FileTools.app.manifest</FileToolsGeneratedManifest>
+    <ApplicationManifest>$(FileToolsGeneratedManifest)</ApplicationManifest>
     <ApplicationIcon>Resources\FileToolsIcon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
@@ -64,6 +67,17 @@
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
   </ItemGroup>
+  <Target Name="GenerateFileToolsApplicationManifest" BeforeTargets="GenerateApplicationManifest;CoreCompile">
+    <MakeDir Directories="$(IntermediateOutputPath)" />
+    <PropertyGroup>
+      <FileToolsApplicationManifestText>$([System.IO.File]::ReadAllText('$(FileToolsManifestTemplate)').Replace('version="1.2.0.0"', 'version="$(FileToolsVersion)"'))</FileToolsApplicationManifestText>
+    </PropertyGroup>
+    <WriteLinesToFile
+      File="$(ApplicationManifest)"
+      Lines="$(FileToolsApplicationManifestText)"
+      Overwrite="true"
+      Encoding="UTF-8" />
+  </Target>
   <Target Name="CopyCorrectionPlugins" AfterTargets="Build">
     <ItemGroup>
       <SymSpellPluginFiles Include="..\FileTools.Correction.SymSpellPlugin\bin\$(Configuration)\net8.0\**\*.*" />

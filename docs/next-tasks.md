@@ -1,7 +1,7 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-07 after common filename archive merge implementation
+Last updated: 2026-06-07 after version-up readiness verification
 
 Scope reviewed:
 
@@ -90,6 +90,15 @@ Scope reviewed:
 - Ran `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` on
   2026-06-07 after the rename-correction plugin slice; all 62 managed tests
   passed.
+- Ran version-up readiness verification on 2026-06-07: Debug managed tests
+  passed 62/62, Visual Studio MSBuild `Release|x64` full solution build passed
+  with 0 warnings and 0 errors, and Release managed tests passed 62/62 with
+  `--no-build`.
+- Implemented tag-driven release version injection on 2026-06-07. The
+  `build_msi.ps1 -Version v1.2.0.3` check completed with 0 warnings and 0
+  errors after sandbox escalation for Windows SDK access, and the generated app
+  manifest, app EXE, MSI `ProductVersion`, Burn setup EXE, and sparse MSIX
+  identity all reported `1.2.0.3`.
 
 ## Deferred Follow-Up Tracks
 
@@ -116,6 +125,10 @@ Scope reviewed:
    - Decide whether ZIP32 limits are acceptable for the first release or whether Zip64 output support must be added before release.
 
 2. Finalize the next release notes.
+   - Binary, generated app manifest, MSI, Burn bundle, and sparse MSIX identity
+     versions are injected from the release tag through `build_msi.ps1`. Before
+     tagging, update only user-facing release documentation such as the README
+     current-version lines when appropriate.
    - Copy `docs/release-notes/next.md` to `docs/release-notes/<tag>.md` after the next version tag is chosen.
    - Keep the archive merge support note explicit: ZIP input and ZIP output are supported; 7Z input is not yet supported and is tracked by #8.
    - Keep the #9 release note scoped to archive-first common output naming and
@@ -123,6 +136,15 @@ Scope reviewed:
 
 3. Run the release verification checklist during the release pass.
    - Follow the maintainer checklist in `docs/release.md` before publishing the draft GitHub Release.
+   - Decide whether to add a `global.json` SDK pin before release. Local
+     verification used .NET SDK 10.0.300 while the release workflow installs
+     .NET SDK 8.0.x. A temporary `global.json` check with SDK 8.0.421 on
+     2026-06-07 built both the MSI and Burn bundle projects with 0 warnings and
+     0 errors, so SDK alignment is currently a reproducibility cleanup rather
+     than a known installer-build blocker.
+   - The local sandbox blocks Visual Studio/Windows SDK lookup under
+     `%LOCALAPPDATA%\Microsoft SDKs`; ShellExt or full `build_msi.ps1` checks may
+     need external permission locally even though GitHub Actions should not.
    - Keep release notes and external wiki updates gated on verified assets, checksums, signatures, attestations, and install smoke testing.
 
 4. Defer lower-priority feature tracks.

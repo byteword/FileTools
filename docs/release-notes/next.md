@@ -20,6 +20,8 @@ notes.
 - Added the first rename-correction plugin boundary with language selection,
   review-only candidate generation, and a SymSpell sample provider that uses
   user-supplied dictionary or corpus data instead of bundled dictionaries.
+- Aligned release versioning so GitHub release tags drive the app binary,
+  generated app manifest, MSI, Burn bundle, and sparse MSIX identity versions.
 
 ## Support Scope
 
@@ -33,7 +35,19 @@ notes.
 
 ## Verification Before Publishing
 
-- Run `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj`. Last automated pass on 2026-06-07 passed 62 managed tests.
+- Run `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj`. Last
+  automated pass on 2026-06-07 passed 62 managed tests in Debug.
+- Run the Release managed test command:
+  `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj -c Release --no-build`.
+  Last automated pass on 2026-06-07 passed 62 managed tests after the Release
+  build.
+- Build `FileTools.sln` with Visual Studio MSBuild in `Release|x64`. Last
+  automated pass on 2026-06-07 completed with 0 warnings and 0 errors.
+- Build or dry-run `build_msi.ps1 -Version <tag>` before tagging to confirm the
+  release tag is accepted and propagated into the installer build.
+  Last automated pass on 2026-06-07 used `v1.2.0.3` and confirmed the app EXE,
+  generated app manifest, MSI `ProductVersion`, setup EXE, and sparse MSIX
+  identity all reported `1.2.0.3`.
 - Build the full solution with Visual Studio MSBuild because `FileTools.ShellExt` requires Visual C++ targets.
 - Validate real ZIP samples with legacy filename encodings, comments, directory entries, external attributes, and local/central extra fields.
 - Check large ZIP merge progress, cancellation, temp-file cleanup, and final move failure behavior.

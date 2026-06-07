@@ -39,8 +39,11 @@ Repository prerequisites:
 - `FILETOOLS_SIGNING_PFX_BASE64` and `FILETOOLS_SIGNING_PASSWORD` must be set in
   GitHub Secrets.
 
-Before running it, create and push a version tag such as `v1.2.0.0`. Then run
-the `Release` workflow from GitHub Actions and provide that existing tag.
+Before running it, create and push a four-part version tag such as `v1.2.0.1`.
+Then run the `Release` workflow from GitHub Actions and provide that existing
+tag. The workflow strips the leading `v` and passes that value to
+`build_msi.ps1 -Version`, so the app binary, generated app manifest, MSI, Burn
+bundle, and sparse MSIX identity use the same release version.
 
 The workflow builds and uploads:
 
@@ -79,11 +82,17 @@ draft until every required item below is checked.
 git status --short
 ```
 
-- Confirm the version is consistent in the app and installer project files:
+- Confirm the release tag uses a four-part version and the build script accepts
+  the same value:
 
 ```powershell
-Select-String -Path src\FileTools.App\FileTools.App.csproj,installer\FileTools.Installer\FileTools.Installer.wixproj,installer\FileTools.Bundle\FileTools.Bundle.wixproj -Pattern '<Version>|<ProductVersion>'
+.\build_msi.ps1 -Version v1.2.0.1
 ```
+
+For a full release build, `build_msi.ps1` validates the version and passes it
+through `FileToolsVersion`/`ProductVersion` MSBuild properties. The app project
+generates its application manifest under `obj` with the same version before
+compilation.
 
 - Run the managed regression suite:
 
@@ -106,7 +115,7 @@ MSBuild.exe FileTools.sln /p:Configuration=Release /p:Platform=x64
 Copy-Item docs\release-notes\next.md docs\release-notes\v1.2.0.1.md
 ```
 
-- Commit the version and release-note changes, then create and push the tag:
+- Commit the release-note changes, then create and push the tag:
 
 ```powershell
 git tag v1.2.0.1

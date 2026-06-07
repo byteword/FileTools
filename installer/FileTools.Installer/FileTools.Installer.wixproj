@@ -3,7 +3,8 @@
     <OutputName>FileTools</OutputName>
     <OutputType>Package</OutputType>
     <InstallerPlatform>x64</InstallerPlatform>
-    <ProductVersion>1.2.0.0</ProductVersion>
+    <FileToolsVersion Condition="'$(FileToolsVersion)' == ''">1.2.0.0</FileToolsVersion>
+    <ProductVersion Condition="'$(ProductVersion)' == ''">$(FileToolsVersion)</ProductVersion>
     <SuppressIces>ICE91</SuppressIces>
     <AppPublishDir>$(MSBuildThisFileDirectory)..\..\artifacts\publish\FileTools-win-x64\</AppPublishDir>
     <AppIconPath>$(MSBuildThisFileDirectory)..\..\src\FileTools.App\Resources\FileToolsIcon.ico</AppIconPath>
@@ -28,6 +29,6 @@
     <MSBuild
       Projects="$(MSBuildThisFileDirectory)..\..\src\FileTools.App\FileTools.App.csproj"
       Targets="Restore;Publish"
-      Properties="Configuration=$(Configuration);RuntimeIdentifier=win-x64;SelfContained=false;PublishSingleFile=true;PublishDir=$(AppPublishDir)" />
+      Properties="Configuration=$(Configuration);RuntimeIdentifier=win-x64;SelfContained=false;PublishSingleFile=true;PublishDir=$(AppPublishDir);FileToolsVersion=$(ProductVersion)" />
   </Target>
 </Project>

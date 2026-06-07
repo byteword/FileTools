@@ -3,7 +3,8 @@
     <OutputName>FileToolsSetup</OutputName>
     <OutputType>Bundle</OutputType>
     <InstallerPlatform>x64</InstallerPlatform>
-    <ProductVersion>1.2.0.0</ProductVersion>
+    <FileToolsVersion Condition="'$(FileToolsVersion)' == ''">1.2.0.0</FileToolsVersion>
+    <ProductVersion Condition="'$(ProductVersion)' == ''">$(FileToolsVersion)</ProductVersion>
     <MsiPath>$(MSBuildThisFileDirectory)..\FileTools.Installer\bin\$(Configuration)\FileTools.msi</MsiPath>
     <AppIconPath>$(MSBuildThisFileDirectory)..\..\src\FileTools.App\Resources\FileToolsIcon.ico</AppIconPath>
     <SetupLogoPath>$(MSBuildThisFileDirectory)Assets\FileToolsSetupLogo.png</SetupLogoPath>
@@ -21,6 +22,6 @@
     <MSBuild
       Projects="$(MSBuildThisFileDirectory)..\FileTools.Installer\FileTools.Installer.wixproj"
       Targets="Build"
-      Properties="Configuration=$(Configuration)" />
+      Properties="Configuration=$(Configuration);FileToolsVersion=$(ProductVersion);ProductVersion=$(ProductVersion)" />
   </Target>
 </Project>
