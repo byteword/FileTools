@@ -1,7 +1,7 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-07 after deferring lower-priority tracks
+Last updated: 2026-06-07 after automated archive merge stabilization
 
 Scope reviewed:
 
@@ -28,6 +28,11 @@ Scope reviewed:
 - Added `docs/release-notes/next.md` as the working release note draft for the archive merge scope.
 - Added explicit deferred status and resume conditions to #3, #6, #7, #8, and #9.
 - Documented the maintainer release verification checklist in `docs/release.md`.
+- Added automated archive merge regression coverage for write-stage cancellation
+  temp cleanup, same-content duplicate skipping, and internal path collision
+  auto-numbering.
+- Ran `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` on
+  2026-06-07; all 31 managed tests passed.
 
 ## Deferred Follow-Up Tracks
 
@@ -40,7 +45,7 @@ Scope reviewed:
 ## Next Priority
 
 1. Stabilize ZIP archive merge release readiness.
-   - Run the managed regression suite after the current extra-field writer changes.
+   - Re-run the managed regression suite before tagging if archive merge changes again.
    - Validate with real ZIP samples that include legacy filename encodings, comments, directory entries, external attributes, and local/central extra fields.
    - Verify cancellation, temp-file cleanup, and final move failure behavior with large archives.
    - Decide whether ZIP32 limits are acceptable for the first release or whether Zip64 output support must be added before release.

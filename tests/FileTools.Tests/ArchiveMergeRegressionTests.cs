@@ -156,7 +156,7 @@ public sealed class ArchiveMergeRegressionTests
         var sourceA = temp.GetPath("source-a.zip");
         var sourceB = temp.GetPath("source-b.zip");
         var output = temp.GetPath("merged.zip");
-        var fileSystem = new MoveFailureArchiveMergeFileSystem();
+        var fileSystem = new TrackingArchiveMergeFileSystem(failFinalMove: true);
 
         ZipTestData.CreateStoredZip(sourceA, new TestZipEntry("a.txt", "a"));
         ZipTestData.CreateStoredZip(sourceB, new TestZipEntry("b.txt", "b"));
@@ -171,6 +171,84 @@ public sealed class ArchiveMergeRegressionTests
         Assert.False(File.Exists(fileSystem.TempPath));
     }
 
+    [Fact]
+    public void Merge_CanceledBeforeWriting_ReportsSkippedAndDeletesTempArchive()
+    {
+        using var temp = TempDirectory.Create();
+        var sourceA = temp.GetPath("source-a.zip");
+        var sourceB = temp.GetPath("source-b.zip");
+        var output = temp.GetPath("merged.zip");
+        using var cancellation = new CancellationTokenSource();
+        var fileSystem = new TrackingArchiveMergeFileSystem();
+        var progress = new InlineProgress(message =>
+        {
+            if (message == Localizer.Get("ArchiveMergeProgressWriteTemp"))
+            {
+                cancellation.Cancel();
+            }
+        });
+
+        ZipTestData.CreateStoredZip(sourceA, new TestZipEntry("a.txt", "a"));
+        ZipTestData.CreateStoredZip(sourceB, new TestZipEntry("b.txt", "b"));
+
+        var result = Merge(
+            [sourceA, sourceB],
+            output,
+            fileSystem: fileSystem,
+            progress: progress,
+            cancellationToken: cancellation.Token);
+
+        Assert.Empty(result.Errors);
+        Assert.Equal(1, result.SkippedCount);
+        Assert.Contains(result.Messages, message => message.Contains(Localizer.Get("ArchiveMergeCanceled"), StringComparison.Ordinal));
+        Assert.False(File.Exists(output));
+        Assert.NotNull(fileSystem.TempPath);
+        Assert.Contains(fileSystem.TempPath, fileSystem.DeletedPaths);
+        Assert.False(File.Exists(fileSystem.TempPath));
+    }
+
+    [Fact]
+    public void Merge_SameContentDuplicatePolicy_SkipsSecondEntryWithSamePayload()
+    {
+        using var temp = TempDirectory.Create();
+        var sourceA = temp.GetPath("source-a.zip");
+        var sourceB = temp.GetPath("source-b.zip");
+        var output = temp.GetPath("merged.zip");
+
+        ZipTestData.CreateStoredZip(sourceA, new TestZipEntry("alpha.txt", "same payload"));
+        ZipTestData.CreateStoredZip(sourceB, new TestZipEntry("bravo.txt", "same payload"));
+
+        var result = Merge(
+            [sourceA, sourceB],
+            output,
+            duplicatePolicy: ArchiveMergeDuplicatePolicy.SameContentKeepFirst);
+
+        Assert.Empty(result.Errors);
+        Assert.Equal(1, result.SkippedCount);
+        var entries = ZipTestData.ReadEntries(output);
+        Assert.Equal("same payload", entries["alpha.txt"].Content);
+        Assert.False(entries.ContainsKey("bravo.txt"));
+    }
+
+    [Fact]
+    public void Merge_AutoNumbersInternalPathCollisions()
+    {
+        using var temp = TempDirectory.Create();
+        var sourceA = temp.GetPath("source-a.zip");
+        var sourceB = temp.GetPath("source-b.zip");
+        var output = temp.GetPath("merged.zip");
+
+        ZipTestData.CreateStoredZip(sourceA, new TestZipEntry("same.txt", "alpha"));
+        ZipTestData.CreateStoredZip(sourceB, new TestZipEntry("same.txt", "bravo"));
+
+        var result = Merge([sourceA, sourceB], output);
+
+        Assert.Empty(result.Errors);
+        var entries = ZipTestData.ReadEntries(output);
+        Assert.Equal("alpha", entries["same.txt"].Content);
+        Assert.Equal("bravo", entries["same (2).txt"].Content);
+    }
+
     private static OperationResult Merge(
         IReadOnlyList<string> sourcePaths,
         string outputPath,
@@ -179,7 +257,9 @@ public sealed class ArchiveMergeRegressionTests
         ArchiveMergeDuplicatePolicy duplicatePolicy = ArchiveMergeDuplicatePolicy.KeepBoth,
         ArchiveMergeFailurePolicy failurePolicy = ArchiveMergeFailurePolicy.AbortAll,
         ArchiveMergeCompressionLevel compressionLevel = ArchiveMergeCompressionLevel.StoreOnly,
-        IArchiveMergeFileSystem? fileSystem = null)
+        IArchiveMergeFileSystem? fileSystem = null,
+        IProgress<string>? progress = null,
+        CancellationToken cancellationToken = default)
     {
         var options = new ArchiveMergeOptions
         {
@@ -193,17 +273,38 @@ public sealed class ArchiveMergeRegressionTests
         };
 
         return fileSystem is null
-            ? ArchiveMergeOperations.Merge(options, CancellationToken.None)
-            : ArchiveMergeOperations.Merge(options, CancellationToken.None, fileSystem);
+            ? ArchiveMergeOperations.Merge(options, cancellationToken, progress)
+            : ArchiveMergeOperations.Merge(options, cancellationToken, fileSystem, progress);
     }
 
-    private sealed class MoveFailureArchiveMergeFileSystem : IArchiveMergeFileSystem
+    private sealed class InlineProgress : IProgress<string>
+    {
+        private readonly Action<string> _handler;
+
+        public InlineProgress(Action<string> handler)
+        {
+            _handler = handler;
+        }
+
+        public void Report(string value)
+        {
+            _handler(value);
+        }
+    }
+
+    private sealed class TrackingArchiveMergeFileSystem : IArchiveMergeFileSystem
     {
         private readonly IArchiveMergeFileSystem _inner = PhysicalArchiveMergeFileSystem.Instance;
+        private readonly bool _failFinalMove;
 
         public string? TempPath { get; private set; }
 
         public List<string> DeletedPaths { get; } = [];
+
+        public TrackingArchiveMergeFileSystem(bool failFinalMove = false)
+        {
+            _failFinalMove = failFinalMove;
+        }
 
         public void CreateDirectory(string path)
         {
@@ -228,7 +329,12 @@ public sealed class ArchiveMergeRegressionTests
 
         public void MoveFile(string sourcePath, string destinationPath)
         {
-            throw new IOException("simulated final move failure");
+            if (_failFinalMove)
+            {
+                throw new IOException("simulated final move failure");
+            }
+
+            _inner.MoveFile(sourcePath, destinationPath);
         }
 
         public void DeleteFileIfExists(string path)

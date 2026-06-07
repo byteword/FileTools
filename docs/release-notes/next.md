@@ -10,7 +10,7 @@ notes.
 - Added archive merge collision handling for skip, replace, rename, and ask decisions.
 - Added ZIP filename encoding selection for archive merge input.
 - Preserved ZIP entry metadata, comments, external attributes, and local/central extra field bytes during ZIP merge.
-- Added regression coverage for archive merge duplicate content, filesystem failures, temp ZIP cleanup, and metadata preservation.
+- Added regression coverage for archive merge duplicate content, internal path collisions, cancellation cleanup, filesystem failures, temp ZIP cleanup, and metadata preservation.
 
 ## Support Scope
 
@@ -20,7 +20,7 @@ notes.
 
 ## Verification Before Publishing
 
-- Run `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj`.
+- Run `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj`. Last automated stabilization pass on 2026-06-07 passed 31 managed tests.
 - Build the full solution with Visual Studio MSBuild because `FileTools.ShellExt` requires Visual C++ targets.
 - Validate real ZIP samples with legacy filename encodings, comments, directory entries, external attributes, and local/central extra fields.
 - Check large ZIP merge progress, cancellation, temp-file cleanup, and final move failure behavior.
