@@ -91,6 +91,7 @@ public sealed partial class MainForm : Form
             _settings.FolderUnwrapNameMismatchMode));
         _addArchiveMergeGroupMenuItem.Click += (_, _) => AddArchiveMergeStep(ArchiveMergeLayout.GroupByArchiveName);
         _addArchiveMergePreserveMenuItem.Click += (_, _) => AddArchiveMergeStep(ArchiveMergeLayout.PreserveInternalPaths);
+        _compareSelectedMenuItem.Click += (_, _) => CompareSelectedTargets();
         _addRelocationMenuItem.Click += (_, _) => AddStep(CreateAutoRelocationStep());
         _removeStepMenuItem.Click += (_, _) => RemoveSelectedStep();
         _clearStepsMenuItem.Click += (_, _) => ClearSelectedTargetSteps();
@@ -128,6 +129,7 @@ public sealed partial class MainForm : Form
         _addArchiveMergeToolButton.ButtonClick += (_, _) => AddArchiveMergeStep(ArchiveMergeLayout.GroupByArchiveName);
         _addArchiveMergeGroupToolItem.Click += (_, _) => AddArchiveMergeStep(ArchiveMergeLayout.GroupByArchiveName);
         _addArchiveMergePreserveToolItem.Click += (_, _) => AddArchiveMergeStep(ArchiveMergeLayout.PreserveInternalPaths);
+        _compareSelectedToolButton.Click += (_, _) => CompareSelectedTargets();
         _addRelocationToolButton.Click += (_, _) => AddStep(CreateAutoRelocationStep());
         _removeStepToolButton.Click += (_, _) => RemoveSelectedStep();
         _clearStepsToolButton.Click += (_, _) => ClearSelectedTargetSteps();
@@ -162,6 +164,7 @@ public sealed partial class MainForm : Form
         _addMoveInnerFilesUpMenuItem.Text = ToolModeText.GetDisplayName(FolderStructureOperation.MoveInnerFilesUp);
         _addArchiveMergeGroupMenuItem.Text = Localizer.Get("ContextCommandArchiveMergeGroupByArchiveName");
         _addArchiveMergePreserveMenuItem.Text = Localizer.Get("ContextCommandArchiveMergePreserveInternalPaths");
+        _compareSelectedMenuItem.Text = Localizer.Get("ButtonCompareSelected");
         _addRelocationMenuItem.Text = Localizer.Get("ButtonAddRelocationStep");
         _removeStepMenuItem.Text = Localizer.Get("ButtonRemoveStep");
         _clearStepsMenuItem.Text = Localizer.Get("ButtonClearSteps");
@@ -198,6 +201,8 @@ public sealed partial class MainForm : Form
         _addArchiveMergeToolButton.ToolTipText = Localizer.Get("ToolTipAddArchiveMerge");
         _addArchiveMergeGroupToolItem.Text = Localizer.Get("ContextCommandArchiveMergeGroupByArchiveName");
         _addArchiveMergePreserveToolItem.Text = Localizer.Get("ContextCommandArchiveMergePreserveInternalPaths");
+        _compareSelectedToolButton.Text = Localizer.Get("ButtonCompareSelected");
+        _compareSelectedToolButton.ToolTipText = Localizer.Get("ToolTipCompareSelected");
         _addRelocationToolButton.Text = Localizer.Get("ButtonAddRelocationStep");
         _addRelocationToolButton.ToolTipText = Localizer.Get("ToolTipAddRelocation");
         _removeStepToolButton.Text = Localizer.Get("ButtonRemoveStep");
@@ -229,6 +234,7 @@ public sealed partial class MainForm : Form
         _addMoveInnerFilesUpMenuItem.Image = UiIconFactory.MoveUp;
         _addArchiveMergeGroupMenuItem.Image = UiIconFactory.ArchiveMerge;
         _addArchiveMergePreserveMenuItem.Image = UiIconFactory.ArchiveMerge;
+        _compareSelectedMenuItem.Image = UiIconFactory.Compare;
         _addRelocationMenuItem.Image = UiIconFactory.Relocate;
         _removeStepMenuItem.Image = UiIconFactory.RemoveStep;
         _clearStepsMenuItem.Image = UiIconFactory.Clear;
@@ -255,6 +261,7 @@ public sealed partial class MainForm : Form
         _addArchiveMergeToolButton.Image = UiIconFactory.ArchiveMerge;
         _addArchiveMergeGroupToolItem.Image = UiIconFactory.ArchiveMerge;
         _addArchiveMergePreserveToolItem.Image = UiIconFactory.ArchiveMerge;
+        _compareSelectedToolButton.Image = UiIconFactory.Compare;
         _addRelocationToolButton.Image = UiIconFactory.Relocate;
         _removeStepToolButton.Image = UiIconFactory.RemoveStep;
         _clearStepsToolButton.Image = UiIconFactory.Clear;
@@ -475,6 +482,72 @@ public sealed partial class MainForm : Form
             _settings = form.Settings;
             SettingsStore.Save(_settings);
             AppendLog(Localizer.Format("SettingsSavedFormat", SettingsStore.SettingsPath));
+        }
+    }
+
+    private void CompareSelectedTargets()
+    {
+        if (_executionCancellation is not null)
+        {
+            return;
+        }
+
+        var selectedTargets = GetSelectedTargets()
+            .Where(IsExistingTarget)
+            .ToArray();
+        if (selectedTargets.Length < 2)
+        {
+            MessageBox.Show(
+                Localizer.Get("FileCompareNeedsMultipleTargets"),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            return;
+        }
+
+        _ = CompareSelectedTargetsAsync(selectedTargets);
+    }
+
+    private async Task CompareSelectedTargetsAsync(IReadOnlyList<WorkTargetPlan> selectedTargets)
+    {
+        using var cancellation = new CancellationTokenSource();
+        _executionCancellation = cancellation;
+        ClearLog();
+        AppendLog(Localizer.Format("FileCompareStartingFormat", selectedTargets.Count));
+        UpdateCommandStates();
+
+        try
+        {
+            var paths = selectedTargets.Select(static target => target.Path).ToArray();
+            var options = _settings.FileCompareOptions.Clone();
+            var report = await Task.Run(() => FileCompareOperations.Compare(paths, options, cancellationToken: cancellation.Token));
+
+            AppendLog(Localizer.Format(
+                "FileCompareCompletedFormat",
+                report.Targets.Count,
+                report.Pairs.Count,
+                report.HashCacheHits,
+                report.HashCacheMisses));
+            using var dialog = new FileCompareResultDialog(report);
+            dialog.ShowDialog(this);
+        }
+        catch (OperationCanceledException)
+        {
+            AppendLog(Localizer.Get("LogExecutionStopped"));
+        }
+        catch (Exception ex)
+        {
+            AppendLog(Localizer.Format("LogExecutionFailedFormat", ex.Message));
+            MessageBox.Show(ex.Message, FileToolsEnvironment.AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            if (ReferenceEquals(_executionCancellation, cancellation))
+            {
+                _executionCancellation = null;
+            }
+
+            UpdateCommandStates();
         }
     }
 
@@ -1186,6 +1259,9 @@ public sealed partial class MainForm : Form
                               selectedTargets.Length >= 2 &&
                               selectedTargets.All(static target => ArchiveMergeOperations.IsSupportedArchivePath(target.Path)) &&
                               selectedTargets.All(static target => target.Steps.Count == 0);
+        var canCompare = canModify &&
+                         selectedTargets.Length >= 2 &&
+                         selectedTargets.All(IsExistingTarget);
         var canMerge = canModify &&
                        selectedTargets.Length >= 2 &&
                        selectedTargets.All(IsExistingTarget) &&
@@ -1203,6 +1279,7 @@ public sealed partial class MainForm : Form
         _addWrapMenuItem.Enabled = canWrap;
         SetUnwrapItemsEnabled(canUnwrap);
         SetArchiveMergeItemsEnabled(canArchiveMerge);
+        _compareSelectedMenuItem.Enabled = canCompare;
         _addRelocationMenuItem.Enabled = canRelocate;
         _removeStepMenuItem.Enabled = canRemoveStep;
         _clearStepsMenuItem.Enabled = canClearSteps;
@@ -1222,6 +1299,7 @@ public sealed partial class MainForm : Form
         _addWrapToolButton.Enabled = canWrap;
         _addUnwrapToolButton.Enabled = canUnwrap;
         _addArchiveMergeToolButton.Enabled = canArchiveMerge;
+        _compareSelectedToolButton.Enabled = canCompare;
         _addRelocationToolButton.Enabled = canRelocate;
         _removeStepToolButton.Enabled = canRemoveStep;
         _clearStepsToolButton.Enabled = canClearSteps;

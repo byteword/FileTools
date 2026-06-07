@@ -970,3 +970,69 @@ internal static class FileCompareOperations
         }
     }
 }
+
+internal static class FileCompareText
+{
+    public static string GetDisplayName(FileCompareNameMatchMode mode)
+    {
+        return mode switch
+        {
+            FileCompareNameMatchMode.ExactFileName => Localizer.Get("FileCompareNameModeExact"),
+            FileCompareNameMatchMode.Stem => Localizer.Get("FileCompareNameModeStem"),
+            FileCompareNameMatchMode.RelativePath => Localizer.Get("FileCompareNameModeRelativePath"),
+            FileCompareNameMatchMode.None => Localizer.Get("FileCompareNameModeNone"),
+            _ => mode.ToString()
+        };
+    }
+
+    public static string GetDisplayName(FileCompareContentMode mode)
+    {
+        return mode switch
+        {
+            FileCompareContentMode.ByteToByte => Localizer.Get("FileCompareContentModeByteToByte"),
+            _ => Localizer.Get("FileCompareContentModeHash")
+        };
+    }
+
+    public static string GetDisplayName(FileCompareRangeMode mode)
+    {
+        return mode switch
+        {
+            FileCompareRangeMode.FrontBytes => Localizer.Get("FileCompareRangeFront"),
+            FileCompareRangeMode.BackBytes => Localizer.Get("FileCompareRangeBack"),
+            FileCompareRangeMode.MiddleBytes => Localizer.Get("FileCompareRangeMiddle"),
+            FileCompareRangeMode.FrontAndBackBytes => Localizer.Get("FileCompareRangeFrontAndBack"),
+            _ => Localizer.Get("FileCompareRangeFull")
+        };
+    }
+
+    public static string GetDisplayName(FileCompareArchiveMode mode)
+    {
+        return mode switch
+        {
+            FileCompareArchiveMode.ExtractEntries => Localizer.Get("FileCompareArchiveModeExtractEntries"),
+            _ => Localizer.Get("FileCompareArchiveModeAsFile")
+        };
+    }
+
+    public static string GetDisplayName(FileCompareArchiveEntryOrder order)
+    {
+        return order switch
+        {
+            FileCompareArchiveEntryOrder.Original => Localizer.Get("FileCompareArchiveOrderOriginal"),
+            _ => Localizer.Get("FileCompareArchiveOrderFileName")
+        };
+    }
+
+    public static string GetDisplayName(FileCompareStatus status)
+    {
+        return status switch
+        {
+            FileCompareStatus.Same => Localizer.Get("FileCompareStatusSame"),
+            FileCompareStatus.Different => Localizer.Get("FileCompareStatusDifferent"),
+            FileCompareStatus.PartialMatch => Localizer.Get("FileCompareStatusPartialMatch"),
+            FileCompareStatus.Failed => Localizer.Get("FileCompareStatusFailed"),
+            _ => status.ToString()
+        };
+    }
+}

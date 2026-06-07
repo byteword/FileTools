@@ -588,4 +588,66 @@
   <data name="ArchiveMergeNameCollisionMessageBoxHelp" xml:space="preserve"><value>Yes: auto-number and keep current. No: skip current. Cancel: abort merge.</value></data>
   <data name="ArchiveMergeDuplicateMessageBoxTitle" xml:space="preserve"><value>Archive merge duplicate content</value></data>
   <data name="ArchiveMergeDuplicateMessageBoxHelp" xml:space="preserve"><value>Yes: keep both. No: skip duplicate. Cancel: abort merge.</value></data>
+  <data name="ButtonCompareSelected" xml:space="preserve"><value>Compare selected</value></data>
+  <data name="ToolTipCompareSelected" xml:space="preserve"><value>Compare selected files and files inside selected folders.</value></data>
+  <data name="FileCompareNeedsMultipleTargets" xml:space="preserve"><value>Select two or more files or folders to compare.</value></data>
+  <data name="FileCompareStartingFormat" xml:space="preserve"><value>Starting file comparison for {0} selected targets.</value></data>
+  <data name="FileCompareCompletedFormat" xml:space="preserve"><value>File comparison complete. Files: {0}, pairs: {1}, hash cache hits: {2}, misses: {3}.</value></data>
+  <data name="FileCompareResultTitle" xml:space="preserve"><value>File compare results</value></data>
+  <data name="FileCompareResultFilter" xml:space="preserve"><value>Status</value></data>
+  <data name="FileCompareFilterAll" xml:space="preserve"><value>All</value></data>
+  <data name="FileCompareResultSummaryFormat" xml:space="preserve"><value>Files: {0} · Pairs: {1} · Same: {2} · Different: {3} · Partial: {4} · Failed: {5} · Cache: {6}/{7}</value></data>
+  <data name="FileCompareColumnStatus" xml:space="preserve"><value>Status</value></data>
+  <data name="FileCompareColumnMatchRatio" xml:space="preserve"><value>Match</value></data>
+  <data name="FileCompareColumnLeft" xml:space="preserve"><value>Left</value></data>
+  <data name="FileCompareColumnRight" xml:space="preserve"><value>Right</value></data>
+  <data name="FileCompareColumnReason" xml:space="preserve"><value>Reason</value></data>
+  <data name="FileCompareColumnCriterion" xml:space="preserve"><value>Criterion</value></data>
+  <data name="FileCompareColumnDetail" xml:space="preserve"><value>Detail</value></data>
+  <data name="FileCompareStatusSame" xml:space="preserve"><value>Same</value></data>
+  <data name="FileCompareStatusDifferent" xml:space="preserve"><value>Different</value></data>
+  <data name="FileCompareStatusPartialMatch" xml:space="preserve"><value>Partial match</value></data>
+  <data name="FileCompareStatusFailed" xml:space="preserve"><value>Failed</value></data>
+  <data name="TabFileCompare" xml:space="preserve"><value>File compare</value></data>
+  <data name="FileCompareGroupFileName" xml:space="preserve"><value>File name</value></data>
+  <data name="FileCompareGroupMetadata" xml:space="preserve"><value>Metadata</value></data>
+  <data name="FileCompareGroupContent" xml:space="preserve"><value>Content</value></data>
+  <data name="FileCompareGroupOther" xml:space="preserve"><value>Other options</value></data>
+  <data name="FileCompareCheckFileName" xml:space="preserve"><value>Compare file name</value></data>
+  <data name="FileCompareCheckCreatedTime" xml:space="preserve"><value>Compare created time</value></data>
+  <data name="FileCompareCheckModifiedTime" xml:space="preserve"><value>Compare modified time</value></data>
+  <data name="FileCompareCheckFileSize" xml:space="preserve"><value>Compare file size</value></data>
+  <data name="FileCompareCheckContent" xml:space="preserve"><value>Compare content</value></data>
+  <data name="FileCompareCheckExtractArchives" xml:space="preserve"><value>Extract ZIP entries before content comparison</value></data>
+  <data name="FileCompareCheckEarlyExit" xml:space="preserve"><value>Use early exit when selected criteria already differ</value></data>
+  <data name="FileCompareCheckHashCache" xml:space="preserve"><value>Use run-level hash cache</value></data>
+  <data name="FileCompareLabelNameMode" xml:space="preserve"><value>Name match mode</value></data>
+  <data name="FileCompareLabelContentMode" xml:space="preserve"><value>Content mode</value></data>
+  <data name="FileCompareLabelRangeMode" xml:space="preserve"><value>Comparison range</value></data>
+  <data name="FileCompareLabelRangeBytes" xml:space="preserve"><value>Range bytes</value></data>
+  <data name="FileCompareLabelArchiveOrder" xml:space="preserve"><value>Archive entry order</value></data>
+  <data name="FileCompareLabelPrefilterPercent" xml:space="preserve"><value>Byte prefilter percent</value></data>
+  <data name="FileCompareNameModeExact" xml:space="preserve"><value>Exact filename</value></data>
+  <data name="FileCompareNameModeStem" xml:space="preserve"><value>Stem without extension</value></data>
+  <data name="FileCompareNameModeRelativePath" xml:space="preserve"><value>Relative path</value></data>
+  <data name="FileCompareNameModeNone" xml:space="preserve"><value>Do not compare names</value></data>
+  <data name="FileCompareContentModeHash" xml:space="preserve"><value>Hash</value></data>
+  <data name="FileCompareContentModeByteToByte" xml:space="preserve"><value>Byte-to-byte</value></data>
+  <data name="FileCompareRangeFull" xml:space="preserve"><value>Full content</value></data>
+  <data name="FileCompareRangeFront" xml:space="preserve"><value>Front bytes</value></data>
+  <data name="FileCompareRangeBack" xml:space="preserve"><value>Back bytes</value></data>
+  <data name="FileCompareRangeMiddle" xml:space="preserve"><value>Middle bytes</value></data>
+  <data name="FileCompareRangeFrontAndBack" xml:space="preserve"><value>Front and back bytes</value></data>
+  <data name="FileCompareArchiveModeAsFile" xml:space="preserve"><value>Compare archive file</value></data>
+  <data name="FileCompareArchiveModeExtractEntries" xml:space="preserve"><value>Extract entries</value></data>
+  <data name="FileCompareArchiveOrderOriginal" xml:space="preserve"><value>Original entry order</value></data>
+  <data name="FileCompareArchiveOrderFileName" xml:space="preserve"><value>Filename order</value></data>
+  <data name="FileCompareNameModeHelp" xml:space="preserve"><value>Relative path uses the path inside each selected folder.</value></data>
+  <data name="FileCompareContentModeHelp" xml:space="preserve"><value>Byte-to-byte first checks a small leading hash before the full byte pass.</value></data>
+  <data name="FileCompareRangeModeHelp" xml:space="preserve"><value>Partial ranges reduce I/O but affect hash equality.</value></data>
+  <data name="FileCompareRangeBytesHelp" xml:space="preserve"><value>Used by front, back, middle, and front/back range modes.</value></data>
+  <data name="FileCompareArchiveOrderHelp" xml:space="preserve"><value>Used only when ZIP entries are extracted before comparison.</value></data>
+  <data name="FileComparePrefilterHelp" xml:space="preserve"><value>Percent of the selected range hashed before byte-to-byte comparison starts.</value></data>
+  <data name="FileCompareSummaryContentOff" xml:space="preserve"><value>Content off</value></data>
+  <data name="SettingsInvalidNumberFormat" xml:space="preserve"><value>Invalid numeric value: {0}</value></data>
 </root>

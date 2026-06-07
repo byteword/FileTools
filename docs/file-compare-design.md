@@ -2,11 +2,13 @@
 
 Review date: 2026-06-07
 
-This document tracks GitHub issue #6. The first implementation slice adds the
-comparison option model and engine. The WinForms result view, settings controls,
-and context menu wiring remain follow-up work.
+This document tracks GitHub issue #6. The first implementation slice added the
+comparison option model and engine. The second slice wires the selected-target
+command, grouped settings controls, and the WinForms result dialog.
 
 ![File compare settings layout](images/file-compare-settings-options.svg)
+
+![File compare result dialog layout](images/file-compare-result-dialog.svg)
 
 ## Target Collection
 
@@ -83,7 +85,7 @@ reader work, including 7Z input policy, remains tracked by issue #8.
 - `PartialMatch`: content ratio is at least 10% but less than full equality.
 - `Failed`: comparison could not be completed.
 
-## Implemented Foundation
+## Implemented Work
 
 Implemented on 2026-06-07:
 
@@ -96,12 +98,16 @@ Implemented on 2026-06-07:
 - ZIP entry content comparison with original-order or filename-order pairing.
 - Automated tests for folder expansion, partial match threshold, byte prefilter,
   hash cache reuse, and archive entry ordering.
+- Selected-target compare command from the main Tasks menu and action toolbar.
+- Grouped settings UI for file name, metadata, content, and other options.
+- Dependent settings controls are disabled when their parent checkbox or mode
+  does not apply.
+- Result dialog with summary counts, status filtering, sortable pair rows, and
+  per-criterion detail rows.
 
 ## Remaining Work
 
-- Add WinForms result view with sortable/filterable pair results.
-- Add settings UI controls using the grouping in this document.
-- Add progress/cancel wiring from the main execution path.
-- Decide whether compare should become a work-plan step or a separate command.
+- Add visible progress reporting for large comparison runs.
+- Add result export or copy support after the first manual UI validation pass.
 - Decide whether Explorer context menu integration should be added after the app
   UI is stable.

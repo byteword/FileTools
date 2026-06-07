@@ -1,7 +1,7 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-07 after file compare foundation work
+Last updated: 2026-06-07 after file compare result/settings UI work
 
 Scope reviewed:
 
@@ -16,7 +16,10 @@ Scope reviewed:
 - #3 internet dictionary or AI-assisted rename correction: keep open as a long-term research item.
 - #4 selected-target folder merge: closed as completed. Common-filename-based file merge and preview scope were split to #9.
 - #5 ZIP archive merge: closed as completed. 7Z input archive merge was split to #8.
-- #6 compare two or more files: active. The first engine/options slice is implemented; result UI, settings UI wiring, progress/cancel integration, and command placement remain open.
+- #6 compare two or more files: active. The engine/options slice is implemented
+  and the selected-target command, settings UI, and result dialog are now wired.
+  Visible progress reporting, result export/copy, and optional Explorer context
+  menu integration remain open.
 - #7 Windows ARM64 build and installer support: keep open and deferred until there is ARM64 Windows hardware or VM validation.
 - #8 7Z input archive merge support: keep open as the archive merge follow-up.
 - #9 common-filename-based file merge flow: keep open as the folder/file merge follow-up.
@@ -39,11 +42,19 @@ Scope reviewed:
   expansion into pairwise file comparisons, filename/metadata/content criteria,
   content range selection, byte-to-byte prefiltering, per-run hash caching, and
   ZIP entry-order comparison.
+- Added the selected-target file compare command, grouped settings controls, and
+  result dialog with status filtering and per-criterion details.
+- Added `docs/images/file-compare-result-dialog.svg` to document the result UI
+  layout.
+- Ran `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` on
+  2026-06-07 after the UI wiring; all 36 managed tests passed.
 
 ## Deferred Follow-Up Tracks
 
 - #3 internet dictionary or AI-assisted rename correction: resume only after privacy, cost, network failure, opt-in, and review UX policies are defined.
-- #6 file comparison: continue with result UI, settings UI wiring, progress/cancel integration, and command placement after the engine foundation is verified.
+- #6 file comparison: continue with visible progress reporting, result
+  export/copy, optional Explorer context menu integration, and manual UI
+  validation with large mixed file sets.
 - #7 Windows ARM64 build and installer support: resume only when ARM64 Windows hardware or a VM is available for end-to-end installer and Explorer validation.
 - #8 7Z input archive merge support: resume after ZIP archive merge real-sample validation and release notes are finished, then decide ZIP-only output versus 7Z output scope.
 - #9 common-filename-based file merge flow: resume after rename, extension, collision, and preview UX decisions are made.
@@ -68,3 +79,9 @@ Scope reviewed:
 4. Defer lower-priority feature tracks.
    - #3, #7, #8, and #9 still carry explicit deferred status and resume conditions in GitHub.
    - Do not pull these into the active work queue until the resume conditions in each issue are satisfied.
+
+5. Continue issue #6 UI validation when file comparison is exercised manually.
+   - Use mixed files and folders to verify pair counts, status filtering, and
+     criterion details.
+   - Validate hash and byte-to-byte range settings with large files before
+     adding export/copy support.

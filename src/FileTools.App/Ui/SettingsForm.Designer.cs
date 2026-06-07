@@ -99,11 +99,13 @@ internal sealed partial class SettingsForm
         _contextMenuGroup = CreateContextMenuGroup();
         _renameGroup = CreateRenameGroup();
         _folderGroup = CreateFolderGroup();
+        _fileCompareGroup = CreateFileCompareGroup();
         _archiveMergeGroup = CreateArchiveMergeGroup();
         _relocationGroup = CreateRelocationGroup();
         _settingsStack.Controls.Add(_contextMenuGroup);
         _settingsStack.Controls.Add(_renameGroup);
         _settingsStack.Controls.Add(_folderGroup);
+        _settingsStack.Controls.Add(_fileCompareGroup);
         _settingsStack.Controls.Add(_archiveMergeGroup);
         _settingsStack.Controls.Add(_relocationGroup);
 
@@ -242,6 +244,70 @@ internal sealed partial class SettingsForm
             _archiveMergeCompressionCombo,
             Localizer.Get("ArchiveMergeCompressionHelp")));
         group.AddBodyControl(_archiveMergeDeleteOriginalsCheckBox);
+        RegisterGroup(group);
+        return group;
+    }
+
+    private CollapsibleSettingsGroup CreateFileCompareGroup()
+    {
+        _fileCompareNameCheckBox.Text = Localizer.Get("FileCompareCheckFileName");
+        ConfigureCheckBox(_fileCompareNameCheckBox);
+        _fileCompareCreatedTimeCheckBox.Text = Localizer.Get("FileCompareCheckCreatedTime");
+        ConfigureCheckBox(_fileCompareCreatedTimeCheckBox);
+        _fileCompareModifiedTimeCheckBox.Text = Localizer.Get("FileCompareCheckModifiedTime");
+        ConfigureCheckBox(_fileCompareModifiedTimeCheckBox);
+        _fileCompareSizeCheckBox.Text = Localizer.Get("FileCompareCheckFileSize");
+        ConfigureCheckBox(_fileCompareSizeCheckBox);
+        _fileCompareContentCheckBox.Text = Localizer.Get("FileCompareCheckContent");
+        ConfigureCheckBox(_fileCompareContentCheckBox);
+        _fileCompareExtractArchivesCheckBox.Text = Localizer.Get("FileCompareCheckExtractArchives");
+        ConfigureCheckBox(_fileCompareExtractArchivesCheckBox);
+        _fileCompareEarlyExitCheckBox.Text = Localizer.Get("FileCompareCheckEarlyExit");
+        ConfigureCheckBox(_fileCompareEarlyExitCheckBox);
+        _fileCompareHashCacheCheckBox.Text = Localizer.Get("FileCompareCheckHashCache");
+        ConfigureCheckBox(_fileCompareHashCacheCheckBox);
+
+        var group = new CollapsibleSettingsGroup(
+            Localizer.Get("TabFileCompare"),
+            Color.FromArgb(59, 130, 246),
+            GetFileCompareSummary,
+            expanded: true);
+        group.AddBodyControl(CreateSectionLabel(Localizer.Get("FileCompareGroupFileName")));
+        group.AddBodyControl(_fileCompareNameCheckBox);
+        group.AddBodyControl(CreateComboRow(
+            Localizer.Get("FileCompareLabelNameMode"),
+            _fileCompareNameModeCombo,
+            Localizer.Get("FileCompareNameModeHelp")));
+        group.AddBodyControl(CreateSectionLabel(Localizer.Get("FileCompareGroupMetadata")));
+        group.AddBodyControl(_fileCompareCreatedTimeCheckBox);
+        group.AddBodyControl(_fileCompareModifiedTimeCheckBox);
+        group.AddBodyControl(_fileCompareSizeCheckBox);
+        group.AddBodyControl(CreateSectionLabel(Localizer.Get("FileCompareGroupContent")));
+        group.AddBodyControl(_fileCompareContentCheckBox);
+        group.AddBodyControl(CreateComboRow(
+            Localizer.Get("FileCompareLabelContentMode"),
+            _fileCompareContentModeCombo,
+            Localizer.Get("FileCompareContentModeHelp")));
+        group.AddBodyControl(CreateComboRow(
+            Localizer.Get("FileCompareLabelRangeMode"),
+            _fileCompareRangeModeCombo,
+            Localizer.Get("FileCompareRangeModeHelp")));
+        group.AddBodyControl(CreateTextRow(
+            Localizer.Get("FileCompareLabelRangeBytes"),
+            _fileCompareRangeBytesBox,
+            Localizer.Get("FileCompareRangeBytesHelp")));
+        group.AddBodyControl(_fileCompareExtractArchivesCheckBox);
+        group.AddBodyControl(CreateComboRow(
+            Localizer.Get("FileCompareLabelArchiveOrder"),
+            _fileCompareArchiveOrderCombo,
+            Localizer.Get("FileCompareArchiveOrderHelp")));
+        group.AddBodyControl(CreateSectionLabel(Localizer.Get("FileCompareGroupOther")));
+        group.AddBodyControl(_fileCompareEarlyExitCheckBox);
+        group.AddBodyControl(_fileCompareHashCacheCheckBox);
+        group.AddBodyControl(CreateTextRow(
+            Localizer.Get("FileCompareLabelPrefilterPercent"),
+            _fileComparePrefilterPercentBox,
+            Localizer.Get("FileComparePrefilterHelp")));
         RegisterGroup(group);
         return group;
     }
@@ -462,6 +528,58 @@ internal sealed partial class SettingsForm
             {
                 helpLabel.Left = combo.Left;
                 helpLabel.Width = combo.Width;
+            }
+        }
+
+        panel.Resize += (_, _) => ResizeRow();
+        ResizeRow();
+        return panel;
+    }
+
+    private static Panel CreateTextRow(string labelText, TextBox textBox, string? helpText = null)
+    {
+        var panel = new Panel
+        {
+            Height = string.IsNullOrWhiteSpace(helpText) ? 38 : 64,
+            Margin = new Padding(0, 0, 0, 8)
+        };
+        var label = new Label
+        {
+            Text = labelText,
+            Left = 0,
+            Top = 3,
+            Width = 190,
+            Height = 24,
+            TextAlign = ContentAlignment.MiddleLeft
+        };
+        textBox.Left = 204;
+        textBox.Top = 1;
+        textBox.Height = 26;
+        textBox.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
+        panel.Controls.Add(label);
+        panel.Controls.Add(textBox);
+
+        Label? helpLabel = null;
+        if (!string.IsNullOrWhiteSpace(helpText))
+        {
+            helpLabel = CreateHelperText(helpText);
+            helpLabel.Left = 204;
+            helpLabel.Top = 31;
+            helpLabel.Height = 32;
+            helpLabel.Margin = new Padding(0);
+            panel.Controls.Add(helpLabel);
+        }
+
+        void ResizeRow()
+        {
+            var labelWidth = Math.Clamp(panel.ClientSize.Width / 3, 150, 220);
+            label.Width = labelWidth;
+            textBox.Left = labelWidth + 14;
+            textBox.Width = Math.Max(180, panel.ClientSize.Width - textBox.Left);
+            if (helpLabel is not null)
+            {
+                helpLabel.Left = textBox.Left;
+                helpLabel.Width = textBox.Width;
             }
         }
 

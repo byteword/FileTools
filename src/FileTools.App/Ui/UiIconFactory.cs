@@ -15,6 +15,7 @@ internal static class UiIconFactory
     public static Image Wrap { get; } = CreateIcon(DrawWrap, Color.FromArgb(32, 123, 67));
     public static Image Unwrap { get; } = CreateIcon(DrawUnwrap, Color.FromArgb(152, 84, 33));
     public static Image ArchiveMerge { get; } = CreateIcon(DrawArchiveMerge, Color.FromArgb(20, 116, 148));
+    public static Image Compare { get; } = CreateIcon(DrawCompare, Color.FromArgb(59, 130, 246));
     public static Image Relocate { get; } = CreateIcon(DrawRelocate, Color.FromArgb(96, 80, 170));
     public static Image RemoveStep { get; } = CreateIcon(DrawRemoveStep, Color.FromArgb(170, 59, 48));
     public static Image Settings { get; } = CreateIcon(DrawSettings, Color.FromArgb(70, 83, 102));
@@ -189,6 +190,26 @@ internal static class UiIconFactory
         graphics.DrawLine(pen, bounds.Right - 5, bounds.Bottom - 7, bounds.Left + 7, bounds.Bottom - 7);
         graphics.DrawLine(pen, bounds.Left + 9, bounds.Bottom - 4, bounds.Left + 5, bounds.Bottom - 7);
         graphics.DrawLine(pen, bounds.Left + 9, bounds.Bottom - 10, bounds.Left + 5, bounds.Bottom - 7);
+    }
+
+    private static void DrawCompare(Graphics graphics, Rectangle bounds, Color color)
+    {
+        using var pen = new Pen(color, 1.8F);
+        using var brush = new SolidBrush(Color.FromArgb(239, 246, 255));
+        var left = new Rectangle(bounds.Left + 2, bounds.Top + 3, 8, 12);
+        var right = new Rectangle(bounds.Right - 11, bounds.Top + 3, 8, 12);
+        graphics.FillRectangle(brush, left);
+        graphics.FillRectangle(brush, right);
+        graphics.DrawRectangle(pen, left);
+        graphics.DrawRectangle(pen, right);
+
+        using var glassPen = new Pen(color, 2F)
+        {
+            StartCap = LineCap.Round,
+            EndCap = LineCap.Round
+        };
+        graphics.DrawEllipse(glassPen, bounds.Left + 7, bounds.Bottom - 12, 8, 8);
+        graphics.DrawLine(glassPen, bounds.Left + 14, bounds.Bottom - 5, bounds.Right - 3, bounds.Bottom - 2);
     }
 
     private static void DrawRemoveStep(Graphics graphics, Rectangle bounds, Color color)
