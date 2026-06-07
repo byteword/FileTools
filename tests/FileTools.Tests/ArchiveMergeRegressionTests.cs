@@ -52,6 +52,19 @@ public sealed class ArchiveMergeRegressionTests
     }
 
     [Fact]
+    public void ArchiveEncodingDetector_UsesSystemDefaultWhenAllCandidatesTie()
+    {
+        using var temp = TempDirectory.Create();
+        var source = temp.GetPath("ascii.zip");
+        ZipTestData.CreateStoredZip(source, new TestZipEntry("plain.txt", "content"));
+
+        var resolution = ArchiveEncodingDetector.Resolve(source, questionSink: null);
+
+        Assert.Equal(Encoding.Default.CodePage, resolution.Encoding.CodePage);
+        Assert.False(resolution.IsAmbiguous);
+    }
+
+    [Fact]
     public void Merge_PreservesZipEntryMetadataAndDirectoryEntries()
     {
         using var temp = TempDirectory.Create();

@@ -252,6 +252,10 @@ Other candidates: Japanese, Simplified Chinese, Traditional Chinese, ZIP default
 
 If the score is ambiguous, the progress window opens a dedicated encoding selection dialog and shows a preview of decoded entry names.
 
+When every candidate receives the same score, FileTools uses the Windows system
+default encoding instead of choosing the first candidate. This avoids treating a
+score tie on plain ASCII filenames as a Korean/Japanese/Chinese encoding signal.
+
 ### Archive Merge Rollback and Source Deletion
 
 The output ZIP is written to a hidden temp file in the final output directory:

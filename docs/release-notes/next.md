@@ -16,6 +16,7 @@ notes.
 - Expanded file comparison options with common-name thresholds, middle-part start/length ranges, byte/KiB/MiB unit conversion, first-N archive entry scope, same-relative-path archive entry pairing, and a result-dialog splitter initialization fix.
 - Clarified duplicate-delete work-plan steps with delete-candidate preview text, an edit-step button, a two-pane editor for choosing which loaded file targets are deleted or kept, result handoff that includes kept same-content files, large/old-file default keep selection, and group-scoped delete-step resynchronization after edits.
 - Improved archive merge common filename handling so numbered archive families such as `A 01.zip` and `A 02.zip` default to `A.zip`, and added a detailed internal entry preview that shows final target paths after collision auto-numbering.
+- Changed ZIP filename encoding detection to use the system default encoding when all candidate encodings receive the same score.
 
 ## Support Scope
 

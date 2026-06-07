@@ -154,7 +154,8 @@ internal sealed record ArchiveEncodingCandidateResult(
     string Description,
     Encoding Encoding,
     int Score,
-    IReadOnlyList<string> PreviewNames);
+    IReadOnlyList<string> PreviewNames,
+    bool IsSystemDefault = false);
 
 internal sealed record ArchiveMergeQuestionEntry(
     string SourceArchivePath,
@@ -2256,7 +2257,8 @@ internal static class ArchiveEncodingDetector
                     Localizer.Get(candidate.DescriptionKey),
                     encoding,
                     ScoreNames(names),
-                    names));
+                    names,
+                    candidate.CodePage == 0));
             }
             catch
             {
@@ -2271,6 +2273,15 @@ internal static class ArchiveEncodingDetector
         var ordered = results
             .OrderByDescending(static item => item.Score)
             .ToArray();
+        if (AllCandidateScoresTie(ordered) &&
+            ordered.FirstOrDefault(static item => item.IsSystemDefault) is { } systemDefault)
+        {
+            return new ArchiveEncodingResolution(
+                systemDefault.Encoding,
+                systemDefault.DisplayName,
+                IsAmbiguous: false);
+        }
+
         var ambiguous = ordered.Length > 1 && ordered[0].Score - ordered[1].Score <= 2;
         if (ambiguous && questionSink is not null)
         {
@@ -2286,6 +2297,12 @@ internal static class ArchiveEncodingDetector
         }
 
         return new ArchiveEncodingResolution(ordered[0].Encoding, ordered[0].DisplayName, ambiguous);
+    }
+
+    private static bool AllCandidateScoresTie(IReadOnlyList<ArchiveEncodingCandidateResult> results)
+    {
+        return results.Count > 1 &&
+               results.All(item => item.Score == results[0].Score);
     }
 
     private static int ScoreNames(IReadOnlyList<string> names)
