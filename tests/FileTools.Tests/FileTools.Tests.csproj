@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\FileTools.App\FileTools.App.csproj" />
+    <ProjectReference Include="..\..\src\FileTools.Correction.SymSpellPlugin\FileTools.Correction.SymSpellPlugin.csproj" />
   </ItemGroup>
 
   <ItemGroup>

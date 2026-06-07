@@ -9,7 +9,8 @@ internal static class RenameOperations
     public static IReadOnlyList<RenamePreview> CreatePlan(IEnumerable<string> paths, FileToolsSettings settings)
     {
         var planner = new RenamePlanner(CreateFileNameCorrector(settings));
-        return planner.CreatePlan(paths);
+        var previews = planner.CreatePlan(paths);
+        return NameCorrectionPluginHost.AddPluginCandidates(previews, settings);
     }
 
     public static RenamePreview CreateManualPreview(string path, string fileName, FileToolsSettings settings)

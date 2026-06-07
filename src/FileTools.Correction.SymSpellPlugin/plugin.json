@@ -1,0 +1,7 @@
+{
+  "id": "filetools.symspell",
+  "displayName": "SymSpell candidate provider",
+  "version": "1.0.0",
+  "license": "MIT",
+  "entryAssembly": "FileTools.Correction.SymSpellPlugin.dll"
+}

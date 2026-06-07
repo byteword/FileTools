@@ -13,7 +13,10 @@ Scope reviewed:
 
 - #1 app-level rename common phrases: closed as completed before this review.
 - #2 app-level rename correction rule management: closed as completed during this review. The rule model, built-in/user rules, review trace, and script-rule constraints are now implemented and documented.
-- #3 internet dictionary or AI-assisted rename correction: keep open as a long-term research item.
+- #3 internet dictionary or AI-assisted rename correction: continue as a
+  plugin-based candidate-provider track. The first slice defines the plugin API,
+  language setting, review-only candidate boundary, and a low-license SymSpell
+  sample plugin without bundled dictionary data.
 - #4 selected-target folder merge: closed as completed. Common-filename-based file merge and preview scope were split to #9.
 - #5 ZIP archive merge: closed as completed. 7Z input archive merge was split to #8.
 - #6 compare two or more files: active. The engine/options slice is implemented,
@@ -84,10 +87,16 @@ Scope reviewed:
   internal entry target names including collision auto-numbering.
 - Ran `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` on
   2026-06-07 after the #9 slice; all 57 managed tests passed.
+- Ran `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` on
+  2026-06-07 after the rename-correction plugin slice; all 62 managed tests
+  passed.
 
 ## Deferred Follow-Up Tracks
 
-- #3 internet dictionary or AI-assisted rename correction: resume only after privacy, cost, network failure, opt-in, and review UX policies are defined.
+- #3 internet dictionary or AI-assisted rename correction: resume internet or
+  local-LLM providers only after privacy, cost, network failure, opt-in, and
+  review UX policies are defined. The current implementation scope is limited
+  to offline plugin loading and a review-only SymSpell sample provider.
 - #6 file comparison: continue with JSON result import/reload, manual UI
   validation with large mixed file sets and narrow result dialog sizes, and
   eventual Explorer menu exposure after the internal `/context FileCompare`

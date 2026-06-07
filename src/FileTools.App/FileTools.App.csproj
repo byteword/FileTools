@@ -56,8 +56,21 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FileTools.Correction.Abstractions\FileTools.Correction.Abstractions.csproj" />
+    <ProjectReference Include="..\FileTools.Correction.SymSpellPlugin\FileTools.Correction.SymSpellPlugin.csproj" ReferenceOutputAssembly="false" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="SharpCompress" Version="0.49.1" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
   </ItemGroup>
+  <Target Name="CopyCorrectionPlugins" AfterTargets="Build">
+    <ItemGroup>
+      <SymSpellPluginFiles Include="..\FileTools.Correction.SymSpellPlugin\bin\$(Configuration)\net8.0\**\*.*" />
+    </ItemGroup>
+    <Copy
+      SourceFiles="@(SymSpellPluginFiles)"
+      DestinationFiles="@(SymSpellPluginFiles->'$(OutputPath)Plugins\FileTools.Correction.SymSpellPlugin\%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
+  </Target>
 </Project>

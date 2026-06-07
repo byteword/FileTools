@@ -55,6 +55,8 @@ internal sealed class FileToolsSettings
 
     public bool RenameUseDictionary { get; set; } = true;
 
+    public RenameCorrectionPluginOptions RenameCorrectionPlugins { get; set; } = new();
+
     public ArchiveMergeLayout ArchiveMergeLayout { get; set; } = ArchiveMergeLayout.GroupByArchiveName;
 
     public ArchiveMergeCollisionPolicy ArchiveMergeCollisionPolicy { get; set; } = ArchiveMergeCollisionPolicy.AutoNumber;
@@ -136,6 +138,7 @@ internal sealed class FileToolsSettings
             ContextMenuAutoRelocationChooseTarget = ContextMenuAutoRelocationChooseTarget,
             RenameReviewMode = RenameReviewMode,
             RenameUseDictionary = RenameUseDictionary,
+            RenameCorrectionPlugins = RenameCorrectionPlugins?.Clone() ?? new RenameCorrectionPluginOptions(),
             ArchiveMergeLayout = ArchiveMergeLayout,
             ArchiveMergeCollisionPolicy = ArchiveMergeCollisionPolicy,
             ArchiveMergeDuplicatePolicy = ArchiveMergeDuplicatePolicy,
@@ -215,6 +218,7 @@ internal static class SettingsStore
             })
             .ToList();
         settings.FileCompareOptions ??= new FileCompareOptions();
+        settings.RenameCorrectionPlugins = RenameCorrectionPluginDefaults.Normalize(settings.RenameCorrectionPlugins);
         settings.FileCompareOptions.CommonNameMinimumCharacters = Math.Max(1, settings.FileCompareOptions.CommonNameMinimumCharacters);
         settings.FileCompareOptions.CommonNameMinimumPercent = Math.Clamp(settings.FileCompareOptions.CommonNameMinimumPercent, 0.01, 1);
         settings.FileCompareOptions.RangeBytes = Math.Max(1, settings.FileCompareOptions.RangeBytes);

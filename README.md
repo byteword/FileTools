@@ -78,6 +78,7 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
 별도 대화상자는 다음 용도로 제공됩니다.
 
 - 이름 변경 교정 규칙. 내장 규칙 표시 여부, 활성 상태, 단계별 순서, 자동/검토/후보 전용 모드를 포함합니다. 오른쪽 `세부 설정` 탭은 기존 이름변경 사전(`source -> replacement`), 검토창 삽입 문구, 왜곡 한글 후보 점수 단어와 보호 영어 단어, 파서 프로파일의 태그 단어/작가 접두어/회차 접두어와 단위/제목 노이즈 단어를 선택 규칙 맥락에서 직접 편집합니다. 후보 프로파일은 `rename-candidate-profile.json`, 파서 프로파일은 `rename-parser-profile.json`에 저장하며, 스크립트 기반 규칙은 보류 중이고 `docs/ux-rename-rule-management.md`에 문서화되어 있습니다.
+- 이름변경 교정 플러그인. 기본 언어와 플러그인별 활성 상태 및 설정을 관리합니다. 플러그인은 자동 적용 없이 검토 가능한 후보만 추가하며, 첫 샘플은 사용자 제공 사전/말뭉치 파일을 쓰는 SymSpell 후보 provider입니다. 설계 경계는 `docs/rename-correction-plugin-design.md`에 문서화되어 있습니다.
 - AutoRelocation 템플릿 편집. 경로 규칙 단계는 순서대로 평가되므로 템플릿은 `{KnownFileKind}\[{Initial}]\{EpisodeRange}` 같은 경로를 만들 수 있습니다. 템플릿 편집기와 단계별 작업 대화상자는 긴 템플릿 이름, 경로, 현지화된 라벨을 위해 크기를 조절할 수 있습니다.
 
 AutoRelocation 템플릿은 의도적으로 파일에서 파생된 값만 사용합니다.
@@ -106,6 +107,7 @@ AutoRelocation 템플릿은 의도적으로 파일에서 파생된 값만 사용
 %APPDATA%\FileTools\rename-dictionary.json
 %APPDATA%\FileTools\rename-candidate-profile.json
 %APPDATA%\FileTools\rename-parser-profile.json
+%APPDATA%\FileTools\Plugins
 %APPDATA%\FileTools\Relocate
 ```
 

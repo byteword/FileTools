@@ -22,6 +22,7 @@ internal sealed partial class SettingsForm : Form
     private readonly ComboBox _folderMismatchCombo = new();
     private readonly ComboBox _defaultTemplateCombo = new();
     private readonly ComboBox _renameReviewModeCombo = new();
+    private readonly ComboBox _renamePluginLanguageCombo = new();
     private readonly ComboBox _archiveMergeLayoutCombo = new();
     private readonly ComboBox _archiveMergeCollisionCombo = new();
     private readonly ComboBox _archiveMergeDuplicateCombo = new();
@@ -50,6 +51,9 @@ internal sealed partial class SettingsForm : Form
     private readonly CheckBox _fileCompareHashCacheCheckBox = new();
     private readonly TextBox _fileComparePrefilterPercentBox = new();
     private readonly CheckBox _renameDictionaryCheckBox = new();
+    private readonly CheckBox _renamePluginCheckBox = new();
+    private readonly CheckedListBox _renamePluginList = new();
+    private readonly Button _renamePluginSettingsButton = new();
     private readonly CheckBox _archiveMergeDeleteOriginalsCheckBox = new();
     private readonly Label _statusTitleLabel = new();
     private readonly Label _statusDetailLabel = new();
@@ -64,6 +68,7 @@ internal sealed partial class SettingsForm : Form
     private CollapsibleSettingsGroup? _fileCompareGroup;
     private FileCompareRangeUnit _fileCompareCurrentRangeUnit = FileCompareRangeUnit.Bytes;
     private bool _updatingFileCompareRangeUnit;
+    private IReadOnlyList<LoadedNameCorrectionPlugin> _renamePlugins = [];
 
     public SettingsForm(FileToolsSettings settings)
     {
@@ -95,6 +100,7 @@ internal sealed partial class SettingsForm : Form
         _contextMenuArchiveMergeGroupByArchiveNameCheckBox.Checked = Settings.ContextMenuArchiveMergeGroupByArchiveName;
         _contextMenuArchiveMergePreserveInternalPathsCheckBox.Checked = Settings.ContextMenuArchiveMergePreserveInternalPaths;
         _renameDictionaryCheckBox.Checked = Settings.RenameUseDictionary;
+        _renamePluginCheckBox.Checked = Settings.RenameCorrectionPlugins.Enabled;
         _archiveMergeDeleteOriginalsCheckBox.Checked = Settings.ArchiveMergeDeleteOriginals;
         _fileCompareNameCheckBox.Checked = Settings.FileCompareOptions.CompareFileName;
         _fileCompareCreatedTimeCheckBox.Checked = Settings.FileCompareOptions.CompareCreatedTime;
@@ -123,6 +129,12 @@ internal sealed partial class SettingsForm : Form
             .Select(mode => new ComboOption<RenameReviewMode>(ToolModeText.GetDisplayName(mode), mode))
             .ToArray());
         SelectComboValue(_renameReviewModeCombo, Settings.RenameReviewMode);
+
+        ConfigureCombo(_renamePluginLanguageCombo, RenameCorrectionPluginDefaults.SupportedLanguages
+            .Select(language => new ComboOption<string>(language, language))
+            .ToArray());
+        SelectComboValue(_renamePluginLanguageCombo, Settings.RenameCorrectionPlugins.Language);
+        LoadRenamePlugins();
 
         ConfigureCombo(_contextMenuLayoutCombo, Enum.GetValues<ContextMenuLayout>()
             .Select(layout => new ComboOption<ContextMenuLayout>(ToolModeText.GetDisplayName(layout), layout))
@@ -229,6 +241,7 @@ internal sealed partial class SettingsForm : Form
             _contextMenuArchiveMergeGroupByArchiveNameCheckBox,
             _contextMenuArchiveMergePreserveInternalPathsCheckBox,
             _renameDictionaryCheckBox,
+            _renamePluginCheckBox,
             _archiveMergeDeleteOriginalsCheckBox,
             _fileCompareNameCheckBox,
             _fileCompareCreatedTimeCheckBox,
@@ -247,6 +260,7 @@ internal sealed partial class SettingsForm : Form
         foreach (var combo in new[]
         {
             _renameReviewModeCombo,
+            _renamePluginLanguageCombo,
             _contextMenuLayoutCombo,
             _defaultFolderOperationCombo,
             _folderMismatchCombo,
@@ -275,6 +289,8 @@ internal sealed partial class SettingsForm : Form
         _fileCompareRangeBytesBox.TextChanged += (_, _) => UpdateUiState();
         _fileCompareArchiveLimitCountBox.TextChanged += (_, _) => UpdateUiState();
         _fileComparePrefilterPercentBox.TextChanged += (_, _) => UpdateUiState();
+        _renamePluginList.ItemCheck += (_, _) => BeginInvoke((MethodInvoker)UpdateUiState);
+        _renamePluginList.SelectedIndexChanged += (_, _) => UpdateUiState();
     }
 
     private void UpdateUiState()
@@ -295,6 +311,7 @@ internal sealed partial class SettingsForm : Form
         }
 
         UpdateFileCompareControlState();
+        UpdateRenamePluginControlState();
     }
 
     private string GetContextMenuSummary()
@@ -310,7 +327,14 @@ internal sealed partial class SettingsForm : Form
         var dictionaryState = _renameDictionaryCheckBox.Checked
             ? Localizer.Get("SettingsSummaryDictionaryOn")
             : Localizer.Get("SettingsSummaryDictionaryOff");
-        return Localizer.Format("SettingsSummaryPairFormat", GetComboText(_renameReviewModeCombo), dictionaryState);
+        var pluginState = _renamePluginCheckBox.Checked
+            ? Localizer.Format("RenamePluginSummaryEnabledFormat", GetCheckedRenamePluginCount())
+            : Localizer.Get("RenamePluginSummaryOff");
+        return Localizer.Format(
+            "SettingsSummaryTripleFormat",
+            GetComboText(_renameReviewModeCombo),
+            dictionaryState,
+            pluginState);
     }
 
     private string GetFolderSummary()
@@ -343,6 +367,56 @@ internal sealed partial class SettingsForm : Form
             "SettingsSummaryPairFormat",
             GetComboText(_fileCompareNameModeCombo),
             content);
+    }
+
+    private void LoadRenamePlugins()
+    {
+        _renamePlugins = NameCorrectionPluginCatalog.Discover();
+        _renamePluginList.Items.Clear();
+        foreach (var plugin in _renamePlugins)
+        {
+            var configuration = Settings.RenameCorrectionPlugins.Plugins.FirstOrDefault(item =>
+                string.Equals(item.PluginId, plugin.Descriptor.Id, StringComparison.OrdinalIgnoreCase));
+            _renamePluginList.Items.Add(new RenamePluginListItem(plugin), configuration?.Enabled == true);
+        }
+
+        if (_renamePluginList.Items.Count > 0)
+        {
+            _renamePluginList.SelectedIndex = 0;
+        }
+    }
+
+    private int GetCheckedRenamePluginCount()
+    {
+        return _renamePluginList.CheckedItems.Count;
+    }
+
+    private void SaveRenamePluginSettingsFromUi()
+    {
+        Settings.RenameCorrectionPlugins = RenameCorrectionPluginDefaults.Normalize(Settings.RenameCorrectionPlugins);
+        for (var index = 0; index < _renamePluginList.Items.Count; index++)
+        {
+            if (_renamePluginList.Items[index] is not RenamePluginListItem item)
+            {
+                continue;
+            }
+
+            var configuration = RenameCorrectionPluginDefaults.GetOrCreatePlugin(
+                Settings.RenameCorrectionPlugins,
+                item.Plugin.Descriptor.Id);
+            configuration.Enabled = _renamePluginList.GetItemChecked(index);
+            configuration.Settings = new Dictionary<string, string>(
+                NameCorrectionPluginHost.BuildSettings(item.Plugin, configuration),
+                StringComparer.OrdinalIgnoreCase);
+        }
+    }
+
+    private void UpdateRenamePluginControlState()
+    {
+        var enabled = _renamePluginCheckBox.Checked;
+        _renamePluginLanguageCombo.Enabled = enabled;
+        _renamePluginList.Enabled = enabled && _renamePluginList.Items.Count > 0;
+        _renamePluginSettingsButton.Enabled = enabled && _renamePluginList.SelectedItem is RenamePluginListItem;
     }
 
     private int GetEnabledContextMenuCommandCount()
@@ -394,6 +468,11 @@ internal sealed partial class SettingsForm : Form
         Settings.ContextMenuArchiveMergeGroupByArchiveName = _contextMenuArchiveMergeGroupByArchiveNameCheckBox.Checked;
         Settings.ContextMenuArchiveMergePreserveInternalPaths = _contextMenuArchiveMergePreserveInternalPathsCheckBox.Checked;
         Settings.RenameUseDictionary = _renameDictionaryCheckBox.Checked;
+        Settings.RenameCorrectionPlugins.Enabled = _renamePluginCheckBox.Checked;
+        Settings.RenameCorrectionPlugins.Language = GetSelectedComboValue(
+            _renamePluginLanguageCombo,
+            RenameCorrectionPluginDefaults.DefaultLanguage);
+        SaveRenamePluginSettingsFromUi();
         Settings.ArchiveMergeDeleteOriginals = _archiveMergeDeleteOriginalsCheckBox.Checked;
         Settings.FileCompareOptions.CompareFileName = _fileCompareNameCheckBox.Checked;
         Settings.FileCompareOptions.CompareCreatedTime = _fileCompareCreatedTimeCheckBox.Checked;
@@ -657,6 +736,26 @@ internal sealed partial class SettingsForm : Form
         }
     }
 
+    private void OpenRenamePluginSettings()
+    {
+        if (_renamePluginList.SelectedItem is not RenamePluginListItem item)
+        {
+            return;
+        }
+
+        var configuration = RenameCorrectionPluginDefaults.GetOrCreatePlugin(
+            Settings.RenameCorrectionPlugins,
+            item.Plugin.Descriptor.Id);
+        using var dialog = new NameCorrectionPluginSettingsDialog(
+            item.Plugin,
+            NameCorrectionPluginHost.BuildSettings(item.Plugin, configuration));
+        if (dialog.ShowDialog(this) == DialogResult.OK)
+        {
+            configuration.Settings = new Dictionary<string, string>(dialog.Settings, StringComparer.OrdinalIgnoreCase);
+            UpdateUiState();
+        }
+    }
+
     private void OpenTemplateEditor()
     {
         var selectedTemplateId = _defaultTemplateCombo.SelectedItem is ComboOption<string> selectedTemplate
@@ -853,4 +952,25 @@ internal sealed partial class SettingsForm : Form
         return combo.SelectedItem is ComboOption<T> option ? option.Value : fallback;
     }
 
+    private sealed record RenamePluginListItem(LoadedNameCorrectionPlugin Plugin)
+    {
+        public override string ToString()
+        {
+            var descriptor = Plugin.Descriptor;
+            var details = new List<string>();
+            if (!string.IsNullOrWhiteSpace(descriptor.License))
+            {
+                details.Add(descriptor.License);
+            }
+
+            if (descriptor.SupportedLanguages.Count > 0)
+            {
+                details.Add(string.Join(", ", descriptor.SupportedLanguages));
+            }
+
+            return details.Count == 0
+                ? descriptor.DisplayName
+                : $"{descriptor.DisplayName} ({string.Join(" - ", details)})";
+        }
+    }
 }

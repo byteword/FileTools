@@ -13,6 +13,23 @@ public sealed class SettingsAndConfigurationTests
             {
                 RangeBytes = 4096
             },
+            RenameCorrectionPlugins = new RenameCorrectionPluginOptions
+            {
+                Enabled = true,
+                Language = "en-US",
+                Plugins =
+                [
+                    new RenameCorrectionPluginConfiguration
+                    {
+                        PluginId = "filetools.symspell",
+                        Enabled = true,
+                        Settings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                        {
+                            ["dictionaryPath"] = "dictionary.txt"
+                        }
+                    }
+                ]
+            },
             FileKindExtensionRules =
             [
                 new FileKindExtensionRule
@@ -26,11 +43,14 @@ public sealed class SettingsAndConfigurationTests
         var clone = settings.Clone();
         clone.FileKindExtensionRules[0].Extensions.Add(".md");
         clone.FileCompareOptions.RangeBytes = 8192;
+        clone.RenameCorrectionPlugins.Plugins[0].Settings["dictionaryPath"] = "changed.txt";
 
         Assert.Equal([".txt"], settings.FileKindExtensionRules[0].Extensions);
         Assert.Equal([".txt", ".md"], clone.FileKindExtensionRules[0].Extensions);
         Assert.Equal(4096, settings.FileCompareOptions.RangeBytes);
         Assert.Equal(8192, clone.FileCompareOptions.RangeBytes);
+        Assert.Equal("dictionary.txt", settings.RenameCorrectionPlugins.Plugins[0].Settings["dictionaryPath"]);
+        Assert.Equal("changed.txt", clone.RenameCorrectionPlugins.Plugins[0].Settings["dictionaryPath"]);
     }
 
     [Fact]

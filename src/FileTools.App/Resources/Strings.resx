@@ -174,6 +174,7 @@
   <data name="SettingsSummaryRegisteredEnabledCountFormat" xml:space="preserve"><value>Registered · {0} enabled</value></data>
   <data name="SettingsSummaryNotRegisteredEnabledCountFormat" xml:space="preserve"><value>Not registered · {0} selected</value></data>
   <data name="SettingsSummaryPairFormat" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="SettingsSummaryTripleFormat" xml:space="preserve"><value>{0} · {1} · {2}</value></data>
   <data name="SettingsSummaryDictionaryOn" xml:space="preserve"><value>Dictionary on</value></data>
   <data name="SettingsSummaryDictionaryOff" xml:space="preserve"><value>Dictionary off</value></data>
   <data name="SettingsContextMenuRegistrationHelp" xml:space="preserve"><value>Command choices are kept even when Explorer registration is off.</value></data>
@@ -189,6 +190,18 @@
   <data name="Windows11ContextMenuFilesMissing" xml:space="preserve"><value>Windows 11 native context menu support files were not found:&#x0D;&#x0A;{0}</value></data>
   <data name="SettingsContextMenuLayoutHelp" xml:space="preserve"><value>Grouped keeps one FileTools submenu; expanded places commands directly in Explorer.</value></data>
   <data name="SettingsRenameReviewHelp" xml:space="preserve"><value>The safer automated mode still stops for NeedsReview and Conflict rows.</value></data>
+  <data name="RenamePluginSectionTitle" xml:space="preserve"><value>Correction plugins</value></data>
+  <data name="RenamePluginSectionHelp" xml:space="preserve"><value>Plugins add review-only candidates and never silently apply a rename.</value></data>
+  <data name="CheckRenamePluginsEnabled" xml:space="preserve"><value>Use correction plugin candidates</value></data>
+  <data name="RenamePluginLanguageLabel" xml:space="preserve"><value>Default language</value></data>
+  <data name="RenamePluginLanguageHelp" xml:space="preserve"><value>This language is passed to every enabled correction plugin.</value></data>
+  <data name="RenamePluginListLabel" xml:space="preserve"><value>Plugins</value></data>
+  <data name="ButtonRenamePluginSettings" xml:space="preserve"><value>Settings...</value></data>
+  <data name="RenamePluginSummaryOff" xml:space="preserve"><value>Plugins off</value></data>
+  <data name="RenamePluginSummaryEnabledFormat" xml:space="preserve"><value>{0} plugins</value></data>
+  <data name="RenamePluginSettingsDialogTitleFormat" xml:space="preserve"><value>{0} settings</value></data>
+  <data name="RenamePluginNoSettings" xml:space="preserve"><value>This plugin does not expose settings.</value></data>
+  <data name="RenamePluginRequiredSettingFormat" xml:space="preserve"><value>Enter a value for {0}.</value></data>
   <data name="SettingsFolderOperationHelp" xml:space="preserve"><value>Default used by Explorer and new plan steps unless a step overrides it.</value></data>
   <data name="SettingsFolderMismatchExample" xml:space="preserve"><value>Example: FolderA\Image01.jpg can keep Image01.jpg, become FolderA.jpg, or become FolderA-Image01.jpg.</value></data>
   <data name="SettingsAutoRelocationHelp" xml:space="preserve"><value>Default template for Explorer relocation commands and new relocation plan steps.</value></data>

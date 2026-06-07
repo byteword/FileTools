@@ -174,6 +174,7 @@
   <data name="SettingsSummaryRegisteredEnabledCountFormat" xml:space="preserve"><value>등록됨 · {0}개 활성</value></data>
   <data name="SettingsSummaryNotRegisteredEnabledCountFormat" xml:space="preserve"><value>미등록 · {0}개 선택</value></data>
   <data name="SettingsSummaryPairFormat" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="SettingsSummaryTripleFormat" xml:space="preserve"><value>{0} · {1} · {2}</value></data>
   <data name="SettingsSummaryDictionaryOn" xml:space="preserve"><value>사전 사용</value></data>
   <data name="SettingsSummaryDictionaryOff" xml:space="preserve"><value>사전 미사용</value></data>
   <data name="SettingsContextMenuRegistrationHelp" xml:space="preserve"><value>Explorer 등록을 꺼도 명령 선택값은 유지됩니다.</value></data>
@@ -189,6 +190,18 @@
   <data name="Windows11ContextMenuFilesMissing" xml:space="preserve"><value>Windows 11 기본 메뉴 지원 파일을 찾을 수 없습니다:&#x0D;&#x0A;{0}</value></data>
   <data name="SettingsContextMenuLayoutHelp" xml:space="preserve"><value>묶음형은 FileTools 하위 메뉴 하나로 정리하고, 펼침형은 명령을 Explorer에 바로 표시합니다.</value></data>
   <data name="SettingsRenameReviewHelp" xml:space="preserve"><value>자동화 보조 모드에서도 검토 필요와 충돌 항목은 반드시 멈춰서 검토합니다.</value></data>
+  <data name="RenamePluginSectionTitle" xml:space="preserve"><value>교정 플러그인</value></data>
+  <data name="RenamePluginSectionHelp" xml:space="preserve"><value>플러그인은 검토 가능한 후보만 추가하며 이름변경을 조용히 적용하지 않습니다.</value></data>
+  <data name="CheckRenamePluginsEnabled" xml:space="preserve"><value>교정 플러그인 후보 사용</value></data>
+  <data name="RenamePluginLanguageLabel" xml:space="preserve"><value>기본 언어</value></data>
+  <data name="RenamePluginLanguageHelp" xml:space="preserve"><value>활성화된 교정 플러그인에 전달할 언어입니다.</value></data>
+  <data name="RenamePluginListLabel" xml:space="preserve"><value>플러그인</value></data>
+  <data name="ButtonRenamePluginSettings" xml:space="preserve"><value>설정...</value></data>
+  <data name="RenamePluginSummaryOff" xml:space="preserve"><value>플러그인 꺼짐</value></data>
+  <data name="RenamePluginSummaryEnabledFormat" xml:space="preserve"><value>플러그인 {0}개</value></data>
+  <data name="RenamePluginSettingsDialogTitleFormat" xml:space="preserve"><value>{0} 설정</value></data>
+  <data name="RenamePluginNoSettings" xml:space="preserve"><value>이 플러그인은 설정을 제공하지 않습니다.</value></data>
+  <data name="RenamePluginRequiredSettingFormat" xml:space="preserve"><value>{0} 값을 입력하세요.</value></data>
   <data name="SettingsFolderOperationHelp" xml:space="preserve"><value>Explorer 작업과 새 플랜 단계에서 별도 지정이 없을 때 쓰는 기본값입니다.</value></data>
   <data name="SettingsFolderMismatchExample" xml:space="preserve"><value>예: FolderA\Image01.jpg는 Image01.jpg 유지, FolderA.jpg 변경, FolderA-Image01.jpg 변경 중 하나로 처리됩니다.</value></data>
   <data name="SettingsAutoRelocationHelp" xml:space="preserve"><value>Explorer 재배치 명령과 새 재배치 플랜 단계에 쓰는 기본 템플릿입니다.</value></data>

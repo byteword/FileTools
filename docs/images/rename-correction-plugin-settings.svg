@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" role="img" aria-labelledby="title desc">
+  <title id="title">Rename correction plugin settings</title>
+  <desc id="desc">Settings window concept showing language and per-plugin correction settings.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f4f6f8; }
+      .panel { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1; }
+      .header { fill: #ecfdf5; stroke: #10b981; stroke-width: 1; }
+      .title { font: 700 17px Segoe UI, Arial, sans-serif; fill: #064e3b; }
+      .body { font: 14px Segoe UI, Arial, sans-serif; fill: #111827; }
+      .muted { font: 12px Segoe UI, Arial, sans-serif; fill: #64748b; }
+      .label { font: 13px Segoe UI, Arial, sans-serif; fill: #374151; }
+      .box { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1; }
+      .check { fill: #059669; }
+      .button { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1; }
+    </style>
+  </defs>
+  <rect class="bg" x="0" y="0" width="900" height="520" />
+  <rect class="panel" x="36" y="28" width="828" height="456" rx="6" />
+  <rect class="header" x="58" y="52" width="784" height="52" rx="4" />
+  <text class="title" x="78" y="84">이름변경 교정 플러그인</text>
+  <text class="muted" x="78" y="124">플러그인은 자동 적용하지 않고 검토 가능한 후보만 추가합니다.</text>
+
+  <rect class="box" x="78" y="154" width="744" height="46" rx="4" />
+  <rect class="box" x="94" y="168" width="18" height="18" rx="2" />
+  <path class="check" d="M98 177 l4 4 l8 -10 l3 3 l-11 13 l-7 -7 z" />
+  <text class="body" x="124" y="182">교정 플러그인 후보 사용</text>
+  <text class="label" x="542" y="182">기본 언어</text>
+  <rect class="box" x="618" y="164" width="178" height="26" rx="3" />
+  <text class="body" x="632" y="183">ko-KR</text>
+
+  <text class="label" x="78" y="232">검색된 플러그인</text>
+  <rect class="box" x="78" y="250" width="744" height="78" rx="4" />
+  <rect class="box" x="96" y="277" width="18" height="18" rx="2" />
+  <path class="check" d="M100 286 l4 4 l8 -10 l3 3 l-11 13 l-7 -7 z" />
+  <text class="body" x="126" y="278">SymSpell candidate provider</text>
+  <text class="muted" x="126" y="301">MIT · en-US, ko-KR · 사용자 사전 파일 필요</text>
+  <rect class="button" x="684" y="271" width="112" height="32" rx="4" />
+  <text class="body" x="714" y="292">설정...</text>
+
+  <text class="label" x="78" y="362">플러그인별 설정</text>
+  <rect class="box" x="78" y="380" width="744" height="54" rx="4" />
+  <text class="label" x="100" y="413">사전 파일</text>
+  <rect class="box" x="198" y="394" width="468" height="26" rx="3" />
+  <text class="muted" x="212" y="412">C:\Dictionaries\frequency.txt</text>
+  <rect class="button" x="680" y="392" width="116" height="30" rx="4" />
+  <text class="body" x="716" y="412">찾기...</text>
+</svg>

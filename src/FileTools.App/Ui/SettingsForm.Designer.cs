@@ -341,6 +341,16 @@ internal sealed partial class SettingsForm
     {
         _renameDictionaryCheckBox.Text = Localizer.Get("CheckRenameUseDictionary");
         ConfigureCheckBox(_renameDictionaryCheckBox);
+        _renamePluginCheckBox.Text = Localizer.Get("CheckRenamePluginsEnabled");
+        ConfigureCheckBox(_renamePluginCheckBox);
+        _renamePluginList.CheckOnClick = true;
+        _renamePluginList.Height = 82;
+        _renamePluginList.IntegralHeight = false;
+        _renamePluginList.BorderStyle = BorderStyle.FixedSingle;
+        _renamePluginSettingsButton.Text = Localizer.Get("ButtonRenamePluginSettings");
+        _renamePluginSettingsButton.Width = 130;
+        _renamePluginSettingsButton.Height = 30;
+        _renamePluginSettingsButton.Click += (_, _) => OpenRenamePluginSettings();
 
         var group = new CollapsibleSettingsGroup(
             Localizer.Get("TabRename"),
@@ -353,6 +363,14 @@ internal sealed partial class SettingsForm
             Localizer.Get("SettingsRenameReviewHelp")));
         group.AddBodyControl(_renameDictionaryCheckBox);
         group.AddBodyControl(CreateRenameButtons());
+        group.AddBodyControl(CreateSectionLabel(Localizer.Get("RenamePluginSectionTitle")));
+        group.AddBodyControl(CreateHelperText(Localizer.Get("RenamePluginSectionHelp")));
+        group.AddBodyControl(_renamePluginCheckBox);
+        group.AddBodyControl(CreateComboRow(
+            Localizer.Get("RenamePluginLanguageLabel"),
+            _renamePluginLanguageCombo,
+            Localizer.Get("RenamePluginLanguageHelp")));
+        group.AddBodyControl(CreateRenamePluginListPanel());
         RegisterGroup(group);
         return group;
     }
@@ -426,6 +444,46 @@ internal sealed partial class SettingsForm
         };
         ruleButton.Click += (_, _) => OpenRenameRuleEditor();
         panel.Controls.Add(ruleButton);
+        return panel;
+    }
+
+    private Control CreateRenamePluginListPanel()
+    {
+        var panel = new Panel
+        {
+            Height = 124,
+            Margin = new Padding(0, 0, 0, 8)
+        };
+        var label = new Label
+        {
+            Text = Localizer.Get("RenamePluginListLabel"),
+            Left = 0,
+            Top = 3,
+            Width = 190,
+            Height = 24,
+            TextAlign = ContentAlignment.MiddleLeft
+        };
+        _renamePluginList.Left = 204;
+        _renamePluginList.Top = 1;
+        _renamePluginList.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
+        _renamePluginSettingsButton.Left = 204;
+        _renamePluginSettingsButton.Top = 90;
+        _renamePluginSettingsButton.Anchor = AnchorStyles.Left | AnchorStyles.Top;
+        panel.Controls.Add(label);
+        panel.Controls.Add(_renamePluginList);
+        panel.Controls.Add(_renamePluginSettingsButton);
+
+        void ResizeRow()
+        {
+            var labelWidth = Math.Clamp(panel.ClientSize.Width / 3, 150, 220);
+            label.Width = labelWidth;
+            _renamePluginList.Left = labelWidth + 14;
+            _renamePluginList.Width = Math.Max(180, panel.ClientSize.Width - _renamePluginList.Left);
+            _renamePluginSettingsButton.Left = _renamePluginList.Left;
+        }
+
+        panel.Resize += (_, _) => ResizeRow();
+        ResizeRow();
         return panel;
     }
 
