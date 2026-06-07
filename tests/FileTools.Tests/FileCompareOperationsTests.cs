@@ -109,6 +109,42 @@ public sealed class FileCompareOperationsTests
         Assert.Equal(FileCompareStatus.Same, Assert.Single(fileNameOrderReport.Pairs).Status);
     }
 
+    [Fact]
+    public void BuildDuplicateGroups_ConnectsSameContentPairsTransitively()
+    {
+        var first = CreateTarget(@"C:\data\a.bin");
+        var second = CreateTarget(@"C:\data\b.bin");
+        var third = CreateTarget(@"C:\data\c.bin");
+        var report = new FileCompareReport(
+            [first, second, third],
+            [
+                CreatePair(first, second, "Content", FileCompareStatus.Same),
+                CreatePair(second, third, "Content", FileCompareStatus.Same)
+            ],
+            HashCacheHits: 0,
+            HashCacheMisses: 0);
+
+        var group = Assert.Single(FileCompareResultActions.BuildDuplicateGroups(report));
+
+        Assert.Equal(3, group.Paths.Count);
+        Assert.Equal(first.Path, group.KeepPath);
+        Assert.Equal([second.Path, third.Path], group.DeleteCandidates);
+    }
+
+    [Fact]
+    public void BuildDuplicateGroups_IgnoresMetadataOnlySamePairs()
+    {
+        var first = CreateTarget(@"C:\data\a.bin");
+        var second = CreateTarget(@"C:\data\b.bin");
+        var report = new FileCompareReport(
+            [first, second],
+            [CreatePair(first, second, "File size", FileCompareStatus.Same)],
+            HashCacheHits: 0,
+            HashCacheMisses: 0);
+
+        Assert.Empty(FileCompareResultActions.BuildDuplicateGroups(report));
+    }
+
     private static FileCompareOptions ContentOnlyOptions(FileCompareContentMode contentMode)
     {
         return new FileCompareOptions
@@ -137,5 +173,26 @@ public sealed class FileCompareOperationsTests
             ArchiveMode = FileCompareArchiveMode.ExtractEntries,
             ArchiveEntryOrder = order
         };
+    }
+
+    private static FileCompareTarget CreateTarget(string path)
+    {
+        return new FileCompareTarget(path, Path.GetFileName(path), Path.GetDirectoryName(path));
+    }
+
+    private static FileComparePairResult CreatePair(
+        FileCompareTarget left,
+        FileCompareTarget right,
+        string criterionName,
+        FileCompareStatus status)
+    {
+        var ratio = status == FileCompareStatus.Same ? 1 : 0;
+        return new FileComparePairResult(
+            left,
+            right,
+            status,
+            ratio,
+            "test",
+            [new FileCompareCriterionResult(criterionName, status, ratio, "test")]);
     }
 }

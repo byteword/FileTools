@@ -52,6 +52,7 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
 - 파일을 변경하기 전에 각 대상에 여러 계획 작업을 추가합니다.
 - 파일명 교정, 폴더 wrapping, 폴더 unwrapping, AutoRelocation 작업을 체인으로 연결합니다.
 - 메뉴 모음에서 파일, 작업, 설정 명령에 접근하고, 자주 쓰는 작업 명령은 고정 작업 도구 모음에 유지합니다.
+- 파일 비교 전용 창에서 파일/폴더 대상을 모으고 이번 실행 옵션을 조정한 뒤, 결과 창에서 중복 후보와 후속 작업 대상을 검토합니다.
 - 분할 버튼에서 폴더 unwrapping 변형을 선택합니다. 기본 설정, 같은 이름 폴더, 단일 파일 폴더 이름 불일치 처리 방식, 바로 아래 자식 파일 상위 이동을 포함합니다.
 - 각 선택 대상의 작업 계획을 순서, 아이콘이 붙은 작업 종류, 예상 결과와 함께 그리드에서 검토합니다. 이름 변경 단계는 `original -> new name` 형식으로 표시됩니다.
 - 작업 계획 위에 현재 표시 중인 대상, 선택된 대상 수, 선택된 대상의 계획 단계 수를 표시합니다.
@@ -167,7 +168,7 @@ src\FileTools.App\bin\Release\net8.0-windows\win-x64\publish\FileTools.exe
 
 ### 테스트
 
-자동 테스트는 `tests\FileTools.Tests`에 있습니다. 현재 회귀 범위는 파일명 교정, 이름 템플릿과 충돌 해결, 이름 변경 적용, 폴더 병합, AutoRelocation 분류/계획 생성, 작업 계획 미리보기, 설정/규칙 정규화, ZIP 병합, ZIP extra field byte 보존, ZIP 병합 중복/충돌/취소 cleanup, 파일 비교 엔진의 폴더 확장/부분 일치/해시 캐시/ZIP 엔트리 순서 비교입니다. ZIP 출력 파일시스템 오류는 내부 `IArchiveMergeFileSystem` 어댑터로 주입하며, 테스트 프로젝트는 `InternalsVisibleTo`로 내부 엔진 API에 접근합니다.
+자동 테스트는 `tests\FileTools.Tests`에 있습니다. 현재 회귀 범위는 파일명 교정, 이름 템플릿과 충돌 해결, 이름 변경 적용, 폴더 병합, AutoRelocation 분류/계획 생성, 작업 계획 미리보기, 설정/규칙 정규화, ZIP 병합, ZIP extra field byte 보존, ZIP 병합 중복/충돌/취소 cleanup, 파일 비교 엔진의 폴더 확장/부분 일치/해시 캐시/ZIP 엔트리 순서 비교, 파일 비교 결과의 중복 그룹 산출입니다. ZIP 출력 파일시스템 오류는 내부 `IArchiveMergeFileSystem` 어댑터로 주입하며, 테스트 프로젝트는 `InternalsVisibleTo`로 내부 엔진 API에 접근합니다.
 
 ```powershell
 dotnet test .\tests\FileTools.Tests\FileTools.Tests.csproj
@@ -414,6 +415,7 @@ The standalone window supports:
 - Adding multiple planned actions to each target before changing files.
 - Chaining filename correction, folder wrapping, folder unwrapping, and AutoRelocation actions.
 - Accessing file, task, and settings commands from the menu bar, while common task commands stay on the fixed task toolbar.
+- Opening the dedicated file-compare dialog to collect files/folders, adjust per-run options, and review duplicate candidates plus follow-up targets from the result dialog.
 - Selecting folder unwrapping variants from a split button, including the default setting, same-name folders, single-file folder name mismatch modes, and moving direct child files upward.
 - Reviewing each selected target's work plan in a grid with order, icon-labeled action kind, and expected result; rename steps show `original -> new name`.
 - Showing the currently displayed target, selected target count, and selected targets' planned step count above the work plan.
@@ -529,7 +531,7 @@ src\FileTools.App\bin\Release\net8.0-windows\win-x64\publish\FileTools.exe
 
 ### Tests
 
-Automated tests live in `tests\FileTools.Tests`. The current regression scope covers filename correction, name templates and collision resolution, rename apply, folder merge, AutoRelocation classification and planning, work-plan previews, settings/rule normalization, ZIP merge, ZIP extra field byte preservation, ZIP merge duplicate/collision/cancellation cleanup, and the file-compare engine's folder expansion, partial match, hash cache, and ZIP entry-order comparison behavior. ZIP output filesystem errors are injected through the internal `IArchiveMergeFileSystem` adapter, and the test project uses `InternalsVisibleTo` for internal engine APIs.
+Automated tests live in `tests\FileTools.Tests`. The current regression scope covers filename correction, name templates and collision resolution, rename apply, folder merge, AutoRelocation classification and planning, work-plan previews, settings/rule normalization, ZIP merge, ZIP extra field byte preservation, ZIP merge duplicate/collision/cancellation cleanup, the file-compare engine's folder expansion, partial match, hash cache, ZIP entry-order comparison behavior, and duplicate-group construction from file-compare results. ZIP output filesystem errors are injected through the internal `IArchiveMergeFileSystem` adapter, and the test project uses `InternalsVisibleTo` for internal engine APIs.
 
 ```powershell
 dotnet test .\tests\FileTools.Tests\FileTools.Tests.csproj

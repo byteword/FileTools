@@ -3,12 +3,14 @@
 Review date: 2026-06-07
 
 This document tracks GitHub issue #6. The first implementation slice added the
-comparison option model and engine. The second slice wires the selected-target
-command, grouped settings controls, and the WinForms result dialog.
+comparison option model and engine. Later slices wire a dedicated comparison
+workflow, grouped settings controls, and the WinForms result/action dialog.
 
 ![File compare settings layout](images/file-compare-settings-options.svg)
 
 ![File compare result dialog layout](images/file-compare-result-dialog.svg)
+
+![File compare workflow and action hub](images/file-compare-workflow-actions.svg)
 
 ## Target Collection
 
@@ -85,6 +87,31 @@ reader work, including 7Z input policy, remains tracked by issue #8.
 - `PartialMatch`: content ratio is at least 10% but less than full equality.
 - `Failed`: comparison could not be completed.
 
+## Dedicated Workflow
+
+The main menu and toolbar open a file-comparison dialog instead of immediately
+running against the current selection. Existing selected targets are prefilled
+when available, but the dialog can also start empty and let the user add files or
+folders directly.
+
+The dialog uses the global file-comparison settings as defaults. Changes made in
+the dialog apply only to that comparison run and do not overwrite saved settings.
+
+## Result Actions
+
+The result dialog is the handoff point for follow-up work:
+
+- Status-filtered pair results remain the primary inspection surface.
+- A duplicate group panel is built only from `Same` pairs that include a
+  same-content criterion. Metadata-only matches are not treated as delete
+  candidates.
+- Duplicate groups keep the earliest path in comparison target order and mark
+  the remaining paths as delete candidates.
+- Delete candidates can be copied or sent back to the main target list for a
+  later operation.
+- The selected pair can be copied, sent to the main target list, or opened in
+  Explorer.
+
 ## Implemented Work
 
 Implemented on 2026-06-07:
@@ -99,15 +126,22 @@ Implemented on 2026-06-07:
 - Automated tests for folder expansion, partial match threshold, byte prefilter,
   hash cache reuse, and archive entry ordering.
 - Selected-target compare command from the main Tasks menu and action toolbar.
+- Dedicated file compare dialog for target collection and per-run options.
 - Grouped settings UI for file name, metadata, content, and other options.
 - Dependent settings controls are disabled when their parent checkbox or mode
   does not apply.
 - Result dialog with summary counts, status filtering, sortable pair rows, and
   per-criterion detail rows.
+- Result action panel with content-confirmed duplicate groups, delete-candidate
+  copy, target-list handoff, selected-pair copy, and selected-folder open.
+- Automated tests for duplicate group construction and metadata-only match
+  exclusion.
 
 ## Remaining Work
 
 - Add visible progress reporting for large comparison runs.
-- Add result export or copy support after the first manual UI validation pass.
+- Add a real duplicate-delete operation with preview, recycle-bin behavior, and
+  undo/failure policy.
+- Add full result export after the first manual UI validation pass.
 - Decide whether Explorer context menu integration should be added after the app
   UI is stable.

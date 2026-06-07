@@ -91,7 +91,7 @@ public sealed partial class MainForm : Form
             _settings.FolderUnwrapNameMismatchMode));
         _addArchiveMergeGroupMenuItem.Click += (_, _) => AddArchiveMergeStep(ArchiveMergeLayout.GroupByArchiveName);
         _addArchiveMergePreserveMenuItem.Click += (_, _) => AddArchiveMergeStep(ArchiveMergeLayout.PreserveInternalPaths);
-        _compareSelectedMenuItem.Click += (_, _) => CompareSelectedTargets();
+        _compareSelectedMenuItem.Click += (_, _) => OpenFileCompareDialog();
         _addRelocationMenuItem.Click += (_, _) => AddStep(CreateAutoRelocationStep());
         _removeStepMenuItem.Click += (_, _) => RemoveSelectedStep();
         _clearStepsMenuItem.Click += (_, _) => ClearSelectedTargetSteps();
@@ -129,7 +129,7 @@ public sealed partial class MainForm : Form
         _addArchiveMergeToolButton.ButtonClick += (_, _) => AddArchiveMergeStep(ArchiveMergeLayout.GroupByArchiveName);
         _addArchiveMergeGroupToolItem.Click += (_, _) => AddArchiveMergeStep(ArchiveMergeLayout.GroupByArchiveName);
         _addArchiveMergePreserveToolItem.Click += (_, _) => AddArchiveMergeStep(ArchiveMergeLayout.PreserveInternalPaths);
-        _compareSelectedToolButton.Click += (_, _) => CompareSelectedTargets();
+        _compareSelectedToolButton.Click += (_, _) => OpenFileCompareDialog();
         _addRelocationToolButton.Click += (_, _) => AddStep(CreateAutoRelocationStep());
         _removeStepToolButton.Click += (_, _) => RemoveSelectedStep();
         _clearStepsToolButton.Click += (_, _) => ClearSelectedTargetSteps();
@@ -485,42 +485,39 @@ public sealed partial class MainForm : Form
         }
     }
 
-    private void CompareSelectedTargets()
+    private void OpenFileCompareDialog()
     {
         if (_executionCancellation is not null)
         {
             return;
         }
 
-        var selectedTargets = GetSelectedTargets()
+        var initialPaths = GetSelectedTargets()
             .Where(IsExistingTarget)
+            .Select(static target => target.Path)
             .ToArray();
-        if (selectedTargets.Length < 2)
+        using var dialog = new FileCompareRequestDialog(initialPaths, _settings.FileCompareOptions);
+        if (dialog.ShowDialog(this) != DialogResult.OK)
         {
-            MessageBox.Show(
-                Localizer.Get("FileCompareNeedsMultipleTargets"),
-                FileToolsEnvironment.AppName,
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
             return;
         }
 
-        _ = CompareSelectedTargetsAsync(selectedTargets);
+        _ = CompareTargetsAsync(dialog.SelectedPaths, dialog.Options);
     }
 
-    private async Task CompareSelectedTargetsAsync(IReadOnlyList<WorkTargetPlan> selectedTargets)
+    private async Task CompareTargetsAsync(IReadOnlyList<string> paths, FileCompareOptions options)
     {
         using var cancellation = new CancellationTokenSource();
         _executionCancellation = cancellation;
         ClearLog();
-        AppendLog(Localizer.Format("FileCompareStartingFormat", selectedTargets.Count));
+        AppendLog(Localizer.Format("FileCompareStartingFormat", paths.Count));
         UpdateCommandStates();
 
         try
         {
-            var paths = selectedTargets.Select(static target => target.Path).ToArray();
-            var options = _settings.FileCompareOptions.Clone();
-            var report = await Task.Run(() => FileCompareOperations.Compare(paths, options, cancellationToken: cancellation.Token));
+            var comparePaths = paths.ToArray();
+            var compareOptions = options.Clone();
+            var report = await Task.Run(() => FileCompareOperations.Compare(comparePaths, compareOptions, cancellationToken: cancellation.Token));
 
             AppendLog(Localizer.Format(
                 "FileCompareCompletedFormat",
@@ -528,8 +525,8 @@ public sealed partial class MainForm : Form
                 report.Pairs.Count,
                 report.HashCacheHits,
                 report.HashCacheMisses));
-            using var dialog = new FileCompareResultDialog(report);
-            dialog.ShowDialog(this);
+            using var resultDialog = new FileCompareResultDialog(report, AddCompareResultTargets);
+            resultDialog.ShowDialog(this);
         }
         catch (OperationCanceledException)
         {
@@ -549,6 +546,12 @@ public sealed partial class MainForm : Form
 
             UpdateCommandStates();
         }
+    }
+
+    private void AddCompareResultTargets(IReadOnlyList<string> paths)
+    {
+        AddPaths(paths);
+        AppendLog(Localizer.Format("FileCompareResultTargetsAddedFormat", paths.Count));
     }
 
     private void AddStep(WorkPlanStep? step)
@@ -1259,9 +1262,7 @@ public sealed partial class MainForm : Form
                               selectedTargets.Length >= 2 &&
                               selectedTargets.All(static target => ArchiveMergeOperations.IsSupportedArchivePath(target.Path)) &&
                               selectedTargets.All(static target => target.Steps.Count == 0);
-        var canCompare = canModify &&
-                         selectedTargets.Length >= 2 &&
-                         selectedTargets.All(IsExistingTarget);
+        var canCompare = canModify;
         var canMerge = canModify &&
                        selectedTargets.Length >= 2 &&
                        selectedTargets.All(IsExistingTarget) &&

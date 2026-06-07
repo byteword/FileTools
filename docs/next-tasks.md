@@ -1,7 +1,7 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-07 after file compare result/settings UI work
+Last updated: 2026-06-07 after common file merge design
 
 Scope reviewed:
 
@@ -16,13 +16,15 @@ Scope reviewed:
 - #3 internet dictionary or AI-assisted rename correction: keep open as a long-term research item.
 - #4 selected-target folder merge: closed as completed. Common-filename-based file merge and preview scope were split to #9.
 - #5 ZIP archive merge: closed as completed. 7Z input archive merge was split to #8.
-- #6 compare two or more files: active. The engine/options slice is implemented
-  and the selected-target command, settings UI, and result dialog are now wired.
-  Visible progress reporting, result export/copy, and optional Explorer context
-  menu integration remain open.
+- #6 compare two or more files: active. The engine/options slice is implemented,
+  the dedicated compare dialog is wired, and the result dialog now includes
+  content-confirmed duplicate groups plus target-list handoff actions. Visible
+  progress reporting, actual duplicate deletion, full result export, and optional
+  Explorer context menu integration remain open.
 - #7 Windows ARM64 build and installer support: keep open and deferred until there is ARM64 Windows hardware or VM validation.
 - #8 7Z input archive merge support: keep open as the archive merge follow-up.
-- #9 common-filename-based file merge flow: keep open as the folder/file merge follow-up.
+- #9 common-filename-based file merge flow: design drafted. Keep open for the
+  preview dialog, rename-plan engine, collision handling, and regression tests.
 
 ## Completed Follow-Up
 
@@ -48,16 +50,27 @@ Scope reviewed:
   layout.
 - Ran `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` on
   2026-06-07 after the UI wiring; all 36 managed tests passed.
+- Reworked file compare into a dedicated execution dialog with per-run options.
+- Added result action handoffs for content-confirmed duplicate candidates,
+  selected pair paths, target-list transfer, and folder opening.
+- Added `docs/images/file-compare-workflow-actions.svg` to document the compare
+  workflow and result action hub.
+- Ran `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` on
+  2026-06-07 after the workflow/action wiring; all 38 managed tests passed.
+- Added `docs/common-file-merge-design.md` and
+  `docs/images/common-file-merge-flow.svg` for issue #9 design.
 
 ## Deferred Follow-Up Tracks
 
 - #3 internet dictionary or AI-assisted rename correction: resume only after privacy, cost, network failure, opt-in, and review UX policies are defined.
-- #6 file comparison: continue with visible progress reporting, result
-  export/copy, optional Explorer context menu integration, and manual UI
-  validation with large mixed file sets.
+- #6 file comparison: continue with visible progress reporting, a real
+  duplicate-delete operation, full result export, optional Explorer context menu
+  integration, and manual UI validation with large mixed file sets.
 - #7 Windows ARM64 build and installer support: resume only when ARM64 Windows hardware or a VM is available for end-to-end installer and Explorer validation.
 - #8 7Z input archive merge support: resume after ZIP archive merge real-sample validation and release notes are finished, then decide ZIP-only output versus 7Z output scope.
-- #9 common-filename-based file merge flow: resume after rename, extension, collision, and preview UX decisions are made.
+- #9 common-filename-based file merge flow: design decisions are documented;
+  implementation remains pending until this feature is pulled into the active
+  work queue.
 
 ## Next Priority
 
@@ -77,11 +90,13 @@ Scope reviewed:
    - Keep release notes and external wiki updates gated on verified assets, checksums, signatures, attestations, and install smoke testing.
 
 4. Defer lower-priority feature tracks.
-   - #3, #7, #8, and #9 still carry explicit deferred status and resume conditions in GitHub.
+   - #3, #7, and #8 still carry explicit deferred status and resume conditions in GitHub.
+   - #9 now has a local design draft, but should stay out of release scope until
+     the preview/apply implementation and tests exist.
    - Do not pull these into the active work queue until the resume conditions in each issue are satisfied.
 
 5. Continue issue #6 UI validation when file comparison is exercised manually.
    - Use mixed files and folders to verify pair counts, status filtering, and
      criterion details.
    - Validate hash and byte-to-byte range settings with large files before
-     adding export/copy support.
+     adding full export or destructive duplicate deletion.

@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="760" viewBox="0 0 1160 760" role="img" aria-labelledby="title desc">
+  <title id="title">File compare workflow and action hub</title>
+  <desc id="desc">Wireframe showing the dedicated compare dialog flowing into the result action hub for duplicate candidates and follow-up actions.</desc>
+  <rect width="1160" height="760" fill="#f4f6f8"/>
+  <text x="52" y="62" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="700" fill="#111827">File compare workflow</text>
+  <text x="52" y="92" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#64748b">Dedicated run setup first, result-driven follow-up actions after comparison.</text>
+
+  <g transform="translate(52 124)">
+    <rect width="488" height="580" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="24" y="42" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="700" fill="#111827">Compare dialog</text>
+    <text x="24" y="70" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#64748b">Targets can be prefilled from the main selection or added here.</text>
+
+    <rect x="24" y="100" width="210" height="390" rx="6" fill="#f8fafc" stroke="#94a3b8"/>
+    <text x="40" y="128" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#334155">Compare targets</text>
+    <rect x="40" y="152" width="178" height="38" rx="4" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="52" y="176" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">C:\Photos\a.jpg</text>
+    <rect x="40" y="198" width="178" height="38" rx="4" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="52" y="222" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">D:\Backup\a.jpg</text>
+    <rect x="40" y="244" width="178" height="38" rx="4" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="52" y="268" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">E:\ScanFolder</text>
+    <rect x="40" y="384" width="80" height="30" rx="4" fill="#2563eb"/>
+    <text x="58" y="404" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#ffffff">Files</text>
+    <rect x="128" y="384" width="90" height="30" rx="4" fill="#2563eb"/>
+    <text x="148" y="404" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#ffffff">Folder</text>
+    <text x="40" y="458" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#64748b">3 targets</text>
+
+    <rect x="258" y="100" width="206" height="390" rx="6" fill="#ffffff" stroke="#94a3b8"/>
+    <text x="274" y="128" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700" fill="#334155">Run options</text>
+    <text x="274" y="164" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#111827">File name: exact</text>
+    <text x="274" y="196" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#111827">Metadata: size, modified</text>
+    <text x="274" y="228" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#111827">Content: hash</text>
+    <text x="274" y="260" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#111827">Range: front/back bytes</text>
+    <text x="274" y="292" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#111827">ZIP: filename order</text>
+    <text x="274" y="324" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#111827">Cache: run memory</text>
+    <rect x="348" y="510" width="116" height="34" rx="4" fill="#059669"/>
+    <text x="382" y="532" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#ffffff">Compare</text>
+  </g>
+
+  <path d="M560 414 H620" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
+  <path d="M620 414 L604 402 M620 414 L604 426" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
+
+  <g transform="translate(640 124)">
+    <rect width="508" height="580" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="24" y="42" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="700" fill="#111827">Result action hub</text>
+    <text x="24" y="70" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#64748b">Inspect pairs, then hand off candidates to the next action.</text>
+
+    <rect x="24" y="100" width="304" height="232" rx="4" fill="#ffffff" stroke="#cbd5e1"/>
+    <rect x="24" y="100" width="304" height="34" fill="#e2e8f0"/>
+    <text x="40" y="122" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#111827">Status</text>
+    <text x="114" y="122" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#111827">Left</text>
+    <text x="218" y="122" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#111827">Right</text>
+    <rect x="24" y="134" width="304" height="38" fill="#ecfdf5"/>
+    <text x="40" y="158" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#065f46">Same</text>
+    <text x="114" y="158" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">a.jpg</text>
+    <text x="218" y="158" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">a copy.jpg</text>
+    <rect x="24" y="172" width="304" height="38" fill="#f8fafc"/>
+    <text x="40" y="196" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#334155">Different</text>
+    <text x="114" y="196" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">b.png</text>
+    <text x="218" y="196" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">b.png</text>
+    <rect x="24" y="210" width="304" height="38" fill="#fffbeb"/>
+    <text x="40" y="234" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#92400e">Partial</text>
+    <text x="114" y="234" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">scan.zip</text>
+    <text x="218" y="234" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">scan.zip</text>
+
+    <rect x="24" y="354" width="304" height="142" rx="4" fill="#ffffff" stroke="#cbd5e1"/>
+    <rect x="24" y="354" width="304" height="32" fill="#e2e8f0"/>
+    <text x="40" y="374" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#111827">Criterion</text>
+    <text x="150" y="374" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#111827">Status</text>
+    <text x="226" y="374" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#111827">Match</text>
+    <rect x="24" y="386" width="304" height="34" fill="#ecfdf5"/>
+    <text x="40" y="408" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">Content</text>
+    <text x="150" y="408" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#065f46">Same</text>
+    <text x="226" y="408" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">100%</text>
+
+    <rect x="352" y="100" width="132" height="396" rx="6" fill="#f8fafc" stroke="#94a3b8"/>
+    <text x="368" y="128" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#334155">Duplicate</text>
+    <text x="368" y="154" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#64748b">1 group / 1 delete</text>
+    <rect x="368" y="176" width="100" height="86" rx="4" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="380" y="202" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">Keep: a.jpg</text>
+    <text x="380" y="228" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">Delete:</text>
+    <text x="380" y="248" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">a copy.jpg</text>
+    <rect x="368" y="284" width="100" height="30" rx="4" fill="#2563eb"/>
+    <text x="384" y="304" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#ffffff">Copy</text>
+    <rect x="368" y="324" width="100" height="30" rx="4" fill="#059669"/>
+    <text x="382" y="344" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#ffffff">To targets</text>
+    <text x="368" y="392" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" fill="#334155">Pair actions</text>
+    <text x="368" y="420" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">Copy paths</text>
+    <text x="368" y="446" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">Add to targets</text>
+    <text x="368" y="472" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#111827">Open folders</text>
+  </g>
+</svg>

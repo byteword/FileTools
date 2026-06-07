@@ -588,11 +588,18 @@
   <data name="ArchiveMergeNameCollisionMessageBoxHelp" xml:space="preserve"><value>Yes: auto-number and keep current. No: skip current. Cancel: abort merge.</value></data>
   <data name="ArchiveMergeDuplicateMessageBoxTitle" xml:space="preserve"><value>Archive merge duplicate content</value></data>
   <data name="ArchiveMergeDuplicateMessageBoxHelp" xml:space="preserve"><value>Yes: keep both. No: skip duplicate. Cancel: abort merge.</value></data>
-  <data name="ButtonCompareSelected" xml:space="preserve"><value>Compare selected</value></data>
-  <data name="ToolTipCompareSelected" xml:space="preserve"><value>Compare selected files and files inside selected folders.</value></data>
+  <data name="ButtonCompareSelected" xml:space="preserve"><value>File compare...</value></data>
+  <data name="ToolTipCompareSelected" xml:space="preserve"><value>Open a dedicated file comparison workflow.</value></data>
   <data name="FileCompareNeedsMultipleTargets" xml:space="preserve"><value>Select two or more files or folders to compare.</value></data>
-  <data name="FileCompareStartingFormat" xml:space="preserve"><value>Starting file comparison for {0} selected targets.</value></data>
+  <data name="FileCompareStartingFormat" xml:space="preserve"><value>Starting file comparison for {0} input targets.</value></data>
   <data name="FileCompareCompletedFormat" xml:space="preserve"><value>File comparison complete. Files: {0}, pairs: {1}, hash cache hits: {2}, misses: {3}.</value></data>
+  <data name="FileCompareDialogTitle" xml:space="preserve"><value>File compare</value></data>
+  <data name="FileCompareDialogTargets" xml:space="preserve"><value>Compare targets</value></data>
+  <data name="FileCompareDialogOptions" xml:space="preserve"><value>Compare options</value></data>
+  <data name="FileCompareDialogRun" xml:space="preserve"><value>Compare</value></data>
+  <data name="FileCompareDialogTargetSummaryFormat" xml:space="preserve"><value>{0} targets.</value></data>
+  <data name="FileCompareAddFilesTitle" xml:space="preserve"><value>Select files to compare</value></data>
+  <data name="FileCompareAddFolderDescription" xml:space="preserve"><value>Select a folder to compare</value></data>
   <data name="FileCompareResultTitle" xml:space="preserve"><value>File compare results</value></data>
   <data name="FileCompareResultFilter" xml:space="preserve"><value>Status</value></data>
   <data name="FileCompareFilterAll" xml:space="preserve"><value>All</value></data>
@@ -604,6 +611,24 @@
   <data name="FileCompareColumnReason" xml:space="preserve"><value>Reason</value></data>
   <data name="FileCompareColumnCriterion" xml:space="preserve"><value>Criterion</value></data>
   <data name="FileCompareColumnDetail" xml:space="preserve"><value>Detail</value></data>
+  <data name="FileCompareResultDuplicateGroups" xml:space="preserve"><value>Duplicate groups</value></data>
+  <data name="FileCompareResultSelectedPair" xml:space="preserve"><value>Selected pair</value></data>
+  <data name="FileCompareDuplicateSummaryFormat" xml:space="preserve"><value>{0} groups · {1} delete candidates</value></data>
+  <data name="FileCompareNoDuplicateGroups" xml:space="preserve"><value>No content-confirmed duplicate groups.</value></data>
+  <data name="FileCompareDuplicateColumnGroup" xml:space="preserve"><value>Group</value></data>
+  <data name="FileCompareDuplicateColumnFiles" xml:space="preserve"><value>Files</value></data>
+  <data name="FileCompareDuplicateColumnKeep" xml:space="preserve"><value>Keep</value></data>
+  <data name="FileCompareDuplicateColumnDeleteCandidates" xml:space="preserve"><value>Delete candidates</value></data>
+  <data name="FileCompareActionCopyDeleteCandidates" xml:space="preserve"><value>Copy delete candidates</value></data>
+  <data name="FileCompareActionAddDeleteCandidatesToTargets" xml:space="preserve"><value>Add delete candidates to targets</value></data>
+  <data name="FileCompareActionCopySelectedPairPaths" xml:space="preserve"><value>Copy selected pair paths</value></data>
+  <data name="FileCompareActionAddSelectedPairToTargets" xml:space="preserve"><value>Add selected pair to targets</value></data>
+  <data name="FileCompareActionOpenSelectedPairFolders" xml:space="preserve"><value>Open selected folders</value></data>
+  <data name="FileCompareActionNoPaths" xml:space="preserve"><value>No paths available.</value></data>
+  <data name="FileCompareActionCopiedFormat" xml:space="preserve"><value>Copied {0} paths.</value></data>
+  <data name="FileCompareActionAddedTargetsFormat" xml:space="preserve"><value>Added {0} paths to targets.</value></data>
+  <data name="FileCompareActionOpenedFoldersFormat" xml:space="preserve"><value>Opened {0} folders.</value></data>
+  <data name="FileCompareResultTargetsAddedFormat" xml:space="preserve"><value>Comparison result sent {0} paths to the target list.</value></data>
   <data name="FileCompareStatusSame" xml:space="preserve"><value>Same</value></data>
   <data name="FileCompareStatusDifferent" xml:space="preserve"><value>Different</value></data>
   <data name="FileCompareStatusPartialMatch" xml:space="preserve"><value>Partial match</value></data>
