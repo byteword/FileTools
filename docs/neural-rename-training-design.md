@@ -116,14 +116,20 @@ bad training data cannot fully replace deterministic behavior.
 ## Local Feedback Data
 
 Feedback should be local and opt-in before it affects future ranking. A future
-history row can store:
+history row is stored as JSONL under:
+
+```text
+%APPDATA%\FileTools\rename-pattern-feedback.jsonl
+```
+
+Each line stores one confirmed parse/render decision:
 
 ```json
 {
   "originalFileName": "[Author] Series 001.zip",
   "selectedFileName": "Author - Series 001.zip",
   "parsePattern": "[{BracketedText}] {Text} {Number:000}",
-  "renderPattern": "{Author} - {Title} {Episode:000}{Extension}",
+  "renderPattern": "{BracketedText} - {Text} {Number:000}{Extension}",
   "candidatePatterns": [
     "[{BracketedText}] {Text} {Number:000}",
     "{Text} - {Number:000} ({BracketedText})"
@@ -146,7 +152,7 @@ exports it.
 6. Shadow neural training and replay validation.
 7. Blended ranker with statistics fallback.
 
-The current codebase now contains the first four internal slices as pure logic:
+The current codebase now contains the first internal slices:
 
 - `FileNamePatternDiscovery` tokenizes filenames and produces ranked structural
   pattern candidates.
@@ -154,9 +160,11 @@ The current codebase now contains the first four internal slices as pure logic:
   candidates from bracketed text, text, number, and extension fields.
 - `FileNamePatternFeedbackNormalizer` defines the local feedback row shape and
   normalizes confirmed parse/render selections.
+- `FileNamePatternFeedbackStore` persists normalized feedback as JSONL and
+  skips malformed lines during load so one bad history row does not discard the
+  user's other learning data.
 - `FileNamePatternStatisticsRanker` ranks parse/render pattern candidates from
   base render scores, exact parse/render history, render-pattern history,
   parse-pattern history, and recency-weighted feedback.
 
-These slices are not wired to UI, persistence, or automatic rename execution
-yet.
+These slices are not wired to UI or automatic rename execution yet.

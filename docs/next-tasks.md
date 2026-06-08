@@ -1,7 +1,7 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-08 after the personal rename statistical-ranking foundation
+Last updated: 2026-06-08 after the personal rename feedback-store foundation
 
 Scope reviewed:
 
@@ -18,8 +18,8 @@ Scope reviewed:
   language setting, review-only candidate boundary, and a low-license SymSpell
   sample plugin without bundled dictionary data. The local learning track now
   starts with filename-structure pattern discovery, render-pattern candidate
-  generation, confirmed-feedback normalization, statistical personalization, and
-  a later shadow-validated neural ranker instead of content-inference naming.
+  generation, confirmed-feedback persistence, statistical personalization, and a
+  later shadow-validated neural ranker instead of content-inference naming.
 - #4 selected-target folder merge: closed as completed. Common-filename-based file merge and preview scope were split to #9.
 - #5 ZIP archive merge: closed as completed. 7Z input archive merge was split to #8.
 - #6 compare two or more files: active. The engine/options slice is implemented,
@@ -125,8 +125,13 @@ Scope reviewed:
 - Added the internal feedback normalization and statistical ranker slice on
   2026-06-08. `FileNamePatternFeedbackNormalizer` defines confirmed selection
   rows, and `FileNamePatternStatisticsRanker` recency-weights prior
-  parse/render selections while keeping UI, persistence, and automatic rename
-  execution disconnected.
+  parse/render selections while keeping UI and automatic rename execution
+  disconnected.
+- Added the internal `FileNamePatternFeedbackStore` slice on 2026-06-08. It
+  stores normalized confirmed selections as JSONL at
+  `%APPDATA%\FileTools\rename-pattern-feedback.jsonl`, supports append and
+  overwrite operations, and skips malformed lines during load while keeping UI
+  and automatic rename execution disconnected.
 
 ## Deferred Follow-Up Tracks
 
