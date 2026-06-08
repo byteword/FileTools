@@ -24,6 +24,8 @@ notes.
   storage, and statistical-ranking foundation for future local rename
   personalization. This is not exposed as an automatic rename feature in this
   release draft.
+- Added settings for future local rename personalization: an enable toggle and a
+  bounded feedback row limit with a default of 2000 rows and a minimum of 100.
 - Aligned release versioning so GitHub release tags drive the app binary,
   generated app manifest, MSI, Burn bundle, and sparse MSIX identity versions.
 
@@ -36,8 +38,9 @@ notes.
   privacy, timeout, opt-in, and failure policies are implemented.
 - Local rename personalization is limited to internal deterministic pattern
   discovery, render-pattern candidate generation, JSONL feedback storage, and
-  statistical ranking in this slice. Neural shadow validation and UI integration
-  remain future work.
+  statistical ranking in this slice. The feedback store honors the settings
+  toggle and row limit, but review-dialog recording, neural shadow validation,
+  and candidate-order UI integration remain future work.
 - 7Z input is not supported in this release scope. Track 7Z input archive merge in GitHub issue #8.
 - Archive-first common-filename merge is implemented through archive merge output naming and entry preview. General file-content merge remains deferred under GitHub issue #9.
 

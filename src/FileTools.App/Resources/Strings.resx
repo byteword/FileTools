@@ -175,6 +175,7 @@
   <data name="SettingsSummaryNotRegisteredEnabledCountFormat" xml:space="preserve"><value>Not registered · {0} selected</value></data>
   <data name="SettingsSummaryPairFormat" xml:space="preserve"><value>{0} · {1}</value></data>
   <data name="SettingsSummaryTripleFormat" xml:space="preserve"><value>{0} · {1} · {2}</value></data>
+  <data name="SettingsSummaryQuadFormat" xml:space="preserve"><value>{0} · {1} · {2} · {3}</value></data>
   <data name="SettingsSummaryDictionaryOn" xml:space="preserve"><value>Dictionary on</value></data>
   <data name="SettingsSummaryDictionaryOff" xml:space="preserve"><value>Dictionary off</value></data>
   <data name="SettingsContextMenuRegistrationHelp" xml:space="preserve"><value>Command choices are kept even when Explorer registration is off.</value></data>
@@ -190,6 +191,13 @@
   <data name="Windows11ContextMenuFilesMissing" xml:space="preserve"><value>Windows 11 native context menu support files were not found:&#x0D;&#x0A;{0}</value></data>
   <data name="SettingsContextMenuLayoutHelp" xml:space="preserve"><value>Grouped keeps one FileTools submenu; expanded places commands directly in Explorer.</value></data>
   <data name="SettingsRenameReviewHelp" xml:space="preserve"><value>The safer automated mode still stops for NeedsReview and Conflict rows.</value></data>
+  <data name="RenamePatternLearningSectionTitle" xml:space="preserve"><value>Personal pattern learning</value></data>
+  <data name="RenamePatternLearningSectionHelp" xml:space="preserve"><value>Stores confirmed rename pattern choices locally so future candidate ranking can match your preferred structure.</value></data>
+  <data name="CheckRenamePatternLearningEnabled" xml:space="preserve"><value>Use personal rename pattern learning</value></data>
+  <data name="RenamePatternFeedbackLimitLabel" xml:space="preserve"><value>Maximum feedback rows</value></data>
+  <data name="RenamePatternFeedbackLimitHelp" xml:space="preserve"><value>Older entries are trimmed after this limit. Minimum value is 100.</value></data>
+  <data name="RenamePatternLearningSummaryOnFormat" xml:space="preserve"><value>Learning {0} rows</value></data>
+  <data name="RenamePatternLearningSummaryOff" xml:space="preserve"><value>Learning off</value></data>
   <data name="RenamePluginSectionTitle" xml:space="preserve"><value>Correction plugins</value></data>
   <data name="RenamePluginSectionHelp" xml:space="preserve"><value>Plugins add review-only candidates and never silently apply a rename.</value></data>
   <data name="CheckRenamePluginsEnabled" xml:space="preserve"><value>Use correction plugin candidates</value></data>

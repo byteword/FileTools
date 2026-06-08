@@ -57,6 +57,10 @@ internal sealed class FileToolsSettings
 
     public RenameCorrectionPluginOptions RenameCorrectionPlugins { get; set; } = new();
 
+    public bool RenamePatternLearningEnabled { get; set; } = true;
+
+    public int RenamePatternFeedbackLimit { get; set; } = FileNamePatternFeedbackStore.DefaultFeedbackLimit;
+
     public ArchiveMergeLayout ArchiveMergeLayout { get; set; } = ArchiveMergeLayout.GroupByArchiveName;
 
     public ArchiveMergeCollisionPolicy ArchiveMergeCollisionPolicy { get; set; } = ArchiveMergeCollisionPolicy.AutoNumber;
@@ -139,6 +143,8 @@ internal sealed class FileToolsSettings
             RenameReviewMode = RenameReviewMode,
             RenameUseDictionary = RenameUseDictionary,
             RenameCorrectionPlugins = RenameCorrectionPlugins?.Clone() ?? new RenameCorrectionPluginOptions(),
+            RenamePatternLearningEnabled = RenamePatternLearningEnabled,
+            RenamePatternFeedbackLimit = RenamePatternFeedbackLimit,
             ArchiveMergeLayout = ArchiveMergeLayout,
             ArchiveMergeCollisionPolicy = ArchiveMergeCollisionPolicy,
             ArchiveMergeDuplicatePolicy = ArchiveMergeDuplicatePolicy,
@@ -219,6 +225,9 @@ internal static class SettingsStore
             .ToList();
         settings.FileCompareOptions ??= new FileCompareOptions();
         settings.RenameCorrectionPlugins = RenameCorrectionPluginDefaults.Normalize(settings.RenameCorrectionPlugins);
+        settings.RenamePatternFeedbackLimit = Math.Max(
+            FileNamePatternFeedbackStore.MinimumFeedbackLimit,
+            settings.RenamePatternFeedbackLimit);
         settings.FileCompareOptions.CommonNameMinimumCharacters = Math.Max(1, settings.FileCompareOptions.CommonNameMinimumCharacters);
         settings.FileCompareOptions.CommonNameMinimumPercent = Math.Clamp(settings.FileCompareOptions.CommonNameMinimumPercent, 0.01, 1);
         settings.FileCompareOptions.RangeBytes = Math.Max(1, settings.FileCompareOptions.RangeBytes);

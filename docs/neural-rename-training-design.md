@@ -142,6 +142,16 @@ The stored data can contain personal filenames, so it must stay under the
 current user's FileTools configuration directory unless the user explicitly
 exports it.
 
+The settings model controls local feedback use:
+
+- `RenamePatternLearningEnabled` disables loading and recording feedback when
+  false. Existing feedback files are left in place so turning the option back on
+  can resume from prior local history.
+- `RenamePatternFeedbackLimit` caps the JSONL history by row count. The default
+  is 2000 rows and the minimum accepted value is 100 rows.
+- Saving or appending feedback trims older rows first so the store remains
+  bounded.
+
 ## Implementation Slices
 
 1. Deterministic structural pattern discovery for selected names.
@@ -162,7 +172,8 @@ The current codebase now contains the first internal slices:
   normalizes confirmed parse/render selections.
 - `FileNamePatternFeedbackStore` persists normalized feedback as JSONL and
   skips malformed lines during load so one bad history row does not discard the
-  user's other learning data.
+  user's other learning data. It also honors the enable toggle and feedback row
+  limit from settings.
 - `FileNamePatternStatisticsRanker` ranks parse/render pattern candidates from
   base render scores, exact parse/render history, render-pattern history,
   parse-pattern history, and recency-weighted feedback.

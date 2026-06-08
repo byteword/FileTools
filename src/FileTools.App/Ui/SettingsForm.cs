@@ -52,6 +52,8 @@ internal sealed partial class SettingsForm : Form
     private readonly TextBox _fileComparePrefilterPercentBox = new();
     private readonly CheckBox _renameDictionaryCheckBox = new();
     private readonly CheckBox _renamePluginCheckBox = new();
+    private readonly CheckBox _renamePatternLearningCheckBox = new();
+    private readonly TextBox _renamePatternFeedbackLimitBox = new();
     private readonly CheckedListBox _renamePluginList = new();
     private readonly Button _renamePluginSettingsButton = new();
     private readonly CheckBox _archiveMergeDeleteOriginalsCheckBox = new();
@@ -101,6 +103,8 @@ internal sealed partial class SettingsForm : Form
         _contextMenuArchiveMergePreserveInternalPathsCheckBox.Checked = Settings.ContextMenuArchiveMergePreserveInternalPaths;
         _renameDictionaryCheckBox.Checked = Settings.RenameUseDictionary;
         _renamePluginCheckBox.Checked = Settings.RenameCorrectionPlugins.Enabled;
+        _renamePatternLearningCheckBox.Checked = Settings.RenamePatternLearningEnabled;
+        _renamePatternFeedbackLimitBox.Text = Settings.RenamePatternFeedbackLimit.ToString(CultureInfo.CurrentCulture);
         _archiveMergeDeleteOriginalsCheckBox.Checked = Settings.ArchiveMergeDeleteOriginals;
         _fileCompareNameCheckBox.Checked = Settings.FileCompareOptions.CompareFileName;
         _fileCompareCreatedTimeCheckBox.Checked = Settings.FileCompareOptions.CompareCreatedTime;
@@ -242,6 +246,7 @@ internal sealed partial class SettingsForm : Form
             _contextMenuArchiveMergePreserveInternalPathsCheckBox,
             _renameDictionaryCheckBox,
             _renamePluginCheckBox,
+            _renamePatternLearningCheckBox,
             _archiveMergeDeleteOriginalsCheckBox,
             _fileCompareNameCheckBox,
             _fileCompareCreatedTimeCheckBox,
@@ -289,6 +294,7 @@ internal sealed partial class SettingsForm : Form
         _fileCompareRangeBytesBox.TextChanged += (_, _) => UpdateUiState();
         _fileCompareArchiveLimitCountBox.TextChanged += (_, _) => UpdateUiState();
         _fileComparePrefilterPercentBox.TextChanged += (_, _) => UpdateUiState();
+        _renamePatternFeedbackLimitBox.TextChanged += (_, _) => UpdateUiState();
         _renamePluginList.ItemCheck += (_, _) => BeginInvoke((MethodInvoker)UpdateUiState);
         _renamePluginList.SelectedIndexChanged += (_, _) => UpdateUiState();
     }
@@ -330,11 +336,15 @@ internal sealed partial class SettingsForm : Form
         var pluginState = _renamePluginCheckBox.Checked
             ? Localizer.Format("RenamePluginSummaryEnabledFormat", GetCheckedRenamePluginCount())
             : Localizer.Get("RenamePluginSummaryOff");
+        var learningState = _renamePatternLearningCheckBox.Checked
+            ? Localizer.Format("RenamePatternLearningSummaryOnFormat", _renamePatternFeedbackLimitBox.Text)
+            : Localizer.Get("RenamePatternLearningSummaryOff");
         return Localizer.Format(
-            "SettingsSummaryTripleFormat",
+            "SettingsSummaryQuadFormat",
             GetComboText(_renameReviewModeCombo),
             dictionaryState,
-            pluginState);
+            pluginState,
+            learningState);
     }
 
     private string GetFolderSummary()
@@ -417,6 +427,7 @@ internal sealed partial class SettingsForm : Form
         _renamePluginLanguageCombo.Enabled = enabled;
         _renamePluginList.Enabled = enabled && _renamePluginList.Items.Count > 0;
         _renamePluginSettingsButton.Enabled = enabled && _renamePluginList.SelectedItem is RenamePluginListItem;
+        _renamePatternFeedbackLimitBox.Enabled = _renamePatternLearningCheckBox.Checked;
     }
 
     private int GetEnabledContextMenuCommandCount()
@@ -469,6 +480,12 @@ internal sealed partial class SettingsForm : Form
         Settings.ContextMenuArchiveMergePreserveInternalPaths = _contextMenuArchiveMergePreserveInternalPathsCheckBox.Checked;
         Settings.RenameUseDictionary = _renameDictionaryCheckBox.Checked;
         Settings.RenameCorrectionPlugins.Enabled = _renamePluginCheckBox.Checked;
+        Settings.RenamePatternLearningEnabled = _renamePatternLearningCheckBox.Checked;
+        Settings.RenamePatternFeedbackLimit = (int)ParseLongText(
+            _renamePatternFeedbackLimitBox,
+            Settings.RenamePatternFeedbackLimit,
+            FileNamePatternFeedbackStore.MinimumFeedbackLimit,
+            int.MaxValue);
         Settings.RenameCorrectionPlugins.Language = GetSelectedComboValue(
             _renamePluginLanguageCombo,
             RenameCorrectionPluginDefaults.DefaultLanguage);

@@ -73,6 +73,85 @@ public sealed class FileNamePatternFeedbackStoreTests
         Assert.Equal("Author - Series 001.zip", loaded[0].SelectedFileName);
     }
 
+    [Fact]
+    public void Save_TrimsToLatestFeedbackLimitWithMinimumFloor()
+    {
+        using var temp = TempDirectory.Create();
+        var path = temp.GetPath("rename-pattern-feedback.jsonl");
+        var feedback = Enumerable
+            .Range(1, FileNamePatternFeedbackStore.MinimumFeedbackLimit + 5)
+            .Select(index => CreateFeedback(index.ToString("000")) with
+            {
+                ConfirmedAtUtc = new DateTimeOffset(2026, 6, 8, 0, 0, 0, TimeSpan.Zero).AddMinutes(index)
+            })
+            .ToArray();
+
+        FileNamePatternFeedbackStore.Save(
+            feedback,
+            path,
+            new FileNamePatternFeedbackStoreOptions
+            {
+                FeedbackLimit = 5
+            });
+
+        var loaded = FileNamePatternFeedbackStore.Load(path);
+
+        Assert.Equal(FileNamePatternFeedbackStore.MinimumFeedbackLimit, loaded.Count);
+        Assert.Equal("[Author] Series 006.zip", loaded[0].OriginalFileName);
+        Assert.Equal("[Author] Series 105.zip", loaded[^1].OriginalFileName);
+    }
+
+    [Fact]
+    public void Append_DoesNothingWhenDisabled()
+    {
+        using var temp = TempDirectory.Create();
+        var path = temp.GetPath("rename-pattern-feedback.jsonl");
+
+        FileNamePatternFeedbackStore.Append(
+            CreateFeedback("001"),
+            path,
+            new FileNamePatternFeedbackStoreOptions
+            {
+                Enabled = false
+            });
+
+        Assert.False(File.Exists(path));
+        Assert.Empty(FileNamePatternFeedbackStore.Load(
+            path,
+            new FileNamePatternFeedbackStoreOptions
+            {
+                Enabled = false
+            }));
+    }
+
+    [Fact]
+    public void Append_TrimsExistingRowsWhenLimitIsReached()
+    {
+        using var temp = TempDirectory.Create();
+        var path = temp.GetPath("rename-pattern-feedback.jsonl");
+        var options = new FileNamePatternFeedbackStoreOptions
+        {
+            FeedbackLimit = FileNamePatternFeedbackStore.MinimumFeedbackLimit
+        };
+
+        for (var index = 1; index <= FileNamePatternFeedbackStore.MinimumFeedbackLimit + 1; index++)
+        {
+            FileNamePatternFeedbackStore.Append(
+                CreateFeedback(index.ToString("000")) with
+                {
+                    ConfirmedAtUtc = new DateTimeOffset(2026, 6, 8, 0, 0, 0, TimeSpan.Zero).AddMinutes(index)
+                },
+                path,
+                options);
+        }
+
+        var loaded = FileNamePatternFeedbackStore.Load(path, options);
+
+        Assert.Equal(FileNamePatternFeedbackStore.MinimumFeedbackLimit, loaded.Count);
+        Assert.Equal("[Author] Series 002.zip", loaded[0].OriginalFileName);
+        Assert.Equal("[Author] Series 101.zip", loaded[^1].OriginalFileName);
+    }
+
     private static FileNamePatternFeedback CreateFeedback(string number)
     {
         return new FileNamePatternFeedback

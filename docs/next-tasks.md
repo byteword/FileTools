@@ -1,7 +1,7 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-08 after the personal rename feedback-store foundation
+Last updated: 2026-06-08 after the personal rename feedback settings
 
 Scope reviewed:
 
@@ -132,6 +132,11 @@ Scope reviewed:
   `%APPDATA%\FileTools\rename-pattern-feedback.jsonl`, supports append and
   overwrite operations, and skips malformed lines during load while keeping UI
   and automatic rename execution disconnected.
+- Added personal pattern learning settings on 2026-06-08. `FileToolsSettings`
+  now stores `RenamePatternLearningEnabled` and `RenamePatternFeedbackLimit`,
+  the settings dialog exposes the toggle and row limit in the Rename group, and
+  the feedback store honors the enabled state plus a minimum bounded limit of
+  100 rows with a default of 2000 rows.
 
 ## Deferred Follow-Up Tracks
 
@@ -139,8 +144,8 @@ Scope reviewed:
   local-LLM providers only after privacy, cost, network failure, opt-in, and
   review UX policies are defined. The local personalization track should proceed
   through deterministic pattern discovery, render-pattern candidates, persisted
-  local feedback history, and review UI integration before any neural ranker
-  affects candidate order.
+  bounded local feedback history, and review UI integration before any neural
+  ranker affects candidate order.
 - #6 file comparison: continue with JSON result import/reload, manual UI
   validation with large mixed file sets and narrow result dialog sizes, and
   eventual Explorer menu exposure after the internal `/context FileCompare`

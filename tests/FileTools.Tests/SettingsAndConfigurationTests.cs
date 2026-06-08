@@ -30,6 +30,8 @@ public sealed class SettingsAndConfigurationTests
                     }
                 ]
             },
+            RenamePatternLearningEnabled = false,
+            RenamePatternFeedbackLimit = 1234,
             FileKindExtensionRules =
             [
                 new FileKindExtensionRule
@@ -51,6 +53,21 @@ public sealed class SettingsAndConfigurationTests
         Assert.Equal(8192, clone.FileCompareOptions.RangeBytes);
         Assert.Equal("dictionary.txt", settings.RenameCorrectionPlugins.Plugins[0].Settings["dictionaryPath"]);
         Assert.Equal("changed.txt", clone.RenameCorrectionPlugins.Plugins[0].Settings["dictionaryPath"]);
+        Assert.False(clone.RenamePatternLearningEnabled);
+        Assert.Equal(1234, clone.RenamePatternFeedbackLimit);
+    }
+
+    [Fact]
+    public void FileNamePatternFeedbackStore_CreateOptionsClampsSettingsLimit()
+    {
+        var options = FileNamePatternFeedbackStore.CreateOptions(new FileToolsSettings
+        {
+            RenamePatternLearningEnabled = false,
+            RenamePatternFeedbackLimit = 1
+        });
+
+        Assert.False(options.Enabled);
+        Assert.Equal(FileNamePatternFeedbackStore.MinimumFeedbackLimit, options.FeedbackLimit);
     }
 
     [Fact]

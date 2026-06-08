@@ -343,6 +343,8 @@ internal sealed partial class SettingsForm
         ConfigureCheckBox(_renameDictionaryCheckBox);
         _renamePluginCheckBox.Text = Localizer.Get("CheckRenamePluginsEnabled");
         ConfigureCheckBox(_renamePluginCheckBox);
+        _renamePatternLearningCheckBox.Text = Localizer.Get("CheckRenamePatternLearningEnabled");
+        ConfigureCheckBox(_renamePatternLearningCheckBox);
         _renamePluginList.CheckOnClick = true;
         _renamePluginList.Height = 82;
         _renamePluginList.IntegralHeight = false;
@@ -363,6 +365,13 @@ internal sealed partial class SettingsForm
             Localizer.Get("SettingsRenameReviewHelp")));
         group.AddBodyControl(_renameDictionaryCheckBox);
         group.AddBodyControl(CreateRenameButtons());
+        group.AddBodyControl(CreateSectionLabel(Localizer.Get("RenamePatternLearningSectionTitle")));
+        group.AddBodyControl(CreateHelperText(Localizer.Get("RenamePatternLearningSectionHelp")));
+        group.AddBodyControl(_renamePatternLearningCheckBox);
+        group.AddBodyControl(CreateTextRow(
+            Localizer.Get("RenamePatternFeedbackLimitLabel"),
+            _renamePatternFeedbackLimitBox,
+            Localizer.Get("RenamePatternFeedbackLimitHelp")));
         group.AddBodyControl(CreateSectionLabel(Localizer.Get("RenamePluginSectionTitle")));
         group.AddBodyControl(CreateHelperText(Localizer.Get("RenamePluginSectionHelp")));
         group.AddBodyControl(_renamePluginCheckBox);

@@ -14,7 +14,7 @@ Scope:
 
 ## Summary
 
-The settings dialog now uses a resizable single-panel layout with a fixed status header, a scrollable settings body, fixed OK/Cancel buttons, and collapsible option groups. It covers the current core defaults: Explorer ContextMenu registration, Windows 11 native context menu identity actions, rename dictionary behavior, rename review mode, AutoRelocation default template and file-kind classification, and folder structure defaults.
+The settings dialog now uses a resizable single-panel layout with a fixed status header, a scrollable settings body, fixed OK/Cancel buttons, and collapsible option groups. It covers the current core defaults: Explorer ContextMenu registration, Windows 11 native context menu identity actions, rename dictionary behavior, rename review mode, personal rename pattern learning, AutoRelocation default template and file-kind classification, and folder structure defaults.
 
 The dialog keeps settings scoped to repeatable defaults. One-off execution choices stay in action dialogs or the main planner.
 
@@ -35,6 +35,7 @@ The dialog keeps settings scoped to repeatable defaults. One-off execution choic
 
 - Context menu commands can be enabled independently, which is useful for reducing Explorer menu clutter.
 - Rename correction rules, relocation templates, and AutoRelocation file-kind classification are reachable from the settings window without exposing their implementation files. Rename dictionary, review insert phrase, obfuscated Hangul candidate-profile, and parser-profile editing now live inside the correction rule editor's selected-rule detail tab.
+- Personal rename pattern learning has an explicit enable toggle and a maximum feedback row limit. The row limit has a lower bound of 100, defaults to 2000, and trims older local feedback rows first.
 - AutoRelocation file-kind classification now supports managing the kind list directly, including custom kinds, deletion, and representative KnownFileKind name changes.
 - AutoRelocation and folder unwrap options are also available at the action-step level through `PlanStepDialog`, so the app already has a path for per-run overrides.
 - The collapsible group summaries make the single-panel layout scannable even when groups are collapsed.
@@ -80,7 +81,17 @@ Implemented stability guard:
 
 - `RenameOperations.Apply` now rechecks invalid target names, duplicate target paths, and existing destination paths before any file-system move. This keeps blocking validation mandatory even when the secondary automation mode skips opening the review dialog.
 
-### 5. Hidden group flags are forced on
+### 5. Personal rename pattern learning is opt-in controlled
+
+![Rename pattern learning settings](images/rename-pattern-learning-settings.svg)
+
+The Rename group now includes a personal pattern learning section. It keeps the future "learn from confirmed choices" behavior separate from deterministic rules and plugins:
+
+- `Use personal rename pattern learning` controls whether confirmed parse/render choices are read or recorded.
+- `Maximum feedback rows` controls the local JSONL history size and clamps to a minimum of 100 rows.
+- The default row limit is 2000 so repeated use has enough history without unbounded growth.
+
+### 6. Hidden group flags are forced on
 
 `ContextMenuFolderStructure` and `ContextMenuAutoRelocation` exist in settings, but `SettingsForm.SaveSettingsFromUi` forces them to `true`. The UI only exposes child command toggles.
 
@@ -89,7 +100,7 @@ Recommended change:
 - This is acceptable if group-level disable is not needed.
 - If menu clutter is a common problem, expose group header toggles: `폴더 작업 표시`, `자동 재배치 표시`.
 
-### 6. Fixed dimensions may age poorly
+### 7. Fixed dimensions may age poorly
 
 The old dialog used a fixed starting size and many hard-coded widths. Current Korean and English strings mostly fit, but new explanatory copy or longer template names made that brittle.
 
@@ -101,7 +112,7 @@ Implemented change:
 - Combo rows resize with the dialog.
 - Helper text sits under rows instead of forcing long labels into the row header.
 
-### 7. A single-panel layout needs collapsible option groups
+### 8. A single-panel layout needs collapsible option groups
 
 The tabbed layout has been replaced by one panel that lists every option group vertically. Collapsible groups keep the layout scannable.
 

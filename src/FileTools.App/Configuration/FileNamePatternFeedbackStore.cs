@@ -3,14 +3,33 @@ using System.Text.Json.Serialization;
 
 namespace FileTools;
 
+internal sealed record FileNamePatternFeedbackStoreOptions
+{
+    public bool Enabled { get; init; } = true;
+
+    public int FeedbackLimit { get; init; } = FileNamePatternFeedbackStore.DefaultFeedbackLimit;
+}
+
 internal static class FileNamePatternFeedbackStore
 {
     private static readonly JsonSerializerOptions JsonOptions = CreateJsonOptions();
 
+    public const int MinimumFeedbackLimit = 100;
+
+    public const int DefaultFeedbackLimit = 2000;
+
     public static string FeedbackPath => Path.Combine(FileToolsEnvironment.AppDataDir, "rename-pattern-feedback.jsonl");
 
-    public static IReadOnlyList<FileNamePatternFeedback> Load(string? path = null)
+    public static IReadOnlyList<FileNamePatternFeedback> Load(
+        string? path = null,
+        FileNamePatternFeedbackStoreOptions? options = null)
     {
+        var normalizedOptions = NormalizeOptions(options);
+        if (!normalizedOptions.Enabled)
+        {
+            return [];
+        }
+
         var targetPath = ResolvePath(path);
         if (!File.Exists(targetPath))
         {
@@ -47,22 +66,42 @@ internal static class FileNamePatternFeedbackStore
             return [];
         }
 
-        return FileNamePatternFeedbackNormalizer.Normalize(feedback);
+        return TrimToLimit(FileNamePatternFeedbackNormalizer.Normalize(feedback), normalizedOptions.FeedbackLimit);
     }
 
-    public static void Save(IEnumerable<FileNamePatternFeedback> feedback, string? path = null)
+    public static void Save(
+        IEnumerable<FileNamePatternFeedback> feedback,
+        string? path = null,
+        FileNamePatternFeedbackStoreOptions? options = null)
     {
+        var normalizedOptions = NormalizeOptions(options);
+        if (!normalizedOptions.Enabled)
+        {
+            return;
+        }
+
         var targetPath = ResolvePath(path);
         EnsureParentDirectory(targetPath);
         using var writer = new StreamWriter(targetPath, append: false);
-        foreach (var item in FileNamePatternFeedbackNormalizer.Normalize(feedback))
+        foreach (var item in TrimToLimit(
+            FileNamePatternFeedbackNormalizer.Normalize(feedback),
+            normalizedOptions.FeedbackLimit))
         {
             writer.WriteLine(JsonSerializer.Serialize(item, JsonOptions));
         }
     }
 
-    public static void Append(FileNamePatternFeedback feedback, string? path = null)
+    public static void Append(
+        FileNamePatternFeedback feedback,
+        string? path = null,
+        FileNamePatternFeedbackStoreOptions? options = null)
     {
+        var normalizedOptions = NormalizeOptions(options);
+        if (!normalizedOptions.Enabled)
+        {
+            return;
+        }
+
         var targetPath = ResolvePath(path);
         var normalized = FileNamePatternFeedbackNormalizer.Normalize([feedback]);
         if (normalized.Count == 0)
@@ -70,10 +109,17 @@ internal static class FileNamePatternFeedbackStore
             return;
         }
 
-        EnsureParentDirectory(targetPath);
-        File.AppendAllText(
-            targetPath,
-            JsonSerializer.Serialize(normalized[0], JsonOptions) + Environment.NewLine);
+        var existing = Load(targetPath, normalizedOptions);
+        Save(existing.Concat(normalized), targetPath, normalizedOptions);
+    }
+
+    public static FileNamePatternFeedbackStoreOptions CreateOptions(FileToolsSettings settings)
+    {
+        return NormalizeOptions(new FileNamePatternFeedbackStoreOptions
+        {
+            Enabled = settings.RenamePatternLearningEnabled,
+            FeedbackLimit = settings.RenamePatternFeedbackLimit
+        });
     }
 
     private static void EnsureParentDirectory(string path)
@@ -83,6 +129,25 @@ internal static class FileNamePatternFeedbackStore
         {
             Directory.CreateDirectory(directory);
         }
+    }
+
+    private static FileNamePatternFeedbackStoreOptions NormalizeOptions(FileNamePatternFeedbackStoreOptions? options)
+    {
+        options ??= new FileNamePatternFeedbackStoreOptions();
+        return options with
+        {
+            FeedbackLimit = Math.Max(MinimumFeedbackLimit, options.FeedbackLimit)
+        };
+    }
+
+    private static IReadOnlyList<FileNamePatternFeedback> TrimToLimit(
+        IReadOnlyList<FileNamePatternFeedback> feedback,
+        int feedbackLimit)
+    {
+        var limit = Math.Max(MinimumFeedbackLimit, feedbackLimit);
+        return feedback.Count <= limit
+            ? feedback
+            : feedback.Skip(feedback.Count - limit).ToArray();
     }
 
     private static string ResolvePath(string? path)

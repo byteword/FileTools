@@ -175,6 +175,7 @@
   <data name="SettingsSummaryNotRegisteredEnabledCountFormat" xml:space="preserve"><value>미등록 · {0}개 선택</value></data>
   <data name="SettingsSummaryPairFormat" xml:space="preserve"><value>{0} · {1}</value></data>
   <data name="SettingsSummaryTripleFormat" xml:space="preserve"><value>{0} · {1} · {2}</value></data>
+  <data name="SettingsSummaryQuadFormat" xml:space="preserve"><value>{0} · {1} · {2} · {3}</value></data>
   <data name="SettingsSummaryDictionaryOn" xml:space="preserve"><value>사전 사용</value></data>
   <data name="SettingsSummaryDictionaryOff" xml:space="preserve"><value>사전 미사용</value></data>
   <data name="SettingsContextMenuRegistrationHelp" xml:space="preserve"><value>Explorer 등록을 꺼도 명령 선택값은 유지됩니다.</value></data>
@@ -190,6 +191,13 @@
   <data name="Windows11ContextMenuFilesMissing" xml:space="preserve"><value>Windows 11 기본 메뉴 지원 파일을 찾을 수 없습니다:&#x0D;&#x0A;{0}</value></data>
   <data name="SettingsContextMenuLayoutHelp" xml:space="preserve"><value>묶음형은 FileTools 하위 메뉴 하나로 정리하고, 펼침형은 명령을 Explorer에 바로 표시합니다.</value></data>
   <data name="SettingsRenameReviewHelp" xml:space="preserve"><value>자동화 보조 모드에서도 검토 필요와 충돌 항목은 반드시 멈춰서 검토합니다.</value></data>
+  <data name="RenamePatternLearningSectionTitle" xml:space="preserve"><value>개인 패턴 학습</value></data>
+  <data name="RenamePatternLearningSectionHelp" xml:space="preserve"><value>확정한 이름변경 패턴 선택을 로컬에 저장해 이후 후보 순서가 선호 구조에 맞게 정렬되도록 준비합니다.</value></data>
+  <data name="CheckRenamePatternLearningEnabled" xml:space="preserve"><value>개인 이름변경 패턴 학습 사용</value></data>
+  <data name="RenamePatternFeedbackLimitLabel" xml:space="preserve"><value>최대 이력 행 수</value></data>
+  <data name="RenamePatternFeedbackLimitHelp" xml:space="preserve"><value>제한을 넘으면 오래된 항목부터 정리합니다. 최소값은 100입니다.</value></data>
+  <data name="RenamePatternLearningSummaryOnFormat" xml:space="preserve"><value>학습 {0}행</value></data>
+  <data name="RenamePatternLearningSummaryOff" xml:space="preserve"><value>학습 꺼짐</value></data>
   <data name="RenamePluginSectionTitle" xml:space="preserve"><value>교정 플러그인</value></data>
   <data name="RenamePluginSectionHelp" xml:space="preserve"><value>플러그인은 검토 가능한 후보만 추가하며 이름변경을 조용히 적용하지 않습니다.</value></data>
   <data name="CheckRenamePluginsEnabled" xml:space="preserve"><value>교정 플러그인 후보 사용</value></data>
