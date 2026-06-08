@@ -1,7 +1,7 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-08 after the personal rename render-pattern foundation
+Last updated: 2026-06-08 after the personal rename statistical-ranking foundation
 
 Scope reviewed:
 
@@ -18,8 +18,8 @@ Scope reviewed:
   language setting, review-only candidate boundary, and a low-license SymSpell
   sample plugin without bundled dictionary data. The local learning track now
   starts with filename-structure pattern discovery, render-pattern candidate
-  generation, statistical personalization, and a later shadow-validated neural
-  ranker instead of content-inference naming.
+  generation, confirmed-feedback normalization, statistical personalization, and
+  a later shadow-validated neural ranker instead of content-inference naming.
 - #4 selected-target folder merge: closed as completed. Common-filename-based file merge and preview scope were split to #9.
 - #5 ZIP archive merge: closed as completed. 7Z input archive merge was split to #8.
 - #6 compare two or more files: active. The engine/options slice is implemented,
@@ -122,15 +122,20 @@ Scope reviewed:
   turns conservative bracketed-text/text/number/extension fields into render
   candidates such as `{BracketedText} - {Text} {Number:000}{Extension}`, without
   semantic content inference or UI integration.
+- Added the internal feedback normalization and statistical ranker slice on
+  2026-06-08. `FileNamePatternFeedbackNormalizer` defines confirmed selection
+  rows, and `FileNamePatternStatisticsRanker` recency-weights prior
+  parse/render selections while keeping UI, persistence, and automatic rename
+  execution disconnected.
 
 ## Deferred Follow-Up Tracks
 
 - #3 internet dictionary or AI-assisted rename correction: resume internet or
   local-LLM providers only after privacy, cost, network failure, opt-in, and
   review UX policies are defined. The local personalization track should proceed
-  through deterministic pattern discovery, render-pattern candidates, local
-  feedback history, and a statistical ranker before any neural ranker affects
-  candidate order.
+  through deterministic pattern discovery, render-pattern candidates, persisted
+  local feedback history, and review UI integration before any neural ranker
+  affects candidate order.
 - #6 file comparison: continue with JSON result import/reload, manual UI
   validation with large mixed file sets and narrow result dialog sizes, and
   eventual Explorer menu exposure after the internal `/context FileCompare`

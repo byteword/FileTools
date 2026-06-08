@@ -146,11 +146,17 @@ exports it.
 6. Shadow neural training and replay validation.
 7. Blended ranker with statistics fallback.
 
-The current codebase now contains the first two internal slices:
+The current codebase now contains the first four internal slices as pure logic:
 
 - `FileNamePatternDiscovery` tokenizes filenames and produces ranked structural
   pattern candidates.
 - `FileNameRenderPatternGenerator` creates conservative render-pattern
   candidates from bracketed text, text, number, and extension fields.
+- `FileNamePatternFeedbackNormalizer` defines the local feedback row shape and
+  normalizes confirmed parse/render selections.
+- `FileNamePatternStatisticsRanker` ranks parse/render pattern candidates from
+  base render scores, exact parse/render history, render-pattern history,
+  parse-pattern history, and recency-weighted feedback.
 
-Neither slice is wired to UI or automatic rename execution yet.
+These slices are not wired to UI, persistence, or automatic rename execution
+yet.

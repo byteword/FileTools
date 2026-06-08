@@ -83,7 +83,7 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
 - 이름변경 교정 플러그인. 기본 언어와 플러그인별 활성 상태 및 설정을 관리합니다. 플러그인은 자동 적용 없이 검토 가능한 후보만 추가하며, 첫 샘플은 사용자 제공 사전/말뭉치 파일을 쓰는 SymSpell 후보 provider입니다. 설계 경계는 `docs/rename-correction-plugin-design.md`에 문서화되어 있습니다.
 - AutoRelocation 템플릿 편집. 경로 규칙 단계는 순서대로 평가되므로 템플릿은 `{KnownFileKind}\[{Initial}]\{EpisodeRange}` 같은 경로를 만들 수 있습니다. 템플릿 편집기와 단계별 작업 대화상자는 긴 템플릿 이름, 경로, 현지화된 라벨을 위해 크기를 조절할 수 있습니다.
 
-개인화 이름변경 학습은 파일 내용을 추론하지 않고 선택된 파일명 묶음의 구조 패턴과 사용자가 확정한 재구성 패턴을 학습하는 방향으로 준비 중입니다. 첫 내부 기반은 결정론적 파일명 패턴 발견과 출력 패턴 후보 생성이며, 통계 기반 랭킹을 먼저 쓰고 충분한 로컬 피드백이 쌓인 뒤 작은 신경망 랭커를 shadow 검증과 혼합 점수로 점진 도입합니다. 설계 경계는 `docs/neural-rename-training-design.md`에 문서화되어 있습니다.
+개인화 이름변경 학습은 파일 내용을 추론하지 않고 선택된 파일명 묶음의 구조 패턴과 사용자가 확정한 재구성 패턴을 학습하는 방향으로 준비 중입니다. 내부 기반은 결정론적 파일명 패턴 발견, 출력 패턴 후보 생성, 사용자 확정 이력 정규화, 통계 기반 랭킹까지 포함하며, 충분한 로컬 피드백이 쌓인 뒤 작은 신경망 랭커를 shadow 검증과 혼합 점수로 점진 도입합니다. 설계 경계는 `docs/neural-rename-training-design.md`에 문서화되어 있습니다.
 
 AutoRelocation 템플릿은 의도적으로 파일에서 파생된 값만 사용합니다.
 
@@ -457,7 +457,7 @@ Separate dialogs are available for:
 - Rename correction plugins. The settings dialog manages the default language, per-plugin enable state, and generated plugin settings. Plugins only add reviewable candidates without automatic apply; the first sample is a SymSpell candidate provider that uses user-supplied dictionary or corpus data. The boundary is documented in `docs/rename-correction-plugin-design.md`.
 - AutoRelocation template editing. Path rule steps are evaluated in order, so a template can produce paths such as `{KnownFileKind}\[{Initial}]\{EpisodeRange}`. The template editor and per-step action dialogs resize for long template names, paths, and localized labels.
 
-Personal rename learning is being prepared around filename-structure patterns instead of file-content inference. The first internal foundation is deterministic filename pattern discovery plus render-pattern candidate generation; statistical ranking will come first, and a small neural ranker can be introduced later through shadow validation and blended scores after enough local feedback exists. The design is documented in `docs/neural-rename-training-design.md`.
+Personal rename learning is being prepared around filename-structure patterns instead of file-content inference. The internal foundation covers deterministic filename pattern discovery, render-pattern candidate generation, confirmed-feedback normalization, and statistical ranking; a small neural ranker can be introduced later through shadow validation and blended scores after enough local feedback exists. The design is documented in `docs/neural-rename-training-design.md`.
 
 AutoRelocation templates intentionally use only file-derived values:
 
