@@ -20,9 +20,9 @@ notes.
 - Added the first rename-correction plugin boundary with language selection,
   review-only candidate generation, and a SymSpell sample provider that uses
   user-supplied dictionary or corpus data instead of bundled dictionaries.
-- Added an internal filename pattern-discovery foundation for future local
-  rename personalization. This is not exposed as an automatic rename feature in
-  this release draft.
+- Added an internal filename pattern-discovery and render-candidate foundation
+  for future local rename personalization. This is not exposed as an automatic
+  rename feature in this release draft.
 - Aligned release versioning so GitHub release tags drive the app binary,
   generated app manifest, MSI, Burn bundle, and sparse MSIX identity versions.
 
@@ -34,8 +34,9 @@ notes.
   slice. Internet dictionary and local LLM providers remain deferred until their
   privacy, timeout, opt-in, and failure policies are implemented.
 - Local rename personalization is limited to internal deterministic pattern
-  discovery in this slice. Statistical ranking, feedback history, neural shadow
-  validation, and UI integration remain future work.
+  discovery and render-pattern candidate generation in this slice. Statistical
+  ranking, feedback history, neural shadow validation, and UI integration remain
+  future work.
 - 7Z input is not supported in this release scope. Track 7Z input archive merge in GitHub issue #8.
 - Archive-first common-filename merge is implemented through archive merge output naming and entry preview. General file-content merge remains deferred under GitHub issue #9.
 

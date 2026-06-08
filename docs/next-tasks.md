@@ -1,7 +1,7 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-08 after the personal rename pattern-learning foundation
+Last updated: 2026-06-08 after the personal rename render-pattern foundation
 
 Scope reviewed:
 
@@ -17,8 +17,9 @@ Scope reviewed:
   plugin-based candidate-provider track. The first slice defines the plugin API,
   language setting, review-only candidate boundary, and a low-license SymSpell
   sample plugin without bundled dictionary data. The local learning track now
-  starts with filename-structure pattern discovery, statistical personalization,
-  and a later shadow-validated neural ranker instead of content-inference naming.
+  starts with filename-structure pattern discovery, render-pattern candidate
+  generation, statistical personalization, and a later shadow-validated neural
+  ranker instead of content-inference naming.
 - #4 selected-target folder merge: closed as completed. Common-filename-based file merge and preview scope were split to #9.
 - #5 ZIP archive merge: closed as completed. 7Z input archive merge was split to #8.
 - #6 compare two or more files: active. The engine/options slice is implemented,
@@ -117,6 +118,10 @@ Scope reviewed:
   selected filename stems, discovers structural parse-pattern candidates, scores
   batch coverage, sequential number slots, stable value slots, and simplicity,
   and keeps the feature disconnected from UI and automatic rename execution.
+- Added the internal `FileNameRenderPatternGenerator` slice on 2026-06-08. It
+  turns conservative bracketed-text/text/number/extension fields into render
+  candidates such as `{BracketedText} - {Text} {Number:000}{Extension}`, without
+  semantic content inference or UI integration.
 
 ## Deferred Follow-Up Tracks
 
