@@ -105,6 +105,11 @@ Scope reviewed:
   `build_msi.ps1 -Version v1.3.0.0` completed with 0 warnings and 0 errors,
   and the generated app manifest, app EXE, MSI `ProductVersion`, Burn setup
   EXE, and sparse MSIX identity all reported `1.3.0.0`.
+- Added release preparation and verification helpers on 2026-06-08:
+  `scripts/prepare_release.ps1` updates release-facing docs/wiki version
+  references and creates tag-specific release notes when needed, while
+  `scripts/verify_release_assets.ps1` validates downloaded asset checksums,
+  local signatures, and optional GitHub artifact attestations.
 
 ## Deferred Follow-Up Tracks
 
@@ -137,7 +142,11 @@ Scope reviewed:
      versions are injected from the release tag through `build_msi.ps1`. Before
      tagging, update only user-facing release documentation such as the README
      current-version lines when appropriate.
-   - Copy `docs/release-notes/next.md` to `docs/release-notes/<tag>.md` after the next version tag is chosen.
+   - Use `scripts/prepare_release.ps1 -Tag <tag> -Channel beta` to update the
+     release-facing README/wiki version references and create
+     `docs/release-notes/<tag>.md` when it does not already exist. Use `-WhatIf`
+     for review and `-Force` only when the tag-specific notes should be
+     regenerated from `docs/release-notes/next.md`.
    - Keep the archive merge support note explicit: ZIP input and ZIP output are supported; 7Z input is not yet supported and is tracked by #8.
    - Keep the #9 release note scoped to archive-first common output naming and
      entry preview; general file-content merge remains deferred.
@@ -153,7 +162,12 @@ Scope reviewed:
    - The local sandbox blocks Visual Studio/Windows SDK lookup under
      `%LOCALAPPDATA%\Microsoft SDKs`; ShellExt or full `build_msi.ps1` checks may
      need external permission locally even though GitHub Actions should not.
-   - Keep release notes and external wiki updates gated on verified assets, checksums, signatures, attestations, and install smoke testing.
+   - After the workflow produces draft assets, use
+     `scripts/verify_release_assets.ps1 -Path <download-directory> -VerifyAttestations`
+     to check `checksums.txt`, local signatures, and GitHub artifact
+     attestations before the install smoke test.
+   - Keep release notes and external wiki updates gated on verified assets,
+     checksums, signatures, attestations, and install smoke testing.
 
 4. Defer lower-priority feature tracks.
    - #3, #7, and #8 still carry explicit deferred status and resume conditions in GitHub.

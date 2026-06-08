@@ -87,6 +87,17 @@ draft until every required item below is checked.
 git status --short
 ```
 
+- Prepare release-facing repository docs and local wiki files:
+
+```powershell
+.\scripts\prepare_release.ps1 -Tag v1.3.0.0 -Channel beta
+```
+
+Use `-WhatIf` to preview file changes, and use `-Force` only when the
+tag-specific release note should be regenerated from
+`docs\release-notes\next.md`. Existing tag-specific release notes are preserved
+by default.
+
 - Confirm the release tag uses a four-part version and the build script accepts
   the same value:
 
@@ -113,14 +124,8 @@ dotnet test tests\FileTools.Tests\FileTools.Tests.csproj
 MSBuild.exe FileTools.sln /p:Configuration=Release /p:Platform=x64
 ```
 
-- Copy `docs/release-notes/next.md` to the tag-specific file and update the
-  title, beta/stable status, asset names, and verification notes:
-
-```powershell
-Copy-Item docs\release-notes\next.md docs\release-notes\v1.3.0.0.md
-```
-
-- Update and push the wiki documentation before tagging:
+- Review the repository documentation and local wiki changes, then commit and
+  push the wiki documentation before tagging:
 
 ```powershell
 git -C .wiki status --short
@@ -152,41 +157,18 @@ checksums.txt
 
 - Download the draft assets to a clean verification directory.
 
-- Verify every downloaded file matches `checksums.txt`:
+- Verify downloaded asset checksums, local signatures, and GitHub artifact
+  attestations:
 
 ```powershell
-$expected = Get-Content .\checksums.txt | ForEach-Object {
-    $parts = $_ -split '\s+', 2
-    [pscustomobject]@{ Hash = $parts[0]; Name = $parts[1] }
-}
-
-foreach ($item in $expected) {
-    $actual = (Get-FileHash ".\$($item.Name)" -Algorithm SHA256).Hash.ToLowerInvariant()
-    if ($actual -ne $item.Hash) {
-        throw "Checksum mismatch for $($item.Name)"
-    }
-}
+.\scripts\verify_release_assets.ps1 -Path .\downloaded-release-assets -VerifyAttestations
 ```
 
-- Verify GitHub artifact attestations:
-
-```powershell
-gh attestation verify .\FileTools-<version>-win-x64-setup.exe -R byteword/FileTools
-gh attestation verify .\FileTools-<version>-win-x64.msi -R byteword/FileTools
-gh attestation verify .\FileTools-<version>-win-x64-identity.msix -R byteword/FileTools
-gh attestation verify .\FileTools-<version>-msix-self-signed.cer -R byteword/FileTools
-gh attestation verify .\checksums.txt -R byteword/FileTools
-```
-
-- Inspect Authenticode/MSIX signatures. The certificate may show as untrusted
-  until the self-signed root is trusted, but the files must be signed and the
-  subject must match `CN=FileTools Self-Signed`:
-
-```powershell
-Get-AuthenticodeSignature .\FileTools-<version>-win-x64-setup.exe
-Get-AuthenticodeSignature .\FileTools-<version>-win-x64.msi
-Get-AuthenticodeSignature .\FileTools-<version>-win-x64-identity.msix
-```
+The script verifies every `checksums.txt` entry, checks the setup EXE, MSI, and
+identity MSIX signer subject, and verifies attestations only when
+`-VerifyAttestations` is supplied. A self-signed certificate may still report as
+locally untrusted until the public CER is trusted; the file must still be signed
+by `CN=FileTools Self-Signed`.
 
 ### Install Smoke Test
 
