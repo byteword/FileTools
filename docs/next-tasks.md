@@ -1,7 +1,7 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-07 after version-up readiness verification
+Last updated: 2026-06-08 after the personal rename pattern-learning foundation
 
 Scope reviewed:
 
@@ -16,7 +16,9 @@ Scope reviewed:
 - #3 internet dictionary or AI-assisted rename correction: continue as a
   plugin-based candidate-provider track. The first slice defines the plugin API,
   language setting, review-only candidate boundary, and a low-license SymSpell
-  sample plugin without bundled dictionary data.
+  sample plugin without bundled dictionary data. The local learning track now
+  starts with filename-structure pattern discovery, statistical personalization,
+  and a later shadow-validated neural ranker instead of content-inference naming.
 - #4 selected-target folder merge: closed as completed. Common-filename-based file merge and preview scope were split to #9.
 - #5 ZIP archive merge: closed as completed. 7Z input archive merge was split to #8.
 - #6 compare two or more files: active. The engine/options slice is implemented,
@@ -110,13 +112,20 @@ Scope reviewed:
   references and creates tag-specific release notes when needed, while
   `scripts/verify_release_assets.ps1` validates downloaded asset checksums,
   local signatures, and optional GitHub artifact attestations.
+- Added `docs/neural-rename-training-design.md` and the first internal
+  `FileNamePatternDiscovery` slice on 2026-06-08. The current slice tokenizes
+  selected filename stems, discovers structural parse-pattern candidates, scores
+  batch coverage, sequential number slots, stable value slots, and simplicity,
+  and keeps the feature disconnected from UI and automatic rename execution.
 
 ## Deferred Follow-Up Tracks
 
 - #3 internet dictionary or AI-assisted rename correction: resume internet or
   local-LLM providers only after privacy, cost, network failure, opt-in, and
-  review UX policies are defined. The current implementation scope is limited
-  to offline plugin loading and a review-only SymSpell sample provider.
+  review UX policies are defined. The local personalization track should proceed
+  through deterministic pattern discovery, render-pattern candidates, local
+  feedback history, and a statistical ranker before any neural ranker affects
+  candidate order.
 - #6 file comparison: continue with JSON result import/reload, manual UI
   validation with large mixed file sets and narrow result dialog sizes, and
   eventual Explorer menu exposure after the internal `/context FileCompare`
@@ -170,7 +179,9 @@ Scope reviewed:
      checksums, signatures, attestations, and install smoke testing.
 
 4. Defer lower-priority feature tracks.
-   - #3, #7, and #8 still carry explicit deferred status and resume conditions in GitHub.
+   - #3 external providers, #7, and #8 still carry explicit deferred status and resume conditions in GitHub.
+   - #3 local pattern learning may continue independently because it stays local,
+     review-first, and disconnected from network/content-inference providers.
    - #9 general file-content merge remains deferred; the archive-first output
      naming and preview slice is implemented.
    - Do not pull these into the active work queue until the resume conditions in each issue are satisfied.
