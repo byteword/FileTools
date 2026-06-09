@@ -74,6 +74,7 @@
   <data name="FolderUnwrapMismatchCustomTemplate" xml:space="preserve"><value>Use custom template</value></data>
   <data name="ContextCommandAutoRelocationCurrentFolder" xml:space="preserve"><value>Auto relocate in current folder</value></data>
   <data name="ContextCommandAutoRelocationChooseTarget" xml:space="preserve"><value>Auto relocate to selected folder</value></data>
+  <data name="ContextCommandFolderMergeSelectedTargets" xml:space="preserve"><value>Merge selected targets</value></data>
   <data name="ContextMenuLayoutGrouped" xml:space="preserve"><value>Grouped: FileTools submenu</value></data>
   <data name="ContextMenuLayoutExpanded" xml:space="preserve"><value>Expanded: show each command directly</value></data>
   <data name="MainFormTitle" xml:space="preserve"><value>FileTools settings and tasks</value></data>

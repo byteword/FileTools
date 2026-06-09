@@ -55,6 +55,11 @@ internal static class ContextMenuRegistrar
             ContextMenuTargetKind.Directory,
             settings => settings.ContextMenuFolderStructure && settings.ContextMenuFolderMoveInnerFilesUp),
         new(
+            "FileTools_05b_FolderMergeSelectedTargets",
+            ContextMenuCommand.FolderMergeSelectedTargets,
+            ContextMenuTargetKind.File | ContextMenuTargetKind.Directory,
+            settings => settings.ContextMenuFolderStructure && settings.ContextMenuFolderMergeSelectedTargets),
+        new(
             "FileTools_06_AutoRelocationCurrentFolder",
             ContextMenuCommand.AutoRelocationCurrentFolder,
             ContextMenuTargetKind.File | ContextMenuTargetKind.Directory,
@@ -319,6 +324,7 @@ internal static class ContextMenuRegistrar
                 options.SetValue(nameof(FileToolsSettings.ContextMenuFolderUnwrapSameNameSingleFile), settings.ContextMenuFolderUnwrapSameNameSingleFile ? 1 : 0, RegistryValueKind.DWord);
                 options.SetValue(nameof(FileToolsSettings.ContextMenuFolderUnwrapSingleFile), settings.ContextMenuFolderUnwrapSingleFile ? 1 : 0, RegistryValueKind.DWord);
                 options.SetValue(nameof(FileToolsSettings.ContextMenuFolderMoveInnerFilesUp), settings.ContextMenuFolderMoveInnerFilesUp ? 1 : 0, RegistryValueKind.DWord);
+                options.SetValue(nameof(FileToolsSettings.ContextMenuFolderMergeSelectedTargets), settings.ContextMenuFolderMergeSelectedTargets ? 1 : 0, RegistryValueKind.DWord);
                 options.SetValue(nameof(FileToolsSettings.ContextMenuAutoRelocationCurrentFolder), settings.ContextMenuAutoRelocationCurrentFolder ? 1 : 0, RegistryValueKind.DWord);
                 options.SetValue(nameof(FileToolsSettings.ContextMenuAutoRelocationChooseTarget), settings.ContextMenuAutoRelocationChooseTarget ? 1 : 0, RegistryValueKind.DWord);
                 options.SetValue(nameof(FileToolsSettings.ContextMenuArchiveMergeGroupByArchiveName), settings.ContextMenuArchiveMergeGroupByArchiveName ? 1 : 0, RegistryValueKind.DWord);

@@ -174,6 +174,11 @@ internal static class Program
             return RenameReviewDialog.ShowAndApply(paths, settings);
         }
 
+        if (command == ContextMenuCommand.FolderMergeSelectedTargets)
+        {
+            return FolderMergeOperations.MergeIntoFolder(paths, settings).OperationResult;
+        }
+
         if (command is ContextMenuCommand.ArchiveMergeGroupByArchiveName or ContextMenuCommand.ArchiveMergePreserveInternalPaths)
         {
             return ExecuteArchiveMergeContextCommand(command, paths, settings);

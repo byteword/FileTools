@@ -45,6 +45,8 @@ internal sealed class FileToolsSettings
 
     public bool ContextMenuFolderMoveInnerFilesUp { get; set; } = true;
 
+    public bool ContextMenuFolderMergeSelectedTargets { get; set; } = true;
+
     public bool ContextMenuAutoRelocation { get; set; } = true;
 
     public bool ContextMenuAutoRelocationCurrentFolder { get; set; } = true;
@@ -97,7 +99,8 @@ internal sealed class FileToolsSettings
         ContextMenuFolderWrapFiles ||
         ContextMenuFolderUnwrapSameNameSingleFile ||
         ContextMenuFolderUnwrapSingleFile ||
-        ContextMenuFolderMoveInnerFilesUp;
+        ContextMenuFolderMoveInnerFilesUp ||
+        ContextMenuFolderMergeSelectedTargets;
 
     public bool IsAnyContextMenuAutoRelocationOperationEnabled =>
         ContextMenuAutoRelocationCurrentFolder ||
@@ -137,6 +140,7 @@ internal sealed class FileToolsSettings
             ContextMenuFolderUnwrapSameNameSingleFile = ContextMenuFolderUnwrapSameNameSingleFile,
             ContextMenuFolderUnwrapSingleFile = ContextMenuFolderUnwrapSingleFile,
             ContextMenuFolderMoveInnerFilesUp = ContextMenuFolderMoveInnerFilesUp,
+            ContextMenuFolderMergeSelectedTargets = ContextMenuFolderMergeSelectedTargets,
             ContextMenuAutoRelocation = ContextMenuAutoRelocation,
             ContextMenuAutoRelocationCurrentFolder = ContextMenuAutoRelocationCurrentFolder,
             ContextMenuAutoRelocationChooseTarget = ContextMenuAutoRelocationChooseTarget,
@@ -253,3 +257,4 @@ internal static class SettingsStore
         return options;
     }
 }
+

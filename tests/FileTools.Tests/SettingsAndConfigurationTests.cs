@@ -32,6 +32,7 @@ public sealed class SettingsAndConfigurationTests
             },
             RenamePatternLearningEnabled = false,
             RenamePatternFeedbackLimit = 1234,
+            ContextMenuFolderMergeSelectedTargets = false,
             FileKindExtensionRules =
             [
                 new FileKindExtensionRule
@@ -55,6 +56,24 @@ public sealed class SettingsAndConfigurationTests
         Assert.Equal("changed.txt", clone.RenameCorrectionPlugins.Plugins[0].Settings["dictionaryPath"]);
         Assert.False(clone.RenamePatternLearningEnabled);
         Assert.Equal(1234, clone.RenamePatternFeedbackLimit);
+        Assert.False(clone.ContextMenuFolderMergeSelectedTargets);
+    }
+
+    [Fact]
+    public void IsAnyContextMenuFolderOperationEnabled_ConsidersFolderMergeSelectedTargets()
+    {
+        var settings = new FileToolsSettings
+        {
+            ContextMenuFolderWrapFiles = false,
+            ContextMenuFolderUnwrapSameNameSingleFile = false,
+            ContextMenuFolderUnwrapSingleFile = false,
+            ContextMenuFolderMoveInnerFilesUp = false,
+            ContextMenuFolderMergeSelectedTargets = false
+        };
+        Assert.False(settings.IsAnyContextMenuFolderOperationEnabled);
+
+        settings.ContextMenuFolderMergeSelectedTargets = true;
+        Assert.True(settings.IsAnyContextMenuFolderOperationEnabled);
     }
 
     [Fact]
@@ -111,6 +130,15 @@ public sealed class SettingsAndConfigurationTests
     }
 
     [Fact]
+    public void ContextMenuCommandLine_TryParseCommandAcceptsFolderMergeSelectedTargets()
+    {
+        var parsed = ContextMenuCommandLine.TryParseCommand("FolderMergeSelectedTargets", out var command);
+
+        Assert.True(parsed);
+        Assert.Equal(ContextMenuCommand.FolderMergeSelectedTargets, command);
+    }
+
+    [Fact]
     public void ContextMenuCommandLine_CreateRegistryCommandBuildsFileCompareContextLaunch()
     {
         var commandLine = ContextMenuCommandLine.CreateRegistryCommand(
@@ -118,6 +146,16 @@ public sealed class SettingsAndConfigurationTests
             ContextMenuCommand.FileCompare);
 
         Assert.Equal(@"""C:\Tools\FileTools.exe"" /context FileCompare ""%1""", commandLine);
+    }
+
+    [Fact]
+    public void ContextMenuCommandLine_CreateRegistryCommandBuildsFolderMergeContextLaunch()
+    {
+        var commandLine = ContextMenuCommandLine.CreateRegistryCommand(
+            @"C:\Tools\FileTools.exe",
+            ContextMenuCommand.FolderMergeSelectedTargets);
+
+        Assert.Equal(@"""C:\Tools\FileTools.exe"" /context FolderMergeSelectedTargets ""%1""", commandLine);
     }
 
     [Fact]

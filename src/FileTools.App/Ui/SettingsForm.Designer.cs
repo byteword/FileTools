@@ -166,6 +166,9 @@ internal sealed partial class SettingsForm
         ConfigureCheckBox(_contextMenuFolderUnwrapSingleFileCheckBox);
         _contextMenuFolderMoveInnerFilesCheckBox.Text = ToolModeText.GetDisplayName(FolderStructureOperation.MoveInnerFilesUp);
         ConfigureCheckBox(_contextMenuFolderMoveInnerFilesCheckBox);
+        _contextMenuFolderMergeSelectedTargetsCheckBox.Text = ToolModeText.GetDisplayName(
+            ContextMenuCommand.FolderMergeSelectedTargets);
+        ConfigureCheckBox(_contextMenuFolderMergeSelectedTargetsCheckBox);
         _contextMenuRelocationCurrentCheckBox.Text = Localizer.Get("ContextCommandAutoRelocationCurrentFolder");
         ConfigureCheckBox(_contextMenuRelocationCurrentCheckBox);
         _contextMenuRelocationChooseTargetCheckBox.Text = Localizer.Get("ContextCommandAutoRelocationChooseTarget");
@@ -193,6 +196,7 @@ internal sealed partial class SettingsForm
         group.AddBodyControl(_contextMenuFolderUnwrapSameNameCheckBox);
         group.AddBodyControl(_contextMenuFolderUnwrapSingleFileCheckBox);
         group.AddBodyControl(_contextMenuFolderMoveInnerFilesCheckBox);
+        group.AddBodyControl(_contextMenuFolderMergeSelectedTargetsCheckBox);
         group.AddBodyControl(CreateSectionLabel(Localizer.Get("GroupAutoRelocationContextMenu")));
         group.AddBodyControl(_contextMenuRelocationCurrentCheckBox);
         group.AddBodyControl(_contextMenuRelocationChooseTargetCheckBox);

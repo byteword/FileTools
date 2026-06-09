@@ -64,7 +64,7 @@
   <data name="ToolFolderStructure" xml:space="preserve"><value>폴더 wrapping / unwrapping</value></data>
   <data name="ToolAutoRelocation" xml:space="preserve"><value>폴더 자동 재배치</value></data>
   <data name="FolderOperationAuto" xml:space="preserve"><value>자동: 파일은 wrapping, 폴더는 unwrapping</value></data>
-  <data name="FolderOperationWrapFiles" xml:space="preserve"><value>파일 wrapping</value></data>
+  <data name="FolderOperationWrapFiles" xml:space="preserve"><value>파일 폴더로 모으기</value></data>
   <data name="FolderOperationUnwrapSameName" xml:space="preserve"><value>같은 이름 단일 파일 폴더 unwrapping</value></data>
   <data name="FolderOperationUnwrapSingleFile" xml:space="preserve"><value>단일 파일 폴더 unwrapping</value></data>
   <data name="FolderOperationMoveInnerFilesUp" xml:space="preserve"><value>폴더 내부 파일 상위로 이동</value></data>
@@ -74,6 +74,7 @@
   <data name="FolderUnwrapMismatchCustomTemplate" xml:space="preserve"><value>사용자 템플릿 사용</value></data>
   <data name="ContextCommandAutoRelocationCurrentFolder" xml:space="preserve"><value>현재 폴더에서 자동 재배치</value></data>
   <data name="ContextCommandAutoRelocationChooseTarget" xml:space="preserve"><value>선택한 폴더로 자동 재배치</value></data>
+  <data name="ContextCommandFolderMergeSelectedTargets" xml:space="preserve"><value>폴더 병합</value></data>
   <data name="ContextMenuLayoutGrouped" xml:space="preserve"><value>묶음형: FileTools 하위 메뉴</value></data>
   <data name="ContextMenuLayoutExpanded" xml:space="preserve"><value>펼침형: 기능을 각각 표시</value></data>
   <data name="MainFormTitle" xml:space="preserve"><value>FileTools 설정 및 작업</value></data>

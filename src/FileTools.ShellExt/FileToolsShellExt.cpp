@@ -27,6 +27,7 @@ enum class CommandKind
     FolderUnwrapUseFolderName,
     FolderUnwrapKeepFileName,
     FolderMoveInnerFilesUp,
+    FolderMergeSelectedTargets,
     AutoRelocationCurrentFolder,
     AutoRelocationChooseTarget,
     ArchiveMergeGroupByArchiveName,
@@ -45,11 +46,12 @@ struct CommandDefinition
 constexpr CommandDefinition SubCommands[] =
 {
     { CommandKind::Rename, L"파일이름 자동 교정", L"FileNameCorrection", L"ContextMenuFileNameCorrection" },
-    { CommandKind::FolderWrapFiles, L"파일 wrapping", L"FolderWrapFiles", L"ContextMenuFolderWrapFiles" },
+    { CommandKind::FolderWrapFiles, L"파일 폴더로 모으기", L"FolderWrapFiles", L"ContextMenuFolderWrapFiles" },
     { CommandKind::FolderUnwrapSameName, L"폴더 벗기기", L"FolderUnwrapSameNameSingleFile", L"ContextMenuFolderUnwrapSameNameSingleFile" },
     { CommandKind::FolderUnwrapUseFolderName, L"폴더명으로 벗기기", L"FolderUnwrapUseFolderName", L"ContextMenuFolderUnwrapSingleFile" },
     { CommandKind::FolderUnwrapKeepFileName, L"파일명으로 벗기기", L"FolderUnwrapKeepFileName", L"ContextMenuFolderUnwrapSingleFile" },
     { CommandKind::FolderMoveInnerFilesUp, L"폴더 내부 파일 상위로 이동", L"FolderMoveInnerFilesUp", L"ContextMenuFolderMoveInnerFilesUp" },
+    { CommandKind::FolderMergeSelectedTargets, L"폴더합치기", L"FolderMergeSelectedTargets", L"ContextMenuFolderMergeSelectedTargets" },
     { CommandKind::AutoRelocationCurrentFolder, L"현재 폴더에서 자동 재배치", L"AutoRelocationCurrentFolder", L"ContextMenuAutoRelocationCurrentFolder" },
     { CommandKind::AutoRelocationChooseTarget, L"선택한 폴더로 자동 재배치", L"AutoRelocationChooseTarget", L"ContextMenuAutoRelocationChooseTarget" },
     { CommandKind::ArchiveMergeGroupByArchiveName, L"ZIP 병합: 압축파일명 폴더로", L"ArchiveMergeGroupByArchiveName", L"ContextMenuArchiveMergeGroupByArchiveName" },
@@ -314,6 +316,8 @@ bool IsCommandVisible(CommandKind kind, const std::vector<std::wstring>& paths)
         return SelectionSingleFileFolderState(paths, SingleFileFolderState::DifferentName);
     case CommandKind::FolderMoveInnerFilesUp:
         return SelectionAllDirectories(paths);
+    case CommandKind::FolderMergeSelectedTargets:
+        return paths.size() >= 2 && SelectionAnyFileSystemItem(paths);
     case CommandKind::AutoRelocationCurrentFolder:
     case CommandKind::AutoRelocationChooseTarget:
         return SelectionAnyFileSystemItem(paths);

@@ -13,6 +13,7 @@ internal sealed partial class SettingsForm : Form
     private readonly CheckBox _contextMenuFolderUnwrapSameNameCheckBox = new();
     private readonly CheckBox _contextMenuFolderUnwrapSingleFileCheckBox = new();
     private readonly CheckBox _contextMenuFolderMoveInnerFilesCheckBox = new();
+    private readonly CheckBox _contextMenuFolderMergeSelectedTargetsCheckBox = new();
     private readonly CheckBox _contextMenuRelocationCurrentCheckBox = new();
     private readonly CheckBox _contextMenuRelocationChooseTargetCheckBox = new();
     private readonly CheckBox _contextMenuArchiveMergeGroupByArchiveNameCheckBox = new();
@@ -97,6 +98,7 @@ internal sealed partial class SettingsForm : Form
         _contextMenuFolderUnwrapSameNameCheckBox.Checked = Settings.ContextMenuFolderUnwrapSameNameSingleFile;
         _contextMenuFolderUnwrapSingleFileCheckBox.Checked = Settings.ContextMenuFolderUnwrapSingleFile;
         _contextMenuFolderMoveInnerFilesCheckBox.Checked = Settings.ContextMenuFolderMoveInnerFilesUp;
+        _contextMenuFolderMergeSelectedTargetsCheckBox.Checked = Settings.ContextMenuFolderMergeSelectedTargets;
         _contextMenuRelocationCurrentCheckBox.Checked = Settings.ContextMenuAutoRelocationCurrentFolder;
         _contextMenuRelocationChooseTargetCheckBox.Checked = Settings.ContextMenuAutoRelocationChooseTarget;
         _contextMenuArchiveMergeGroupByArchiveNameCheckBox.Checked = Settings.ContextMenuArchiveMergeGroupByArchiveName;
@@ -240,6 +242,7 @@ internal sealed partial class SettingsForm : Form
             _contextMenuFolderUnwrapSameNameCheckBox,
             _contextMenuFolderUnwrapSingleFileCheckBox,
             _contextMenuFolderMoveInnerFilesCheckBox,
+            _contextMenuFolderMergeSelectedTargetsCheckBox,
             _contextMenuRelocationCurrentCheckBox,
             _contextMenuRelocationChooseTargetCheckBox,
             _contextMenuArchiveMergeGroupByArchiveNameCheckBox,
@@ -440,6 +443,7 @@ internal sealed partial class SettingsForm : Form
             _contextMenuFolderUnwrapSameNameCheckBox,
             _contextMenuFolderUnwrapSingleFileCheckBox,
             _contextMenuFolderMoveInnerFilesCheckBox,
+            _contextMenuFolderMergeSelectedTargetsCheckBox,
             _contextMenuRelocationCurrentCheckBox,
             _contextMenuRelocationChooseTargetCheckBox,
             _contextMenuArchiveMergeGroupByArchiveNameCheckBox,
@@ -473,6 +477,7 @@ internal sealed partial class SettingsForm : Form
         Settings.ContextMenuFolderUnwrapSameNameSingleFile = _contextMenuFolderUnwrapSameNameCheckBox.Checked;
         Settings.ContextMenuFolderUnwrapSingleFile = _contextMenuFolderUnwrapSingleFileCheckBox.Checked;
         Settings.ContextMenuFolderMoveInnerFilesUp = _contextMenuFolderMoveInnerFilesCheckBox.Checked;
+        Settings.ContextMenuFolderMergeSelectedTargets = _contextMenuFolderMergeSelectedTargetsCheckBox.Checked;
         Settings.ContextMenuAutoRelocation = true;
         Settings.ContextMenuAutoRelocationCurrentFolder = _contextMenuRelocationCurrentCheckBox.Checked;
         Settings.ContextMenuAutoRelocationChooseTarget = _contextMenuRelocationChooseTargetCheckBox.Checked;
