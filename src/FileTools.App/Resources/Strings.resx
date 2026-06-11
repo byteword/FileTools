@@ -89,6 +89,8 @@
   <data name="ButtonRemoveSelected" xml:space="preserve"><value>Remove selected</value></data>
   <data name="ButtonClear" xml:space="preserve"><value>Clear</value></data>
   <data name="ButtonMergeSelectedTargets" xml:space="preserve"><value>Merge selected into folder</value></data>
+  <data name="ButtonMergeFoldersMode" xml:space="preserve"><value>Merge folders as folders</value></data>
+  <data name="ButtonMergeFolderContentsMode" xml:space="preserve"><value>Merge folder contents only</value></data>
   <data name="GroupFolderStructure" xml:space="preserve"><value>Folder wrapping / unwrapping</value></data>
   <data name="GroupContextMenu" xml:space="preserve"><value>ContextMenu</value></data>
   <data name="CheckRegisterContextMenu" xml:space="preserve"><value>Register Explorer ContextMenu</value></data>
@@ -470,7 +472,19 @@
   <data name="DefaultMergeFolderName" xml:space="preserve"><value>Merged</value></data>
   <data name="FolderMergeNeedsMultipleTargets" xml:space="preserve"><value>Select two or more existing targets to merge.</value></data>
   <data name="FolderMergePlannedStepsMessage" xml:space="preserve"><value>Merge selected targets only after clearing their planned steps.</value></data>
+  <data name="FolderMergeCanceled" xml:space="preserve"><value>Folder merge was canceled by user.</value></data>
+  <data name="FolderMergeOptionsDialogTitle" xml:space="preserve"><value>Folder merge options</value></data>
+  <data name="FolderMergeDialogHeader" xml:space="preserve"><value>Merge destination options</value></data>
+  <data name="FolderMergeTargetName" xml:space="preserve"><value>Target folder name</value></data>
+  <data name="FolderMergeTargetPath" xml:space="preserve"><value>Target folder path</value></data>
+  <data name="FolderMergeModeGroup" xml:space="preserve"><value>Merge mode</value></data>
+  <data name="FolderMergeModeMergeFolders" xml:space="preserve"><value>Merge folders as folder units</value></data>
+  <data name="FolderMergeModeMergeContentsOnly" xml:space="preserve"><value>Move folder contents only</value></data>
+  <data name="FolderMergeModeLabelFormat" xml:space="preserve"><value>Mode: {0}</value></data>
   <data name="FolderMergeConfirmFormat" xml:space="preserve"><value>Merge {0} selected targets into:&#x0D;&#x0A;{1}</value></data>
+  <data name="FolderMergeTargetParentFormat" xml:space="preserve"><value>Target parent: {0}</value></data>
+  <data name="FolderMergeMultiParentWarning" xml:space="preserve"><value>Selected targets are in different parents. All items will be merged into a folder under the first selected target's parent path.</value></data>
+  <data name="FolderMergeSelectedSourcesHeader" xml:space="preserve"><value>Selected sources:</value></data>
   <data name="FolderMergeCompletedFormat" xml:space="preserve"><value>Merge completed: {0} | applied {1}, skipped {2}, errors {3}.</value></data>
   <data name="FolderMergeSameAsTargetFolderFormat" xml:space="preserve"><value>{0} is the target folder</value></data>
   <data name="FolderMergeSourceMissingFormat" xml:space="preserve"><value>{0} source does not exist</value></data>

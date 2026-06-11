@@ -8,6 +8,7 @@ Scope:
 - Related display logic in `MainForm.cs`, `WorkPlan.cs`, `PlanStepDialog.cs`, and `OperationResult.cs`
 
 ![Current MainForm designer layout](images/current-mainform-designer-layout.svg)
+![In-app folder-merge interaction](images/in-app-context-menu-folder-merge-design.svg)
 
 ## Summary
 
@@ -30,6 +31,11 @@ The README now references `docs/images/current-mainform-designer-layout.svg`, wh
 - The old always-large result box is replaced by a compact bottom log view.
 - Execution uses one bottom-right button that shows run in the idle state and stop while running.
 - Command state updates disable commands that do not apply to the current selection or execution state.
+- Added right-click context menus on the target and plan grids, wired to the same command handlers as menu/toolbar actions.
+- Context-menu selection behavior now preserves multi-row selections and updates command availability through the existing `UpdateCommandStates` flow.
+- The "Merge selected into folder" split button moved into the action toolbar on the right panel.
+- Added folder-merge option flow with target-name preview/edit and split-button mode support.
+- For folder merges, multiple-folder selections expose a "merge folder contents only" mode and the current plan/confirmation now reflects the selected merge mode.
 
 ## Remaining UX Notes
 

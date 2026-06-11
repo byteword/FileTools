@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="720" viewBox="0 0 1120 720" role="img" aria-labelledby="title desc">
+  <title id="title">In-app context menu and folder merge design</title>
+  <desc id="desc">A MainForm mockup showing the target grid right-click menu, the plan grid right-click menu, and the confirm-first folder merge flow.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f5f7fa; }
+      .window { fill: #ffffff; stroke: #94a3b8; stroke-width: 2; }
+      .titlebar { fill: #e7edf3; }
+      .panel { fill: #ffffff; stroke: #c5ced8; stroke-width: 1.5; }
+      .gridHead { fill: #e2e8f0; }
+      .row { fill: #ffffff; }
+      .rowAlt { fill: #f8fafc; }
+      .selected { fill: #dbeafe; stroke: #60a5fa; stroke-width: 1; }
+      .menu { fill: #ffffff; stroke: #64748b; stroke-width: 1.5; }
+      .menuItem { fill: #1f2937; font-family: Segoe UI, Arial, sans-serif; font-size: 16px; }
+      .menuMuted { fill: #64748b; font-family: Segoe UI, Arial, sans-serif; font-size: 15px; }
+      .text { fill: #1f2937; font-family: Segoe UI, Arial, sans-serif; font-size: 17px; }
+      .small { fill: #475569; font-family: Segoe UI, Arial, sans-serif; font-size: 14px; }
+      .label { fill: #0f172a; font-family: Segoe UI, Arial, sans-serif; font-size: 20px; font-weight: 600; }
+      .dialog { fill: #ffffff; stroke: #475569; stroke-width: 2; }
+      .button { fill: #f8fafc; stroke: #94a3b8; stroke-width: 1.3; }
+      .primary { fill: #2563eb; stroke: #1d4ed8; stroke-width: 1.3; }
+      .primaryText { fill: #ffffff; font-family: Segoe UI, Arial, sans-serif; font-size: 16px; font-weight: 600; }
+      .line { stroke: #cbd5e1; stroke-width: 1; }
+      .arrow { stroke: #2563eb; stroke-width: 3; fill: none; marker-end: url(#arrowHead); }
+    </style>
+    <marker id="arrowHead" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M1,1 L9,5 L1,9 Z" fill="#2563eb"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1120" height="720"/>
+  <rect class="window" x="46" y="34" width="1028" height="626" rx="8"/>
+  <rect class="titlebar" x="48" y="36" width="1024" height="46" rx="6"/>
+  <text class="label" x="72" y="66">FileTools MainForm</text>
+  <text class="small" x="824" y="64">Context menus reuse existing commands</text>
+
+  <rect class="panel" x="74" y="112" width="396" height="410" rx="6"/>
+  <text class="label" x="96" y="146">Targets</text>
+  <rect class="gridHead" x="96" y="164" width="350" height="32"/>
+  <text class="small" x="112" y="185">Name</text>
+  <text class="small" x="262" y="185">Location</text>
+  <line class="line" x1="246" y1="164" x2="246" y2="452"/>
+
+  <rect class="row" x="96" y="196" width="350" height="36"/>
+  <text class="text" x="112" y="220">Series 01.txt</text>
+  <text class="small" x="262" y="219">C:\Work</text>
+  <rect class="selected" x="96" y="232" width="350" height="36"/>
+  <text class="text" x="112" y="256">Series 02.txt</text>
+  <text class="small" x="262" y="255">C:\Work</text>
+  <rect class="selected" x="96" y="268" width="350" height="36"/>
+  <text class="text" x="112" y="292">Series 03.txt</text>
+  <text class="small" x="262" y="291">C:\Work</text>
+  <rect class="rowAlt" x="96" y="304" width="350" height="36"/>
+  <text class="text" x="112" y="328">Notes</text>
+  <text class="small" x="262" y="327">D:\Inbox</text>
+
+  <rect class="menu" x="330" y="240" width="270" height="294" rx="6"/>
+  <text class="menuItem" x="350" y="270">Add files...</text>
+  <text class="menuItem" x="350" y="300">Add folder...</text>
+  <line class="line" x1="344" y1="318" x2="586" y2="318"/>
+  <text class="menuItem" x="350" y="346">Remove selected</text>
+  <text class="menuItem" x="350" y="376">Move up</text>
+  <text class="menuItem" x="350" y="406">Move down</text>
+  <text class="menuItem" x="350" y="436">Merge selected into folder...</text>
+  <line class="line" x1="344" y1="454" x2="586" y2="454"/>
+  <text class="menuItem" x="350" y="482">Add rename step</text>
+  <text class="menuItem" x="350" y="512">Add unwrap step &gt;</text>
+
+  <rect class="panel" x="620" y="112" width="394" height="410" rx="6"/>
+  <text class="label" x="642" y="146">Work plan</text>
+  <rect class="gridHead" x="642" y="164" width="348" height="32"/>
+  <text class="small" x="658" y="185">Order</text>
+  <text class="small" x="748" y="185">Action</text>
+  <line class="line" x1="730" y1="164" x2="730" y2="360"/>
+
+  <rect class="selected" x="642" y="196" width="348" height="36"/>
+  <text class="text" x="672" y="220">1</text>
+  <text class="text" x="748" y="220">Rename</text>
+  <rect class="rowAlt" x="642" y="232" width="348" height="36"/>
+  <text class="text" x="672" y="256">2</text>
+  <text class="text" x="748" y="256">Wrap files</text>
+
+  <rect class="menu" x="812" y="214" width="178" height="152" rx="6"/>
+  <text class="menuItem" x="830" y="244">Edit step...</text>
+  <text class="menuItem" x="830" y="274">Remove step</text>
+  <text class="menuItem" x="830" y="304">Clear steps</text>
+  <line class="line" x1="824" y1="322" x2="976" y2="322"/>
+  <text class="menuItem" x="830" y="350">Run plan</text>
+
+  <line class="arrow" x1="474" y1="452" x2="612" y2="574"/>
+
+  <rect class="dialog" x="344" y="538" width="432" height="134" rx="8"/>
+  <text class="label" x="370" y="574">Confirm folder merge</text>
+  <text class="text" x="370" y="606">Move 3 selected targets into:</text>
+  <text class="text" x="370" y="632">C:\Work\Series</text>
+  <rect class="button" x="548" y="642" width="92" height="30" rx="4"/>
+  <text class="small" x="580" y="662">Cancel</text>
+  <rect class="primary" x="654" y="642" width="92" height="30" rx="4"/>
+  <text class="primaryText" x="682" y="662">Merge</text>
+</svg>

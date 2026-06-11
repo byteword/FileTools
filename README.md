@@ -343,6 +343,7 @@ FileTools.exe /context FolderUnwrapSingleFile "%1"
 FileTools.exe /context FolderUnwrapUseFolderName "%1"
 FileTools.exe /context FolderUnwrapKeepFileName "%1"
 FileTools.exe /context FolderMoveInnerFilesUp "%1"
+FileTools.exe /context FolderMergeSelectedTargets "%1"
 FileTools.exe /context AutoRelocationCurrentFolder "%1"
 FileTools.exe /context AutoRelocationChooseTarget "%1"
 ```
@@ -361,6 +362,9 @@ Explorer는 선택 항목마다 프로세스를 하나씩 시작하는 경우가
 - 선택 항목 병합은 실행 전 대상 폴더를 확인받고, 충돌하는 파일/폴더명에는 자동 번호를 붙입니다.
 - 폴더는 unwrapping 또는 자식 파일 이동 후 비어 있을 때만 삭제됩니다.
 - 폴더 unwrapping은 바로 아래의 자식 파일만 이동하며, 중첩 폴더 내용은 평탄화하지 않습니다.
+- `FolderMergeSelectedTargets`는 선택 항목 수, 대상 폴더 경로, 부모 경로, 소스 목록을 확인한 뒤 병합 실행 전 확인 창을 표시합니다.
+- `FolderMergeSelectedTargets` 다이얼로그에서 병합 대상 폴더명을 수정하거나, 다중 폴더 선택 시
+  `폴더 단위 병합` / `폴더 내용만 병합` 모드를 선택할 수 있습니다.
 - folder wrap/unwrap 이름 템플릿과 충돌 정책의 내부 설계는 `docs/name-template-and-collision-policy.md`에 정리되어 있습니다.
 
 ### 로그
@@ -726,6 +730,7 @@ FileTools.exe /context FolderUnwrapSingleFile "%1"
 FileTools.exe /context FolderUnwrapUseFolderName "%1"
 FileTools.exe /context FolderUnwrapKeepFileName "%1"
 FileTools.exe /context FolderMoveInnerFilesUp "%1"
+FileTools.exe /context FolderMergeSelectedTargets "%1"
 FileTools.exe /context AutoRelocationCurrentFolder "%1"
 FileTools.exe /context AutoRelocationChooseTarget "%1"
 ```
@@ -742,6 +747,9 @@ An internal smoke-test route is also prepared as `FileTools.exe /context FileCom
 - Filename correction is reviewed before applying changes by default, or only when generated rows need review or have conflicts if that review mode is selected.
 - AutoRelocation applies `(2)`, `(3)` suffixes when a target already exists.
 - Selected-target merge asks for confirmation before moving items and auto-numbers colliding file or folder names.
+- `FolderMergeSelectedTargets` supports editing the target folder name before execution and
+  allows selecting `Merge folders` or `Merge folder contents only` when multiple folders are selected.
+- `FolderMergeSelectedTargets` shows the proposed target folder, normalized source list, and parent-path behavior before execution.
 - Folders are deleted only when empty after unwrapping/moving child files.
 - Folder unwrapping only moves direct child files; nested folder contents are not flattened.
 - Internal folder wrap/unwrap name-template and collision-policy design is documented in `docs/name-template-and-collision-policy.md`.

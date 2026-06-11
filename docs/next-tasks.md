@@ -35,6 +35,26 @@ Scope reviewed:
 
 ## Completed Follow-Up
 
+- Added `docs/in-app-context-menu-folder-merge-design.md` and
+  `docs/images/in-app-context-menu-folder-merge-design.svg` on 2026-06-11 to
+  prepare the in-app right-click menu implementation and the safer selected-target
+  folder merge pass.
+- Implemented the in-app context-menu wiring for target/plan grids and the confirm-first folder-merge preview flow on 2026-06-11:
+  - Added right-click-aware context menus in `src/FileTools.App/Ui/MainForm.Designer.cs` and
+    `src/FileTools.App/Ui/MainForm.cs`.
+  - Added shared folder-merge preview/result type in `src/FileTools.App/Operations/FolderMergeOperations.cs`.
+  - Added `/context FolderMergeSelectedTargets` confirmation with user-cancel path and shared message formatting.
+  - Updated `FolderMergeOperations` naming logic to remove shared numeric suffixes (`Series 01`, `Series 02` -> `Series`).
+- 2026-06-11 follow-up on this thread:
+  - Added in-app folder-merge options flow (`FolderMergeOptionsDialog`) supporting target folder name edit and split-button mode selection (`Merge folders` / `Move folder contents only`).
+  - Moved the main action split button for merge from the target toolbar to the action toolbar.
+  - Linked merge option dialog into `/context FolderMergeSelectedTargets` as well.
+- Added regression coverage on 2026-06-11 for folder-merge naming/preview behaviors in
+  `tests/FileTools.Tests/FolderAndRenameOperationTests.cs`:
+  - Numeric suffix stripping for sequence naming,
+  - cross-parent preview safety metadata,
+  - mixed file-folder merge structure preservation.
+
 - Added Korean readability annotations to operations-layer code first on 2026-06-11 as
   the initial phase of the "default comment-first" hardening pass:
   `src/FileTools.App/Operations/ArchiveMergeOperations.cs` and

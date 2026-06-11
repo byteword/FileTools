@@ -35,6 +35,12 @@ partial class MainForm
     private SplitContainer _mainSplit = null!;
     private GroupBox _targetsGroup = null!;
     private DataGridView _targetGrid = null!;
+    private ContextMenuStrip _targetContextMenu = null!;
+    private ToolStripMenuItem _targetContextAddFilesMenuItem = null!;
+    private ToolStripMenuItem _targetContextAddFolderMenuItem = null!;
+    private ToolStripMenuItem _targetContextRemoveTargetMenuItem = null!;
+    private ToolStripMenuItem _targetContextMergeSelectedTargetsMenuItem = null!;
+    private ToolStripMenuItem _targetContextClearTargetsMenuItem = null!;
     private ToolStrip _targetToolStrip = null!;
     private ToolStripSplitButton _addTargetToolButton = null!;
     private ToolStripMenuItem _addFilesTargetMenuItem = null!;
@@ -42,7 +48,9 @@ partial class MainForm
     private ToolStripButton _removeTargetToolButton = null!;
     private ToolStripButton _moveTargetUpToolButton = null!;
     private ToolStripButton _moveTargetDownToolButton = null!;
-    private ToolStripButton _mergeSelectedToolButton = null!;
+    private ToolStripSplitButton _mergeSelectedToolButton = null!;
+    private ToolStripMenuItem _mergeSelectedFolderUnitsMenuItem = null!;
+    private ToolStripMenuItem _mergeSelectedFolderContentsMenuItem = null!;
     private ToolStripButton _clearTargetsToolButton = null!;
     private Panel _rightPanel = null!;
     private ToolStrip _actionToolStrip = null!;
@@ -64,6 +72,11 @@ partial class MainForm
     private GroupBox _planGroup = null!;
     private Label _planScopeLabel = null!;
     private DataGridView _planGrid = null!;
+    private ContextMenuStrip _planContextMenu = null!;
+    private ToolStripMenuItem _planContextEditStepMenuItem = null!;
+    private ToolStripMenuItem _planContextRemoveStepMenuItem = null!;
+    private ToolStripMenuItem _planContextClearStepsMenuItem = null!;
+    private ToolStripMenuItem _planContextRunPlanMenuItem = null!;
     private ToolStrip _planToolStrip = null!;
     private ToolStripButton _editStepToolButton = null!;
     private ToolStripButton _removeStepToolButton = null!;
@@ -115,6 +128,12 @@ partial class MainForm
         _mainSplit = new SplitContainer();
         _targetsGroup = new GroupBox();
         _targetGrid = new DataGridView();
+        _targetContextMenu = new ContextMenuStrip(components);
+        _targetContextAddFilesMenuItem = new ToolStripMenuItem();
+        _targetContextAddFolderMenuItem = new ToolStripMenuItem();
+        _targetContextRemoveTargetMenuItem = new ToolStripMenuItem();
+        _targetContextMergeSelectedTargetsMenuItem = new ToolStripMenuItem();
+        _targetContextClearTargetsMenuItem = new ToolStripMenuItem();
         _targetToolStrip = new ToolStrip();
         _addTargetToolButton = new ToolStripSplitButton();
         _addFilesTargetMenuItem = new ToolStripMenuItem();
@@ -122,7 +141,9 @@ partial class MainForm
         _removeTargetToolButton = new ToolStripButton();
         _moveTargetUpToolButton = new ToolStripButton();
         _moveTargetDownToolButton = new ToolStripButton();
-        _mergeSelectedToolButton = new ToolStripButton();
+        _mergeSelectedToolButton = new ToolStripSplitButton();
+        _mergeSelectedFolderUnitsMenuItem = new ToolStripMenuItem();
+        _mergeSelectedFolderContentsMenuItem = new ToolStripMenuItem();
         _clearTargetsToolButton = new ToolStripButton();
         _rightPanel = new Panel();
         _actionToolStrip = new ToolStrip();
@@ -144,6 +165,11 @@ partial class MainForm
         _planGroup = new GroupBox();
         _planScopeLabel = new Label();
         _planGrid = new DataGridView();
+        _planContextMenu = new ContextMenuStrip(components);
+        _planContextEditStepMenuItem = new ToolStripMenuItem();
+        _planContextRemoveStepMenuItem = new ToolStripMenuItem();
+        _planContextClearStepsMenuItem = new ToolStripMenuItem();
+        _planContextRunPlanMenuItem = new ToolStripMenuItem();
         _planToolStrip = new ToolStrip();
         _editStepToolButton = new ToolStripButton();
         _removeStepToolButton = new ToolStripButton();
@@ -289,6 +315,31 @@ partial class MainForm
         _openSettingsMenuItem.Name = "_openSettingsMenuItem";
         _openSettingsMenuItem.Text = "Settings";
 
+        _targetContextAddFilesMenuItem.Name = "_targetContextAddFilesMenuItem";
+        _targetContextAddFolderMenuItem.Name = "_targetContextAddFolderMenuItem";
+        _targetContextRemoveTargetMenuItem.Name = "_targetContextRemoveTargetMenuItem";
+        _targetContextMergeSelectedTargetsMenuItem.Name = "_targetContextMergeSelectedTargetsMenuItem";
+        _targetContextClearTargetsMenuItem.Name = "_targetContextClearTargetsMenuItem";
+        _targetContextAddFilesMenuItem.Text = "Add files";
+        _targetContextAddFolderMenuItem.Text = "Add folder";
+        _targetContextRemoveTargetMenuItem.Text = "Remove selected";
+        _targetContextMergeSelectedTargetsMenuItem.Text = "Merge selected into folder";
+        _targetContextClearTargetsMenuItem.Text = "Clear";
+
+        _mergeSelectedFolderUnitsMenuItem.Name = "_mergeSelectedFolderUnitsMenuItem";
+        _mergeSelectedFolderContentsMenuItem.Name = "_mergeSelectedFolderContentsMenuItem";
+        _mergeSelectedFolderUnitsMenuItem.Text = "Merge as folders";
+        _mergeSelectedFolderContentsMenuItem.Text = "Merge folder contents only";
+
+        _planContextEditStepMenuItem.Name = "_planContextEditStepMenuItem";
+        _planContextRemoveStepMenuItem.Name = "_planContextRemoveStepMenuItem";
+        _planContextClearStepsMenuItem.Name = "_planContextClearStepsMenuItem";
+        _planContextRunPlanMenuItem.Name = "_planContextRunPlanMenuItem";
+        _planContextEditStepMenuItem.Text = "Edit step";
+        _planContextRemoveStepMenuItem.Text = "Remove step";
+        _planContextClearStepsMenuItem.Text = "Clear steps";
+        _planContextRunPlanMenuItem.Text = "Run plan";
+
         _mainSplit.Dock = DockStyle.Fill;
         _mainSplit.FixedPanel = FixedPanel.Panel1;
         _mainSplit.Name = "_mainSplit";
@@ -314,10 +365,22 @@ partial class MainForm
         _targetGrid.Dock = DockStyle.Fill;
         _targetGrid.MultiSelect = true;
         _targetGrid.Name = "_targetGrid";
+        _targetGrid.ContextMenuStrip = _targetContextMenu;
         _targetGrid.ReadOnly = true;
         _targetGrid.RowHeadersVisible = false;
         _targetGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         _targetGrid.ShowCellToolTips = true;
+
+        _targetContextMenu.Items.AddRange(new ToolStripItem[]
+        {
+            _targetContextAddFilesMenuItem,
+            _targetContextAddFolderMenuItem,
+            new ToolStripSeparator(),
+            _targetContextRemoveTargetMenuItem,
+            _targetContextMergeSelectedTargetsMenuItem,
+            new ToolStripSeparator(),
+            _targetContextClearTargetsMenuItem
+        });
 
         _targetToolStrip.Dock = DockStyle.Bottom;
         _targetToolStrip.GripStyle = ToolStripGripStyle.Hidden;
@@ -330,7 +393,6 @@ partial class MainForm
             _moveTargetUpToolButton,
             _moveTargetDownToolButton,
             new ToolStripSeparator(),
-            _mergeSelectedToolButton,
             _clearTargetsToolButton
         });
         _targetToolStrip.Name = "_targetToolStrip";
@@ -369,6 +431,11 @@ partial class MainForm
         _moveTargetDownToolButton.Text = "Down";
 
         _mergeSelectedToolButton.DisplayStyle = ToolStripItemDisplayStyle.Image;
+        _mergeSelectedToolButton.DropDownItems.AddRange(new ToolStripItem[]
+        {
+            _mergeSelectedFolderUnitsMenuItem,
+            _mergeSelectedFolderContentsMenuItem
+        });
         _mergeSelectedToolButton.ImageTransparentColor = Color.Magenta;
         _mergeSelectedToolButton.Name = "_mergeSelectedToolButton";
         _mergeSelectedToolButton.Text = "Merge";
@@ -390,6 +457,7 @@ partial class MainForm
         _actionToolStrip.ImageScalingSize = new Size(20, 20);
         _actionToolStrip.Items.AddRange(new ToolStripItem[]
         {
+            _mergeSelectedToolButton,
             _addRenameToolButton,
             _addWrapToolButton,
             _addUnwrapToolButton,
@@ -499,10 +567,20 @@ partial class MainForm
         _planGrid.Dock = DockStyle.Fill;
         _planGrid.MultiSelect = false;
         _planGrid.Name = "_planGrid";
+        _planGrid.ContextMenuStrip = _planContextMenu;
         _planGrid.ReadOnly = true;
         _planGrid.RowHeadersVisible = false;
         _planGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         _planGrid.ShowCellToolTips = true;
+
+        _planContextMenu.Items.AddRange(new ToolStripItem[]
+        {
+            _planContextEditStepMenuItem,
+            _planContextRemoveStepMenuItem,
+            _planContextClearStepsMenuItem,
+            new ToolStripSeparator(),
+            _planContextRunPlanMenuItem
+        });
 
         _planToolStrip.Dock = DockStyle.Top;
         _planToolStrip.GripStyle = ToolStripGripStyle.Hidden;

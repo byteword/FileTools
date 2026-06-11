@@ -176,7 +176,58 @@ internal static class Program
 
         if (command == ContextMenuCommand.FolderMergeSelectedTargets)
         {
-            return FolderMergeOperations.MergeIntoFolder(paths, settings).OperationResult;
+            var preview = FolderMergeOperations.CreateMergePlanPreview(paths, settings);
+            if (!preview.IsReady)
+            {
+                var result = new OperationResult();
+                if (!string.IsNullOrWhiteSpace(preview.FailureReason))
+                {
+                    result.AddSkipped(preview.FailureReason);
+                }
+
+                return result;
+            }
+
+            var allowFolderContentsMode = paths.Count(path => Directory.Exists(path)) >= 2;
+            using var optionsDialog = new FolderMergeOptionsDialog(
+                paths,
+                settings,
+                new FolderMergeOptions(preview.TargetFolderName, FolderMergeMode.MergeFolderUnits),
+                allowFolderContentsMode);
+            if (optionsDialog.ShowDialog() != DialogResult.OK)
+            {
+                var canceled = new OperationResult();
+                canceled.AddSkipped(Localizer.Get("FolderMergeCanceled"));
+                return canceled;
+            }
+
+            var options = optionsDialog.ResultOptions;
+            preview = FolderMergeOperations.CreateMergePlanPreview(paths, settings, options);
+            if (!preview.IsReady)
+            {
+                var unavailable = new OperationResult();
+                if (!string.IsNullOrWhiteSpace(preview.FailureReason))
+                {
+                    unavailable.AddSkipped(preview.FailureReason);
+                }
+
+                return unavailable;
+            }
+
+            var confirmation = MessageBox.Show(
+                BuildFolderMergeContextConfirmationMessage(preview, options),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+            if (confirmation != DialogResult.OK)
+            {
+                var result = new OperationResult();
+                result.AddSkipped(Localizer.Get("FolderMergeCanceled"));
+                return result;
+            }
+
+            return FolderMergeOperations.MergeIntoFolder(paths, settings, options).OperationResult;
         }
 
         if (command is ContextMenuCommand.ArchiveMergeGroupByArchiveName or ContextMenuCommand.ArchiveMergePreserveInternalPaths)
@@ -297,6 +348,37 @@ internal static class Program
             UseDescriptionForTitle = true
         };
         return dialog.ShowDialog() == DialogResult.OK ? dialog.SelectedPath : null;
+    }
+
+    private static string BuildFolderMergeContextConfirmationMessage(
+        FolderMergePlanPreview preview,
+        FolderMergeOptions options)
+    {
+        var message = new StringBuilder();
+        message.AppendLine(Localizer.Format("FolderMergeConfirmFormat", preview.SourcePaths.Count, preview.TargetFolderPath));
+        message.AppendLine(
+            Localizer.Format(
+                "FolderMergeModeLabelFormat",
+                options.Mode == FolderMergeMode.MergeFolderContentsOnly
+                    ? Localizer.Get("FolderMergeModeMergeContentsOnly")
+                    : Localizer.Get("FolderMergeModeMergeFolders")));
+        if (!string.IsNullOrWhiteSpace(preview.TargetParentPath))
+        {
+            message.AppendLine(Localizer.Format("FolderMergeTargetParentFormat", preview.TargetParentPath));
+        }
+
+        if (preview.HasMultipleParents)
+        {
+            message.AppendLine(Localizer.Get("FolderMergeMultiParentWarning"));
+        }
+
+        message.AppendLine(Localizer.Get("FolderMergeSelectedSourcesHeader"));
+        for (var i = 0; i < preview.SourcePaths.Count; i++)
+        {
+            message.AppendLine($"{i + 1}. {preview.SourcePaths[i]}");
+        }
+
+        return message.ToString().TrimEnd();
     }
 
     private static void OpenFromContextMenu(string[] args)
