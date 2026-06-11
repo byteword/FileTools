@@ -11,13 +11,18 @@
 
 namespace
 {
+// FileTools 쉘 확장에서 등록할 COM 클래스의 고정 식별자.
 constexpr GUID CLSID_FileToolsExplorerCommand =
 { 0x716e7cc4, 0x5941, 0x4362, { 0x8a, 0xca, 0xd3, 0x8c, 0x62, 0x81, 0x7d, 0xe9 } };
 
+// DLL 핸들과 COM 객체/LOCK 수 카운터.
+// DllCanUnloadNow에서 모두 0인지 판정해 언로드 가능 여부를 결정한다.
 HMODULE g_module = nullptr;
 long g_objectCount = 0;
 long g_lockCount = 0;
 
+// 셸 메뉴에서 노출되는 동작 목록.
+// Root는 최상위 메뉴, 나머지는 실제 실행 동작을 담당한다.
 enum class CommandKind
 {
     Root,
@@ -37,12 +42,17 @@ enum class CommandKind
 
 struct CommandDefinition
 {
+    // 동작 식별자
     CommandKind Kind;
+    // 메뉴에 표시할 문자열
     const wchar_t* Title;
+    // FileTools 실행 시 사용할 verb
     const wchar_t* Verb;
+    // 설정 저장 키
     const wchar_t* SettingName;
 };
 
+// 서브 메뉴 노출 순서와 설정 키를 묶어 둔 테이블.
 constexpr CommandDefinition SubCommands[] =
 {
     { CommandKind::Rename, L"파일이름 자동 교정", L"FileNameCorrection", L"ContextMenuFileNameCorrection" },
@@ -61,6 +71,8 @@ constexpr CommandDefinition SubCommands[] =
 
 CommandDefinition GetDefinition(CommandKind kind)
 {
+    // CommandKind를 실제 메뉴 메타데이터로 변환한다.
+    // 유효하지 않은 kind는 OpenApp으로 폴백해 안정적으로 동작한다.
     if (kind == CommandKind::Root)
     {
         return { CommandKind::Root, L"FileTools", L"", L"" };
@@ -130,6 +142,8 @@ enum class SingleFileFolderState
 
 SingleFileFolderState GetSingleFileFolderState(const std::wstring& folderPath)
 {
+    // 폴더를 대상으로 "파일 하나만 있고 디렉토리는 없는" 상태인지 판별한 뒤
+    // 폴더명과 파일명 스템을 비교해 분기 상태를 반환한다.
     WIN32_FIND_DATAW data{};
     HANDLE find = FindFirstFileW(JoinPath(folderPath, L"*").c_str(), &data);
     if (find == INVALID_HANDLE_VALUE)
@@ -140,6 +154,7 @@ SingleFileFolderState GetSingleFileFolderState(const std::wstring& folderPath)
     std::wstring onlyFileName;
     int fileCount = 0;
     int directoryCount = 0;
+    // ., .. 항목은 대상 폴더 자체/부모 디렉토리이므로 상태 판단에서 제외한다.
     do
     {
         const std::wstring name = data.cFileName;
@@ -173,6 +188,8 @@ SingleFileFolderState GetSingleFileFolderState(const std::wstring& folderPath)
 
 std::vector<std::wstring> GetSelectionPaths(IShellItemArray* selection)
 {
+    // 셸 선택 목록에서 파일 시스템 경로만 추출해 순서를 유지한 벡터로 반환한다.
+    // API 호출이 실패해도 예외를 던지지 않고 빈 목록으로 종료한다.
     std::vector<std::wstring> paths;
     if (!selection)
     {
@@ -268,6 +285,9 @@ bool SelectionSingleFileFolderState(
     const std::vector<std::wstring>& paths,
     SingleFileFolderState expected)
 {
+    // 선택한 모든 경로가 디렉토리인지 선행 검사 후,
+    // 각 폴더의 상태가 expected로 일치하는지 확인한다.
+    // 최소 하나는 expected 상태여야 true다.
     if (!SelectionAllDirectories(paths))
     {
         return false;
@@ -297,6 +317,10 @@ bool SelectionSingleFileFolderState(
 
 bool IsCommandVisible(CommandKind kind, const std::vector<std::wstring>& paths)
 {
+    // 메뉴 노출 여부 판단은
+    // 1) 설정에서 해당 항목이 켜져 있는지
+    // 2) 선택 항목 특성이 메뉴 요구 조건을 만족하는지
+    // 두 조건을 모두 통과할 때만 true.
     const auto definition = GetDefinition(kind);
     if (!IsSettingEnabled(definition.SettingName, true))
     {
@@ -347,6 +371,8 @@ std::wstring GetModuleDirectory()
 
 std::wstring QuoteArgument(const std::wstring& value)
 {
+    // CreateProcess로 전달할 인자 문자열을 안전하게 만들기 위해
+    // 역슬래시/따옴표를 Win32 규칙에 맞게 이스케이프한다.
     std::wstring result = L"\"";
     unsigned backslashes = 0;
     for (const wchar_t ch : value)
@@ -377,6 +403,8 @@ std::wstring QuoteArgument(const std::wstring& value)
 
 HRESULT LaunchFileTools(CommandKind kind, const std::vector<std::wstring>& paths)
 {
+    // 실제 동작 실행 진입점.
+    // exe 존재 여부 확인 -> 커맨드 라인 구성 -> 자식 프로세스 시작.
     const std::wstring exePath = JoinPath(GetModuleDirectory(), L"FileTools.exe");
     if (exePath.empty() || GetFileAttributesW(exePath.c_str()) == INVALID_FILE_ATTRIBUTES)
     {
@@ -433,9 +461,11 @@ class ExplorerCommand;
 class ExplorerCommandEnum final : public IEnumExplorerCommand
 {
 public:
+    // 하위 명령을 순회해서 쉘에 반환하는 열거자.
     ExplorerCommandEnum();
     ~ExplorerCommandEnum()
     {
+        // 열거자 종료 시 소유한 명령 객체의 COM 참조를 정리한다.
         for (auto* command : _commands)
         {
             command->Release();
@@ -495,14 +525,18 @@ public:
     }
 
 private:
+    // COM 참조 카운트.
     long _ref = 1;
+    // 다음으로 반환할 항목 인덱스.
     size_t _index = 0;
+    // 캐시해 둔 하위 명령 목록.
     std::vector<IExplorerCommand*> _commands;
 };
 
 class ExplorerCommand final : public IExplorerCommand
 {
 public:
+    // 각 메뉴 항목을 나타내는 COM 객체. kind로 동작을 분기한다.
     explicit ExplorerCommand(CommandKind kind) : _kind(kind)
     {
         InterlockedIncrement(&g_objectCount);
@@ -628,6 +662,8 @@ public:
             return E_POINTER;
         }
 
+        // Root 메뉴는 선택 항목 존재 시에만 보여주고,
+        // 하위 메뉴는 커맨드 가시성 규칙에 따라 enabled/hidden로 처리한다.
         const auto paths = GetSelectionPaths(selection);
         if (_kind == CommandKind::Root)
         {
@@ -641,6 +677,7 @@ public:
 
     IFACEMETHODIMP Invoke(IShellItemArray* selection, IBindCtx*) override
     {
+        // Root는 실제 실행 동작이 없고, 하위 항목만 LaunchFileTools를 호출한다.
         if (_kind == CommandKind::Root)
         {
             return S_OK;
@@ -668,6 +705,7 @@ public:
 
     IFACEMETHODIMP EnumSubCommands(IEnumExplorerCommand** enumCommands) override
     {
+        // 하위 메뉴가 필요한 root 메뉴에서만 subcommand enumerator를 반환한다.
         if (!enumCommands)
         {
             return E_POINTER;
@@ -684,12 +722,15 @@ public:
     }
 
 private:
+    // COM 참조 카운트.
     long _ref = 1;
+    // 이 객체가 담당하는 커맨드 타입.
     CommandKind _kind;
 };
 
 ExplorerCommandEnum::ExplorerCommandEnum()
 {
+    // 메뉴 정의 순서대로 ExplorerCommand를 생성해 열거자 버퍼에 쌓는다.
     for (const auto& command : SubCommands)
     {
         auto* item = new (std::nothrow) ExplorerCommand(command.Kind);
@@ -702,6 +743,7 @@ ExplorerCommandEnum::ExplorerCommandEnum()
 
 IFACEMETHODIMP ExplorerCommandEnum::Next(ULONG count, IExplorerCommand** commands, ULONG* fetched)
 {
+    // IEnumExplorerCommand 규약에 따라 요청 수만큼 포인터를 채우고 실제 반환 수를 반환한다.
     if (!commands)
     {
         return E_POINTER;
@@ -727,6 +769,8 @@ IFACEMETHODIMP ExplorerCommandEnum::Next(ULONG count, IExplorerCommand** command
 class ClassFactory final : public IClassFactory
 {
 public:
+    // COM 클래스 팩토리.
+    // class object 요청 시 Root 명령 객체를 생성해 반환한다.
     ClassFactory()
     {
         InterlockedIncrement(&g_objectCount);
@@ -773,6 +817,7 @@ public:
 
     IFACEMETHODIMP CreateInstance(IUnknown* outer, REFIID riid, void** result) override
     {
+        // 쉘은 aggregation을 사용하지 않으므로 outer를 허용하지 않는다.
         if (outer)
         {
             return CLASS_E_NOAGGREGATION;
@@ -791,6 +836,7 @@ public:
 
     IFACEMETHODIMP LockServer(BOOL lock) override
     {
+        // 전역 잠금 카운트를 통해 클래스 로더가 언로드되지 않도록 보조한다.
         if (lock)
         {
             InterlockedIncrement(&g_lockCount);
@@ -804,11 +850,13 @@ public:
     }
 
 private:
+    // 팩토리 COM 참조 카운트.
     long _ref = 1;
 };
 
 HRESULT SetStringValue(HKEY root, const std::wstring& keyPath, const wchar_t* name, const std::wstring& value)
 {
+    // HKCU 하위 키에 문자열 값(REg_SZ)을 설정하는 공통 유틸.
     HKEY key = nullptr;
     const LSTATUS createStatus = RegCreateKeyExW(root, keyPath.c_str(), 0, nullptr, 0, KEY_SET_VALUE, nullptr, &key, nullptr);
     if (createStatus != ERROR_SUCCESS)
@@ -830,6 +878,7 @@ HRESULT SetStringValue(HKEY root, const std::wstring& keyPath, const wchar_t* na
 
 HRESULT RegisterComServer()
 {
+    // 등록 시 CLSID와 InprocServer32 경로, threading model을 설정한다.
     wchar_t dllPath[MAX_PATH]{};
     const DWORD length = GetModuleFileNameW(g_module, dllPath, static_cast<DWORD>(std::size(dllPath)));
     if (length == 0 || length >= std::size(dllPath))
@@ -855,6 +904,7 @@ HRESULT RegisterComServer()
 
 void UnregisterComServer()
 {
+    // 등록 해제 시 동일 CLSID 트리를 제거해 잔여키를 청소한다.
     RegDeleteTreeW(HKEY_CURRENT_USER, L"Software\\Classes\\CLSID\\{716e7cc4-5941-4362-8aca-d38c62817de9}");
 }
 }
@@ -872,6 +922,8 @@ BOOL APIENTRY DllMain(HMODULE module, DWORD reason, LPVOID)
 
 STDAPI DllGetClassObject(REFCLSID classId, REFIID riid, void** result)
 {
+    // CLSID 불일치면 클래스 미지원을 반환하고,
+    // 일치 시 ClassFactory를 통해 인터페이스를 제공한다.
     if (classId != CLSID_FileToolsExplorerCommand)
     {
         return CLASS_E_CLASSNOTAVAILABLE;
@@ -890,16 +942,19 @@ STDAPI DllGetClassObject(REFCLSID classId, REFIID riid, void** result)
 
 STDAPI DllCanUnloadNow()
 {
+    // 전역 객체/잠금 카운트가 모두 0이면 언로드 허용.
     return g_objectCount == 0 && g_lockCount == 0 ? S_OK : S_FALSE;
 }
 
 STDAPI DllRegisterServer()
 {
+    // regsvr32 /s /i? 경로에서 호출되는 COM 등록 엔트리.
     return RegisterComServer();
 }
 
 STDAPI DllUnregisterServer()
 {
+    // regsvr32 /u에서 호출되는 COM 해제 엔트리.
     UnregisterComServer();
     return S_OK;
 }

@@ -1,7 +1,7 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-08 after the personal rename feedback settings
+Last updated: 2026-06-11
 
 Scope reviewed:
 
@@ -34,6 +34,26 @@ Scope reviewed:
   implemented; general file-content merge remains deferred.
 
 ## Completed Follow-Up
+
+- Added Korean readability annotations to operations-layer code first on 2026-06-11 as
+  the initial phase of the "default comment-first" hardening pass:
+  `src/FileTools.App/Operations/ArchiveMergeOperations.cs` and
+  `src/FileTools.App/Operations/FileCompareOperations.cs` received focused
+  function-level and complex-block comments where interpretation burden was high.
+  Remaining non-operations files are intentionally deferred to the next phase.
+
+- Added Korean readability comments on 2026-06-11 to additional operations modules
+  (`DuplicateDeleteOperations.cs`, `DuplicateDeleteStepSelection.cs`,
+  `FileCompareResultActions.cs`, `FileCompareResultExport.cs`, `FolderMergeOperations.cs`,
+  `WorkPlan.cs`, `WorkPlanExecutor.cs`, `WorkPlanPreviewBuilder.cs`,
+  `RenameOperations.cs`) for member fields, helper methods, and complex
+  flow blocks where manual interpretation costs were highest.
+
+- Started and completed the shell-extension-only readability pass on 2026-06-11:
+  `src/FileTools.ShellExt/FileToolsShellExt.cpp` now has focused Korean
+  comments for core command definitions, COM lifecycle points, selection/visibility
+  checks, and command launch/registration paths where non-trivial control flow
+  is present.
 
 - Split 7Z input archive merge from #5 into #8 and closed #5 as ZIP input/ZIP output archive merge.
 - Split common-filename-based file merge from #4 into #9 and closed #4 as selected-target folder merge.
@@ -137,6 +157,13 @@ Scope reviewed:
   the settings dialog exposes the toggle and row limit in the Rename group, and
   the feedback store honors the enabled state plus a minimum bounded limit of
   100 rows with a default of 2000 rows.
+- Extended Korean readability comment coverage on 2026-06-11 beyond Operations to
+  core non-UI layers: `FileTools.Correction.SymSpellPlugin` plugin, correction
+  plugin host/catalog, environment helper, settings/stores, and naming/pattern
+  modules (`FileNamePatternDiscovery`, `FileNamePatternLearning`,
+  `FileNameRenderPatterns`, `NameTemplate`). The same member/function/block
+  criteria were applied: member/함수 설명을 먼저 추가하고, 해석이
+  난해한 루프/필터 블록은 요약 블록 주석을 추가했습니다.
 
 ## Deferred Follow-Up Tracks
 
