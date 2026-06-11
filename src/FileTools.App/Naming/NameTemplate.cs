@@ -3,6 +3,7 @@ using System.Text;
 
 namespace FileTools;
 
+/// <summary>이름 템플릿과 충돌 해소, 기본 토큰을 함께 다루는 공통 파서/평가기.</summary>
 internal enum NameTemplateEvaluationStatus
 {
     Ready,
@@ -114,6 +115,7 @@ internal sealed record NameTemplateContext
 
 internal sealed class NameTemplateResolver
 {
+    /// <summary>기본 템플릿 해석기 인스턴스(설정 미적용).</summary>
     public static NameTemplateResolver Default { get; } = CreateDefault(settings: null);
 
     private readonly IReadOnlyList<INameTemplateTokenProvider> _tokenProviders;
@@ -138,6 +140,9 @@ internal sealed class NameTemplateResolver
         return new NameTemplateResolver(providers);
     }
 
+    /// <summary>
+    /// 템플릿 문자열을 파싱해 토큰을 치환한 최종 이름을 반환한다.
+    /// </summary>
     public NameTemplateEvaluationResult Evaluate(string? template, NameTemplateContext context)
     {
         var normalizedTemplate = string.IsNullOrWhiteSpace(template) ? "{FileStem}" : template;
@@ -214,6 +219,7 @@ internal sealed class NameTemplateResolver
             : new NameTemplateEvaluationResult(NameTemplateEvaluationStatus.Ready, value);
     }
 
+    /// <summary>각 provider에 순차 위임해 첫 유효값을 채택한다.</summary>
     private bool TryResolve(NameTemplateToken token, NameTemplateContext context, out string value)
     {
         foreach (var provider in _tokenProviders)
@@ -228,6 +234,7 @@ internal sealed class NameTemplateResolver
         return false;
     }
 
+    /// <summary>"{TOKEN}" 또는 "{TOKEN:format}" 형태를 token/format으로 분리해 변환한다.</summary>
     private static NameTemplateToken ParseToken(string tokenText)
     {
         var separatorIndex = tokenText.IndexOf(':', StringComparison.Ordinal);
@@ -244,6 +251,7 @@ internal sealed class NameTemplateResolver
 
 internal sealed class FileSystemNameTemplateTokenProvider : INameTemplateTokenProvider
 {
+    /// <summary>파일시스템 기반 토큰(파일명, 확장자, 인덱스 등)을 처리한다.</summary>
     public bool TryResolve(NameTemplateToken token, NameTemplateContext context, out string value)
     {
         var tokenName = token.Name.Trim();
@@ -397,6 +405,7 @@ internal sealed class RenameCorrectionNameTemplateTokenProvider : INameTemplateT
         }
     }
 
+    /// <summary>교정 미리보기를 캐싱하여 동일 경로 재계산 비용을 줄인다.</summary>
     private bool TryGetPreview(NameTemplateContext context, out RenamePreview preview)
     {
         var sourcePath = context.SourcePath;
@@ -430,6 +439,7 @@ internal sealed class RenameCorrectionNameTemplateTokenProvider : INameTemplateT
         return preview is not null;
     }
 
+    /// <summary>교정 토큰 계산용 KorenaNameCorrector를 설정으로 생성한다.</summary>
     private static KoreanFileNameCorrector CreateFileNameCorrector(FileToolsSettings settings)
     {
         var dictionary = RenameDictionaryStore.Load();
@@ -509,6 +519,9 @@ internal sealed record NameCollisionResult(
 
 internal static class NameCollisionResolver
 {
+    /// <summary>
+    /// 대상 경로의 충돌 여부를 정책에 따라 자동 번호 매김/스킵/대화요구로 결정한다.
+    /// </summary>
     public static NameCollisionResult Resolve(
         string directory,
         string desiredName,
@@ -590,6 +603,7 @@ internal static class NameCollisionResolver
             "Could not resolve name collision.");
     }
 
+    /// <summary>확장자 분리 규칙은 파일/폴더 구분을 위해 분기한다.</summary>
     private static (string Stem, string Extension) SplitName(string name, NameCollisionTargetKind targetKind)
     {
         if (targetKind == NameCollisionTargetKind.Folder)
@@ -739,6 +753,7 @@ internal static class NameTemplateDefaults
 
 internal static class FolderStructureNameTemplates
 {
+    /// <summary>래핑/언래핑 결과 이름을 템플릿으로 일관되게 계산한다.</summary>
     public static string ResolveWrapFolderName(string filePath, FileToolsSettings? settings = null)
     {
         var context = NameTemplateContext.FromFile(filePath);
@@ -821,6 +836,7 @@ internal static class FolderStructureNameTemplates
     }
 }
 
+/// <summary>충돌 해결 정책과 인덱스 표기 스타일 헬퍼.</summary>
 internal static class FolderStructureCollisionOptions
 {
     public static NameCollisionOptions Create(FileToolsSettings settings, NameCollisionTargetKind targetKind)
@@ -842,6 +858,7 @@ internal static class FolderStructureCollisionOptions
     }
 }
 
+/// <summary>토큰/인덱스 스타일의 로컬라이즈된 문자열 맵핑.</summary>
 internal static class NameTemplateText
 {
     public static string GetDisplayName(NameCollisionPolicy policy)
@@ -870,3 +887,4 @@ internal static class NameTemplateText
         };
     }
 }
+

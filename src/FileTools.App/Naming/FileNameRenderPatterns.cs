@@ -3,6 +3,7 @@ using System.Text;
 
 namespace FileTools;
 
+/// <summary>파일명 구성 요소로부터 문자열 후보를 렌더링하는 패턴 생성기.</summary>
 internal sealed record FileNameRenderPattern
 {
     public required string DisplayName { get; init; }
@@ -31,14 +32,21 @@ internal sealed class FileNameRenderPatternOptions
     public int MaxCandidates { get; init; } = 12;
 }
 
+/// <summary>템플릿을 점수순으로 렌더링해 고유한 파일명 후보를 만든다.</summary>
 internal static class FileNameRenderPatternGenerator
 {
+    /// <summary>
+    /// 파일명 요소를 파싱해 기본 렌더 패턴을 만든다.
+    /// </summary>
     public static IReadOnlyList<FileNameRenderPattern> CreateDefaultPatterns(string fileNameOrPath)
     {
         var fields = FileNamePatternFields.FromFileName(fileNameOrPath);
         return CreateDefaultPatterns(fields);
     }
 
+    /// <summary>
+    /// 템플릿을 텍스트 후보로 렌더링하고 중복/비정상 값을 걸러낸다.
+    /// </summary>
     public static IReadOnlyList<FileNameRenderCandidate> Generate(
         string fileNameOrPath,
         IEnumerable<FileNameRenderPattern>? patterns = null,
@@ -83,6 +91,7 @@ internal static class FileNameRenderPatternGenerator
         return candidates;
     }
 
+    /// <summary>파일명 요소를 기반으로 괄호/텍스트/숫자 조합 템플릿을 구성한다.</summary>
     private static IReadOnlyList<FileNameRenderPattern> CreateDefaultPatterns(FileNamePatternFields fields)
     {
         var patterns = new List<FileNameRenderPattern>();
@@ -143,6 +152,7 @@ internal static class FileNameRenderPatternGenerator
         return patterns;
     }
 
+    /// <summary>단일 템플릿을 순회해 토큰 치환이 가능한지 검증한다.</summary>
     private static bool TryRender(string template, FileNamePatternFields fields, out string value)
     {
         var builder = new StringBuilder();
@@ -177,6 +187,7 @@ internal static class FileNameRenderPatternGenerator
         return !string.IsNullOrWhiteSpace(value);
     }
 
+    /// <summary>필드 이름/포맷을 해석해 렌더 문자열을 반환한다.</summary>
     private static bool TryResolve(string token, FileNamePatternFields fields, out string value)
     {
         var separatorIndex = token.IndexOf(':', StringComparison.Ordinal);

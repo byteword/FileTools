@@ -1,5 +1,6 @@
 namespace FileTools;
 
+/// <summary>이름 교정 플러그인 설정과 정규화 정책.</summary>
 internal sealed class RenameCorrectionPluginOptions
 {
     public bool Enabled { get; set; }
@@ -8,6 +9,9 @@ internal sealed class RenameCorrectionPluginOptions
 
     public List<RenameCorrectionPluginConfiguration> Plugins { get; set; } = [];
 
+    /// <summary>
+    /// 플러그인 설정 목록을 깊은 복사한다.
+    /// </summary>
     public RenameCorrectionPluginOptions Clone()
     {
         return new RenameCorrectionPluginOptions
@@ -21,6 +25,7 @@ internal sealed class RenameCorrectionPluginOptions
     }
 }
 
+/// <summary>단일 플러그인 설정.</summary>
 internal sealed class RenameCorrectionPluginConfiguration
 {
     public string PluginId { get; set; } = "";
@@ -29,6 +34,9 @@ internal sealed class RenameCorrectionPluginConfiguration
 
     public Dictionary<string, string> Settings { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// 설정 사전을 독립 복사해서 반환한다.
+    /// </summary>
     public RenameCorrectionPluginConfiguration Clone()
     {
         return new RenameCorrectionPluginConfiguration
@@ -40,12 +48,16 @@ internal sealed class RenameCorrectionPluginConfiguration
     }
 }
 
+/// <summary>플러그인 설정 정규화 유틸.</summary>
 internal static class RenameCorrectionPluginDefaults
 {
     public const string DefaultLanguage = "ko-KR";
 
     public static readonly string[] SupportedLanguages = ["ko-KR", "en-US"];
 
+    /// <summary>
+    /// null/빈값/중복 제거로 사용자 설정을 정돈한다.
+    /// </summary>
     public static RenameCorrectionPluginOptions Normalize(RenameCorrectionPluginOptions? options)
     {
         var normalized = options?.Clone() ?? new RenameCorrectionPluginOptions();

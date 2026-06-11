@@ -3,6 +3,9 @@ using System.Text.Json.Serialization;
 
 namespace FileTools;
 
+/// <summary>
+/// 비교 결과 JSON 내보내기 DTO와 직렬화 진입점을 묶는다.
+/// </summary>
 internal sealed record FileCompareExportDocument(
     string DocumentType,
     int SchemaVersion,
@@ -13,6 +16,9 @@ internal sealed record FileCompareExportDocument(
     IReadOnlyList<FileCompareExportPair> Pairs,
     IReadOnlyList<FileCompareExportDuplicateGroup> DuplicateGroups);
 
+/// <summary>
+/// 비교 옵션을 저장 포맷에 맞는 단순 타입 DTO로 변환한다.
+/// </summary>
 internal sealed record FileCompareExportOptions(
     bool CompareFileName,
     string NameMatchMode,
@@ -38,11 +44,17 @@ internal sealed record FileCompareExportOptions(
     double PartialMatchThreshold,
     double ByteToBytePrefilterRatio);
 
+/// <summary>
+/// 비교 대상(입력 파일/폴더) 메타정보 DTO.
+/// </summary>
 internal sealed record FileCompareExportTarget(
     string Path,
     string RelativePath,
     string? RootPath);
 
+/// <summary>
+/// 비교 결과 한 쌍을 직렬화 가능한 형태로 보존한다.
+/// </summary>
 internal sealed record FileCompareExportPair(
     string LeftPath,
     string RightPath,
@@ -51,18 +63,27 @@ internal sealed record FileCompareExportPair(
     string Reason,
     IReadOnlyList<FileCompareExportCriterion> Criteria);
 
+/// <summary>
+/// 비교 판정 기준별 상태/비율/상세 사유 DTO.
+/// </summary>
 internal sealed record FileCompareExportCriterion(
     string Name,
     string Status,
     double MatchRatio,
     string Detail);
 
+/// <summary>
+/// 중복 후보 그룹과 삭제 후보 집합을 직렬화한다.
+/// </summary>
 internal sealed record FileCompareExportDuplicateGroup(
     int Number,
     string KeepPath,
     IReadOnlyList<string> DeleteCandidates,
     IReadOnlyList<string> Paths);
 
+/// <summary>
+/// 비교 리포트를 JSON으로 저장/생성 형식으로 변환한다.
+/// </summary>
 internal static class FileCompareResultExport
 {
     public const string DocumentType = "FileTools.FileCompareResult";
@@ -74,6 +95,9 @@ internal static class FileCompareResultExport
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
+    /// <summary>
+    /// 비교 리포트를 지정 경로에 JSON으로 저장한다.
+    /// </summary>
     public static void Save(
         string path,
         FileCompareReport report,
@@ -86,6 +110,9 @@ internal static class FileCompareResultExport
         File.WriteAllText(path, json);
     }
 
+    /// <summary>
+    /// 문서 객체로 먼저 구성해 저장/미리보기에서 재사용한다.
+    /// </summary>
     public static FileCompareExportDocument CreateDocument(
         FileCompareReport report,
         FileCompareOptions options,
@@ -120,6 +147,9 @@ internal static class FileCompareResultExport
                 group.Paths)).ToArray());
     }
 
+    /// <summary>
+    /// 옵션을 직렬화에 적합한 단순 타입으로 변환한다.
+    /// </summary>
     private static FileCompareExportOptions CreateOptions(FileCompareOptions options)
     {
         return new FileCompareExportOptions(

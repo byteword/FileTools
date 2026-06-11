@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace FileTools;
 
+/// <summary>앱 전역 설정 구조와 로드/저장 동작.</summary>
 internal sealed class FileToolsSettings
 {
     public FolderStructureOperation FolderStructureOperation { get; set; } = FolderStructureOperation.Auto;
@@ -83,6 +84,9 @@ internal sealed class FileToolsSettings
 
     public FileCompareOptions FileCompareOptions { get; set; } = new();
 
+    /// <summary>
+    /// 컨텍스트 메뉴에서 특정 도구 활성 여부를 판단한다.
+    /// </summary>
     public bool IsContextMenuToolEnabled(ToolMode mode)
     {
         return mode switch
@@ -95,6 +99,7 @@ internal sealed class FileToolsSettings
         };
     }
 
+    /// <summary>폴더 동작 관련 컨텍스트 메뉴가 하나라도 활성이면 true.</summary>
     public bool IsAnyContextMenuFolderOperationEnabled =>
         ContextMenuFolderWrapFiles ||
         ContextMenuFolderUnwrapSameNameSingleFile ||
@@ -110,6 +115,9 @@ internal sealed class FileToolsSettings
         ContextMenuArchiveMergeGroupByArchiveName ||
         ContextMenuArchiveMergePreserveInternalPaths;
 
+    /// <summary>
+    /// settings를 깊은 복사/정규화해서 반환한다.
+    /// </summary>
     public FileToolsSettings Clone()
     {
         return new FileToolsSettings
@@ -163,12 +171,16 @@ internal sealed class FileToolsSettings
     }
 }
 
+/// <summary>settings.json 저장/로드와 값 정규화.</summary>
 internal static class SettingsStore
 {
     private static readonly JsonSerializerOptions JsonOptions = CreateJsonOptions();
 
     public static string SettingsPath => Path.Combine(FileToolsEnvironment.AppDataDir, "settings.json");
 
+    /// <summary>
+    /// 설정 파일을 읽고 없으면 기본값으로 새로 만든다.
+    /// </summary>
     public static FileToolsSettings Load()
     {
         Directory.CreateDirectory(FileToolsEnvironment.AppDataDir);
@@ -196,6 +208,9 @@ internal static class SettingsStore
         }
     }
 
+    /// <summary>
+    /// 설정 값을 정규화 후 저장한다.
+    /// </summary>
     public static void Save(FileToolsSettings settings)
     {
         Directory.CreateDirectory(FileToolsEnvironment.AppDataDir);
@@ -203,6 +218,7 @@ internal static class SettingsStore
         File.WriteAllText(SettingsPath, JsonSerializer.Serialize(settings, JsonOptions));
     }
 
+    /// <summary>불완전한 설정값을 안전한 기본값과 범위로 정리한다.</summary>
     private static void Normalize(FileToolsSettings settings)
     {
         settings.FolderWrapFolderNameTemplate = NormalizeTemplate(

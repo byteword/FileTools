@@ -3,6 +3,7 @@ using System.Text;
 
 namespace FileTools;
 
+/// <summary>파일명에서 공통 규칙을 추출해 자동 패턴 후보를 생성한다.</summary>
 internal enum FileNamePatternTokenKind
 {
     Text,
@@ -41,8 +42,12 @@ internal sealed class FileNamePatternDiscoveryOptions
     public int MaxSamplesPerPattern { get; init; } = 5;
 }
 
+/// <summary>문자열의 토큰화를 통해 다수 파일에서 공통 서명을 추정한다.</summary>
 internal static class FileNamePatternDiscovery
 {
+    /// <summary>
+    /// 파일명 본문을 텍스트/숫자/구분자/괄호 토큰으로 분해한다.
+    /// </summary>
     public static IReadOnlyList<FileNamePatternToken> Tokenize(string fileNameOrPath)
     {
         var fileName = Path.GetFileName(fileNameOrPath.Trim());
@@ -123,6 +128,9 @@ internal static class FileNamePatternDiscovery
         return tokens;
     }
 
+    /// <summary>
+    /// 후보 파일군을 분석해 점수가 높은 패턴 서명을 선택한다.
+    /// </summary>
     public static IReadOnlyList<DiscoveredFileNamePattern> Discover(
         IEnumerable<string> fileNamesOrPaths,
         FileNamePatternDiscoveryOptions? options = null)
@@ -199,6 +207,7 @@ internal static class FileNamePatternDiscovery
         };
     }
 
+    /// <summary>동일 위치 토큰 타입을 묶어 그룹핑용 키를 생성한다.</summary>
     private static string BuildGroupingSignature(IReadOnlyList<FileNamePatternToken> tokens)
     {
         var builder = new StringBuilder();
@@ -220,6 +229,7 @@ internal static class FileNamePatternDiscovery
         return builder.ToString();
     }
 
+    /// <summary>샘플 값 자체가 아니라 슬롯 토큰을 써서 패턴 서명을 안정화한다.</summary>
     private static string BuildDisplaySignature(IReadOnlyList<TokenizedFileName> files)
     {
         var builder = new StringBuilder();
@@ -258,6 +268,7 @@ internal static class FileNamePatternDiscovery
         return values.Length == 1 ? values[0] : "{Separator}";
     }
 
+    /// <summary>숫자 슬롯이 단조 증가 패턴인지 판정한다.</summary>
     private static bool HasSequentialNumberSlot(IReadOnlyList<TokenizedFileName> files)
     {
         if (files.Count < 2)
@@ -295,6 +306,7 @@ internal static class FileNamePatternDiscovery
         return false;
     }
 
+    /// <summary>값이 항상 같은 토큰 슬롯 개수를 센다.</summary>
     private static int CountStableValueSlots(IReadOnlyList<TokenizedFileName> files)
     {
         var count = 0;
@@ -316,13 +328,6 @@ internal static class FileNamePatternDiscovery
         }
 
         return count;
-    }
-
-    private static string NormalizeStableValue(FileNamePatternToken token)
-    {
-        return token.Kind == FileNamePatternTokenKind.Number
-            ? token.Text.TrimStart('0')
-            : token.Text;
     }
 
     private static char? GetClosingBracket(char ch)
@@ -368,6 +373,13 @@ internal static class FileNamePatternDiscovery
     private static string NormalizeText(string value)
     {
         return string.Join(' ', value.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)).Trim();
+    }
+
+    private static string NormalizeStableValue(FileNamePatternToken token)
+    {
+        return token.Kind == FileNamePatternTokenKind.Number
+            ? token.Text.TrimStart('0')
+            : token.Text;
     }
 
     private sealed record TokenizedFileName(string FileName, IReadOnlyList<FileNamePatternToken> Tokens);

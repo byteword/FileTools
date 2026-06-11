@@ -1,5 +1,8 @@
 namespace FileTools;
 
+/// <summary>
+/// 파일 비교 결과에서 중복군 구성과 삭제 후보를 결정한다.
+/// </summary>
 internal enum FileCompareDuplicateKeepMode
 {
     LargestSizeOldestCreated,
@@ -10,6 +13,9 @@ internal enum FileCompareDuplicateKeepMode
     LongestPath
 }
 
+/// <summary>
+/// 동일 내용 연결성 그룹에 대한 UI/실행 공유 DTO.
+/// </summary>
 internal sealed record FileCompareDuplicateGroup(
     int Number,
     IReadOnlyList<string> Paths)
@@ -19,17 +25,32 @@ internal sealed record FileCompareDuplicateGroup(
     public IReadOnlyList<string> DeleteCandidates => Paths.Skip(1).ToArray();
 }
 
+/// <summary>
+/// 중복 삭제 단계로 넘길 때 사용할 그룹 통합 핸드오프 구조.
+/// </summary>
 internal sealed record FileCompareDuplicateDeleteHandoff(
     IReadOnlyList<string> AllPaths,
     IReadOnlyList<string> DeletePaths,
     IReadOnlyList<FileCompareDuplicateDeleteGroupHandoff> Groups);
 
+/// <summary>
+/// 개별 중복군의 삭제 후보 집합을 표현한다.
+/// </summary>
 internal sealed record FileCompareDuplicateDeleteGroupHandoff(
     IReadOnlyList<string> Paths,
     IReadOnlyList<string> DeletePaths);
 
+/// <summary>
+/// 중복 판정, 우선순위 규칙, 인덱스 기반 삭제 후보 추출의 집약점.
+/// </summary>
 internal static class FileCompareResultActions
 {
+    /// <summary>
+    /// 비교 리포트에서 동일 그룹(동일 내용 연결성)이 2개 이상인 경로 묶음을 생성한다.
+    /// </summary>
+    /// <remarks>
+    /// 비교 결과의 같은-content쌍을 union-find로 묶어 연결 컴포넌트 단위의 중복군을 구성한다.
+    /// </remarks>
     public static IReadOnlyList<FileCompareDuplicateGroup> BuildDuplicateGroups(
         FileCompareReport report,
         FileCompareDuplicateKeepMode keepMode = FileCompareDuplicateKeepMode.ComparisonOrder)
@@ -56,6 +77,9 @@ internal static class FileCompareResultActions
             .ToArray();
     }
 
+    /// <summary>
+    /// 비교 쌍에서 실제 경로 목록만 안전하게 추출한다.
+    /// </summary>
     public static IReadOnlyList<string> GetPairPaths(FileComparePairResult? pair)
     {
         if (pair is null)
@@ -68,6 +92,9 @@ internal static class FileCompareResultActions
             .ToArray();
     }
 
+    /// <summary>
+    /// 각 중복군의 삭제 대상 경로만 합쳐서 반환한다.
+    /// </summary>
     public static IReadOnlyList<string> GetDeleteCandidates(IEnumerable<FileCompareDuplicateGroup> groups)
     {
         return groups
@@ -76,6 +103,9 @@ internal static class FileCompareResultActions
             .ToArray();
     }
 
+    /// <summary>
+    /// UI 전달용 중복군/삭제군 핸드오프 구조체를 생성한다.
+    /// </summary>
     public static FileCompareDuplicateDeleteHandoff CreateDuplicateDeleteHandoff(
         IEnumerable<FileCompareDuplicateGroup> groups)
     {
@@ -97,6 +127,9 @@ internal static class FileCompareResultActions
             groupHandoffs);
     }
 
+    /// <summary>
+    /// 비교 판정이 ‘동일 콘텐츠’로 확정된 쌍인지 판단한다.
+    /// </summary>
     private static bool IsSameContentPair(FileComparePairResult pair)
     {
         return pair.Status == FileCompareStatus.Same &&
@@ -105,12 +138,18 @@ internal static class FileCompareResultActions
                    IsContentCriterionName(criterion.Name));
     }
 
+    /// <summary>
+    /// 파일명 판정 기준이 아닌 “content” 기반 비교 기준인지 판별한다.
+    /// </summary>
     private static bool IsContentCriterionName(string name)
     {
         return string.Equals(name, "Content", StringComparison.OrdinalIgnoreCase) ||
                name.EndsWith(" content", StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// 유지 모드에 맞춰 대표 경로 우선순위를 계산한다.
+    /// </summary>
     private static IReadOnlyList<string> ApplyKeepMode(IReadOnlyList<string> paths, FileCompareDuplicateKeepMode keepMode)
     {
         if (paths.Count <= 1)
@@ -141,6 +180,9 @@ internal static class FileCompareResultActions
         };
     }
 
+    /// <summary>
+    /// ‘최대 크기 + 오래된 생성일’ 기준으로 대표 경로를 재배치한다.
+    /// </summary>
     private static IReadOnlyList<string> ApplyLargestSizeOldestCreatedKeepMode(IReadOnlyList<string> paths)
     {
         var keepPath = paths
@@ -157,6 +199,9 @@ internal static class FileCompareResultActions
             .ToArray();
     }
 
+    /// <summary>
+    /// 파일 크기를 안정적으로 읽고, 예외 시 sentinel 값으로 처리한다.
+    /// </summary>
     private static long GetFileSize(string path)
     {
         try
@@ -171,6 +216,9 @@ internal static class FileCompareResultActions
         }
     }
 
+    /// <summary>
+    /// 생성 시간을 안정적으로 조회한다.
+    /// </summary>
     private static DateTime GetCreationTimeUtc(string path)
     {
         try
@@ -185,6 +233,9 @@ internal static class FileCompareResultActions
         }
     }
 
+    /// <summary>
+    /// 수정 시간을 안정적으로 조회한다.
+    /// </summary>
     private static DateTime GetLastWriteTimeUtc(string path)
     {
         try
@@ -199,6 +250,9 @@ internal static class FileCompareResultActions
         }
     }
 
+    /// <summary>
+    /// union-find 기반으로 동일내용 연결성의 부모를 병합한다.
+    /// </summary>
     private static void Union(Dictionary<string, string> parent, string left, string right)
     {
         if (!parent.ContainsKey(left) || !parent.ContainsKey(right))
@@ -216,6 +270,9 @@ internal static class FileCompareResultActions
         parent[rightRoot] = leftRoot;
     }
 
+    /// <summary>
+    /// 경로 루트를 탐색하고 경로 압축으로 후속 조회를 최적화한다.
+    /// </summary>
     private static string Find(Dictionary<string, string> parent, string path)
     {
         var current = path;
@@ -236,6 +293,9 @@ internal static class FileCompareResultActions
         return root;
     }
 
+    /// <summary>
+    /// 플랫폼에 맞는 경로 비교 기준을 반환한다.
+    /// </summary>
     private static StringComparer GetPathComparer()
     {
         return OperatingSystem.IsWindows()
@@ -243,6 +303,9 @@ internal static class FileCompareResultActions
             : StringComparer.Ordinal;
     }
 
+    /// <summary>
+    /// 플랫폼에 맞는 경로 문자열 비교 옵션을 반환한다.
+    /// </summary>
     private static StringComparison GetPathComparison()
     {
         return OperatingSystem.IsWindows()

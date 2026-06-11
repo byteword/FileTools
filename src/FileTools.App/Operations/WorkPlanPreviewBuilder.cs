@@ -1,5 +1,8 @@
 namespace FileTools;
 
+/// <summary>
+/// 작업 계획의 각 step에 대해 사용자에게 보여줄 미리보기 문구를 생성한다.
+/// </summary>
 internal sealed record WorkPlanStepPreview(
     int Number,
     WorkPlanStep Step,
@@ -9,10 +12,16 @@ internal sealed record WorkPlanStepPreview(
 
 internal sealed class WorkPlanPreviewBuilder
 {
+    /// <summary>
+    /// OS별 경로 비교 규칙.
+    /// </summary>
     private static readonly StringComparer PathComparer = OperatingSystem.IsWindows()
         ? StringComparer.OrdinalIgnoreCase
         : StringComparer.Ordinal;
 
+    /// <summary>
+    /// 미리보기 계산에 쓰는 기본 설정 스냅샷.
+    /// </summary>
     private readonly FileToolsSettings _settings;
 
     public WorkPlanPreviewBuilder(FileToolsSettings settings)
@@ -20,6 +29,9 @@ internal sealed class WorkPlanPreviewBuilder
         _settings = settings;
     }
 
+    /// <summary>
+    /// 대상의 step 시퀀스를 순차 평가해 단계별 미리보기를 만든다.
+    /// </summary>
     public IReadOnlyList<WorkPlanStepPreview> Build(WorkTargetPlan target)
     {
         var state = PreviewPathState.FromPath(target.Path);
@@ -38,6 +50,12 @@ internal sealed class WorkPlanPreviewBuilder
         return previews;
     }
 
+    /// <summary>
+    /// 한 step의 상태 기반 미리보기 텍스트와 경고를 만든다.
+    /// </summary>
+    /// <remarks>
+    /// 삭제/누락 상태는 단계별 계산 전에 경고 결과를 즉시 반환한다.
+    /// </remarks>
     private PreviewBuildResult BuildStepPreview(int number, WorkPlanStep step, PreviewPathState state)
     {
         if (state.Kind == PreviewPathKind.Deleted)
@@ -62,6 +80,9 @@ internal sealed class WorkPlanPreviewBuilder
         };
     }
 
+    /// <summary>
+    /// 아카이브 병합 미리보기 생성. 출력 경로 누락 시 경고만 표기한다.
+    /// </summary>
     private PreviewBuildResult BuildArchiveMergePreview(int number, WorkPlanStep step)
     {
         var options = step.ArchiveMergeOptions;
@@ -94,6 +115,9 @@ internal sealed class WorkPlanPreviewBuilder
             NextState: null);
     }
 
+    /// <summary>
+    /// 이름 변경 미리보기 생성. 후보 생성 실패 시 경고 처리.
+    /// </summary>
     private PreviewBuildResult BuildRenamePreview(int number, WorkPlanStep step, PreviewPathState state)
     {
         try
@@ -118,6 +142,9 @@ internal sealed class WorkPlanPreviewBuilder
         }
     }
 
+    /// <summary>
+    /// Wrap 미리보기 생성. 폴더 충돌 해석 결과를 반영한다.
+    /// </summary>
     private PreviewBuildResult BuildWrapPreview(int number, WorkPlanStep step, PreviewPathState state)
     {
         if (state.Kind != PreviewPathKind.File)
@@ -162,6 +189,13 @@ internal sealed class WorkPlanPreviewBuilder
         return CreateResult(number, step, state, targetFolder, nextState);
     }
 
+    /// <summary>
+    /// Unwrap 미리보기 생성.
+    /// </summary>
+    /// <remarks>
+    /// 폴더명 불일치 시 템플릿 정책으로 최종 파일명을 재계산하고,
+    /// 충돌이 있으면 경고 경로로 표시해 사용자 확인을 유도한다.
+    /// </remarks>
     private PreviewBuildResult BuildUnwrapPreview(int number, WorkPlanStep step, PreviewPathState state)
     {
         if (state.Kind != PreviewPathKind.Folder)
@@ -224,6 +258,9 @@ internal sealed class WorkPlanPreviewBuilder
         return CreateResult(number, step, state, targetPath, nextState);
     }
 
+    /// <summary>
+    /// AutoRelocation 미리보기 생성.
+    /// </summary>
     private PreviewBuildResult BuildRelocationPreview(int number, WorkPlanStep step, PreviewPathState state)
     {
         try
@@ -271,6 +308,9 @@ internal sealed class WorkPlanPreviewBuilder
         }
     }
 
+    /// <summary>
+    /// 중복 삭제 step 미리보기.
+    /// </summary>
     private PreviewBuildResult BuildDuplicateDeletePreview(int number, WorkPlanStep step, PreviewPathState state)
     {
         if (state.Kind != PreviewPathKind.File)
@@ -289,6 +329,10 @@ internal sealed class WorkPlanPreviewBuilder
             state with { Kind = PreviewPathKind.Deleted });
     }
 
+    /// <summary>
+    /// 현재 대상 경로 전환 결과를 미리보기 텍스트/툴팁과 함께 만들고,
+    /// 다음 상태를 반환한다.
+    /// </summary>
     private PreviewBuildResult CreateResult(
         int number,
         WorkPlanStep step,
@@ -306,6 +350,9 @@ internal sealed class WorkPlanPreviewBuilder
             nextState);
     }
 
+    /// <summary>
+    /// 경고 메시지와 경고 상태를 가진 미리보기를 생성한다.
+    /// </summary>
     private PreviewBuildResult CreateWarning(int number, WorkPlanStep step, PreviewPathState state, string warning)
     {
         var toolTip = CreateToolTip(step, state.Path, outputPath: null, warning);
@@ -314,6 +361,9 @@ internal sealed class WorkPlanPreviewBuilder
             NextState: null);
     }
 
+    /// <summary>
+    /// 툴팁 텍스트를 구성한다.
+    /// </summary>
     private static string CreateToolTip(WorkPlanStep step, string inputPath, string? outputPath, string warning)
     {
         var lines = new List<string>
@@ -335,6 +385,9 @@ internal sealed class WorkPlanPreviewBuilder
         return string.Join(Environment.NewLine, lines);
     }
 
+    /// <summary>
+    /// step 타입별 옵션 문자열을 구성한다.
+    /// </summary>
     private static string CreateStepOptionText(WorkPlanStep step)
     {
         if (step.Kind == WorkPlanStepKind.FileNameCorrection && !string.IsNullOrWhiteSpace(step.ManualRenameFileName))
@@ -355,6 +408,9 @@ internal sealed class WorkPlanPreviewBuilder
         return step.DisplayName;
     }
 
+    /// <summary>
+    /// 아카이브 병합 툴팁(원본 목록 포함) 생성.
+    /// </summary>
     private static string CreateArchiveMergeToolTip(WorkPlanStep step, ArchiveMergeOptions options, string warning)
     {
         var lines = new List<string>
@@ -372,6 +428,9 @@ internal sealed class WorkPlanPreviewBuilder
         return string.Join(Environment.NewLine, lines);
     }
 
+    /// <summary>
+    /// 수동 입력 파일명으로 이름 정정 미리보기를 다시 계산한다.
+    /// </summary>
     private RenamePreview CreateManualRenamePreview(string path, string fileName)
     {
         var preview = CreateFileNameCorrector().CreatePreview(path);
@@ -387,6 +446,9 @@ internal sealed class WorkPlanPreviewBuilder
         };
     }
 
+    /// <summary>
+    /// AutoRelocation 템플릿 계산에 필요한 단일 항목 컨텍스트를 생성한다.
+    /// </summary>
     private AutoRelocationItemContext CreateRelocationContext(PreviewPathState state)
     {
         var fileName = Path.GetFileName(state.Path);
@@ -424,6 +486,9 @@ internal sealed class WorkPlanPreviewBuilder
             createdAt);
     }
 
+    /// <summary>
+    /// 미리보기 계산에 필요한 이름 정정기 인스턴스를 생성한다.
+    /// </summary>
     private KoreanFileNameCorrector CreateFileNameCorrector()
     {
         var dictionary = RenameDictionaryStore.Load();
@@ -440,6 +505,9 @@ internal sealed class WorkPlanPreviewBuilder
         });
     }
 
+    /// <summary>
+    /// 언랩 미리보기에서 ‘직접 하위 파일 이동’이 가능한지 판단한다.
+    /// </summary>
     private static bool CanPreviewMoveInnerFilesUp(PreviewPathState state)
     {
         if (!string.IsNullOrWhiteSpace(state.SingleChildFileName))
@@ -451,6 +519,9 @@ internal sealed class WorkPlanPreviewBuilder
                Directory.EnumerateFiles(state.Path, "*", SearchOption.TopDirectoryOnly).Any();
     }
 
+    /// <summary>
+    /// 폴더 내 단일 파일 자식 여부를 판별하고 단일 파일명(혹은 이유)을 반환한다.
+    /// </summary>
     private static string? TryGetSingleChildFileName(string folderPath, out string? reason)
     {
         reason = null;
@@ -472,6 +543,9 @@ internal sealed class WorkPlanPreviewBuilder
         return files[0].Name;
     }
 
+    /// <summary>
+    /// 원본/결과 파일명 전환 문자열을 포맷한다.
+    /// </summary>
     private static string FormatPathTransition(string inputPath, string outputPath)
     {
         var inputName = Path.GetFileName(inputPath);
@@ -489,6 +563,9 @@ internal sealed class WorkPlanPreviewBuilder
         return Localizer.Format("PlanPreviewTransitionFormat", inputName, outputName);
     }
 
+    /// <summary>
+    /// 출력 대상이 이미 존재할 때 자동 번호를 붙여 대체 경로를 찾는다.
+    /// </summary>
     private static string CreateUniqueTargetPath(string targetPath)
     {
         if (!File.Exists(targetPath) && !Directory.Exists(targetPath))
@@ -511,6 +588,9 @@ internal sealed class WorkPlanPreviewBuilder
         return targetPath;
     }
 
+    /// <summary>
+    /// 하위경로 판정.
+    /// </summary>
     private static bool IsSubPathOf(string candidatePath, string parentPath)
     {
         var parentFull = Path.GetFullPath(parentPath)
@@ -525,11 +605,17 @@ internal sealed class WorkPlanPreviewBuilder
             : StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// 경로가 존재하는지 확인한다.
+    /// </summary>
     private static bool PathExists(string path)
     {
         return File.Exists(path) || Directory.Exists(path);
     }
 
+    /// <summary>
+    /// 파일/폴더를 구분해 FileSystemInfo를 생성하고 미존재 시 null을 반환한다.
+    /// </summary>
     private static FileSystemInfo? TryGetFileSystemInfo(string path)
     {
         if (File.Exists(path))

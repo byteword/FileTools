@@ -5,17 +5,30 @@ using FileTools.Correction;
 
 namespace FileTools.Correction.SymSpellPlugin;
 
+/// <summary>
+/// SymSpell 기반 후보 생성 플러그인.
+/// 사용자 사전/코퍼스와 설정을 바탕으로 파일명 토큰 단위 보정 후보를 생성한다.
+/// </summary>
 public sealed class SymSpellNameCorrectionPlugin : INameCorrectionPlugin
 {
+    /// <summary>사전 경로 설정 키.</summary>
     private const string DictionaryPathKey = "dictionaryPath";
+    /// <summary>소스 모드 설정 키.</summary>
     private const string SourceModeKey = "sourceMode";
+    /// <summary>허용 편집 거리 설정 키.</summary>
     private const string MaxEditDistanceKey = "maxEditDistance";
+    /// <summary>최소 점수 임계값 키.</summary>
     private const string MinimumScoreKey = "minimumScore";
+    /// <summary>최대 후보 개수 키.</summary>
     private const string MaxCandidatesKey = "maxCandidates";
+    /// <summary>사전 항목의 term 열 인덱스.</summary>
     private const string TermIndexKey = "termIndex";
+    /// <summary>사전 항목의 빈도/카운트 열 인덱스.</summary>
     private const string CountIndexKey = "countIndex";
 
+    /// <summary>후보 계산에서 사용할 토큰 추출 정규식.</summary>
     private static readonly Regex TokenRegex = new(@"[\p{L}\p{M}]{2,}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    /// <summary>옵션 조합별 SymSpell 인스턴스 캐시.</summary>
     private static readonly ConcurrentDictionary<string, Lazy<SymSpell?>> Cache = new(StringComparer.OrdinalIgnoreCase);
 
     public NameCorrectionPluginDescriptor Descriptor { get; } = new()
@@ -91,6 +104,9 @@ public sealed class SymSpellNameCorrectionPlugin : INameCorrectionPlugin
         ];
     }
 
+    /// <summary>
+    /// 설정 값을 정규화해 안전한 범위로 보정한다.
+    /// </summary>
     public IReadOnlyDictionary<string, string> NormalizeSettings(IReadOnlyDictionary<string, string> settings)
     {
         return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -179,6 +195,13 @@ public sealed class SymSpellNameCorrectionPlugin : INameCorrectionPlugin
         return result.Take(maxCandidates).ToArray();
     }
 
+    /// <summary>
+    /// path/옵션 조합별로 SymSpell 인스턴스를 캐시에서 재사용한다.
+    /// </summary>
+    /// <remarks>
+    /// 1) 경로/모드/거리/컬럼 설정으로 키를 만들고
+    /// 2) 캐시 미스면 로딩/파싱 비용이 큰 SymSpell 로더를 한 번만 실행해 저장한다.
+    /// </remarks>
     private static SymSpell? GetOrLoadDictionary(IReadOnlyDictionary<string, string> settings)
     {
         var path = Get(settings, DictionaryPathKey, "");
@@ -209,6 +232,9 @@ public sealed class SymSpellNameCorrectionPlugin : INameCorrectionPlugin
         })).Value;
     }
 
+    /// <summary>
+    /// 대문자/첫 글자 대문자 유지 정책으로 대소문자 가독성을 유지한다.
+    /// </summary>
     private static string PreserveSimpleCasing(string original, string suggestion)
     {
         if (original.All(char.IsUpper))
@@ -224,6 +250,7 @@ public sealed class SymSpellNameCorrectionPlugin : INameCorrectionPlugin
         return suggestion;
     }
 
+    /// <summary>키가 없으면 fallback을 반환하는 설정 값 조회 유틸.</summary>
     private static string Get(IReadOnlyDictionary<string, string> settings, string key, string fallback)
     {
         return settings.TryGetValue(key, out var value) ? value.Trim() : fallback;

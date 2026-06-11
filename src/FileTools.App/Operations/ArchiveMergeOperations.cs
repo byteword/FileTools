@@ -54,8 +54,14 @@ internal enum ArchiveMergeCompressionLevel
     Maximum
 }
 
+/// <summary>
+/// 아카이브 병합 실행에 필요한 기본 옵션 집합이다.
+/// </summary>
 internal sealed class ArchiveMergeOptions
 {
+    /// <summary>
+    /// 병합 계획 식별자.
+    /// </summary>
     public string PlanId { get; set; } = Guid.NewGuid().ToString("N");
 
     public List<string> SourcePaths { get; set; } = [];
@@ -74,6 +80,9 @@ internal sealed class ArchiveMergeOptions
 
     public bool DeleteOriginals { get; set; }
 
+    /// <summary>
+    /// 현재 옵션을 값 복제로 안전하게 복제한다.
+    /// </summary>
     public ArchiveMergeOptions Clone()
     {
         return new ArchiveMergeOptions
@@ -91,6 +100,9 @@ internal sealed class ArchiveMergeOptions
     }
 }
 
+/// <summary>
+/// 아카이브 본문/엔트리 스트림 접근을 추상화한다.
+/// </summary>
 internal interface IArchiveReader : IDisposable
 {
     IReadOnlyList<ArchiveEntryInfo> Entries { get; }
@@ -98,6 +110,9 @@ internal interface IArchiveReader : IDisposable
     Stream OpenEntryStream(ArchiveEntryInfo entry);
 }
 
+/// <summary>
+/// 병합용 ZIP 출력기 인터페이스.
+/// </summary>
 internal interface IArchiveWriter : IDisposable
 {
     void WriteDirectory(string entryPath, ArchiveEntryMetadata metadata);
@@ -107,6 +122,9 @@ internal interface IArchiveWriter : IDisposable
     void Complete();
 }
 
+/// <summary>
+/// 충돌/중복/인코딩 선택을 UI에서 주입받기 위한 질문 싱크.
+/// </summary>
 internal interface IArchiveMergeQuestionSink
 {
     Encoding? ChooseEncoding(ArchiveEncodingQuestion question);
@@ -116,6 +134,9 @@ internal interface IArchiveMergeQuestionSink
     ArchiveMergeDuplicateContentDecision ResolveDuplicateContent(ArchiveMergeDuplicateContentQuestion question);
 }
 
+/// <summary>
+/// 병합 로직의 파일시스템 접근을 캡슐화한다.
+/// </summary>
 internal interface IArchiveMergeFileSystem
 {
     void CreateDirectory(string path);
@@ -245,6 +266,9 @@ internal sealed record ArchiveEntryInfo(
     long Size,
     ArchiveEntryMetadata Metadata);
 
+/// <summary>
+/// 아카이브 병합 실행의 전 과정을 담당하는 메인 엔진.
+/// </summary>
 internal static class ArchiveMergeOperations
 {
     private static readonly StringComparer PathComparer = OperatingSystem.IsWindows()
@@ -255,6 +279,13 @@ internal static class ArchiveMergeOperations
         ? StringComparer.OrdinalIgnoreCase
         : StringComparer.Ordinal;
 
+    /// <summary>
+    /// 병합 실행에 사용할 기본 옵션을 경로/설정 기반으로 구성한다.
+    /// </summary>
+    /// <param name="paths">병합 대상 경로 목록</param>
+    /// <param name="settings">사용자 설정</param>
+    /// <param name="layoutOverride">레아이웃 강제 지정(선택)</param>
+    /// <returns>2개 미만 입력이면 null</returns>
     public static ArchiveMergeOptions? CreateDefaultOptions(
         IEnumerable<string> paths,
         FileToolsSettings settings,
@@ -281,6 +312,14 @@ internal static class ArchiveMergeOperations
         };
     }
 
+    /// <summary>
+    /// 파일시스템 기본 구현을 사용해 병합을 실행한다.
+    /// </summary>
+    /// <param name="options">실행 옵션</param>
+    /// <param name="cancellationToken">취소 토큰</param>
+    /// <param name="progress">진행 로그 콜백</param>
+    /// <param name="questionSink">충돌/인코딩 인터랙션 싱크</param>
+    /// <returns>실행 결과 집계</returns>
     public static OperationResult Merge(
         ArchiveMergeOptions options,
         CancellationToken cancellationToken,
@@ -295,6 +334,16 @@ internal static class ArchiveMergeOperations
             questionSink);
     }
 
+    /// <summary>
+    /// 병합 본 실행.
+    /// 소스 열기 → 유효성/해시/충돌 처리 → 임시 저장소에 쓰기 → 최종 병합본 이동까지 수행한다.
+    /// </summary>
+    /// <param name="options">병합 옵션</param>
+    /// <param name="cancellationToken">취소 토큰</param>
+    /// <param name="fileSystem">파일시스템 추상화</param>
+    /// <param name="progress">진행 로그</param>
+    /// <param name="questionSink">대화형 결정 콜백</param>
+    /// <returns>실행 결과</returns>
     internal static OperationResult Merge(
         ArchiveMergeOptions options,
         CancellationToken cancellationToken,
@@ -441,12 +490,20 @@ internal static class ArchiveMergeOperations
         return result;
     }
 
+    /// <summary>
+    /// 입력이 실제 파일이면서 .zip 인지 확인한다.
+    /// </summary>
+    /// <param name="path">검사할 경로</param>
+    /// <returns>zip 파일이면 true</returns>
     public static bool IsSupportedArchivePath(string path)
     {
         return File.Exists(path) &&
                string.Equals(Path.GetExtension(path), ".zip", StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// 병합 계획 출력에서 사용될 옵션 문자열을 조합한다.
+    /// </summary>
     public static string DescribeOptions(ArchiveMergeOptions options)
     {
         return Localizer.Format(
@@ -456,6 +513,12 @@ internal static class ArchiveMergeOperations
             ArchiveMergeText.GetDisplayName(options.DuplicatePolicy));
     }
 
+    /// <summary>
+    /// 병합을 실행하지 않고 소스/타깃 매핑과 충돌/중복 상황을 미리 계산한다.
+    /// </summary>
+    /// <param name="options">병합 옵션</param>
+    /// <param name="cancellationToken">취소 토큰</param>
+    /// <returns>미리보기 결과</returns>
     public static ArchiveMergePreview CreatePreview(
         ArchiveMergeOptions options,
         CancellationToken cancellationToken = default)
@@ -544,6 +607,13 @@ internal static class ArchiveMergeOperations
         return new ArchiveMergePreview(options.OutputPath, sources, entries);
     }
 
+    /// <summary>
+    /// 개별 아카이브를 열고 항목 메타데이터를 수집한다.
+    /// </summary>
+    /// <param name="sourcePath">소스 아카이브 경로</param>
+    /// <param name="questionSink">인코딩 선택 싱크</param>
+    /// <param name="result">오류 누적 대상</param>
+    /// <returns>열린 상태 객체, 실패 시 null</returns>
     private static SourceArchiveState? OpenSourceArchive(
         string sourcePath,
         IArchiveMergeQuestionSink? questionSink,
@@ -572,6 +642,13 @@ internal static class ArchiveMergeOperations
         }
     }
 
+    /// <summary>
+    /// 병합할 엔트리 목록을 레이아웃 규칙에 맞춰 생성한다.
+    /// </summary>
+    /// <param name="states">소스 아카이브 상태</param>
+    /// <param name="options">병합 옵션</param>
+    /// <param name="result">결과 집계</param>
+    /// <returns>생성된 병합 계획</returns>
     private static List<EntryMergePlan> CreateEntryPlans(
         IReadOnlyList<SourceArchiveState> states,
         ArchiveMergeOptions options,
@@ -611,6 +688,16 @@ internal static class ArchiveMergeOperations
         return plans;
     }
 
+    /// <summary>
+    /// 각 엔트리 스트림을 읽어 해시/검증을 수행해 병합 불가 항목을 표시한다.
+    /// </summary>
+    /// <param name="states">소스 상태</param>
+    /// <param name="plans">사전 생성된 계획</param>
+    /// <param name="options">병합 옵션</param>
+    /// <param name="result">오류/스킵 집계</param>
+    /// <param name="progress">진행 로그</param>
+    /// <param name="cancellationToken">취소 토큰</param>
+    /// <returns>전체 유효성 통과 여부</returns>
     private static bool ValidateEntryStreams(
         IReadOnlyList<SourceArchiveState> states,
         IReadOnlyList<EntryMergePlan> plans,
@@ -701,6 +788,11 @@ internal static class ArchiveMergeOperations
         return true;
     }
 
+    /// <summary>
+    /// 중복/충돌 정책상 해시가 필요한지 판정한다.
+    /// </summary>
+    /// <param name="options">병합 옵션</param>
+    /// <returns>해시 필요 여부</returns>
     private static bool NeedsEntryHashes(ArchiveMergeOptions options)
     {
         return options.DuplicatePolicy == ArchiveMergeDuplicatePolicy.Ask ||
@@ -708,6 +800,15 @@ internal static class ArchiveMergeOperations
                options.CollisionPolicy == ArchiveMergeCollisionPolicy.SameContentKeepFirst;
     }
 
+    /// <summary>
+    /// 실제 병합 대상 경로를 확정하기 위해 중복/충돌을 해석한다.
+    /// </summary>
+    /// <param name="plans">미리 구성된 엔트리 플랜</param>
+    /// <param name="options">정책</param>
+    /// <param name="result">집계 결과</param>
+    /// <param name="questionSink">Ask 정책 시 사용자 결정 채널</param>
+    /// <param name="cancellationToken">취소 토큰</param>
+    /// <returns>실행 가능 여부</returns>
     private static bool ResolveDuplicatesAndCollisions(
         IReadOnlyList<EntryMergePlan> plans,
         ArchiveMergeOptions options,
@@ -825,6 +926,16 @@ internal static class ArchiveMergeOperations
         return true;
     }
 
+    /// <summary>
+    /// 동일 경로 충돌을 정책에 따라 스킵/중단/번호부여로 해결한다.
+    /// </summary>
+    /// <param name="plan">현재 플랜</param>
+    /// <param name="existing">이미 점유된 플랜</param>
+    /// <param name="usedPaths">현재까지 사용된 경로</param>
+    /// <param name="options">병합 정책</param>
+    /// <param name="result">결과 집계</param>
+    /// <param name="questionSink">Ask 정책 처리 채널</param>
+    /// <returns>정상 처리/계속 여부</returns>
     private static bool ResolveInternalPathCollision(
         EntryMergePlan plan,
         EntryMergePlan existing,
@@ -875,6 +986,13 @@ internal static class ArchiveMergeOperations
         return true;
     }
 
+    /// <summary>
+    /// 미리보기용 충돌/중복 분석을 수행해 경고/변경 상태를 설정한다.
+    /// </summary>
+    /// <param name="plans">병합 후보 플랜</param>
+    /// <param name="options">옵션</param>
+    /// <param name="result">결과 집계</param>
+    /// <param name="cancellationToken">취소 토큰</param>
     private static void ResolvePreviewDuplicatesAndCollisions(
         IReadOnlyList<EntryMergePlan> plans,
         ArchiveMergeOptions options,
@@ -957,6 +1075,14 @@ internal static class ArchiveMergeOperations
         }
     }
 
+    /// <summary>
+    /// 미리보기 단계에서 충돌 경로를 상태로만 표시한다.
+    /// </summary>
+    /// <param name="plan">현재 플랜</param>
+    /// <param name="existing">기존 충돌 대상</param>
+    /// <param name="usedPaths">이미 사용된 경로</param>
+    /// <param name="options">병합 정책</param>
+    /// <param name="result">결과 집계</param>
     private static void ResolvePreviewInternalPathCollision(
         EntryMergePlan plan,
         EntryMergePlan existing,
@@ -991,6 +1117,12 @@ internal static class ArchiveMergeOperations
         plan.TargetPath = plan.Entry.IsDirectory ? EnsureDirectoryPath(resolved) : TrimDirectoryPath(resolved);
     }
 
+    /// <summary>
+    /// 플랜의 상태를 미리보기 엔트리 상태값으로 변환한다.
+    /// </summary>
+    /// <param name="plan">변환 대상 플랜</param>
+    /// <param name="originalTargetPath">변경 전 경로</param>
+    /// <returns>미리보기 항목</returns>
     private static ArchiveMergePreviewEntry CreatePreviewEntry(EntryMergePlan plan, string originalTargetPath)
     {
         if (plan.IsBlocked)
@@ -1042,6 +1174,11 @@ internal static class ArchiveMergeOperations
             "");
     }
 
+    /// <summary>
+    /// UI 질의용 질문 엔트리 모델을 생성한다.
+    /// </summary>
+    /// <param name="plan">질의 대상 플랜</param>
+    /// <returns>질의 항목</returns>
     private static ArchiveMergeQuestionEntry CreateQuestionEntry(EntryMergePlan plan)
     {
         return new ArchiveMergeQuestionEntry(
@@ -1052,6 +1189,14 @@ internal static class ArchiveMergeOperations
             plan.Entry.Size);
     }
 
+    /// <summary>
+    /// 병합 결과를 임시 아카이브에 실제 쓰기한다.
+    /// </summary>
+    /// <param name="states">원본 상태</param>
+    /// <param name="plans">최종 적용 가능한 계획</param>
+    /// <param name="tempPath">임시 저장 경로</param>
+    /// <param name="options">병합 옵션</param>
+    /// <param name="cancellationToken">취소 토큰</param>
     private static void WriteTempArchive(
         IReadOnlyList<SourceArchiveState> states,
         IReadOnlyList<EntryMergePlan> plans,
@@ -1092,6 +1237,9 @@ internal static class ArchiveMergeOperations
         writer.Complete();
     }
 
+    /// <summary>
+    /// 임시 아카이브에 적재된 엔트리 수를 검증한다.
+    /// </summary>
     private static void VerifyOutputArchive(string tempPath, int expectedEntries)
     {
         using var reader = SharpCompressArchiveReader.Open(tempPath, Encoding.UTF8);
@@ -1104,6 +1252,12 @@ internal static class ArchiveMergeOperations
         }
     }
 
+    /// <summary>
+    /// 삭제 옵션이 켜진 경우 병합 성공한 원본 아카이브를 삭제한다.
+    /// </summary>
+    /// <param name="states">소스 상태</param>
+    /// <param name="plans">병합 계획</param>
+    /// <param name="result">집계 결과</param>
     private static void DeleteEligibleOriginals(
         IReadOnlyList<SourceArchiveState> states,
         IReadOnlyList<EntryMergePlan> plans,
@@ -1131,6 +1285,12 @@ internal static class ArchiveMergeOperations
         }
     }
 
+    /// <summary>
+    /// 설정/입력 기반 기본 출력 경로를 계산한다.
+    /// </summary>
+    /// <param name="sourcePaths">입력 소스</param>
+    /// <param name="settings">병합 설정</param>
+    /// <returns>기본 출력 경로</returns>
     private static string ResolveDefaultOutputPath(IReadOnlyList<string> sourcePaths, FileToolsSettings settings)
     {
         var parent = Path.GetDirectoryName(sourcePaths[0]) ?? Environment.CurrentDirectory;
@@ -1169,11 +1329,17 @@ internal static class ArchiveMergeOperations
         return ResolveOutputCollision(Path.Combine(parent, fileName), sourcePaths);
     }
 
+    /// <summary>
+    /// 기본 파일시스템에서 출력 경로 충돌을 회피한다.
+    /// </summary>
     private static string ResolveOutputCollision(string outputPath, IReadOnlyList<string> sourcePaths)
     {
         return ResolveOutputCollision(outputPath, sourcePaths, PhysicalArchiveMergeFileSystem.Instance);
     }
 
+    /// <summary>
+    /// 경로 충돌이 존재할 때 "(2)" 형태로 가능한 출력 경로를 탐색한다.
+    /// </summary>
     private static string ResolveOutputCollision(
         string outputPath,
         IReadOnlyList<string> sourcePaths,
@@ -1205,6 +1371,9 @@ internal static class ArchiveMergeOperations
         throw new InvalidOperationException(Localizer.Get("ArchiveMergeOutputCollisionUnresolved"));
     }
 
+    /// <summary>
+    /// 병합 소스 경로를 trim/존재확인/전체경로/중복제거한다.
+    /// </summary>
     private static string[] NormalizeArchivePaths(IEnumerable<string> paths)
     {
         return paths
@@ -1215,6 +1384,13 @@ internal static class ArchiveMergeOperations
             .ToArray();
     }
 
+    /// <summary>
+    /// 여러 소스 파일명에서 병합 출력 이름의 공통 stem을 계산한다.
+    /// </summary>
+    /// <remarks>
+    /// 먼저 연속된 시퀀스 표기를 제거해 논리적 공통값을 먼저 시도하고,
+    /// 실패하면 문자열 prefix 기반으로 폴백한다.
+    /// </remarks>
     internal static string CreateCommonArchiveStem(IReadOnlyList<string?> stems)
     {
         var normalized = stems
@@ -1235,6 +1411,9 @@ internal static class ArchiveMergeOperations
         return CreateCommonPrefixStem(normalized);
     }
 
+    /// <summary>
+    /// 동일한 베이스명(끝 시퀀스만 다름)을 가진 항목인지 판별해 공통 stem을 만든다.
+    /// </summary>
     private static string CreateCommonLogicalStem(IReadOnlyList<string> stems)
     {
         if (stems.Count < 2)
@@ -1256,6 +1435,9 @@ internal static class ArchiveMergeOperations
             : "";
     }
 
+    /// <summary>
+    /// 파일명 뒤쪽에 붙는 시퀀스 표기(예: " - 001")를 제거한다.
+    /// </summary>
     private static string StripTerminalSequenceMarker(string stem)
     {
         var value = stem.Trim();
@@ -1287,6 +1469,9 @@ internal static class ArchiveMergeOperations
             : WindowsFileNameSafety.MakeSafeFileName(prefix);
     }
 
+    /// <summary>
+    /// 정규화된 이름 목록에서 대소문자 무시 prefix 공통부를 추출한다.
+    /// </summary>
     private static string CreateCommonPrefixStem(IReadOnlyList<string> normalized)
     {
         var prefix = normalized[0];
@@ -1309,6 +1494,10 @@ internal static class ArchiveMergeOperations
         return prefix.Trim().TrimEnd(' ', '.', '-', '_', '[', '(', '{');
     }
 
+    /// <summary>
+    /// 스트림을 SHA-256으로 읽어 해시 문자열을 생성한다.
+    /// </summary>
+    /// <remarks>검증만 필요한 시점에서 본문을 모두 소비한 뒤 해시를 반환한다.</remarks>
     private static string ReadAndHash(Stream stream, CancellationToken cancellationToken)
     {
         using var sha = SHA256.Create();
@@ -1318,12 +1507,19 @@ internal static class ArchiveMergeOperations
         return Convert.ToHexString(sha.Hash ?? []);
     }
 
+    /// <summary>
+    /// 스트림의 내용을 버퍼로 소진하고 문자열은 반환하지 않는다.
+    /// </summary>
+    /// <returns>항상 빈 문자열.</returns>
     private static string ReadAndDiscard(Stream stream, CancellationToken cancellationToken)
     {
         CopyStream(stream, Stream.Null, cancellationToken);
         return "";
     }
 
+    /// <summary>
+    /// 버퍼 단위로 소스 스트림을 목적지 스트림으로 전송한다.
+    /// </summary>
     private static void CopyStream(Stream source, Stream destination, CancellationToken cancellationToken)
     {
         var buffer = new byte[128 * 1024];
@@ -1340,6 +1536,9 @@ internal static class ArchiveMergeOperations
         }
     }
 
+    /// <summary>
+    /// 내부 엔트리명 충돌을 피하도록 사용되지 않은 파일/폴더명을 생성한다.
+    /// </summary>
     private static string CreateUniqueInternalName(string desiredName, bool isDirectory, HashSet<string> usedNames)
     {
         var safeName = WindowsFileNameSafety.MakeSafeFileName(desiredName);
@@ -1359,6 +1558,9 @@ internal static class ArchiveMergeOperations
         return candidate;
     }
 
+    /// <summary>
+    /// 동일 경로 충돌이 발생했을 때 파일명에 번호를 붙여 대체 경로를 생성한다.
+    /// </summary>
     private static string CreateNumberedInternalPath(string desiredPath, IEnumerable<string> usedPaths)
     {
         var used = usedPaths.ToHashSet(InternalPathComparer);
@@ -1382,6 +1584,9 @@ internal static class ArchiveMergeOperations
         throw new InvalidOperationException(Localizer.Format("ArchiveMergeInternalCollisionFormat", desiredPath));
     }
 
+    /// <summary>
+    /// 상위 폴더명과 엔트리 경로를 합쳐 ZIP 내부 경로 문자열을 만든다.
+    /// </summary>
     private static string CombineEntryPath(string rootName, string entryPath)
     {
         return string.IsNullOrWhiteSpace(rootName)
@@ -1389,16 +1594,25 @@ internal static class ArchiveMergeOperations
             : EnsureDirectoryPath(rootName) + entryPath.TrimStart('/');
     }
 
+    /// <summary>
+    /// 경로가 디렉터리 경로처럼 끝이 '/'로 유지되도록 보정한다.
+    /// </summary>
     private static string EnsureDirectoryPath(string path)
     {
         return path.TrimEnd('/') + "/";
     }
 
+    /// <summary>
+    /// 경로 끝의 '/'를 제거해 파일/디렉터리 공통 처리에 사용할 정규형을 만든다.
+    /// </summary>
     private static string TrimDirectoryPath(string path)
     {
         return path.TrimEnd('/');
     }
 
+    /// <summary>
+    /// 내부 엔트리 경로에서 폴더 부분만 추출한다.
+    /// </summary>
     private static string GetEntryDirectory(string entryPath)
     {
         var normalized = entryPath.Replace('\\', '/');
@@ -1406,6 +1620,9 @@ internal static class ArchiveMergeOperations
         return index < 0 ? "" : normalized[..index];
     }
 
+    /// <summary>
+    /// 내부 엔트리 경로에서 파일명만 추출한다.
+    /// </summary>
     private static string GetEntryFileName(string entryPath)
     {
         var normalized = entryPath.Replace('\\', '/').TrimEnd('/');
@@ -1413,6 +1630,9 @@ internal static class ArchiveMergeOperations
         return index < 0 ? normalized : normalized[(index + 1)..];
     }
 
+    /// <summary>
+    /// 파일 삭제를 시도하되, 실패 시 무시하는 보수적 정리 유틸이다.
+    /// </summary>
     private static void TryDeleteFile(string path, IArchiveMergeFileSystem fileSystem)
     {
         try
@@ -1424,6 +1644,9 @@ internal static class ArchiveMergeOperations
         }
     }
 
+    /// <summary>
+    /// 병합 대상 아카이브 1개에 대한 상태와 진입 항목 목록을 보관한다.
+    /// </summary>
     private sealed class SourceArchiveState
     {
         public SourceArchiveState(string sourcePath, Encoding encoding, string encodingDisplayName, List<ArchiveEntryInfo> entries)
@@ -1447,6 +1670,9 @@ internal static class ArchiveMergeOperations
         public bool HadEntryFailure { get; set; }
     }
 
+    /// <summary>
+    /// 각 엔트리에 대한 병합 결과 경로 및 상태를 표현하는 계획 객체.
+    /// </summary>
     private sealed class EntryMergePlan
     {
         public EntryMergePlan(string sourceArchivePath, ArchiveEntryInfo entry, string targetPath)
@@ -1843,6 +2069,9 @@ internal sealed class SharpCompressArchiveReader : IArchiveReader
     }
 }
 
+/// <summary>
+/// SharpZipLib 의존 없이 ZIP을 직접 조립해 쓰기 위한 경량 작성기 구현.
+/// </summary>
 internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
 {
     private const ushort Utf8NameFlag = 0x0800;
@@ -1857,17 +2086,26 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
     private readonly ArchiveMergeCompressionLevel _compressionLevel;
     private readonly List<WrittenZipEntry> _entries = [];
 
+    /// <summary>
+    /// ZIP 저장 스트림과 압축 레벨을 초기화한다.
+    /// </summary>
     private SharpZipLibArchiveWriter(string path, ArchiveMergeCompressionLevel compressionLevel)
     {
         _stream = File.Create(path);
         _compressionLevel = compressionLevel;
     }
 
+    /// <summary>
+    /// 작성기 인스턴스를 생성한다.
+    /// </summary>
     public static SharpZipLibArchiveWriter Create(string path, ArchiveMergeCompressionLevel compressionLevel)
     {
         return new SharpZipLibArchiveWriter(path, compressionLevel);
     }
 
+    /// <summary>
+    /// 디렉터리 엔트리를 ZIP에 기록한다.
+    /// </summary>
     public void WriteDirectory(string entryPath, ArchiveEntryMetadata metadata)
     {
         var entry = CreateEntry(EnsureDirectoryPath(entryPath), metadata, _compressionLevel, isDirectory: true);
@@ -1876,6 +2114,9 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
         _entries.Add(entry);
     }
 
+    /// <summary>
+    /// 파일 엔트리를 압축/저장 규칙에 맞춰 쓰고 CRC/크기를 업데이트한다.
+    /// </summary>
     public void WriteFile(string entryPath, Stream source, ArchiveEntryMetadata metadata, CancellationToken cancellationToken)
     {
         var entry = CreateEntry(entryPath.Replace('\\', '/').TrimStart('/'), metadata, _compressionLevel, isDirectory: false);
@@ -1931,6 +2172,9 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
         _entries.Add(entry);
     }
 
+    /// <summary>
+    /// 엔트리 모두 기록 후 중앙 디렉터리와 EOCD를 기록해 ZIP 파일을 완성한다.
+    /// </summary>
     public void Complete()
     {
         var centralDirectoryOffset = _stream.Position;
@@ -1946,11 +2190,17 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
             EnsureUInt32(centralDirectoryOffset, "ZIP central directory offset"));
     }
 
+    /// <summary>
+    /// 파일 스트림을 정리한다.
+    /// </summary>
     public void Dispose()
     {
         _stream.Dispose();
     }
 
+    /// <summary>
+    /// 메타데이터와 압축 설정을 반영한 ZIP 엔트리 구조를 만든다.
+    /// </summary>
     private static WrittenZipEntry CreateEntry(
         string entryPath,
         ArchiveEntryMetadata metadata,
@@ -1974,6 +2224,9 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
         };
     }
 
+    /// <summary>
+    /// 메타데이터에 extra field가 없을 때 시간 정보를 담은 대체 extra field를 생성한다.
+    /// </summary>
     private static byte[]? CreateFallbackExtraData(ArchiveEntryMetadata metadata)
     {
         var times = new[]
@@ -2001,6 +2254,9 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
         return stream.ToArray();
     }
 
+    /// <summary>
+    /// ZIP Local File Header를 현재 위치에 기록한다.
+    /// </summary>
     private void WriteLocalHeader(WrittenZipEntry entry)
     {
         EnsureUInt16(entry.NameBytes.Length, "ZIP entry name length");
@@ -2019,6 +2275,9 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
         _stream.Write(entry.LocalExtraData, 0, entry.LocalExtraData.Length);
     }
 
+    /// <summary>
+    /// 파일 바디 계산이 끝난 뒤 Local Header의 CRC/크기를 패치한다.
+    /// </summary>
     private void PatchLocalHeader(WrittenZipEntry entry)
     {
         var currentPosition = _stream.Position;
@@ -2029,6 +2288,9 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
         _stream.Position = currentPosition;
     }
 
+    /// <summary>
+    /// 중앙 디렉터리 헤더를 순회중인 엔트리에 대해 작성한다.
+    /// </summary>
     private void WriteCentralDirectoryHeader(WrittenZipEntry entry)
     {
         EnsureUInt16(entry.NameBytes.Length, "ZIP entry name length");
@@ -2055,6 +2317,9 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
         _stream.Write(entry.CommentBytes, 0, entry.CommentBytes.Length);
     }
 
+    /// <summary>
+    /// EOCD 레코드를 작성해 ZIP 마무리 메타데이터를 닫는다.
+    /// </summary>
     private void WriteEndOfCentralDirectory(ushort entryCount, uint centralDirectorySize, uint centralDirectoryOffset)
     {
         WriteUInt32(EndOfCentralDirectorySignature);
@@ -2067,6 +2332,9 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
         WriteUInt16(0);
     }
 
+    /// <summary>
+    /// DateTime을 ZIP DOS time/date 형식으로 변환해 기록한다.
+    /// </summary>
     private void WriteDosDateTime(DateTime value)
     {
         var dosTime = (ushort)((value.Hour << 11) | (value.Minute << 5) | (value.Second / 2));
@@ -2075,6 +2343,9 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
         WriteUInt16(dosDate);
     }
 
+    /// <summary>
+    /// UTF-8 little-endian uint16 값을 스트림에 기록한다.
+    /// </summary>
     private void WriteUInt16(ushort value)
     {
         Span<byte> buffer = stackalloc byte[2];
@@ -2082,6 +2353,9 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
         _stream.Write(buffer);
     }
 
+    /// <summary>
+    /// UTF-8 little-endian uint32 값을 스트림에 기록한다.
+    /// </summary>
     private void WriteUInt32(uint value)
     {
         Span<byte> buffer = stackalloc byte[4];
@@ -2089,6 +2363,9 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
         _stream.Write(buffer);
     }
 
+    /// <summary>
+    /// ZIP 포맷 범위를 벗어난 값은 예외, 유효하면 ushort로 반환한다.
+    /// </summary>
     private static ushort EnsureUInt16(int value, string description)
     {
         if (value < 0 || value > ushort.MaxValue)
@@ -2099,6 +2376,9 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
         return (ushort)value;
     }
 
+    /// <summary>
+    /// ZIP32 포맷 범위를 벗어난 값은 예외, 유효하면 uint로 반환한다.
+    /// </summary>
     private static uint EnsureUInt32(long value, string description)
     {
         if (value < 0 || value > uint.MaxValue)
@@ -2109,6 +2389,9 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
         return (uint)value;
     }
 
+    /// <summary>
+    /// FILETIME 기반 시간 정수로 변환한다.
+    /// </summary>
     private static long ToFileTime(DateTime value)
     {
         var normalized = value.Kind == DateTimeKind.Unspecified
@@ -2117,6 +2400,9 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
         return normalized.ToUniversalTime().ToFileTimeUtc();
     }
 
+    /// <summary>
+    /// ZIP에서 허용되지 않는 과거/미래 날짜를 ZIP 경계(1980~2107)로 보정한다.
+    /// </summary>
     private static DateTime ClampZipDate(DateTime value)
     {
         var local = value.Kind == DateTimeKind.Utc ? value.ToLocalTime() : value;
@@ -2133,6 +2419,9 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
         return local;
     }
 
+    /// <summary>
+    /// 프로젝트 압축 레벨을 SharpZipLib Deflater 레벨로 매핑한다.
+    /// </summary>
     private static int ToSharpZipLevel(ArchiveMergeCompressionLevel level)
     {
         return level switch
@@ -2144,6 +2433,9 @@ internal sealed class SharpZipLibArchiveWriter : IArchiveWriter
         };
     }
 
+    /// <summary>
+    /// 내부 경로를 ZIP 디렉터리 표기(끝 '/')로 정규화한다.
+    /// </summary>
     private static string EnsureDirectoryPath(string path)
     {
         return path.Replace('\\', '/').TrimStart('/').TrimEnd('/') + "/";

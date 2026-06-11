@@ -178,6 +178,9 @@ internal sealed record FileCompareProgress(
     string CurrentLeftPath,
     string CurrentRightPath);
 
+/// <summary>
+/// 파일/아카이브 비교의 핵심 실행 로직을 담당한다.
+/// </summary>
 internal static class FileCompareOperations
 {
     private static readonly StringComparer PathComparer = OperatingSystem.IsWindows()
@@ -192,6 +195,9 @@ internal static class FileCompareOperations
         ? StringComparison.OrdinalIgnoreCase
         : StringComparison.Ordinal;
 
+    /// <summary>
+    /// 입력 경로 쌍의 조합으로 비교를 수행하고 진행률을 보고한다.
+    /// </summary>
     public static FileCompareReport Compare(
         IEnumerable<string> paths,
         FileCompareOptions? options = null,
@@ -219,6 +225,9 @@ internal static class FileCompareOperations
         return new FileCompareReport(targets, results, cache.Hits, cache.Misses);
     }
 
+    /// <summary>
+    /// 입력 경로를 정규화해 대상 파일 목록을 수집한다.
+    /// </summary>
     public static IReadOnlyList<FileCompareTarget> CollectTargets(IEnumerable<string> paths)
     {
         var targets = new List<FileCompareTarget>();
@@ -265,6 +274,9 @@ internal static class FileCompareOperations
         }
     }
 
+    /// <summary>
+    /// 두 대상의 비교를 실행한다.
+    /// </summary>
     private static FileComparePairResult ComparePair(
         FileCompareTarget left,
         FileCompareTarget right,
@@ -313,6 +325,9 @@ internal static class FileCompareOperations
         }
     }
 
+    /// <summary>
+    /// 파일명/크기/시간 비교와 같은 빠른 사전 판정을 수행한다.
+    /// </summary>
     private static FileComparePairResult? CompareFileIdentityAndMetadata(
         FileCompareTarget left,
         FileCompareTarget right,
@@ -380,6 +395,9 @@ internal static class FileCompareOperations
         return null;
     }
 
+    /// <summary>
+    /// 아카이브 비교 모드일 때 엔트리 단위로 상세 비교를 수행한다.
+    /// </summary>
     private static FileComparePairResult CompareArchives(
         FileCompareTarget left,
         FileCompareTarget right,
@@ -449,6 +467,9 @@ internal static class FileCompareOperations
         return CreatePairResult(left, right, criteria, options.PartialMatchThreshold);
     }
 
+    /// <summary>
+    /// 상대경로를 기준으로 엔트리를 매칭해 1:1 쌍을 만든다.
+    /// </summary>
     private static IReadOnlyList<(ZipArchiveEntry Left, ZipArchiveEntry Right)> PairEntriesByRelativePath(
         IReadOnlyList<ZipArchiveEntry> leftEntries,
         IReadOnlyList<ZipArchiveEntry> rightEntries,
@@ -494,6 +515,9 @@ internal static class FileCompareOperations
         return pairs;
     }
 
+    /// <summary>
+    /// 한 쌍의 아카이브 엔트리를 메타데이터와 콘텐츠로 비교한다.
+    /// </summary>
     private static void CompareArchiveEntry(
         int index,
         ZipArchiveEntry leftEntry,
@@ -561,6 +585,9 @@ internal static class FileCompareOperations
         }
     }
 
+    /// <summary>
+    /// 파일/엔트리 콘텐츠를 해시 또는 구간별 바이트 비교로 판정한다.
+    /// </summary>
     private static FileCompareCriterionResult CompareContent(
         long leftLength,
         Func<Stream> openLeft,
@@ -580,6 +607,9 @@ internal static class FileCompareOperations
             : CompareContentByHash(openLeft, cacheKeyBaseLeft, leftRanges, openRight, cacheKeyBaseRight, rightRanges, options, cache, cancellationToken);
     }
 
+    /// <summary>
+    /// 전체 바이트를 SHA-256으로 해시해 동일성 여부를 계산한다.
+    /// </summary>
     private static FileCompareCriterionResult CompareContentByHash(
         Func<Stream> openLeft,
         string? cacheKeyBaseLeft,
@@ -617,6 +647,9 @@ internal static class FileCompareOperations
         return CreateContentResult(matched, total, options.PartialMatchThreshold, "Content hash");
     }
 
+    /// <summary>
+    /// 바이트 스트림을 지정한 범위/단위로 샘플링해 차이를 판별한다.
+    /// </summary>
     private static FileCompareCriterionResult CompareContentByteToByte(
         long leftLength,
         Func<Stream> openLeft,
@@ -926,6 +959,9 @@ internal static class FileCompareOperations
         return ranges.Sum(static range => range.Length);
     }
 
+    /// <summary>
+    /// 개별 기준점 집계를 기반으로 최종 페어 결과를 만든다.
+    /// </summary>
     private static FileComparePairResult CreatePairResult(
         FileCompareTarget left,
         FileCompareTarget right,
@@ -939,6 +975,9 @@ internal static class FileCompareOperations
         return new FileComparePairResult(left, right, status, ratio, reason, criteria);
     }
 
+    /// <summary>
+    /// 모든 기준의 상태를 합쳐 최종 상태(Same/PartialMatch/Different/Failed)를 계산한다.
+    /// </summary>
     private static FileCompareStatus GetAggregateStatus(
         IReadOnlyList<FileCompareCriterionResult> criteria,
         double partialMatchThreshold)
@@ -963,6 +1002,9 @@ internal static class FileCompareOperations
             : FileCompareStatus.Different;
     }
 
+    /// <summary>
+    /// 기준 점수 비율의 평균을 0~1 범위로 계산한다.
+    /// </summary>
     private static double CalculateAverageRatio(IReadOnlyList<FileCompareCriterionResult> criteria)
     {
         if (criteria.Count == 0)
@@ -973,6 +1015,9 @@ internal static class FileCompareOperations
         return Math.Clamp(criteria.Average(static item => item.MatchRatio), 0, 1);
     }
 
+    /// <summary>
+    /// 비교 모드에 맞춰 대상 파일명을 비교용 문자열로 가공한다.
+    /// </summary>
     private static string GetNameForComparison(FileCompareTarget target, FileCompareNameMatchMode mode)
     {
         return mode switch
@@ -985,6 +1030,9 @@ internal static class FileCompareOperations
         };
     }
 
+    /// <summary>
+    /// 아카이브 엔트리 경로를 비교 모드에 맞게 정규화한다.
+    /// </summary>
     private static string GetEntryNameForComparison(string entryPath, FileCompareNameMatchMode mode)
     {
         var normalized = entryPath.Replace('\\', '/').TrimEnd('/');
@@ -1000,6 +1048,9 @@ internal static class FileCompareOperations
         };
     }
 
+    /// <summary>
+    /// 아카이브 엔트리 목록을 정렬/제한 옵션에 따라 수집한다.
+    /// </summary>
     private static IReadOnlyList<ZipArchiveEntry> GetArchiveEntries(
         ZipArchive archive,
         FileCompareOptions options)
@@ -1020,11 +1071,17 @@ internal static class FileCompareOperations
         return entries.ToList();
     }
 
+    /// <summary>
+    /// 아카이브 콘텐츠 비교 지원 확장자를 판별한다.
+    /// </summary>
     private static bool IsSupportedArchiveContentPath(string path)
     {
         return string.Equals(Path.GetExtension(path), ".zip", StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// 파일 캐시키(경로/크기/시간)를 구성해 재사용 가능한 해시 조회 키로 사용한다.
+    /// </summary>
     private static string CreateFileCacheKey(FileInfo file)
     {
         return string.Join(
@@ -1035,6 +1092,9 @@ internal static class FileCompareOperations
             file.CreationTimeUtc.Ticks.ToString(System.Globalization.CultureInfo.InvariantCulture));
     }
 
+    /// <summary>
+    /// 사용자가 입력한 옵션을 비교 안정성을 위해 보정한다.
+    /// </summary>
     private static FileCompareOptions NormalizeOptions(FileCompareOptions? options)
     {
         var normalized = options?.Clone() ?? new FileCompareOptions();
@@ -1057,6 +1117,9 @@ internal static class FileCompareOperations
         return normalized;
     }
 
+    /// <summary>
+    /// 이름 비교 기준에 따라 Same/Different/비율을 계산한다.
+    /// </summary>
     private static FileCompareCriterionResult CompareNames(
         string criterionName,
         string leftName,
@@ -1089,6 +1152,9 @@ internal static class FileCompareOperations
             detail);
     }
 
+    /// <summary>
+    /// 두 문자열의 최장 공통 부분 문자열과 길이를 동적계획법으로 찾는다.
+    /// </summary>
     private static (string Value, int Length) FindLongestCommonSubstring(string left, string right)
     {
         if (left.Length == 0 || right.Length == 0)
@@ -1129,6 +1195,9 @@ internal static class FileCompareOperations
             : (left.Substring(bestEnd - bestLength, bestLength), bestLength);
     }
 
+    /// <summary>
+    /// 비율값과 임계값으로 Same/PartialMatch/Different를 판정한다.
+    /// </summary>
     private static FileCompareStatus GetThresholdStatus(double ratio, double partialMatchThreshold)
     {
         return ratio >= 1
@@ -1138,11 +1207,17 @@ internal static class FileCompareOperations
                 : FileCompareStatus.Different;
     }
 
+    /// <summary>
+    /// 엔트리 경로의 구분자와 끝 마침표 정리를 일관되게 수행한다.
+    /// </summary>
     private static string NormalizeEntryPath(string entryPath)
     {
         return entryPath.Replace('\\', '/').TrimEnd('/');
     }
 
+    /// <summary>
+    /// 아카이브 비교 결과 문자열에 엔트리 수와 비교 모드 요약을 구성한다.
+    /// </summary>
     private static string CreateArchiveDetail(int leftCount, int rightCount, FileCompareOptions options)
     {
         var limit = options.ArchiveEntryLimitMode == FileCompareArchiveEntryLimitMode.FirstN
@@ -1195,8 +1270,14 @@ internal static class FileCompareOperations
     }
 }
 
+/// <summary>
+/// 비교 옵션/상태값의 표시용 라벨과 단위 변환 문자열을 중앙화한다.
+/// </summary>
 internal static class FileCompareText
 {
+    /// <summary>
+    /// 이름 비교 모드의 사용자 표기 문자열을 반환한다.
+    /// </summary>
     public static string GetDisplayName(FileCompareNameMatchMode mode)
     {
         return mode switch
@@ -1219,6 +1300,9 @@ internal static class FileCompareText
         };
     }
 
+    /// <summary>
+    /// 콘텐츠 비교 모드의 사용자 표기 문자열을 반환한다.
+    /// </summary>
     public static string GetDisplayName(FileCompareContentMode mode)
     {
         return mode switch
@@ -1228,6 +1312,9 @@ internal static class FileCompareText
         };
     }
 
+    /// <summary>
+    /// 범위 비교 모드의 사용자 표기 문자열을 반환한다.
+    /// </summary>
     public static string GetDisplayName(FileCompareRangeMode mode)
     {
         return mode switch
@@ -1240,6 +1327,9 @@ internal static class FileCompareText
         };
     }
 
+    /// <summary>
+    /// 단위 라벨(B, KiB, MiB)을 문자열로 반환한다.
+    /// </summary>
     public static string GetDisplayName(FileCompareRangeUnit unit)
     {
         return unit switch
@@ -1250,6 +1340,9 @@ internal static class FileCompareText
         };
     }
 
+    /// <summary>
+    /// 아카이브 비교 모드의 사용자 표기 문자열을 반환한다.
+    /// </summary>
     public static string GetDisplayName(FileCompareArchiveMode mode)
     {
         return mode switch
@@ -1259,6 +1352,9 @@ internal static class FileCompareText
         };
     }
 
+    /// <summary>
+    /// 아카이브 엔트리 정렬 방식의 사용자 표기 문자열을 반환한다.
+    /// </summary>
     public static string GetDisplayName(FileCompareArchiveEntryOrder order)
     {
         return order switch
@@ -1268,6 +1364,9 @@ internal static class FileCompareText
         };
     }
 
+    /// <summary>
+    /// 엔트리 제한 모드의 사용자 표기 문자열을 반환한다.
+    /// </summary>
     public static string GetDisplayName(FileCompareArchiveEntryLimitMode mode)
     {
         return mode switch
@@ -1277,6 +1376,9 @@ internal static class FileCompareText
         };
     }
 
+    /// <summary>
+    /// 비교 상태의 사용자 표기 문자열을 반환한다.
+    /// </summary>
     public static string GetDisplayName(FileCompareStatus status)
     {
         return status switch
@@ -1289,6 +1391,9 @@ internal static class FileCompareText
         };
     }
 
+    /// <summary>
+    /// 중복 제거 전략의 사용자 표기 문자열을 반환한다.
+    /// </summary>
     public static string GetDisplayName(FileCompareDuplicateKeepMode keepMode)
     {
         return keepMode switch
@@ -1302,6 +1407,9 @@ internal static class FileCompareText
         };
     }
 
+    /// <summary>
+    /// 사용자가 입력한 단위값을 바이트로 변환한다.
+    /// </summary>
     public static long ConvertRangeValueToBytes(long value, FileCompareRangeUnit unit)
     {
         var multiplier = GetRangeUnitMultiplier(unit);
@@ -1313,6 +1421,9 @@ internal static class FileCompareText
         return Math.Max(0, value) * multiplier;
     }
 
+    /// <summary>
+    /// 바이트 값을 UI 단위로 환산한다.
+    /// </summary>
     public static long ConvertBytesToRangeValue(long bytes, FileCompareRangeUnit unit)
     {
         var multiplier = GetRangeUnitMultiplier(unit);

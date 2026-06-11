@@ -5,6 +5,9 @@ using FileTools.Correction;
 
 namespace FileTools;
 
+/// <summary>
+/// 런타임 플러그인 탐색/로드 레코드와 정규화 캐시.
+/// </summary>
 internal sealed record LoadedNameCorrectionPlugin(
     INameCorrectionPlugin Instance,
     NameCorrectionPluginDescriptor Descriptor,
@@ -19,6 +22,7 @@ internal static class NameCorrectionPluginCatalog
     private static readonly object Sync = new();
     private static IReadOnlyList<LoadedNameCorrectionPlugin>? _cachedPlugins;
 
+    /// <summary>캐시를 사용해 플러그인 리스트를 한 번만 조회한다.</summary>
     public static IReadOnlyList<LoadedNameCorrectionPlugin> Discover()
     {
         lock (Sync)
@@ -28,6 +32,9 @@ internal static class NameCorrectionPluginCatalog
         }
     }
 
+    /// <summary>
+    /// 테스트 전용 캐시 초기화.
+    /// </summary>
     internal static void ResetForTests()
     {
         lock (Sync)
@@ -36,6 +43,10 @@ internal static class NameCorrectionPluginCatalog
         }
     }
 
+    /// <summary>
+    /// 플러그인 루트에서 후보 어셈블리를 모두 수집하고
+    /// ID 중복 제거 후 표시명 순으로 정렬해 반환한다.
+    /// </summary>
     private static IReadOnlyList<LoadedNameCorrectionPlugin> DiscoverCore()
     {
         var plugins = new List<LoadedNameCorrectionPlugin>();
@@ -63,6 +74,9 @@ internal static class NameCorrectionPluginCatalog
             .ToArray();
     }
 
+    /// <summary>
+    /// 루트 폴더를 스캔해 매니페스트와 파일명 규칙에 맞는 dll 후보를 수집한다.
+    /// </summary>
     private static IEnumerable<string> EnumeratePluginAssemblies()
     {
         foreach (var root in GetPluginRoots())
@@ -154,6 +168,7 @@ internal static class NameCorrectionPluginCatalog
         yield return Path.Combine(FileToolsEnvironment.AppDataDir, "Plugins");
     }
 
+    /// <summary>단일 어셈블리에서 플러그인 타입을 로드해 실제 실행 인스턴스를 만든다.</summary>
     private static IEnumerable<LoadedNameCorrectionPlugin> LoadPluginsFromAssembly(string assemblyPath)
     {
         Assembly assembly;
@@ -211,6 +226,7 @@ internal static class NameCorrectionPluginCatalog
         }
     }
 
+    /// <summary>플러그인 메타데이터를 누락 항목 없이 정규화한다.</summary>
     private static NameCorrectionPluginDescriptor NormalizeDescriptor(
         NameCorrectionPluginDescriptor descriptor,
         Type fallbackType)
@@ -235,6 +251,7 @@ internal static class NameCorrectionPluginCatalog
         };
     }
 
+    /// <summary>중복 키/공백이 있는 플러그인 설정 정의를 정제한다.</summary>
     private static IReadOnlyList<NameCorrectionSettingDefinition> NormalizeDefinitions(
         IReadOnlyList<NameCorrectionSettingDefinition> definitions)
     {

@@ -1,5 +1,6 @@
 namespace FileTools;
 
+/// <summary>패턴 후보 피드백/랭킹에 쓰이는 핵심 DTO와 계산기.</summary>
 internal sealed record FileNamePatternFeedback
 {
     public required string OriginalFileName { get; init; }
@@ -53,6 +54,7 @@ internal sealed class FileNamePatternStatisticsRankerOptions
     public double FeedbackHalfLifeDays { get; init; } = 45;
 }
 
+/// <summary>파일명 패턴 피드백 정규화.</summary>
 internal static class FileNamePatternFeedbackNormalizer
 {
     public static IReadOnlyList<FileNamePatternFeedback> Normalize(IEnumerable<FileNamePatternFeedback> feedback)
@@ -65,6 +67,9 @@ internal static class FileNamePatternFeedbackNormalizer
             .ToArray();
     }
 
+    /// <summary>
+    /// 공백/중복 제거 후 시간 정규화로 통계 신뢰도를 통일한다.
+    /// </summary>
     private static FileNamePatternFeedback? NormalizeOne(FileNamePatternFeedback feedback)
     {
         var parsePattern = feedback.ParsePattern.Trim();
@@ -90,6 +95,7 @@ internal static class FileNamePatternFeedbackNormalizer
     }
 }
 
+/// <summary>과거 피드백 기반으로 후보 점수를 산정한다.</summary>
 internal static class FileNamePatternStatisticsRanker
 {
     public static IReadOnlyList<FileNamePatternRankResult> Rank(
@@ -126,6 +132,7 @@ internal static class FileNamePatternStatisticsRanker
             .ToArray();
     }
 
+    /// <summary>단일 후보에 대해 parse/render 히스토리를 반영해 점수를 만든다.</summary>
     private static FileNamePatternRankResult RankOne(
         FileNamePatternRankCandidate candidate,
         IReadOnlyList<WeightedPatternFeedback> feedback,

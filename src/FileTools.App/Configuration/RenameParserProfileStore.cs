@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace FileTools;
 
+/// <summary>파일명 파서용 사전(접두어/키워드) 모델과 저장소.</summary>
 internal sealed class RenameParserProfileDocument
 {
     public List<string> KnownTags { get; set; } =
@@ -63,6 +64,9 @@ internal static class RenameParserProfileStore
 
     public static string ProfilePath => Path.Combine(FileToolsEnvironment.AppDataDir, "rename-parser-profile.json");
 
+    /// <summary>
+    /// 파서 프로필을 읽고 없으면 기본값을 저장한다.
+    /// </summary>
     public static RenameParserProfileDocument Load()
     {
         Directory.CreateDirectory(FileToolsEnvironment.AppDataDir);
@@ -86,6 +90,9 @@ internal static class RenameParserProfileStore
         }
     }
 
+    /// <summary>
+    /// 정규화 후 파서 프로필을 저장한다.
+    /// </summary>
     public static void Save(RenameParserProfileDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
@@ -93,6 +100,7 @@ internal static class RenameParserProfileStore
         File.WriteAllText(ProfilePath, JsonSerializer.Serialize(Normalize(document), JsonOptions));
     }
 
+    /// <summary>기본 문서를 반환한다.</summary>
     public static RenameParserProfileDocument CreateDefaultDocument()
     {
         return new RenameParserProfileDocument();

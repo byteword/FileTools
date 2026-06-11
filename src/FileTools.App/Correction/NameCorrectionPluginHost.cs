@@ -2,12 +2,19 @@ using FileTools.Correction;
 
 namespace FileTools;
 
+/// <summary>
+/// 이름 교정 플러그인 결과를 기존 미리보기 후보에 합성한다.
+/// </summary>
 internal static class NameCorrectionPluginHost
 {
+    /// <summary>플랫폼별 경로 비교 정책에 맞는 후보 중복 비교자.</summary>
     private static readonly StringComparer CandidateComparer = OperatingSystem.IsWindows()
         ? StringComparer.OrdinalIgnoreCase
         : StringComparer.Ordinal;
 
+    /// <summary>
+    /// 미리보기에 대해 교정 플러그인 후보를 추가해 결과 목록을 반환한다.
+    /// </summary>
     public static IReadOnlyList<RenamePreview> AddPluginCandidates(
         IReadOnlyList<RenamePreview> previews,
         FileToolsSettings settings)
@@ -37,6 +44,9 @@ internal static class NameCorrectionPluginHost
         return result;
     }
 
+    /// <summary>
+    /// 플러그인 정의값과 사용자 설정을 결합해 정상화된 설정으로 반환한다.
+    /// </summary>
     public static IReadOnlyDictionary<string, string> BuildSettings(
         LoadedNameCorrectionPlugin plugin,
         RenameCorrectionPluginConfiguration configuration)
@@ -63,6 +73,14 @@ internal static class NameCorrectionPluginHost
         }
     }
 
+    /// <summary>
+    /// 미리보기에 대해 플러그인별로 후보를 추가하고 중복을 제거해 반환한다.
+    /// </summary>
+    /// <remarks>
+    /// 1) 입력 미리보기를 기준으로 플러그인 후보를 생성하고,
+    /// 2) 기존 후보를 유지한 채 파일명만 정규화한 후보를 추가하며,
+    /// 3) 중복이 아니면 충돌 시 충돌 후보를 최소화한다.
+    /// </remarks>
     private static RenamePreview AddPluginCandidates(
         RenamePreview preview,
         RenameCorrectionPluginOptions options,
@@ -129,6 +147,7 @@ internal static class NameCorrectionPluginHost
         };
     }
 
+    /// <summary>플러그인 enable 플래그와 선택 상태를 검사한다.</summary>
     private static bool IsPluginEnabled(
         LoadedNameCorrectionPlugin plugin,
         RenameCorrectionPluginOptions options)
@@ -138,6 +157,7 @@ internal static class NameCorrectionPluginHost
             string.Equals(configuration.PluginId, plugin.Descriptor.Id, StringComparison.OrdinalIgnoreCase));
     }
 
+    /// <summary>플러그인 descriptor 언어 지원 여부를 검사한다.</summary>
     private static bool SupportsLanguage(NameCorrectionPluginDescriptor descriptor, string language)
     {
         return descriptor.SupportedLanguages.Count == 0 ||
@@ -146,6 +166,7 @@ internal static class NameCorrectionPluginHost
                 string.Equals(supported, language, StringComparison.OrdinalIgnoreCase));
     }
 
+    /// <summary>플러그인 요청 객체를 구성한다.</summary>
     private static NameCorrectionRequest CreateRequest(
         RenamePreview preview,
         string language,
@@ -170,6 +191,7 @@ internal static class NameCorrectionPluginHost
         };
     }
 
+    /// <summary>공통어 배열은 사용 안 함일 때 빈 배열을 반환한다.</summary>
     private static IReadOnlyList<string> LoadCommonPhrases(FileToolsSettings settings)
     {
         if (!settings.RenameUseDictionary)
@@ -191,11 +213,13 @@ internal static class NameCorrectionPluginHost
         }
     }
 
+    /// <summary>디렉토리면 전체 파일명, 아니면 확장자 없는 스템을 사용한다.</summary>
     private static string GetStem(string fileName, bool isDirectory)
     {
         return isDirectory ? fileName : Path.GetFileNameWithoutExtension(fileName);
     }
 
+    /// <summary>파일명 후보값에 원본 확장자 보정이 필요한지 판단한다.</summary>
     private static string ToCandidateFileName(PluginCorrectionCandidate candidate, string extension)
     {
         var value = Path.GetFileName(candidate.Value.Trim());

@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace FileTools;
 
+/// <summary>이름 변경 사전(치환/공통어) 영속화 모델.</summary>
 internal sealed class RenameDictionaryDocument
 {
     public List<RenameDictionaryEntry> Replacements { get; set; } = [];
@@ -30,6 +31,9 @@ internal static class RenameDictionaryStore
 
     public static string DictionaryPath => Path.Combine(FileToolsEnvironment.AppDataDir, "rename-dictionary.json");
 
+    /// <summary>
+    /// 사전 파일을 읽고 없으면 빈 문서를 저장한 뒤 반환한다.
+    /// </summary>
     public static RenameDictionaryDocument Load()
     {
         Directory.CreateDirectory(FileToolsEnvironment.AppDataDir);
@@ -53,6 +57,9 @@ internal static class RenameDictionaryStore
         }
     }
 
+    /// <summary>
+    /// 문서를 정규화 후 JSON으로 저장한다.
+    /// </summary>
     public static void Save(RenameDictionaryDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
@@ -60,6 +67,10 @@ internal static class RenameDictionaryStore
         File.WriteAllText(DictionaryPath, JsonSerializer.Serialize(Normalize(document), JsonOptions));
     }
 
+    /// <summary>
+    /// source/phrase 입력을 정규화한다.
+    /// 공백 제거와 중복 제거를 통해 저장 가능한 규칙 집합을 만든다.
+    /// </summary>
     private static RenameDictionaryDocument Normalize(RenameDictionaryDocument document)
     {
         var normalized = new RenameDictionaryDocument();

@@ -1,12 +1,24 @@
 namespace FileTools;
 
+/// <summary>
+/// 작업 계획을 실제 실행으로 바인딩하고 결과를 집계하는 엔진.
+/// </summary>
 internal sealed class WorkPlanExecutor
 {
+    /// <summary>
+    /// OS별 경로 비교 방식(Windows는 대소문자 무시).
+    /// </summary>
     private static readonly StringComparer PathComparer = OperatingSystem.IsWindows()
         ? StringComparer.OrdinalIgnoreCase
         : StringComparer.Ordinal;
 
+    /// <summary>
+    /// 실행 시 기본으로 복제해 쓰는 사용자 설정.
+    /// </summary>
     private readonly FileToolsSettings _baseSettings;
+    /// <summary>
+    /// 아카이브 병합 실행 시 사용자 개입(인코딩/충돌/중복 해석) 채널.
+    /// </summary>
     private readonly IArchiveMergeQuestionSink? _archiveMergeQuestionSink;
 
     public WorkPlanExecutor(FileToolsSettings baseSettings, IArchiveMergeQuestionSink? archiveMergeQuestionSink = null)
@@ -15,11 +27,21 @@ internal sealed class WorkPlanExecutor
         _archiveMergeQuestionSink = archiveMergeQuestionSink;
     }
 
+    /// <summary>
+    /// 취소 토큰/진행 로그 없이 기본 실행한다.
+    /// </summary>
     public OperationResult Run(IEnumerable<WorkTargetPlan> targets)
     {
         return Run(targets, CancellationToken.None, progress: null);
     }
 
+    /// <summary>
+    /// 작업 계획 목록을 순차 실행한다.
+    /// </summary>
+    /// <param name="targets">실행 대상 계획</param>
+    /// <param name="cancellationToken">중단 토큰</param>
+    /// <param name="progress">로그 전달 채널</param>
+    /// <returns>누적 실행 결과</returns>
     public OperationResult Run(
         IEnumerable<WorkTargetPlan> targets,
         CancellationToken cancellationToken,
@@ -27,6 +49,7 @@ internal sealed class WorkPlanExecutor
     {
         var aggregate = new OperationResult();
         var executedArchiveMergePlanIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
         foreach (var target in targets)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -44,6 +67,12 @@ internal sealed class WorkPlanExecutor
         return aggregate;
     }
 
+    /// <summary>
+    /// 단일 대상의 단계(step)들을 실행하고 결과를 합친다.
+    /// </summary>
+    /// <remarks>
+    /// 단계가 비어 있으면 즉시 건너뛰고, 단계별로 현재 경로를 추적해 체인 입출력을 반영한다.
+    /// </remarks>
     private bool RunTarget(
         WorkTargetPlan target,
         OperationResult aggregate,
@@ -92,6 +121,9 @@ internal sealed class WorkPlanExecutor
         return true;
     }
 
+    /// <summary>
+    /// 아카이브 병합 step을 실행한다.
+    /// </summary>
     private static void RunArchiveMergeStep(
         WorkPlanStep step,
         OperationResult aggregate,
@@ -120,6 +152,9 @@ internal sealed class WorkPlanExecutor
         ReportStepResult(result, progress);
     }
 
+    /// <summary>
+    /// 실행 결과의 메시지/에러를 진행 로그로 출력한다.
+    /// </summary>
     private static void ReportStepResult(OperationResult result, IProgress<string>? progress)
     {
         if (progress is null)
@@ -138,6 +173,9 @@ internal sealed class WorkPlanExecutor
         }
     }
 
+    /// <summary>
+    /// 단일 step을 타입별로 실제 작업 runner/operation에 매핑해 실행한다.
+    /// </summary>
     private OperationResult RunStep(WorkPlanStep step, string path)
     {
         var settings = _baseSettings.Clone();
@@ -155,6 +193,7 @@ internal sealed class WorkPlanExecutor
                 }
 
                 return runner.Run(ToolMode.FileNameCorrection, [path]);
+
             case WorkPlanStepKind.FolderWrap:
                 settings.FolderStructureOperation = FolderStructureOperation.WrapFiles;
                 return runner.Run(ToolMode.FolderStructure, [path]);
@@ -177,6 +216,9 @@ internal sealed class WorkPlanExecutor
         }
     }
 
+    /// <summary>
+    /// 현재 step이 끝난 뒤 예상되는 다음 경로를 계산한다.
+    /// </summary>
     private string? PredictNextPath(WorkPlanStep step, string path)
     {
         return step.Kind switch
@@ -194,6 +236,9 @@ internal sealed class WorkPlanExecutor
         };
     }
 
+    /// <summary>
+    /// 이름 변경 step의 예상 결과 경로를 계산한다.
+    /// </summary>
     private string? PredictRenamePath(WorkPlanStep step, string path)
     {
         try
@@ -212,6 +257,9 @@ internal sealed class WorkPlanExecutor
         }
     }
 
+    /// <summary>
+    /// Wrap step의 예상 대상 폴더를 계산한다.
+    /// </summary>
     private string? PredictWrapPath(string path)
     {
         if (!File.Exists(path))
@@ -248,6 +296,15 @@ internal sealed class WorkPlanExecutor
         return fileCollision.IsReady ? targetFolder : null;
     }
 
+    /// <summary>
+    /// AutoRelocation step의 예상 대상 경로를 계산한다.
+    /// 템플릿/컨텍스트 생성 실패 시 null로 실패 신호를 낸다.
+    /// </summary>
+    /// <remarks>
+    /// 1) 템플릿 ID를 기본값/설정값으로 해석한다.
+    /// 2) 루트 경로 오버라이드가 있으면 우선 적용한다.
+    /// 3) 생성 계획에서 충돌/검토가 필요한 결과는 미리보기에서 배제한다.
+    /// </remarks>
     private string? PredictAutoRelocationPath(WorkPlanStep step, string path)
     {
         try
@@ -290,6 +347,13 @@ internal sealed class WorkPlanExecutor
         }
     }
 
+    /// <summary>
+    /// Unwrap step의 예상 결과 경로를 계산한다.
+    /// </summary>
+    /// <remarks>
+    /// MoveInnerFilesUp은 부모 폴더로 승격하고,
+    /// 단일 자식 파일 기반 언랩만 폴더 경로로 전환한다.
+    /// </remarks>
     private string? PredictUnwrapPath(
         string path,
         FolderStructureOperation operation,
@@ -336,6 +400,12 @@ internal sealed class WorkPlanExecutor
         return fileCollision.IsReady ? fileCollision.TargetPath : null;
     }
 
+    /// <summary>
+    /// AutoRelocation 템플릿 적용에 필요한 컨텍스트를 구성한다.
+    /// </summary>
+    /// <remarks>
+    /// 템플릿 평가/로그 추적에 필요한 메타데이터(크기/시간/속성)를 한 곳에서 묶는다.
+    /// </remarks>
     private RelocationContextWithRoot? CreateRelocationContext(string path, string? targetRootOverride)
     {
         if (!File.Exists(path) && !Directory.Exists(path))
@@ -382,6 +452,9 @@ internal sealed class WorkPlanExecutor
                 info.CreationTime));
     }
 
+    /// <summary>
+    /// 대상의 폴더/파일 타입에 따라 템플릿용 스템 이름을 구성한다.
+    /// </summary>
     private static string GetRelocationFileNameStem(string path)
     {
         return Directory.Exists(path)
@@ -389,11 +462,17 @@ internal sealed class WorkPlanExecutor
             : Path.GetFileNameWithoutExtension(path);
     }
 
+    /// <summary>
+    /// 폴더 기반/파일 기반 템플릿 계산을 위해 스템을 추출한다.
+    /// </summary>
     private static string GetRelocationFileExtension(string path)
     {
         return File.Exists(path) ? Path.GetExtension(path).TrimStart('.') : "";
     }
 
+    /// <summary>
+    /// 존재 충돌 시 (2), (3) ... 번호를 붙여서 유효한 경로를 만든다.
+    /// </summary>
     private static string CreateUniqueTargetPath(string targetPath)
     {
         if (!File.Exists(targetPath) && !Directory.Exists(targetPath))
@@ -416,6 +495,9 @@ internal sealed class WorkPlanExecutor
         return targetPath;
     }
 
+    /// <summary>
+    /// 후보 경로가 부모 경로 아래인지 판별한다.
+    /// </summary>
     private static bool IsSubPathOf(string candidatePath, string parentPath)
     {
         var parentFull = Path.GetFullPath(parentPath)
@@ -434,6 +516,9 @@ internal sealed class WorkPlanExecutor
         string RootFolder,
         AutoRelocationItemContext Context);
 
+    /// <summary>
+    /// 파일명 정정기 생성 캐시로 플랜별 불필요한 규칙 파싱 비용을 줄인다.
+    /// </summary>
     private KoreanFileNameCorrector CreateFileNameCorrector()
     {
         var dictionary = RenameDictionaryStore.Load();

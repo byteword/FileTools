@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace FileTools;
 
+/// <summary>학습 피드백 저장 형식과 CRUD/정렬 규칙.</summary>
 internal sealed record FileNamePatternFeedbackStoreOptions
 {
     public bool Enabled { get; init; } = true;
@@ -20,6 +21,9 @@ internal static class FileNamePatternFeedbackStore
 
     public static string FeedbackPath => Path.Combine(FileToolsEnvironment.AppDataDir, "rename-pattern-feedback.jsonl");
 
+    /// <summary>
+    /// jsonl 피드백 파일을 읽고 정렬/제한을 적용해 반환한다.
+    /// </summary>
     public static IReadOnlyList<FileNamePatternFeedback> Load(
         string? path = null,
         FileNamePatternFeedbackStoreOptions? options = null)
@@ -69,6 +73,9 @@ internal static class FileNamePatternFeedbackStore
         return TrimToLimit(FileNamePatternFeedbackNormalizer.Normalize(feedback), normalizedOptions.FeedbackLimit);
     }
 
+    /// <summary>
+    /// 전체 피드백을 덮어쓰기 방식으로 저장한다.
+    /// </summary>
     public static void Save(
         IEnumerable<FileNamePatternFeedback> feedback,
         string? path = null,
@@ -91,6 +98,9 @@ internal static class FileNamePatternFeedbackStore
         }
     }
 
+    /// <summary>
+    /// 신규 피드백을 정규화 후 기존 로그 뒤에 추가한다.
+    /// </summary>
     public static void Append(
         FileNamePatternFeedback feedback,
         string? path = null,

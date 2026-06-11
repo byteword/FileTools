@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace FileTools;
 
+/// <summary>왜곡한글 후보 계산에 쓰는 학습 프로필 모델과 저장소.</summary>
 internal sealed class RenameCandidateProfileDocument
 {
     public ObfuscatedHangulCandidateProfile ObfuscatedHangul { get; set; } = new();
@@ -33,6 +34,9 @@ internal static class RenameCandidateProfileStore
 
     public static string ProfilePath => Path.Combine(FileToolsEnvironment.AppDataDir, "rename-candidate-profile.json");
 
+    /// <summary>
+    /// 프로필 파일을 읽고 없으면 기본 프로필을 생성한다.
+    /// </summary>
     public static RenameCandidateProfileDocument Load(IEnumerable<string>? legacyScoringWords = null)
     {
         Directory.CreateDirectory(FileToolsEnvironment.AppDataDir);
@@ -56,6 +60,9 @@ internal static class RenameCandidateProfileStore
         }
     }
 
+    /// <summary>
+    /// 현재 프로필을 정규화해 저장한다.
+    /// </summary>
     public static void Save(RenameCandidateProfileDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
@@ -63,6 +70,7 @@ internal static class RenameCandidateProfileStore
         File.WriteAllText(ProfilePath, JsonSerializer.Serialize(Normalize(document), JsonOptions));
     }
 
+    /// <summary>기본 프로필을 생성한다.</summary>
     public static RenameCandidateProfileDocument CreateDefaultDocument(IEnumerable<string>? scoringWords = null)
     {
         return new RenameCandidateProfileDocument

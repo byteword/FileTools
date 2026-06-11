@@ -1,11 +1,20 @@
 namespace FileTools;
 
+/// <summary>
+/// 모드별 실행을 담당하고, 필요한 경우 보정/폴더 작업/자동 재배치로 라우팅한다.
+/// </summary>
 internal sealed class FileToolRunner
 {
+    /// <summary>
+    /// OS별 경로 비교 규칙(Windows는 대소문자 무시).
+    /// </summary>
     private static readonly StringComparer PathComparer = OperatingSystem.IsWindows()
         ? StringComparer.OrdinalIgnoreCase
         : StringComparer.Ordinal;
 
+    /// <summary>
+    /// 실행 시점의 설정 스냅샷.
+    /// </summary>
     private readonly FileToolsSettings _settings;
 
     public FileToolRunner(FileToolsSettings settings)
@@ -13,6 +22,12 @@ internal sealed class FileToolRunner
         _settings = settings;
     }
 
+    /// <summary>
+    /// 선택 모드에 따라 경로들을 정규화한 뒤 해당 작업을 실행한다.
+    /// </summary>
+    /// <param name="mode">실행할 운영 모드</param>
+    /// <param name="paths">입력 경로</param>
+    /// <returns>적용 결과 집계</returns>
     public OperationResult Run(ToolMode mode, IEnumerable<string> paths)
     {
         var normalizedPaths = paths
@@ -31,6 +46,9 @@ internal sealed class FileToolRunner
         };
     }
 
+    /// <summary>
+    /// 이름 교정 모드 실행을 위한 후보 생성/적용을 한 번에 수행한다.
+    /// </summary>
     private OperationResult RunFileNameCorrection(IReadOnlyList<string> paths)
     {
         try
@@ -45,6 +63,11 @@ internal sealed class FileToolRunner
         }
     }
 
+    /// <summary>
+    /// 폴더 구조 작업(랩/언랩/상향 이동)을 경로별로 분기 실행한다.
+    /// </summary>
+    /// <param name="paths">정규화된 대상 경로</param>
+    /// <returns>폴더 구조 작업 결과</returns>
     private OperationResult RunFolderStructure(IReadOnlyList<string> paths)
     {
         var result = new OperationResult();
@@ -81,6 +104,9 @@ internal sealed class FileToolRunner
         return result;
     }
 
+    /// <summary>
+    /// 폴더 구조 모드는 현재 설정된 동작(랩/언랩/상향 이동)에 따라 분기 실행한다.
+    /// </summary>
     private void RunFolderOperation(string folderPath, OperationResult result)
     {
         switch (_settings.FolderStructureOperation)
@@ -116,6 +142,11 @@ internal sealed class FileToolRunner
         }
     }
 
+    /// <summary>
+    /// 파일을 랩 모드 대상 폴더로 이동한다.
+    /// </summary>
+    /// <param name="filePath">랩 대상 파일 경로</param>
+    /// <param name="result">결과 집계</param>
     private void WrapFile(string filePath, OperationResult result)
     {
         result.AddCandidate();
@@ -160,6 +191,16 @@ internal sealed class FileToolRunner
         FileToolsEnvironment.Log("WRAP", filePath + " -> " + targetPath);
     }
 
+    /// <summary>
+    /// 단일 파일이 들어 있는 폴더를 언랩으로 처리 가능한지 판정하고 실행한다.
+    /// </summary>
+    /// <param name="folderPath">처리 대상 폴더</param>
+    /// <param name="sameNameOnly">폴더명과 파일명 일치 조건</param>
+    /// <param name="result">결과 집계</param>
+    /// <returns>성공 여부</returns>
+    /// <summary>
+    /// 단일 파일 언랩을 시도하고, 조건 불일치 시 사유를 결과에 기록한다.
+    /// </summary>
     private bool UnwrapSingleFileFolder(string folderPath, bool sameNameOnly, OperationResult result)
     {
         result.AddCandidate();
@@ -196,6 +237,9 @@ internal sealed class FileToolRunner
         return true;
     }
 
+    /// <summary>
+    /// 단일 파일 폴더 조건(파일 1개/하위 폴더 0개 등) 판정을 수행한다.
+    /// </summary>
     private static bool CanUnwrapSingleFileFolder(
         string folderPath,
         bool sameNameOnly,
@@ -231,6 +275,11 @@ internal sealed class FileToolRunner
         return true;
     }
 
+    /// <summary>
+    /// 하위 직접 파일을 상위 폴더로 승격시키는 작업이다.
+    /// </summary>
+    /// <param name="folderPath">처리 대상 폴더</param>
+    /// <param name="result">결과 집계</param>
     private static void MoveInnerFilesUp(string folderPath, OperationResult result)
     {
         result.AddCandidate();
@@ -277,6 +326,12 @@ internal sealed class FileToolRunner
         result.AddApplied($"{dir.Name} 직접 하위 파일 {moved}개 상위 이동");
     }
 
+    /// <summary>
+    /// 자동 재배치 실행 엔트리.
+    /// 템플릿을 불러오고 대상들을 그룹핑해 템플릿 빌드 후 이동을 적용한다.
+    /// </summary>
+    /// <param name="paths">처리 경로</param>
+    /// <returns>실행 결과</returns>
     private OperationResult RunAutoRelocation(IReadOnlyList<string> paths)
     {
         var result = new OperationResult();
@@ -332,6 +387,9 @@ internal sealed class FileToolRunner
         return result;
     }
 
+    /// <summary>
+    /// 자동 재배치 계획에 필요한 텍스트/분류 속성 맥락을 구성한다.
+    /// </summary>
     private static RelocationContextWithRoot? CreateRelocationContext(
         string path,
         KoreanFileNameCorrector corrector,
@@ -387,6 +445,9 @@ internal sealed class FileToolRunner
         }
     }
 
+    /// <summary>
+    /// 파일/폴더 이름에서 템플릿용 파일명 스템(확장자 제외)을 구한다.
+    /// </summary>
     private static string GetRelocationFileNameStem(string path)
     {
         return Directory.Exists(path)
@@ -394,11 +455,19 @@ internal sealed class FileToolRunner
             : Path.GetFileNameWithoutExtension(path);
     }
 
+    /// <summary>
+    /// 템플릿에 들어갈 파일 확장자(점 제외)를 추출한다.
+    /// </summary>
     private static string GetRelocationFileExtension(string path)
     {
         return File.Exists(path) ? Path.GetExtension(path).TrimStart('.') : "";
     }
 
+    /// <summary>
+    /// 단일 템플릿 항목의 이동 의도를 실제 파일/폴더 이동으로 반영한다.
+    /// </summary>
+    /// <param name="item">자동 재배치 항목</param>
+    /// <param name="result">결과 집계</param>
     private static void ApplyRelocationItem(AutoRelocationPlanItem item, OperationResult result)
     {
         try
@@ -453,6 +522,11 @@ internal sealed class FileToolRunner
         }
     }
 
+    /// <summary>
+    /// 충돌을 피하기 위해 경로 뒤에 번호를 붙여 유효한 대상 경로를 만든다.
+    /// </summary>
+    /// <param name="targetPath">원본 대상 경로</param>
+    /// <returns>유일한 경로</returns>
     private static string CreateUniqueTargetPath(string targetPath)
     {
         if (!File.Exists(targetPath) && !Directory.Exists(targetPath))
@@ -475,6 +549,9 @@ internal sealed class FileToolRunner
         throw new InvalidOperationException("중복 대상 경로를 해결할 수 없습니다: " + targetPath);
     }
 
+    /// <summary>
+    /// candidate가 부모 경로 내부인지 판단해 하위로 이동되는 경우를 방지한다.
+    /// </summary>
     private static bool IsSubPathOf(string candidatePath, string parentPath)
     {
         var parentFull = Path.GetFullPath(parentPath)

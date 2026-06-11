@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace FileTools;
 
+/// <summary>이름 교정 파이프라인의 단계/유형/실행 모드 모델과 저장소.</summary>
 internal enum RenameCorrectionRuleStage
 {
     Preprocess,
@@ -45,6 +46,7 @@ internal sealed class RenameRuleDocument
     public List<RenameCorrectionRule> Rules { get; set; } = [];
 }
 
+/// <summary>한 규칙의 정의를 표현한다.</summary>
 internal sealed class RenameCorrectionRule
 {
     public string Id { get; set; } = "";
@@ -73,6 +75,19 @@ internal sealed class RenameCorrectionRule
 
     public string Replacement { get; set; } = "";
 
+    /// <summary>
+    /// 리스트 항목 노출/로그에 쓰기 쉬운 문자열을 반환한다.
+    /// </summary>
+    public override string ToString()
+    {
+        var enabled = Enabled || IsRequired ? "On" : "Off";
+        var type = IsBuiltIn ? "Built-in" : RenameCorrectionRuleText.GetKindDisplayName(Kind);
+        return $"{Order:000} [{RenameCorrectionRuleText.GetStageDisplayName(Stage)}] {enabled} - {DisplayName} ({type}, {RenameCorrectionRuleText.GetModeDisplayName(Mode)})";
+    }
+
+    /// <summary>
+    /// 클론은 목록 정렬/병합 시 기존 인스턴스 오염을 막는다.
+    /// </summary>
     public RenameCorrectionRule Clone()
     {
         return new RenameCorrectionRule
@@ -92,15 +107,9 @@ internal sealed class RenameCorrectionRule
             Replacement = Replacement
         };
     }
-
-    public override string ToString()
-    {
-        var enabled = Enabled || IsRequired ? "On" : "Off";
-        var type = IsBuiltIn ? "Built-in" : RenameCorrectionRuleText.GetKindDisplayName(Kind);
-        return $"{Order:000} [{RenameCorrectionRuleText.GetStageDisplayName(Stage)}] {enabled} - {DisplayName} ({type}, {RenameCorrectionRuleText.GetModeDisplayName(Mode)})";
-    }
 }
 
+/// <summary>기본 내장 규칙 ID 상수.</summary>
 internal static class RenameRuleIds
 {
     public const string UnicodeJamo = "built-in.unicode-jamo";
@@ -115,6 +124,7 @@ internal static class RenameRuleIds
     public const string WindowsSafeFileName = "built-in.windows-safe-file-name";
 }
 
+/// <summary>라벨 변환 유틸.</summary>
 internal static class RenameCorrectionRuleText
 {
     public static string GetStageDisplayName(RenameCorrectionRuleStage stage) => stage switch
@@ -158,12 +168,16 @@ internal static class RenameCorrectionRuleText
     };
 }
 
+/// <summary>규칙 파일의 로드/저장/정규화를 담당한다.</summary>
 internal static class RenameRuleStore
 {
     private static readonly JsonSerializerOptions JsonOptions = CreateJsonOptions();
 
     public static string RulePath => Path.Combine(FileToolsEnvironment.AppDataDir, "rename-rules.json");
 
+    /// <summary>
+    /// 규칙 목록을 읽고 없으면 기본 규칙을 만든다.
+    /// </summary>
     public static RenameRuleDocument Load()
     {
         Directory.CreateDirectory(FileToolsEnvironment.AppDataDir);
@@ -190,6 +204,9 @@ internal static class RenameRuleStore
         }
     }
 
+    /// <summary>
+    /// 중복/정규화된 규칙만 직렬화해 저장한다.
+    /// </summary>
     public static void Save(RenameRuleDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
@@ -199,11 +216,17 @@ internal static class RenameRuleStore
             JsonOptions));
     }
 
+    /// <summary>
+    /// 기본 규칙을 반환한다.
+    /// </summary>
     public static RenameRuleDocument CreateDefaultDocument()
     {
         return new RenameRuleDocument { Rules = CreateDefaultRules().ToList() };
     }
 
+    /// <summary>
+    /// 기본 규칙 + 사용자 규칙을 합쳐 id/순서/필수성 기준으로 정규화한다.
+    /// </summary>
     public static IReadOnlyList<RenameCorrectionRule> NormalizeRules(IEnumerable<RenameCorrectionRule> rules)
     {
         var incoming = rules
@@ -257,6 +280,7 @@ internal static class RenameRuleStore
             .ToArray();
     }
 
+    /// <summary>기본 규칙을 생성한다.</summary>
     private static IEnumerable<RenameCorrectionRule> CreateDefaultRules()
     {
         yield return BuiltIn(
@@ -342,6 +366,7 @@ internal static class RenameRuleStore
             isRequired: true);
     }
 
+    /// <summary>BuiltIn 규칙 객체를 한 번만 만들어준다.</summary>
     private static RenameCorrectionRule BuiltIn(
         string id,
         string displayName,
