@@ -42,6 +42,13 @@ Scope reviewed:
   top-right pane, moves plan review to a bottom execution-order list, places
   run/stop/progress state in the same work-plan group, and defines all-plan,
   selected-target, and warning filters before implementation.
+- Started the MainForm plan-list layout branch on 2026-06-12:
+  - Reworked the first layout slice into a top target/task-log split and a
+    bottom work-plan group.
+  - Moved run/stop and lightweight progress state into the work-plan group while
+    keeping the existing selected-target plan grid behavior.
+  - Refreshed `docs/images/current-mainform-designer-layout.svg`, README UI
+    notes, and MainForm UX tracking docs to match the new layout skeleton.
 - Added `docs/in-app-context-menu-folder-merge-design.md` and
   `docs/images/in-app-context-menu-folder-merge-design.svg` on 2026-06-11 to
   prepare the in-app right-click menu implementation and the safer selected-target

@@ -33,6 +33,7 @@ partial class MainForm
     private ToolStripMenuItem _settingsMenuItem = null!;
     private ToolStripMenuItem _openSettingsMenuItem = null!;
     private SplitContainer _mainSplit = null!;
+    private SplitContainer _topSplit = null!;
     private GroupBox _targetsGroup = null!;
     private DataGridView _targetGrid = null!;
     private ContextMenuStrip _targetContextMenu = null!;
@@ -81,6 +82,9 @@ partial class MainForm
     private ToolStripButton _editStepToolButton = null!;
     private ToolStripButton _removeStepToolButton = null!;
     private ToolStripButton _clearStepsToolButton = null!;
+    private TableLayoutPanel _planExecutionPanel = null!;
+    private Label _planExecutionStatusLabel = null!;
+    private ProgressBar _planProgressBar = null!;
     private Panel _executionPanel = null!;
     private ArchiveMergeDecisionPanel _archiveMergeDecisionPanel = null!;
     private TextBox _logBox = null!;
@@ -126,6 +130,7 @@ partial class MainForm
         _settingsMenuItem = new ToolStripMenuItem();
         _openSettingsMenuItem = new ToolStripMenuItem();
         _mainSplit = new SplitContainer();
+        _topSplit = new SplitContainer();
         _targetsGroup = new GroupBox();
         _targetGrid = new DataGridView();
         _targetContextMenu = new ContextMenuStrip(components);
@@ -174,6 +179,9 @@ partial class MainForm
         _editStepToolButton = new ToolStripButton();
         _removeStepToolButton = new ToolStripButton();
         _clearStepsToolButton = new ToolStripButton();
+        _planExecutionPanel = new TableLayoutPanel();
+        _planExecutionStatusLabel = new Label();
+        _planProgressBar = new ProgressBar();
         _executionPanel = new Panel();
         _archiveMergeDecisionPanel = new ArchiveMergeDecisionPanel();
         _logBox = new TextBox();
@@ -183,6 +191,10 @@ partial class MainForm
         _mainSplit.Panel1.SuspendLayout();
         _mainSplit.Panel2.SuspendLayout();
         _mainSplit.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)_topSplit).BeginInit();
+        _topSplit.Panel1.SuspendLayout();
+        _topSplit.Panel2.SuspendLayout();
+        _topSplit.SuspendLayout();
         _targetsGroup.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)_targetGrid).BeginInit();
         _targetToolStrip.SuspendLayout();
@@ -191,6 +203,7 @@ partial class MainForm
         _planGroup.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)_planGrid).BeginInit();
         _planToolStrip.SuspendLayout();
+        _planExecutionPanel.SuspendLayout();
         _executionPanel.SuspendLayout();
         SuspendLayout();
 
@@ -341,12 +354,25 @@ partial class MainForm
         _planContextRunPlanMenuItem.Text = "Run plan";
 
         _mainSplit.Dock = DockStyle.Fill;
-        _mainSplit.FixedPanel = FixedPanel.Panel1;
+        _mainSplit.FixedPanel = FixedPanel.None;
         _mainSplit.Name = "_mainSplit";
-        _mainSplit.Panel1.Controls.Add(_targetsGroup);
-        _mainSplit.Panel2.Controls.Add(_rightPanel);
+        _mainSplit.Orientation = Orientation.Horizontal;
+        _mainSplit.Panel1.Controls.Add(_topSplit);
+        _mainSplit.Panel1MinSize = 260;
+        _mainSplit.Panel2.Controls.Add(_planGroup);
+        _mainSplit.Panel2MinSize = 240;
         _mainSplit.Size = new Size(980, 676);
-        _mainSplit.SplitterDistance = 410;
+        _mainSplit.SplitterDistance = 344;
+
+        _topSplit.Dock = DockStyle.Fill;
+        _topSplit.FixedPanel = FixedPanel.Panel1;
+        _topSplit.Name = "_topSplit";
+        _topSplit.Panel1.Controls.Add(_targetsGroup);
+        _topSplit.Panel1MinSize = 360;
+        _topSplit.Panel2.Controls.Add(_rightPanel);
+        _topSplit.Panel2MinSize = 320;
+        _topSplit.Size = new Size(980, 344);
+        _topSplit.SplitterDistance = 500;
 
         _targetsGroup.Dock = DockStyle.Fill;
         _targetsGroup.Name = "_targetsGroup";
@@ -448,7 +474,6 @@ partial class MainForm
         _rightPanel.Dock = DockStyle.Fill;
         _rightPanel.Name = "_rightPanel";
         _rightPanel.Padding = new Padding(8);
-        _rightPanel.Controls.Add(_planGroup);
         _rightPanel.Controls.Add(_executionPanel);
         _rightPanel.Controls.Add(_actionToolStrip);
 
@@ -548,6 +573,7 @@ partial class MainForm
         _planGroup.Padding = new Padding(8);
         _planGroup.Text = "Work plan";
         _planGroup.Controls.Add(_planGrid);
+        _planGroup.Controls.Add(_planExecutionPanel);
         _planGroup.Controls.Add(_planToolStrip);
         _planGroup.Controls.Add(_planScopeLabel);
 
@@ -614,13 +640,42 @@ partial class MainForm
         _clearStepsToolButton.Text = "Clear steps";
         _clearStepsToolButton.TextImageRelation = TextImageRelation.ImageBeforeText;
 
-        _executionPanel.Dock = DockStyle.Bottom;
-        _executionPanel.Height = 96;
+        _planExecutionPanel.ColumnCount = 3;
+        _planExecutionPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        _planExecutionPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170F));
+        _planExecutionPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 126F));
+        _planExecutionPanel.Dock = DockStyle.Bottom;
+        _planExecutionPanel.Height = 54;
+        _planExecutionPanel.Name = "_planExecutionPanel";
+        _planExecutionPanel.Padding = new Padding(0, 8, 0, 0);
+        _planExecutionPanel.RowCount = 1;
+        _planExecutionPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        _planExecutionPanel.Controls.Add(_planExecutionStatusLabel, 0, 0);
+        _planExecutionPanel.Controls.Add(_planProgressBar, 1, 0);
+        _planExecutionPanel.Controls.Add(_runStopButton, 2, 0);
+
+        _planExecutionStatusLabel.Dock = DockStyle.Fill;
+        _planExecutionStatusLabel.Name = "_planExecutionStatusLabel";
+        _planExecutionStatusLabel.Padding = new Padding(2, 0, 0, 0);
+        _planExecutionStatusLabel.Text = "Ready.";
+        _planExecutionStatusLabel.TextAlign = ContentAlignment.MiddleLeft;
+
+        _planProgressBar.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+        _planProgressBar.MarqueeAnimationSpeed = 0;
+        _planProgressBar.Name = "_planProgressBar";
+        _planProgressBar.Size = new Size(154, 14);
+        _planProgressBar.Style = ProgressBarStyle.Blocks;
+
+        _runStopButton.Dock = DockStyle.Fill;
+        _runStopButton.Name = "_runStopButton";
+        _runStopButton.Text = "Run";
+        _runStopButton.TextImageRelation = TextImageRelation.ImageBeforeText;
+
+        _executionPanel.Dock = DockStyle.Fill;
         _executionPanel.Name = "_executionPanel";
         _executionPanel.Padding = new Padding(0, 8, 0, 0);
         _executionPanel.Controls.Add(_logBox);
         _executionPanel.Controls.Add(_archiveMergeDecisionPanel);
-        _executionPanel.Controls.Add(_runStopButton);
 
         _archiveMergeDecisionPanel.Dock = DockStyle.Right;
         _archiveMergeDecisionPanel.Name = "_archiveMergeDecisionPanel";
@@ -638,13 +693,6 @@ partial class MainForm
         _logBox.Text = "Ready.";
         _logBox.WordWrap = true;
 
-        _runStopButton.Dock = DockStyle.Right;
-        _runStopButton.Height = 88;
-        _runStopButton.Name = "_runStopButton";
-        _runStopButton.Text = "Run";
-        _runStopButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-        _runStopButton.Width = 118;
-
         AllowDrop = true;
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
@@ -659,6 +707,7 @@ partial class MainForm
 
         _executionPanel.ResumeLayout(false);
         _executionPanel.PerformLayout();
+        _planExecutionPanel.ResumeLayout(false);
         _planToolStrip.ResumeLayout(false);
         _planToolStrip.PerformLayout();
         ((System.ComponentModel.ISupportInitialize)_planGrid).EndInit();
@@ -673,6 +722,10 @@ partial class MainForm
         ((System.ComponentModel.ISupportInitialize)_targetGrid).EndInit();
         _targetsGroup.ResumeLayout(false);
         _targetsGroup.PerformLayout();
+        _topSplit.Panel1.ResumeLayout(false);
+        _topSplit.Panel2.ResumeLayout(false);
+        ((System.ComponentModel.ISupportInitialize)_topSplit).EndInit();
+        _topSplit.ResumeLayout(false);
         _mainSplit.Panel1.ResumeLayout(false);
         _mainSplit.Panel2.ResumeLayout(false);
         ((System.ComponentModel.ISupportInitialize)_mainSplit).EndInit();

@@ -2,7 +2,7 @@
 
 Review date: 2026-06-12
 
-Status: design proposal. No implementation has been made for this layout yet.
+Status: first layout slice started. The current implementation has moved target/task/log controls into the top split and moved the selected-target work-plan grid plus run/stop/progress state into the bottom group. The all-plan projection, plan filters, execution-order grouping, and multi-input/multi-output display model are not implemented yet.
 
 ![Proposed MainForm plan list layout](images/mainform-plan-list-layout-proposal.svg)
 
@@ -107,12 +107,12 @@ Duplicate delete should also be shown as a grouped operation when it came from a
 
 ## Implementation Slices
 
-1. Add documentation and branch the work.
-2. Extract plan-display projection generation without changing layout.
-3. Add tests for projection ordering, selected-target filtering, shared archive merge de-duplication, and warning propagation.
-4. Move the run/stop button and progress label into the plan group while keeping current plan grid behavior.
-5. Replace the current selected-target-only plan grid with the bottom plan grid and filter controls.
-6. Move task buttons/log into the top-right pane.
+1. Add documentation and branch the work. Done.
+2. Move task buttons/log into the top-right pane while preserving existing command behavior. Done.
+3. Move the run/stop button and progress label into the plan group while keeping current plan grid behavior. Done.
+4. Extract plan-display projection generation without changing layout.
+5. Add tests for projection ordering, selected-target filtering, shared archive merge de-duplication, and warning propagation.
+6. Replace the current selected-target-only plan grid with the bottom plan grid and filter controls.
 7. Add grouped display rows for shared and uncertain operations.
 8. Perform manual UI validation at small, default, and wide window sizes.
 

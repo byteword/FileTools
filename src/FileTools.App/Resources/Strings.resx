@@ -414,6 +414,9 @@
   <data name="ToolTipClearSteps" xml:space="preserve"><value>Clear every step shown in the current work plan.</value></data>
   <data name="ToolTipRunPlan" xml:space="preserve"><value>Run the current plan.</value></data>
   <data name="ToolTipStopPlan" xml:space="preserve"><value>Request a stop after the current operation completes.</value></data>
+  <data name="PlanExecutionStatusReady" xml:space="preserve"><value>Ready.</value></data>
+  <data name="PlanExecutionStatusRunning" xml:space="preserve"><value>Working through the current plan.</value></data>
+  <data name="PlanExecutionStatusStopping" xml:space="preserve"><value>Stop requested. Waiting for the current operation to finish.</value></data>
   <data name="LogReady" xml:space="preserve"><value>Ready.</value></data>
   <data name="LogExecutionStartingFormat" xml:space="preserve"><value>Starting plan: {0} targets, {1} steps.</value></data>
   <data name="LogExecutionSummaryFormat" xml:space="preserve"><value>Summary: targets {0}, applied {1}, skipped {2}, errors {3}.</value></data>

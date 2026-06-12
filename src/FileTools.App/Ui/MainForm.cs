@@ -179,6 +179,7 @@ public sealed partial class MainForm : Form
         _targetsGroup.Text = Localizer.Get("GroupDropTargets");
         _planGroup.Text = Localizer.Get("GroupWorkPlan");
         _planScopeLabel.Text = Localizer.Get("PlanScopeNoSelection");
+        _planExecutionStatusLabel.Text = Localizer.Get("PlanExecutionStatusReady");
 
         _fileMenuItem.Text = Localizer.Get("MenuFile");
         _taskMenuItem.Text = Localizer.Get("MenuTasks");
@@ -1627,6 +1628,7 @@ public sealed partial class MainForm : Form
     private void ApplyRunStopButtonState()
     {
         var isExecuting = _executionCancellation is not null;
+        var cancellationPending = _executionCancellation?.IsCancellationRequested == true;
         var text = Localizer.Get(isExecuting ? "ButtonStop" : "ButtonRun");
         var image = isExecuting ? UiIconFactory.Stop : UiIconFactory.Play;
         _runStopButton.Text = text;
@@ -1635,6 +1637,15 @@ public sealed partial class MainForm : Form
         _runStopMenuItem.Image = image;
         _planContextRunPlanMenuItem.Text = text;
         _planContextRunPlanMenuItem.Image = image;
+        _planExecutionStatusLabel.Text = cancellationPending
+            ? Localizer.Get("PlanExecutionStatusStopping")
+            : Localizer.Get(isExecuting ? "PlanExecutionStatusRunning" : "PlanExecutionStatusReady");
+        _planProgressBar.Style = isExecuting ? ProgressBarStyle.Marquee : ProgressBarStyle.Blocks;
+        _planProgressBar.MarqueeAnimationSpeed = isExecuting ? 30 : 0;
+        if (!isExecuting)
+        {
+            _planProgressBar.Value = 0;
+        }
     }
 
     private bool CanMoveSelectedTargets(int direction)

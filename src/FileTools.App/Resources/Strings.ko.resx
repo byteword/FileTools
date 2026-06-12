@@ -414,6 +414,9 @@
   <data name="ToolTipClearSteps" xml:space="preserve"><value>현재 작업 플랜에 표시된 모든 단계를 삭제합니다.</value></data>
   <data name="ToolTipRunPlan" xml:space="preserve"><value>현재 플랜을 실행합니다.</value></data>
   <data name="ToolTipStopPlan" xml:space="preserve"><value>현재 작업이 끝난 뒤 중지하도록 요청합니다.</value></data>
+  <data name="PlanExecutionStatusReady" xml:space="preserve"><value>준비됨.</value></data>
+  <data name="PlanExecutionStatusRunning" xml:space="preserve"><value>현재 플랜을 실행 중입니다.</value></data>
+  <data name="PlanExecutionStatusStopping" xml:space="preserve"><value>중지를 요청했습니다. 현재 작업이 끝나기를 기다립니다.</value></data>
   <data name="LogReady" xml:space="preserve"><value>준비됨.</value></data>
   <data name="LogExecutionStartingFormat" xml:space="preserve"><value>플랜 실행 시작: 대상 {0}개, 단계 {1}개.</value></data>
   <data name="LogExecutionSummaryFormat" xml:space="preserve"><value>요약: 대상 {0}, 적용 {1}, 건너뜀 {2}, 오류 {3}.</value></data>
