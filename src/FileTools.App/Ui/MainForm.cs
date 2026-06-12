@@ -1265,6 +1265,11 @@ public sealed partial class MainForm : Form
             return;
         }
 
+        if (e.Graphics is null)
+        {
+            return;
+        }
+
         if (_planGrid.Rows[e.RowIndex].Tag is not WorkPlanDisplayRow { Kind: WorkPlanDisplayRowKind.Input } ||
             !_planInputGroupByGridRow.TryGetValue(e.RowIndex, out var groupInfo) ||
             groupInfo.InputCount <= 1)
