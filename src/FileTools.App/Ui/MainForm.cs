@@ -1200,28 +1200,7 @@ public sealed partial class MainForm : Form
 
         var selectedTargets = GetSelectedTargets().ToArray();
         var rows = new WorkPlanDisplayBuilder(_settings).Build(_targets, _planDisplayFilter, selectedTargets);
-        var inputGroupByRowIndex = new Dictionary<int, (int InputIndex, int InputCount)>();
-        var groupedRowIndexes = rows
-            .Select((row, index) => new { row, index })
-            .GroupBy(item => (item.row.Order, item.row.OperationKey))
-            .Where(group => group.Count() > 1)
-            .ToArray();
-        foreach (var group in groupedRowIndexes)
-        {
-            var groupedInputIndexes = group
-                .Where(item => item.row.Kind == WorkPlanDisplayRowKind.Input)
-                .Select(item => item.index)
-                .ToArray();
-            if (groupedInputIndexes.Length <= 1)
-            {
-                continue;
-            }
-
-            for (var i = 0; i < groupedInputIndexes.Length; i++)
-            {
-                inputGroupByRowIndex[groupedInputIndexes[i]] = (InputIndex: i, InputCount: groupedInputIndexes.Length);
-            }
-        }
+        var inputGroupByRowIndex = CreateInputGroupLookup(rows);
 
         for (var rowIndex = 0; rowIndex < rows.Count; rowIndex++)
         {
@@ -1258,6 +1237,36 @@ public sealed partial class MainForm : Form
                 cell.ToolTipText = toolTip;
             }
         }
+    }
+
+    internal static Dictionary<int, (int InputIndex, int InputCount)> CreateInputGroupLookup(
+        IReadOnlyList<WorkPlanDisplayRow> rows)
+    {
+        var inputGroupByRowIndex = new Dictionary<int, (int InputIndex, int InputCount)>();
+        var groupedRows = rows
+            .Select((row, index) => new { row, index })
+            .GroupBy(item => (item.row.Order, item.row.OperationKey))
+            .Where(group => group.Count() > 1)
+            .ToArray();
+
+        foreach (var group in groupedRows)
+        {
+            var groupedInputIndexes = group
+                .Where(item => item.row.Kind == WorkPlanDisplayRowKind.Input)
+                .Select(item => item.index)
+                .ToArray();
+            if (groupedInputIndexes.Length <= 1)
+            {
+                continue;
+            }
+
+            for (var i = 0; i < groupedInputIndexes.Length; i++)
+            {
+                inputGroupByRowIndex[groupedInputIndexes[i]] = (InputIndex: i, InputCount: groupedInputIndexes.Length);
+            }
+        }
+
+        return inputGroupByRowIndex;
     }
 
     private void PlanGrid_CellPainting(object? sender, DataGridViewCellPaintingEventArgs e)

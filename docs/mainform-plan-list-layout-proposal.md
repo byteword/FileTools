@@ -117,6 +117,7 @@ Duplicate delete should also be shown as a grouped operation when it came from a
 7. Grouped display rows for shared and uncertain operations with connector-style row painting for grouped input rows.
 8. Perform manual UI validation at small, default, and wide window sizes.
 9. Fix connector paint index math so multi-input groups draw top/middle/bottom segments correctly for all group sizes.
+10. Add unit coverage for input-group lookup to protect connector-index regressions.
 
 ## Expected Risks
 

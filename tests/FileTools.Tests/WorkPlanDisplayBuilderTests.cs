@@ -190,6 +190,115 @@ public sealed class WorkPlanDisplayBuilderTests
         Assert.Single(rows.Where(static row => row.Kind == WorkPlanDisplayRowKind.OperationGroup));
     }
 
+    [Fact]
+    public void CreateInputGroupLookup_GroupsByOrderAndOperationForInputRowsOnly()
+    {
+        var rows = new List<WorkPlanDisplayRow>
+        {
+            new(
+                1,
+                WorkPlanDisplayRowKind.OperationGroup,
+                "op:1",
+                null,
+                null,
+                null,
+                "ZIP merge",
+                "A.zip",
+                "",
+                false,
+                true),
+            new(
+                1,
+                WorkPlanDisplayRowKind.Input,
+                "op:1",
+                null,
+                null,
+                null,
+                "-",
+                "A01.zip",
+                "",
+                false,
+                true),
+            new(
+                1,
+                WorkPlanDisplayRowKind.Input,
+                "op:1",
+                null,
+                null,
+                null,
+                "-",
+                "A02.zip",
+                "",
+                false,
+                true),
+            new(
+                2,
+                WorkPlanDisplayRowKind.OperationGroup,
+                "op:2",
+                null,
+                null,
+                null,
+                "Duplicate delete",
+                "3 files",
+                "",
+                false,
+                true),
+            new(
+                2,
+                WorkPlanDisplayRowKind.Input,
+                "op:2",
+                null,
+                null,
+                null,
+                "-",
+                "X01.txt",
+                "",
+                false,
+                true),
+            new(
+                2,
+                WorkPlanDisplayRowKind.Input,
+                "op:2",
+                null,
+                null,
+                null,
+                "-",
+                "X02.txt",
+                "",
+                false,
+                true),
+            new(
+                2,
+                WorkPlanDisplayRowKind.Input,
+                "op:2",
+                null,
+                null,
+                null,
+                "-",
+                "X03.txt",
+                "",
+                false,
+                true),
+        };
+
+        var actual = MainForm.CreateInputGroupLookup(rows);
+        var expected = new Dictionary<int, (int InputIndex, int InputCount)>
+        {
+            [1] = (0, 2),
+            [2] = (1, 2),
+            [4] = (0, 3),
+            [5] = (1, 3),
+            [6] = (2, 3)
+        };
+
+        Assert.Equal(expected.Count, actual.Count);
+        foreach (var pair in expected)
+        {
+            Assert.True(actual.TryGetValue(pair.Key, out var actualInfo));
+            Assert.Equal(pair.Value, actualInfo);
+        }
+    }
+
     private static WorkTargetPlan CreateRenameTarget(string path, string fileName)
     {
         var target = new WorkTargetPlan(path);
