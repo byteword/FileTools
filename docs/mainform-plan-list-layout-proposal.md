@@ -118,6 +118,7 @@ Duplicate delete should also be shown as a grouped operation when it came from a
 8. Perform manual UI validation at small, default, and wide window sizes.
 9. Fix connector paint index math so multi-input groups draw top/middle/bottom segments correctly for all group sizes.
 10. Add unit coverage for input-group lookup to protect connector-index regressions.
+11. Add unit coverage for input prefix markers (`├`/`└`) so grouped row rendering remains stable.
 
 ## Expected Risks
 

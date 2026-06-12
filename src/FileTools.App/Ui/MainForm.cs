@@ -1943,7 +1943,7 @@ public sealed partial class MainForm : Form
             : CreatePlanActionCellText(row.Step);
     }
 
-    private static string GetInputGroupPrefix(int index, int groupSize)
+    internal static string GetInputGroupPrefix(int index, int groupSize)
     {
         return groupSize <= 1
             ? "  "

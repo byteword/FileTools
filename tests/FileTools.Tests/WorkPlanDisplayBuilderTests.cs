@@ -1,3 +1,4 @@
+using System.Reflection;
 using FileTools;
 
 namespace FileTools.Tests;
@@ -297,6 +298,77 @@ public sealed class WorkPlanDisplayBuilderTests
             Assert.True(actual.TryGetValue(pair.Key, out var actualInfo));
             Assert.Equal(pair.Value, actualInfo);
         }
+    }
+
+    [Fact]
+    public void GetInputGroupPrefix_ReturnsExpectedCharacters()
+    {
+        Assert.Equal("  ", MainForm.GetInputGroupPrefix(0, 1));
+        Assert.Equal("  ", MainForm.GetInputGroupPrefix(3, 1));
+
+        Assert.Equal("├ ", MainForm.GetInputGroupPrefix(0, 3));
+        Assert.Equal("├ ", MainForm.GetInputGroupPrefix(1, 3));
+        Assert.Equal("└ ", MainForm.GetInputGroupPrefix(2, 3));
+    }
+
+    [Fact]
+    public void GetInputGroupPrefix_MatchCreatePlanActionCellTextForInputRows()
+    {
+        var row = new WorkPlanDisplayRow(
+            1,
+            WorkPlanDisplayRowKind.Input,
+            "op",
+            null,
+            null,
+            null,
+            "merge",
+            "A.zip",
+            "",
+            false,
+            true);
+
+        var expectedFirst = MainForm.GetInputGroupPrefix(0, 2) + "merge";
+        var expectedSecond = MainForm.GetInputGroupPrefix(1, 2) + "merge";
+
+        var actualFirst = InvokeCreatePlanActionCellText(row, 0, 2);
+        var actualSecond = InvokeCreatePlanActionCellText(row, 1, 2);
+
+        Assert.Equal(expectedFirst, actualFirst);
+        Assert.Equal(expectedSecond, actualSecond);
+    }
+
+    private static string InvokeCreatePlanActionCellText(WorkPlanDisplayRow row, int groupIndex, int groupSize)
+    {
+        var method = typeof(MainForm).GetMethod(
+            "CreatePlanActionCellText",
+            BindingFlags.Static | BindingFlags.NonPublic,
+            null,
+            [typeof(WorkPlanDisplayRow), typeof(int), typeof(int)],
+            null);
+        Assert.NotNull(method);
+        var value = method.Invoke(null, [row, groupIndex, groupSize]);
+
+        return Assert.IsType<string>(value);
+    }
+
+    [Fact]
+    public void GetInputGroupPrefix_UsesDefaultSpaceForNonGroupedInputRows()
+    {
+        var row = new WorkPlanDisplayRow(
+            1,
+            WorkPlanDisplayRowKind.Input,
+            "op",
+            null,
+            null,
+            null,
+            "merge",
+            "A.zip",
+            "",
+            false,
+            true);
+
+        Assert.Equal("  merge", InvokeCreatePlanActionCellText(row, 0, 1));
+        Assert.Equal("  merge", InvokeCreatePlanActionCellText(row, 5, 1));
     }
 
     private static WorkTargetPlan CreateRenameTarget(string path, string fileName)
