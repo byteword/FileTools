@@ -9,12 +9,15 @@ Scope:
 
 ![Current MainForm designer layout](images/current-mainform-designer-layout.svg)
 ![In-app folder-merge interaction](images/in-app-context-menu-folder-merge-design.svg)
+![Proposed MainForm plan list layout](images/mainform-plan-list-layout-proposal.svg)
 
 ## Summary
 
 The standalone window is now organized as a planner: targets on the left, task planning on the right, and execution feedback at the bottom. The latest layout pass addresses the earlier command-mixing problem by introducing a menu bar, icon toolbars, an unwrap split button, a plan scope header, and a bottom-right run/stop button paired with a compact log view.
 
 The README now references `docs/images/current-mainform-designer-layout.svg`, which describes the current planner-oriented layout. The reference image was refreshed on 2026-06-03 to match the current WinForms structure: menu bar, icon-only task toolbar, plan scope label, icon+text plan-step toolbar, log box, and run/stop button.
+
+The next layout proposal is tracked in `docs/mainform-plan-list-layout-proposal.md`. It moves the plan review surface to the bottom of the window, keeps target commands separate from plan-row commands, and places run/stop/progress state inside the same work-plan group as the execution-order list.
 
 ## Implemented Layout Changes
 
@@ -61,6 +64,6 @@ The plan grid now predicts rename, wrap, unwrap, and relocation where enough pat
 
 ## Suggested Next Priority
 
-1. Decide whether task toolbar buttons should remain icon-only or become icon+text.
-2. Revisit bottom log height and splitter constraints after using the new layout.
-3. Consider a richer execution result viewer if result review becomes a primary workflow.
+1. Prototype the bottom work-plan list behind a UI-only plan display projection.
+2. Move run/stop/progress state into the work-plan group with minimum-size constraints.
+3. Add all-plan, selected-target, and warning filters before replacing the current selected-target-only plan grid.

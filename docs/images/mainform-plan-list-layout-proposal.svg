@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="700" viewBox="0 0 980 700" role="img" aria-labelledby="title desc">
+  <title id="title">Proposed MainForm plan list layout</title>
+  <desc id="desc">Proposed FileTools standalone planner UI with targets on the left, task buttons and log on the right, and a bottom work-plan list containing filters, progress, and run or stop controls.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f4f6f8; }
+      .window { fill: #ffffff; stroke: #aeb7c2; stroke-width: 1; }
+      .menu { fill: #ffffff; stroke: #d4dae2; stroke-width: 1; }
+      .pane { fill: #f8fafc; stroke: #c8d0da; stroke-width: 1; }
+      .group { fill: #ffffff; stroke: #c8d0da; stroke-width: 1; }
+      .grid { fill: #fbfcfd; stroke: #c8d0da; stroke-width: 1; }
+      .header { fill: #eef2f6; stroke: #c8d0da; stroke-width: 1; }
+      .toolbar { fill: #ffffff; stroke: #c8d0da; stroke-width: 1; }
+      .button { fill: #f9fafb; stroke: #c8d0da; stroke-width: 1; }
+      .buttonActive { fill: #e8f0fe; stroke: #9db7e8; stroke-width: 1; }
+      .run { fill: #eaf3ef; stroke: #9bbfaa; stroke-width: 1; }
+      .warn { fill: #fff7ed; stroke: #f2c28f; stroke-width: 1; }
+      .groupRow { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1; }
+      .selected { fill: #e8f0fe; stroke: #d6e3fa; stroke-width: 1; }
+      .titleText { fill: #18212f; font: 16px "Segoe UI", Arial, sans-serif; font-weight: 600; }
+      .body { fill: #1f2937; font: 13px "Segoe UI", Arial, sans-serif; }
+      .small { fill: #4b5563; font: 12px "Segoe UI", Arial, sans-serif; }
+      .muted { fill: #64748b; font: 12px "Segoe UI", Arial, sans-serif; }
+      .mono { fill: #4b5563; font: 12px Consolas, monospace; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="980" height="700"/>
+  <rect class="window" x="1" y="1" width="978" height="698"/>
+
+  <rect class="menu" x="0" y="0" width="980" height="24"/>
+  <text class="body" x="14" y="17">파일</text>
+  <text class="body" x="60" y="17">작업</text>
+  <text class="body" x="106" y="17">설정</text>
+
+  <rect class="pane" x="0" y="24" width="980" height="356"/>
+  <rect class="pane" x="0" y="380" width="980" height="320"/>
+
+  <rect class="group" x="8" y="36" width="494" height="332"/>
+  <text class="titleText" x="18" y="59">Targets</text>
+  <rect class="grid" x="18" y="72" width="474" height="246"/>
+  <rect class="header" x="18" y="72" width="474" height="27"/>
+  <text class="small" x="50" y="90">이름</text>
+  <text class="small" x="236" y="90">위치</text>
+  <text class="small" x="444" y="90">작업</text>
+  <rect class="selected" x="20" y="102" width="470" height="31"/>
+  <rect x="32" y="111" width="14" height="14" fill="#f4b400" stroke="#c58d00"/>
+  <text class="body" x="54" y="123">A 01.zip</text>
+  <text class="small" x="236" y="123">D:\Work</text>
+  <text class="body" x="454" y="123" fill="#15803d">2</text>
+  <rect x="32" y="145" width="14" height="14" fill="#f4b400" stroke="#c58d00"/>
+  <text class="body" x="54" y="156">A 02.zip</text>
+  <text class="small" x="236" y="156">D:\Work</text>
+  <text class="body" x="454" y="156" fill="#15803d">2</text>
+  <rect x="32" y="176" width="14" height="12" fill="#60a5fa" stroke="#2563eb"/>
+  <text class="body" x="54" y="188">FolderA</text>
+  <text class="small" x="236" y="188">D:\Work</text>
+  <text class="body" x="454" y="188" fill="#15803d">1</text>
+  <rect x="32" y="207" width="14" height="14" fill="#e5e7eb" stroke="#94a3b8"/>
+  <text class="body" x="54" y="219">cover.png</text>
+  <text class="small" x="236" y="219">D:\Images</text>
+  <text class="body" x="454" y="219">0</text>
+
+  <rect class="toolbar" x="18" y="328" width="474" height="29"/>
+  <circle cx="37" cy="343" r="8" fill="#207b43"/>
+  <text x="33" y="347" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff">+</text>
+  <circle cx="67" cy="343" r="8" fill="#aa3b30"/>
+  <text x="63" y="347" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff">-</text>
+  <path d="M96 349 L104 335 L112 349 Z" fill="#465366"/>
+  <path d="M130 335 L138 349 L146 335 Z" fill="#465366"/>
+  <path d="M168 336 L180 348 M180 336 L168 348" stroke="#7a4b28" stroke-width="3" stroke-linecap="round"/>
+  <text class="muted" x="205" y="347">대상 추가 / 제거 / 순서 변경</text>
+
+  <rect class="group" x="514" y="36" width="458" height="332"/>
+  <text class="titleText" x="524" y="59">Tasks and log</text>
+  <rect class="toolbar" x="524" y="72" width="438" height="80"/>
+  <rect class="button" x="536" y="86" width="88" height="24"/>
+  <text class="small" x="552" y="102">이름변경</text>
+  <rect class="button" x="636" y="86" width="78" height="24"/>
+  <text class="small" x="657" y="102">감싸기</text>
+  <rect class="button" x="726" y="86" width="88" height="24"/>
+  <text class="small" x="744" y="102">벗기기 ▼</text>
+  <rect class="button" x="826" y="86" width="92" height="24"/>
+  <text class="small" x="846" y="102">재배치</text>
+  <rect class="button" x="536" y="118" width="104" height="24"/>
+  <text class="small" x="555" y="134">ZIP 병합 ▼</text>
+  <rect class="button" x="652" y="118" width="88" height="24"/>
+  <text class="small" x="675" y="134">비교</text>
+  <rect class="button" x="752" y="118" width="128" height="24"/>
+  <text class="small" x="773" y="134">진행 창 보기</text>
+  <text class="muted" x="524" y="176">선택 대상에 작업을 추가합니다.</text>
+  <rect class="grid" x="524" y="194" width="438" height="154"/>
+  <text class="mono" x="540" y="222">Ready.</text>
+  <text class="mono" x="540" y="246">최근 실행 로그와 요약은 이 패널에 유지됩니다.</text>
+  <text class="mono" x="540" y="270">세부 실행 상태는 아래 작업목록 헤더에서 표시합니다.</text>
+
+  <rect class="group" x="8" y="392" width="964" height="296"/>
+  <text class="titleText" x="18" y="415">Work plan</text>
+  <rect class="buttonActive" x="138" y="397" width="74" height="24"/>
+  <text class="small" x="154" y="413">전체보기</text>
+  <rect class="button" x="218" y="397" width="92" height="24"/>
+  <text class="small" x="234" y="413">선택파일</text>
+  <rect class="button" x="316" y="397" width="64" height="24"/>
+  <text class="small" x="333" y="413">경고</text>
+  <rect class="run" x="770" y="397" width="88" height="28" rx="3"/>
+  <path d="M790 404 L790 418 L803 411 Z" fill="#207b43"/>
+  <text class="body" x="816" y="416" font-weight="600">실행</text>
+  <rect class="toolbar" x="866" y="397" width="96" height="28"/>
+  <rect x="876" y="407" width="70" height="7" fill="#e5e7eb" stroke="#cbd5e1"/>
+  <rect x="876" y="407" width="32" height="7" fill="#60a5fa"/>
+  <text class="small" x="18" y="441">실행 순서 기준 · 전체 대상 4개 · 계획 작업 5개 · 경고 1개</text>
+
+  <rect class="grid" x="18" y="454" width="944" height="220"/>
+  <rect class="header" x="18" y="454" width="944" height="27"/>
+  <text class="small" x="36" y="472">순서</text>
+  <text class="small" x="96" y="472">작업</text>
+  <text class="small" x="252" y="472">입력</text>
+  <text class="small" x="596" y="472">출력 / 예상 결과</text>
+  <text class="small" x="882" y="472">상태</text>
+
+  <text class="body" x="40" y="506">1</text>
+  <text class="body" x="96" y="506">이름변경</text>
+  <text class="small" x="252" y="506">D:\Work\A 01.zip</text>
+  <text class="small" x="596" y="506">D:\Work\A 001.zip</text>
+  <text class="small" x="882" y="506">OK</text>
+
+  <text class="body" x="40" y="536">2</text>
+  <text class="body" x="96" y="536">이름변경</text>
+  <text class="small" x="252" y="536">D:\Work\A 02.zip</text>
+  <text class="small" x="596" y="536">D:\Work\A 002.zip</text>
+  <text class="small" x="882" y="536">OK</text>
+
+  <rect class="groupRow" x="20" y="550" width="940" height="31"/>
+  <text class="body" x="40" y="570">3</text>
+  <text class="body" x="96" y="570" font-weight="600">ZIP 병합</text>
+  <text class="small" x="252" y="570">2 source archives</text>
+  <text class="small" x="596" y="570">D:\Work\A.zip</text>
+  <text class="small" x="882" y="570">공유</text>
+  <text class="small" x="118" y="600">└ 입력</text>
+  <text class="small" x="252" y="600">D:\Work\A 001.zip</text>
+  <text class="small" x="118" y="626">└ 입력</text>
+  <text class="small" x="252" y="626">D:\Work\A 002.zip</text>
+
+  <rect class="warn" x="20" y="640" width="940" height="31"/>
+  <text class="body" x="40" y="660">4</text>
+  <text class="body" x="96" y="660">폴더 벗기기</text>
+  <text class="small" x="252" y="660">D:\Work\FolderA</text>
+  <text class="small" x="596" y="660">실행 시 결정됨</text>
+  <text class="small" x="882" y="660">경고</text>
+</svg>

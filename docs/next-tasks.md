@@ -1,13 +1,14 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-11
+Last updated: 2026-06-12
 
 Scope reviewed:
 
 - Local commits after `v1.2.0.0`, including archive merge and issue split documentation through this review.
 - GitHub issues #1 through #9 in `byteword/FileTools`.
 - README, `docs/name-template-and-collision-policy.md`, `docs/release.md`, and `docs/release-notes/next.md`.
+- `docs/ux-mainform-review.md` and `docs/mainform-plan-list-layout-proposal.md`.
 
 ## GitHub Issue Status
 
@@ -35,6 +36,12 @@ Scope reviewed:
 
 ## Completed Follow-Up
 
+- Added `docs/mainform-plan-list-layout-proposal.md` and
+  `docs/images/mainform-plan-list-layout-proposal.svg` on 2026-06-12 to plan
+  the safer MainForm layout branch. The proposal moves task commands/log to the
+  top-right pane, moves plan review to a bottom execution-order list, places
+  run/stop/progress state in the same work-plan group, and defines all-plan,
+  selected-target, and warning filters before implementation.
 - Added `docs/in-app-context-menu-folder-merge-design.md` and
   `docs/images/in-app-context-menu-folder-merge-design.svg` on 2026-06-11 to
   prepare the in-app right-click menu implementation and the safer selected-target
