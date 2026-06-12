@@ -1,4 +1,3 @@
-using System.Reflection;
 using FileTools;
 
 namespace FileTools.Tests;
@@ -187,7 +186,7 @@ public sealed class WorkPlanDisplayBuilderTests
             [target]);
 
         Assert.Equal(3, rows.Count);
-        Assert.True(rows.Any(static row => row.MatchesFilter));
+        Assert.Contains(rows, static row => row.MatchesFilter);
         Assert.Single(rows.Where(static row => row.Kind == WorkPlanDisplayRowKind.OperationGroup));
     }
 
@@ -330,25 +329,11 @@ public sealed class WorkPlanDisplayBuilderTests
         var expectedFirst = MainForm.GetInputGroupPrefix(0, 2) + "merge";
         var expectedSecond = MainForm.GetInputGroupPrefix(1, 2) + "merge";
 
-        var actualFirst = InvokeCreatePlanActionCellText(row, 0, 2);
-        var actualSecond = InvokeCreatePlanActionCellText(row, 1, 2);
+        var actualFirst = MainForm.CreatePlanActionCellText(row, 0, 2);
+        var actualSecond = MainForm.CreatePlanActionCellText(row, 1, 2);
 
         Assert.Equal(expectedFirst, actualFirst);
         Assert.Equal(expectedSecond, actualSecond);
-    }
-
-    private static string InvokeCreatePlanActionCellText(WorkPlanDisplayRow row, int groupIndex, int groupSize)
-    {
-        var method = typeof(MainForm).GetMethod(
-            "CreatePlanActionCellText",
-            BindingFlags.Static | BindingFlags.NonPublic,
-            null,
-            [typeof(WorkPlanDisplayRow), typeof(int), typeof(int)],
-            null);
-        Assert.NotNull(method);
-        var value = method.Invoke(null, [row, groupIndex, groupSize]);
-
-        return Assert.IsType<string>(value);
     }
 
     [Fact]
@@ -367,8 +352,8 @@ public sealed class WorkPlanDisplayBuilderTests
             false,
             true);
 
-        Assert.Equal("  merge", InvokeCreatePlanActionCellText(row, 0, 1));
-        Assert.Equal("  merge", InvokeCreatePlanActionCellText(row, 5, 1));
+        Assert.Equal("  merge", MainForm.CreatePlanActionCellText(row, 0, 1));
+        Assert.Equal("  merge", MainForm.CreatePlanActionCellText(row, 5, 1));
     }
 
     private static WorkTargetPlan CreateRenameTarget(string path, string fileName)
