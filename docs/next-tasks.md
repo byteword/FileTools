@@ -49,6 +49,10 @@ Scope reviewed:
     keeping the existing selected-target plan grid behavior.
   - Refreshed `docs/images/current-mainform-designer-layout.svg`, README UI
     notes, and MainForm UX tracking docs to match the new layout skeleton.
+  - Added the UI-independent `WorkPlanDisplayBuilder` projection with coverage
+    for execution order, selected-target filtering, shared archive-merge
+    de-duplication, and warning propagation. The projection is not yet wired to
+    the visible grid.
 - Added `docs/in-app-context-menu-folder-merge-design.md` and
   `docs/images/in-app-context-menu-folder-merge-design.svg` on 2026-06-11 to
   prepare the in-app right-click menu implementation and the safer selected-target
