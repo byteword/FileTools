@@ -1200,20 +1200,26 @@ public sealed partial class MainForm : Form
 
         var selectedTargets = GetSelectedTargets().ToArray();
         var rows = new WorkPlanDisplayBuilder(_settings).Build(_targets, _planDisplayFilter, selectedTargets);
-        var groupSizeByRowIndex = new Dictionary<int, int>();
-        var groupIndexByRowIndex = new Dictionary<int, int>();
+        var inputGroupByRowIndex = new Dictionary<int, (int InputIndex, int InputCount)>();
         var groupedRowIndexes = rows
             .Select((row, index) => new { row, index })
             .GroupBy(item => (item.row.Order, item.row.OperationKey))
             .Where(group => group.Count() > 1)
-            .Select(group => group.Select(item => item.index).ToArray())
             .ToArray();
-        foreach (var indexes in groupedRowIndexes)
+        foreach (var group in groupedRowIndexes)
         {
-            for (var i = 0; i < indexes.Length; i++)
+            var groupedInputIndexes = group
+                .Where(item => item.row.Kind == WorkPlanDisplayRowKind.Input)
+                .Select(item => item.index)
+                .ToArray();
+            if (groupedInputIndexes.Length <= 1)
             {
-                groupSizeByRowIndex[indexes[i]] = indexes.Length;
-                groupIndexByRowIndex[indexes[i]] = i;
+                continue;
+            }
+
+            for (var i = 0; i < groupedInputIndexes.Length; i++)
+            {
+                inputGroupByRowIndex[groupedInputIndexes[i]] = (InputIndex: i, InputCount: groupedInputIndexes.Length);
             }
         }
 
@@ -1222,18 +1228,15 @@ public sealed partial class MainForm : Form
             var displayRow = rows[rowIndex];
             var gridRowIndex = _planGrid.Rows.Add();
             var row = _planGrid.Rows[gridRowIndex];
-            var groupSize = groupSizeByRowIndex.GetValueOrDefault(rowIndex);
-            var groupIndex = groupIndexByRowIndex.GetValueOrDefault(rowIndex);
-            var isGroupedInput = displayRow.Kind == WorkPlanDisplayRowKind.Input && groupSize > 1;
-            var isInputWithNoGroup = displayRow.Kind == WorkPlanDisplayRowKind.Input && groupSize == 0;
+            var isGroupedInput = inputGroupByRowIndex.TryGetValue(rowIndex, out var groupInfo);
             if (isGroupedInput)
             {
-                _planInputGroupByGridRow[gridRowIndex] = (InputIndex: groupIndex - 1, InputCount: groupSize);
+                _planInputGroupByGridRow[gridRowIndex] = groupInfo;
             }
             var actionText = CreatePlanActionCellText(
                 displayRow,
-                isGroupedInput || isInputWithNoGroup ? groupIndex : 0,
-                isGroupedInput ? groupSize : 0);
+                isGroupedInput ? groupInfo.InputIndex : 0,
+                isGroupedInput ? groupInfo.InputCount : 0);
             row.Tag = displayRow;
             row.Cells[PlanOrderColumnName].Value = displayRow.Kind == WorkPlanDisplayRowKind.Input
                 ? ""

@@ -122,7 +122,7 @@ Duplicate delete should also be shown as a grouped operation when it came from a
 
 - `EditStep` currently depends on the selected target grid row. The new plan grid must carry target context per row.
 - `RemoveSelectedStep` currently removes from the displayed target. Shared operations need group-level removal.
-- Connector-style input group painting must treat group-local input offsets consistently when grouped operations have more than two inputs.
+- Connector-style input group painting now tracks input-only offsets (not operation row offsets) so visual connectors are consistent across 2+ input rows.
 - Preview refresh may become more expensive because all target previews are built for the full plan view.
 - Large target sets can create many display rows. Filtering and row virtualization may become necessary later.
 - Folder operations with runtime-dependent output should be marked as uncertain rather than pretending to know every output path.
