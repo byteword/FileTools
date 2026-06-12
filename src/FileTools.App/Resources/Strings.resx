@@ -422,6 +422,7 @@
   <data name="PlanExecutionStatusReady" xml:space="preserve"><value>Ready.</value></data>
   <data name="PlanExecutionStatusRunning" xml:space="preserve"><value>Working through the current plan.</value></data>
   <data name="PlanExecutionStatusStopping" xml:space="preserve"><value>Stop requested. Waiting for the current operation to finish.</value></data>
+  <data name="PlanDisplayInputSummaryFormat" xml:space="preserve"><value>{0} input items</value></data>
   <data name="PlanDisplayArchiveInputSummaryFormat" xml:space="preserve"><value>{0} ZIP sources</value></data>
   <data name="PlanDisplayInputRow" xml:space="preserve"><value>Input</value></data>
   <data name="PlanFilterAll" xml:space="preserve"><value>All plan</value></data>

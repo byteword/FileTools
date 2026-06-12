@@ -45,9 +45,9 @@ The next layout proposal is tracked in `docs/mainform-plan-list-layout-proposal.
 
 ## Remaining UX Notes
 
-### 1. Plan grid is filtered but still uses simple grouped rows
+### 1. Plan grid is filtered and now groups multi-input operations
 
-The target grid shows per-target action counts, and the bottom plan grid can now switch between all plan, selected targets, and warnings. Shared operations use simple group/input rows rather than owner-drawn merged cells, so richer visual grouping remains a later pass.
+The target grid shows per-target action counts, and the bottom plan grid can now switch between all plan, selected targets, and warnings. Shared operations now show explicit group headers plus grouped input rows for archive merge and duplicate-delete steps, with connector-style row markers to show one logical operation.
 
 ### 2. Icon-only commands need real-use validation
 

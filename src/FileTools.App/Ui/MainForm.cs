@@ -1195,19 +1195,45 @@ public sealed partial class MainForm : Form
 
         var selectedTargets = GetSelectedTargets().ToArray();
         var rows = new WorkPlanDisplayBuilder(_settings).Build(_targets, _planDisplayFilter, selectedTargets);
-        foreach (var displayRow in rows)
+        var groupSizeByRowIndex = new Dictionary<int, int>();
+        var groupIndexByRowIndex = new Dictionary<int, int>();
+        var groupedRowIndexes = rows
+            .Select((row, index) => new { row, index })
+            .GroupBy(item => (item.row.Order, item.row.OperationKey))
+            .Where(group => group.Count() > 1)
+            .Select(group => group.Select(item => item.index).ToArray())
+            .ToArray();
+        foreach (var indexes in groupedRowIndexes)
         {
-            var rowIndex = _planGrid.Rows.Add();
-            var row = _planGrid.Rows[rowIndex];
+            for (var i = 0; i < indexes.Length; i++)
+            {
+                groupSizeByRowIndex[indexes[i]] = indexes.Length;
+                groupIndexByRowIndex[indexes[i]] = i;
+            }
+        }
+
+        for (var rowIndex = 0; rowIndex < rows.Count; rowIndex++)
+        {
+            var displayRow = rows[rowIndex];
+            var gridRowIndex = _planGrid.Rows.Add();
+            var row = _planGrid.Rows[gridRowIndex];
+            var groupSize = groupSizeByRowIndex.GetValueOrDefault(rowIndex);
+            var groupIndex = groupIndexByRowIndex.GetValueOrDefault(rowIndex);
+            var isGroupedInput = displayRow.Kind == WorkPlanDisplayRowKind.Input && groupSize > 1;
+            var isInputWithNoGroup = displayRow.Kind == WorkPlanDisplayRowKind.Input && groupSize == 0;
+            var actionText = CreatePlanActionCellText(
+                displayRow,
+                isGroupedInput || isInputWithNoGroup ? groupIndex : 0,
+                isGroupedInput ? groupSize : 0);
             row.Tag = displayRow;
             row.Cells[PlanOrderColumnName].Value = displayRow.Kind == WorkPlanDisplayRowKind.Input
                 ? ""
                 : displayRow.Order.ToString(CultureInfo.CurrentCulture);
-            row.Cells[PlanActionColumnName].Value = CreatePlanActionCellText(displayRow);
+            row.Cells[PlanActionColumnName].Value = actionText;
             row.Cells[PlanInputColumnName].Value = FormatPlanPathCell(displayRow.InputText);
             row.Cells[PlanOutputColumnName].Value = FormatPlanPathCell(displayRow.OutputText);
 
-            ApplyPlanDisplayRowStyle(row, displayRow);
+            ApplyPlanDisplayRowStyle(row, displayRow, isGroupedInput);
 
             if (displayRow.HasWarning)
             {
@@ -1840,16 +1866,25 @@ public sealed partial class MainForm : Form
         return icon + " " + GetPlanActionName(step);
     }
 
-    private static string CreatePlanActionCellText(WorkPlanDisplayRow row)
+    private static string CreatePlanActionCellText(WorkPlanDisplayRow row, int groupIndex, int groupSize)
     {
         if (row.Kind == WorkPlanDisplayRowKind.Input)
         {
-            return "  " + row.ActionText;
+            return GetInputGroupPrefix(groupIndex, groupSize) + row.ActionText;
         }
 
         return row.Step is null
             ? row.ActionText
             : CreatePlanActionCellText(row.Step);
+    }
+
+    private static string GetInputGroupPrefix(int index, int groupSize)
+    {
+        return groupSize <= 1
+            ? "  "
+            : index == groupSize - 1
+                ? "└ "
+                : "├ ";
     }
 
     private static string FormatPlanPathCell(string text)
@@ -1884,17 +1919,22 @@ public sealed partial class MainForm : Form
         return string.Join(Environment.NewLine, parts.Distinct());
     }
 
-    private static void ApplyPlanDisplayRowStyle(DataGridViewRow gridRow, WorkPlanDisplayRow displayRow)
+    private static void ApplyPlanDisplayRowStyle(
+        DataGridViewRow gridRow,
+        WorkPlanDisplayRow displayRow,
+        bool isGroupedInput)
     {
         if (displayRow.Kind == WorkPlanDisplayRowKind.OperationGroup)
         {
             gridRow.DefaultCellStyle.BackColor = Color.FromArgb(241, 245, 249);
             gridRow.Cells[PlanActionColumnName].Style.ForeColor = Color.FromArgb(31, 41, 55);
+            gridRow.Cells[PlanActionColumnName].Style.Padding = new Padding(0, 0, 0, 0);
         }
         else if (displayRow.Kind == WorkPlanDisplayRowKind.Input)
         {
             gridRow.DefaultCellStyle.ForeColor = Color.FromArgb(92, 99, 112);
             gridRow.DefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
+            gridRow.Cells[PlanActionColumnName].Style.Padding = new Padding(isGroupedInput ? 10 : 0, 0, 0, 0);
         }
 
         if (!displayRow.MatchesFilter && displayRow.Kind == WorkPlanDisplayRowKind.Input)

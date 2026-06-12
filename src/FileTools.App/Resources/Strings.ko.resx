@@ -422,6 +422,7 @@
   <data name="PlanExecutionStatusReady" xml:space="preserve"><value>준비됨.</value></data>
   <data name="PlanExecutionStatusRunning" xml:space="preserve"><value>현재 플랜을 실행 중입니다.</value></data>
   <data name="PlanExecutionStatusStopping" xml:space="preserve"><value>중지를 요청했습니다. 현재 작업이 끝나기를 기다립니다.</value></data>
+  <data name="PlanDisplayInputSummaryFormat" xml:space="preserve"><value>입력 항목 {0}개</value></data>
   <data name="PlanDisplayArchiveInputSummaryFormat" xml:space="preserve"><value>ZIP 입력 {0}개</value></data>
   <data name="PlanDisplayInputRow" xml:space="preserve"><value>입력</value></data>
   <data name="PlanFilterAll" xml:space="preserve"><value>전체 플랜</value></data>

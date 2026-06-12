@@ -84,6 +84,19 @@ internal sealed class WorkPlanDisplayBuilder
                     continue;
                 }
 
+                if (preview.Step.Kind == WorkPlanStepKind.DuplicateDelete)
+                {
+                    AddDuplicateDeleteRows(
+                        rows,
+                        target,
+                        preview,
+                        filter,
+                        selectedTargetArray,
+                        selectedPaths,
+                        ref order);
+                    continue;
+                }
+
                 var relatedPaths = GetRelatedPaths(target, preview.Step);
                 var matchesFilter = MatchesSelectedTargets(target, relatedPaths, selectedTargetArray, selectedPaths);
                 if (!ShouldInclude(filter, preview.HasWarning, matchesFilter))
@@ -153,8 +166,63 @@ internal sealed class WorkPlanDisplayBuilder
             preview.Step,
             preview,
             preview.Step.DisplayName,
-            Localizer.Format("PlanDisplayArchiveInputSummaryFormat", relatedPaths.Count),
+            Localizer.Format("PlanDisplayInputSummaryFormat", relatedPaths.Count),
             archiveOptions.OutputPath,
+            preview.HasWarning,
+            matchesFilter || filter == WorkPlanDisplayFilter.All));
+
+        foreach (var sourcePath in relatedPaths)
+        {
+            var sourceMatchesFilter = selectedPaths.Contains(sourcePath);
+            rows.Add(new WorkPlanDisplayRow(
+                currentOrder,
+                WorkPlanDisplayRowKind.Input,
+                operationKey,
+                target,
+                preview.Step,
+                preview,
+                Localizer.Get("PlanDisplayInputRow"),
+                sourcePath,
+                "",
+                preview.HasWarning,
+                sourceMatchesFilter || filter == WorkPlanDisplayFilter.All));
+        }
+    }
+
+    /// <summary>
+    /// 중복 삭제는 관련 경로를 모두 보여줘야 하므로 그룹 행으로 펼쳐 표시한다.
+    /// </summary>
+    private static void AddDuplicateDeleteRows(
+        List<WorkPlanDisplayRow> rows,
+        WorkTargetPlan target,
+        WorkPlanStepPreview preview,
+        WorkPlanDisplayFilter filter,
+        IReadOnlyList<WorkTargetPlan> selectedTargets,
+        HashSet<string> selectedPaths,
+        ref int order)
+    {
+        var relatedPaths = preview.Step.DuplicateDeleteGroupPaths.Count > 0
+            ? preview.Step.DuplicateDeleteGroupPaths
+            : [target.Path];
+        var matchesFilter = MatchesSelectedTargets(target, relatedPaths, selectedTargets, selectedPaths);
+        if (!ShouldInclude(filter, preview.HasWarning, matchesFilter))
+        {
+            order++;
+            return;
+        }
+
+        var currentOrder = order++;
+        var operationKey = CreateStepOperationKey(target, preview);
+        rows.Add(new WorkPlanDisplayRow(
+            currentOrder,
+            WorkPlanDisplayRowKind.OperationGroup,
+            operationKey,
+            target,
+            preview.Step,
+            preview,
+            preview.Step.DisplayName,
+            Localizer.Format("PlanDisplayInputSummaryFormat", relatedPaths.Count),
+            "",
             preview.HasWarning,
             matchesFilter || filter == WorkPlanDisplayFilter.All));
 

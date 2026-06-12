@@ -142,6 +142,54 @@ public sealed class WorkPlanDisplayBuilderTests
         Assert.Contains(Path.GetFileName(missingSource), group.OutputText + group.Preview?.PreviewText, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void Build_DuplicateDeleteDisplaysAsGroupedInputs()
+    {
+        using var temp = TempDirectory.Create();
+        var firstPath = temp.GetPath("First.txt");
+        var secondPath = temp.GetPath("Second.txt");
+        File.WriteAllText(firstPath, "first");
+        File.WriteAllText(secondPath, "second");
+        var target = new WorkTargetPlan(firstPath);
+        target.Steps.Add(new WorkPlanStep
+        {
+            Kind = WorkPlanStepKind.DuplicateDelete,
+            DuplicateDeleteGroupPaths = [firstPath, secondPath]
+        });
+
+        var rows = new WorkPlanDisplayBuilder(new FileToolsSettings()).Build([target]);
+
+        Assert.Equal(3, rows.Count);
+        var operationGroup = Assert.Single(rows.Where(static row => row.Kind == WorkPlanDisplayRowKind.OperationGroup));
+        Assert.Equal(WorkPlanStepKind.DuplicateDelete, operationGroup.Step?.Kind);
+        Assert.Equal(2, rows.Count(static row => row.Kind == WorkPlanDisplayRowKind.Input));
+    }
+
+    [Fact]
+    public void Build_DuplicateDeleteSelectedFilterShowsWholeGroup()
+    {
+        using var temp = TempDirectory.Create();
+        var firstPath = temp.GetPath("First.txt");
+        var secondPath = temp.GetPath("Second.txt");
+        File.WriteAllText(firstPath, "first");
+        File.WriteAllText(secondPath, "second");
+        var target = new WorkTargetPlan(firstPath);
+        target.Steps.Add(new WorkPlanStep
+        {
+            Kind = WorkPlanStepKind.DuplicateDelete,
+            DuplicateDeleteGroupPaths = [firstPath, secondPath]
+        });
+
+        var rows = new WorkPlanDisplayBuilder(new FileToolsSettings()).Build(
+            [target],
+            WorkPlanDisplayFilter.SelectedTargets,
+            [target]);
+
+        Assert.Equal(3, rows.Count);
+        Assert.True(rows.Any(static row => row.MatchesFilter));
+        Assert.Single(rows.Where(static row => row.Kind == WorkPlanDisplayRowKind.OperationGroup));
+    }
+
     private static WorkTargetPlan CreateRenameTarget(string path, string fileName)
     {
         var target = new WorkTargetPlan(path);
