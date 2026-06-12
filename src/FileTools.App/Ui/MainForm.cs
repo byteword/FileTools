@@ -14,7 +14,8 @@ public sealed partial class MainForm : Form
     private const string TargetActionsColumnName = "TargetActions";
     private const string PlanOrderColumnName = "PlanOrder";
     private const string PlanActionColumnName = "PlanAction";
-    private const string PlanPreviewColumnName = "PlanPreview";
+    private const string PlanInputColumnName = "PlanInput";
+    private const string PlanOutputColumnName = "PlanOutput";
     private const int ExecutionPanelDefaultHeight = 96;
     private const int ExecutionPanelDecisionHeight = 220;
 
@@ -27,6 +28,10 @@ public sealed partial class MainForm : Form
     private FileCompareProgressDialog? _fileCompareProgressDialog;
     private bool _updatingTargetGridSelection;
     private FolderMergeMode _folderMergeMode = FolderMergeMode.MergeFolderUnits;
+    private WorkPlanDisplayFilter _planDisplayFilter = WorkPlanDisplayFilter.All;
+    private readonly Dictionary<int, (int InputIndex, int InputCount)> _planInputGroupByGridRow = [];
+    private static readonly Color PlanGroupConnectorColor = Color.FromArgb(148, 163, 184);
+    private static readonly Color PlanGroupConnectorSelectedColor = SystemColors.HighlightText;
 
     public MainForm()
         : this(null, MainFormStartupAction.None)
@@ -76,6 +81,7 @@ public sealed partial class MainForm : Form
         _targetGrid.DragDrop += FileDrop_DragDrop;
         _planGrid.CellDoubleClick += (_, _) => EditSelectedStep();
         _planGrid.CellMouseDown += PlanGrid_CellMouseDown;
+        _planGrid.CellPainting += PlanGrid_CellPainting;
         _planGrid.SelectionChanged += (_, _) => UpdateCommandStates();
 
         _addFilesMenuItem.Click += (_, _) => AddFiles();
@@ -167,6 +173,9 @@ public sealed partial class MainForm : Form
         _editStepToolButton.Click += (_, _) => EditSelectedStep();
         _removeStepToolButton.Click += (_, _) => RemoveSelectedStep();
         _clearStepsToolButton.Click += (_, _) => ClearSelectedTargetSteps();
+        _planFilterAllToolButton.Click += (_, _) => SetPlanDisplayFilter(WorkPlanDisplayFilter.All);
+        _planFilterSelectedToolButton.Click += (_, _) => SetPlanDisplayFilter(WorkPlanDisplayFilter.SelectedTargets);
+        _planFilterWarningsToolButton.Click += (_, _) => SetPlanDisplayFilter(WorkPlanDisplayFilter.Warnings);
         _runStopButton.Click += (_, _) => RunOrStopPlan();
         _archiveMergeDecisionPanel.DecisionAdded += (_, e) =>
             AppendLog(Localizer.Format("ArchiveMergeDecisionAddedFormat", e.Title));
@@ -179,6 +188,7 @@ public sealed partial class MainForm : Form
         _targetsGroup.Text = Localizer.Get("GroupDropTargets");
         _planGroup.Text = Localizer.Get("GroupWorkPlan");
         _planScopeLabel.Text = Localizer.Get("PlanScopeNoSelection");
+        _planExecutionStatusLabel.Text = Localizer.Get("PlanExecutionStatusReady");
 
         _fileMenuItem.Text = Localizer.Get("MenuFile");
         _taskMenuItem.Text = Localizer.Get("MenuTasks");
@@ -259,11 +269,17 @@ public sealed partial class MainForm : Form
         _removeStepToolButton.ToolTipText = Localizer.Get("ToolTipRemoveStep");
         _clearStepsToolButton.Text = Localizer.Get("ButtonClearSteps");
         _clearStepsToolButton.ToolTipText = Localizer.Get("ToolTipClearSteps");
+        _planFilterAllToolButton.Text = Localizer.Get("PlanFilterAll");
+        _planFilterAllToolButton.ToolTipText = Localizer.Get("PlanFilterAllToolTip");
+        _planFilterSelectedToolButton.Text = Localizer.Get("PlanFilterSelectedTargets");
+        _planFilterSelectedToolButton.ToolTipText = Localizer.Get("PlanFilterSelectedTargetsToolTip");
+        _planFilterWarningsToolButton.Text = Localizer.Get("PlanFilterWarnings");
+        _planFilterWarningsToolButton.ToolTipText = Localizer.Get("PlanFilterWarningsToolTip");
 
         ApplyTargetGridLocalization();
         ApplyPlanGridLocalization();
         _logBox.Text = Localizer.Get("LogReady");
-        UpdatePlanScopeHeader(GetSelectedTarget());
+        UpdatePlanScopeHeader();
         UpdateCommandStates();
     }
 
@@ -804,7 +820,7 @@ public sealed partial class MainForm : Form
         var displayedTarget = GetSelectedTarget();
         if (displayedTarget?.Steps.Count > 0)
         {
-            SelectPlanRow(displayedTarget.Steps.Count - 1);
+            SelectPlanStep(displayedTarget, displayedTarget.Steps[^1]);
         }
 
         UpdateCommandStates();
@@ -848,7 +864,7 @@ public sealed partial class MainForm : Form
         var displayedTarget = GetSelectedTarget();
         if (displayedTarget?.Steps.Count > 0)
         {
-            SelectPlanRow(displayedTarget.Steps.Count - 1);
+            SelectPlanStep(displayedTarget, displayedTarget.Steps[^1]);
         }
 
         UpdateCommandStates();
@@ -894,7 +910,7 @@ public sealed partial class MainForm : Form
             Kind = WorkPlanStepKind.AutoRelocation,
             AutoRelocationTemplateId = _settings.AutoRelocationTemplateId
         };
-        return EditStep(step) ? step : null;
+        return EditStep(step, target: null) ? step : null;
     }
 
     private void AddArchiveMergeStep(ArchiveMergeLayout layout)
@@ -947,12 +963,13 @@ public sealed partial class MainForm : Form
 
         RefreshTargetGridRows();
         RefreshPlanList();
-        SelectPlanRow(GetSelectedTarget()?.Steps.IndexOf(step) ?? -1);
+        SelectPlanStep(GetSelectedTarget(), step);
         UpdateCommandStates();
     }
 
     private void EditSelectedStep()
     {
+        var row = GetSelectedDisplayRow();
         var step = GetSelectedStep();
         if (step is null)
         {
@@ -965,7 +982,7 @@ public sealed partial class MainForm : Form
             return;
         }
 
-        if (EditStep(step))
+        if (EditStep(step, row?.Target))
         {
             RefreshTargetGridRows();
             RefreshPlanList();
@@ -1007,9 +1024,9 @@ public sealed partial class MainForm : Form
             changedTargets));
     }
 
-    private bool EditStep(WorkPlanStep step)
+    private bool EditStep(WorkPlanStep step, WorkTargetPlan? target)
     {
-        if (step.Kind == WorkPlanStepKind.FileNameCorrection && GetSelectedTarget() is { } target)
+        if (step.Kind == WorkPlanStepKind.FileNameCorrection && target is not null)
         {
             return RenameReviewDialog.EditPlanStep(this, target.Path, step, _settings);
         }
@@ -1047,24 +1064,24 @@ public sealed partial class MainForm : Form
 
     private void RemoveSelectedStep()
     {
-        var target = GetSelectedTarget();
+        var selectedRowIndex = _planGrid.CurrentRow?.Index ?? -1;
+        var target = GetSelectedPlanTarget();
         var step = GetSelectedStep();
         if (target is null || step is null)
         {
             return;
         }
 
-        var removedIndex = target.Steps.IndexOf(step);
         RemoveStepFromPlans(target, step);
         RefreshTargetGridRows();
         RefreshPlanList();
-        SelectPlanRow(Math.Min(removedIndex, target.Steps.Count - 1));
+        SelectPlanRow(Math.Min(selectedRowIndex, _planGrid.Rows.Count - 1));
         UpdateCommandStates();
     }
 
     private void ClearSelectedTargetSteps()
     {
-        var target = GetSelectedTarget();
+        var target = GetSelectedPlanTarget() ?? GetSelectedTarget();
         if (target is null || target.Steps.Count == 0)
         {
             return;
@@ -1176,39 +1193,129 @@ public sealed partial class MainForm : Form
 
     private void RefreshPlanList()
     {
-        var target = GetSelectedTarget();
+        _planInputGroupByGridRow.Clear();
         _planGrid.Rows.Clear();
-        UpdatePlanScopeHeader(target);
-        if (target is null)
-        {
-            return;
-        }
+        UpdatePlanScopeHeader();
+        UpdatePlanFilterButtons();
 
-        var previews = new WorkPlanPreviewBuilder(_settings).Build(target);
-        foreach (var preview in previews)
-        {
-            var rowIndex = _planGrid.Rows.Add();
-            var row = _planGrid.Rows[rowIndex];
-            row.Tag = preview;
-            row.Cells[PlanOrderColumnName].Value = preview.Number.ToString(CultureInfo.CurrentCulture);
-            row.Cells[PlanActionColumnName].Value = CreatePlanActionCellText(preview.Step);
-            row.Cells[PlanPreviewColumnName].Value = preview.PreviewText;
+        var selectedTargets = GetSelectedTargets().ToArray();
+        var rows = new WorkPlanDisplayBuilder(_settings).Build(_targets, _planDisplayFilter, selectedTargets);
+        var inputGroupByRowIndex = CreateInputGroupLookup(rows);
 
-            if (preview.HasWarning)
+        for (var rowIndex = 0; rowIndex < rows.Count; rowIndex++)
+        {
+            var displayRow = rows[rowIndex];
+            var gridRowIndex = _planGrid.Rows.Add();
+            var row = _planGrid.Rows[gridRowIndex];
+            var isGroupedInput = inputGroupByRowIndex.TryGetValue(rowIndex, out var groupInfo);
+            if (isGroupedInput)
             {
-                row.Cells[PlanPreviewColumnName].Style.ForeColor = Color.FromArgb(160, 73, 28);
+                _planInputGroupByGridRow[gridRowIndex] = groupInfo;
+            }
+            var actionText = CreatePlanActionCellText(
+                displayRow,
+                isGroupedInput ? groupInfo.InputIndex : 0,
+                isGroupedInput ? groupInfo.InputCount : 0);
+            row.Tag = displayRow;
+            row.Cells[PlanOrderColumnName].Value = displayRow.Kind == WorkPlanDisplayRowKind.Input
+                ? ""
+                : displayRow.Order.ToString(CultureInfo.CurrentCulture);
+            row.Cells[PlanActionColumnName].Value = actionText;
+            row.Cells[PlanInputColumnName].Value = FormatPlanPathCell(displayRow.InputText);
+            row.Cells[PlanOutputColumnName].Value = FormatPlanPathCell(displayRow.OutputText);
+
+            ApplyPlanDisplayRowStyle(row, displayRow, isGroupedInput);
+
+            if (displayRow.HasWarning)
+            {
+                row.Cells[PlanOutputColumnName].Style.ForeColor = Color.FromArgb(160, 73, 28);
             }
 
+            var toolTip = CreatePlanDisplayToolTip(displayRow);
             foreach (var cell in row.Cells.Cast<DataGridViewCell>())
             {
-                cell.ToolTipText = preview.ToolTipText;
+                cell.ToolTipText = toolTip;
             }
         }
     }
 
-    private void UpdatePlanScopeHeader(WorkTargetPlan? displayedTarget)
+    internal static Dictionary<int, (int InputIndex, int InputCount)> CreateInputGroupLookup(
+        IReadOnlyList<WorkPlanDisplayRow> rows)
     {
-        if (displayedTarget is null)
+        var inputGroupByRowIndex = new Dictionary<int, (int InputIndex, int InputCount)>();
+        var groupedRows = rows
+            .Select((row, index) => new { row, index })
+            .GroupBy(item => (item.row.Order, item.row.OperationKey))
+            .Where(group => group.Count() > 1)
+            .ToArray();
+
+        foreach (var group in groupedRows)
+        {
+            var groupedInputIndexes = group
+                .Where(item => item.row.Kind == WorkPlanDisplayRowKind.Input)
+                .Select(item => item.index)
+                .ToArray();
+            if (groupedInputIndexes.Length <= 1)
+            {
+                continue;
+            }
+
+            for (var i = 0; i < groupedInputIndexes.Length; i++)
+            {
+                inputGroupByRowIndex[groupedInputIndexes[i]] = (InputIndex: i, InputCount: groupedInputIndexes.Length);
+            }
+        }
+
+        return inputGroupByRowIndex;
+    }
+
+    private void PlanGrid_CellPainting(object? sender, DataGridViewCellPaintingEventArgs e)
+    {
+        if (e.RowIndex < 0 || e.ColumnIndex < 0 ||
+            e.ColumnIndex != _planGrid.Columns[PlanActionColumnName].Index)
+        {
+            return;
+        }
+
+        if (e.Graphics is null)
+        {
+            return;
+        }
+
+        if (_planGrid.Rows[e.RowIndex].Tag is not WorkPlanDisplayRow { Kind: WorkPlanDisplayRowKind.Input } ||
+            !_planInputGroupByGridRow.TryGetValue(e.RowIndex, out var groupInfo) ||
+            groupInfo.InputCount <= 1)
+        {
+            return;
+        }
+
+        e.Paint(e.CellBounds, DataGridViewPaintParts.All);
+
+        var isSelected = _planGrid.Rows[e.RowIndex].Selected;
+        using var pen = new Pen(isSelected
+            ? PlanGroupConnectorSelectedColor
+            : PlanGroupConnectorColor);
+        var lineColorX = e.CellBounds.Left + 16f;
+        var lineTop = e.CellBounds.Top + 2f;
+        var lineBottom = e.CellBounds.Bottom - 2f;
+        var lineMiddle = e.CellBounds.Top + (e.CellBounds.Height / 2f);
+        if (groupInfo.InputIndex > 0)
+        {
+            e.Graphics.DrawLine(pen, lineColorX, lineTop, lineColorX, lineMiddle);
+        }
+
+        if (groupInfo.InputIndex < groupInfo.InputCount - 1)
+        {
+            e.Graphics.DrawLine(pen, lineColorX, lineMiddle, lineColorX, lineBottom);
+        }
+
+        e.Graphics.DrawLine(pen, lineColorX, lineMiddle, e.CellBounds.Left + 30f, lineMiddle);
+        e.Handled = true;
+    }
+
+    private void UpdatePlanScopeHeader()
+    {
+        if (_targets.Count == 0)
         {
             _planScopeLabel.Text = Localizer.Get("PlanScopeNoSelection");
             _planScopeLabel.ForeColor = Color.FromArgb(93, 99, 108);
@@ -1217,12 +1324,45 @@ public sealed partial class MainForm : Form
 
         var selectedTargets = GetSelectedTargets().ToArray();
         var selectedCount = selectedTargets.Length;
+        if (_planDisplayFilter == WorkPlanDisplayFilter.SelectedTargets && selectedCount == 0)
+        {
+            _planScopeLabel.Text = Localizer.Get("PlanScopeNoSelection");
+            _planScopeLabel.ForeColor = Color.FromArgb(93, 99, 108);
+            return;
+        }
+
+        var totalStepCount = _targets.Sum(static target => target.Steps.Count);
         var selectedStepCount = selectedTargets.Sum(static target => target.Steps.Count);
-        var displayedName = GetTargetName(displayedTarget);
-        _planScopeLabel.Text = selectedCount > 1
-            ? Localizer.Format("PlanScopeSelectedFormat", displayedName, selectedCount, selectedStepCount)
-            : Localizer.Format("PlanScopeSingleFormat", displayedName, displayedTarget.Steps.Count);
+        var warningCount = new WorkPlanDisplayBuilder(_settings)
+            .Build(_targets, WorkPlanDisplayFilter.Warnings, selectedTargets)
+            .Count(static row => row.Kind != WorkPlanDisplayRowKind.Input);
+        _planScopeLabel.Text = _planDisplayFilter switch
+        {
+            WorkPlanDisplayFilter.All => Localizer.Format("PlanScopeAllFormat", _targets.Count, totalStepCount, warningCount),
+            WorkPlanDisplayFilter.SelectedTargets => Localizer.Format("PlanScopeSelectedOnlyFormat", selectedCount, selectedStepCount, warningCount),
+            WorkPlanDisplayFilter.Warnings => Localizer.Format("PlanScopeWarningsFormat", warningCount, totalStepCount),
+            _ => Localizer.Get("PlanScopeNoSelection")
+        };
         _planScopeLabel.ForeColor = Color.FromArgb(55, 65, 81);
+    }
+
+    private void UpdatePlanFilterButtons()
+    {
+        _planFilterAllToolButton.Checked = _planDisplayFilter == WorkPlanDisplayFilter.All;
+        _planFilterSelectedToolButton.Checked = _planDisplayFilter == WorkPlanDisplayFilter.SelectedTargets;
+        _planFilterWarningsToolButton.Checked = _planDisplayFilter == WorkPlanDisplayFilter.Warnings;
+    }
+
+    private void SetPlanDisplayFilter(WorkPlanDisplayFilter filter)
+    {
+        if (_planDisplayFilter == filter)
+        {
+            return;
+        }
+
+        _planDisplayFilter = filter;
+        RefreshPlanList();
+        UpdateCommandStates();
     }
 
     private WorkTargetPlan? GetSelectedTarget()
@@ -1243,9 +1383,21 @@ public sealed partial class MainForm : Form
     {
         return _planGrid.CurrentRow?.Tag switch
         {
-            WorkPlanStepPreview preview => preview.Step,
+            WorkPlanDisplayRow { Kind: not WorkPlanDisplayRowKind.Input } row => row.Step,
             _ => null
         };
+    }
+
+    private WorkTargetPlan? GetSelectedPlanTarget()
+    {
+        return GetSelectedDisplayRow() is { Kind: not WorkPlanDisplayRowKind.Input } row
+            ? row.Target
+            : null;
+    }
+
+    private WorkPlanDisplayRow? GetSelectedDisplayRow()
+    {
+        return _planGrid.CurrentRow?.Tag as WorkPlanDisplayRow;
     }
 
     private void FileDrop_DragEnter(object? sender, DragEventArgs e)
@@ -1377,9 +1529,18 @@ public sealed partial class MainForm : Form
         });
         _planGrid.Columns.Add(new DataGridViewTextBoxColumn
         {
-            Name = PlanPreviewColumnName,
-            HeaderText = "Preview",
+            Name = PlanInputColumnName,
+            HeaderText = "Input",
             AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+            FillWeight = 45F,
+            SortMode = DataGridViewColumnSortMode.NotSortable
+        });
+        _planGrid.Columns.Add(new DataGridViewTextBoxColumn
+        {
+            Name = PlanOutputColumnName,
+            HeaderText = "Output",
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
+            FillWeight = 55F,
             SortMode = DataGridViewColumnSortMode.NotSortable
         });
         _planGrid.DefaultCellStyle.SelectionBackColor = SystemColors.Highlight;
@@ -1391,7 +1552,8 @@ public sealed partial class MainForm : Form
     {
         _planGrid.Columns[PlanOrderColumnName].HeaderText = Localizer.Get("ColumnPlanOrder");
         _planGrid.Columns[PlanActionColumnName].HeaderText = Localizer.Get("ColumnPlanAction");
-        _planGrid.Columns[PlanPreviewColumnName].HeaderText = Localizer.Get("ColumnPlanPreview");
+        _planGrid.Columns[PlanInputColumnName].HeaderText = Localizer.Get("ColumnPlanInput");
+        _planGrid.Columns[PlanOutputColumnName].HeaderText = Localizer.Get("ColumnPlanOutput");
     }
 
     private void RefreshTargetGrid()
@@ -1511,6 +1673,33 @@ public sealed partial class MainForm : Form
         _planGrid.CurrentCell = row.Cells[PlanActionColumnName];
     }
 
+    private void SelectPlanStep(WorkTargetPlan? target, WorkPlanStep step)
+    {
+        if (target is null)
+        {
+            _planGrid.ClearSelection();
+            return;
+        }
+
+        for (var index = 0; index < _planGrid.Rows.Count; index++)
+        {
+            if (_planGrid.Rows[index].Tag is WorkPlanDisplayRow
+                {
+                    Kind: not WorkPlanDisplayRowKind.Input,
+                    Target: { } rowTarget,
+                    Step: { } rowStep
+                } &&
+                ReferenceEquals(rowTarget, target) &&
+                ReferenceEquals(rowStep, step))
+            {
+                SelectPlanRow(index);
+                return;
+            }
+        }
+
+        _planGrid.ClearSelection();
+    }
+
     private void UpdateCommandStates()
     {
         var isExecuting = _executionCancellation is not null;
@@ -1518,6 +1707,7 @@ public sealed partial class MainForm : Form
         var selectedTargets = GetSelectedTargets().ToArray();
         var hasSelectedTargets = selectedTargets.Length > 0;
         var selectedTarget = GetSelectedTarget();
+        var planCommandTarget = GetSelectedPlanTarget() ?? selectedTarget;
         var hasTargets = _targets.Count > 0;
         var anyPlannedSteps = _targets.Any(static target => target.Steps.Count > 0);
         var canModify = !isExecuting;
@@ -1538,7 +1728,7 @@ public sealed partial class MainForm : Form
                        selectedTargets.All(static target => target.Steps.Count == 0);
         var canEditStep = canModify && GetSelectedStep() is not null;
         var canRemoveStep = canEditStep;
-        var canClearSteps = canModify && selectedTarget?.Steps.Count > 0;
+        var canClearSteps = canModify && planCommandTarget?.Steps.Count > 0;
         if (!hasMultipleFolders && _folderMergeMode == FolderMergeMode.MergeFolderContentsOnly)
         {
             _folderMergeMode = FolderMergeMode.MergeFolderUnits;
@@ -1627,6 +1817,7 @@ public sealed partial class MainForm : Form
     private void ApplyRunStopButtonState()
     {
         var isExecuting = _executionCancellation is not null;
+        var cancellationPending = _executionCancellation?.IsCancellationRequested == true;
         var text = Localizer.Get(isExecuting ? "ButtonStop" : "ButtonRun");
         var image = isExecuting ? UiIconFactory.Stop : UiIconFactory.Play;
         _runStopButton.Text = text;
@@ -1635,6 +1826,15 @@ public sealed partial class MainForm : Form
         _runStopMenuItem.Image = image;
         _planContextRunPlanMenuItem.Text = text;
         _planContextRunPlanMenuItem.Image = image;
+        _planExecutionStatusLabel.Text = cancellationPending
+            ? Localizer.Get("PlanExecutionStatusStopping")
+            : Localizer.Get(isExecuting ? "PlanExecutionStatusRunning" : "PlanExecutionStatusReady");
+        _planProgressBar.Style = isExecuting ? ProgressBarStyle.Marquee : ProgressBarStyle.Blocks;
+        _planProgressBar.MarqueeAnimationSpeed = isExecuting ? 30 : 0;
+        if (!isExecuting)
+        {
+            _planProgressBar.Value = 0;
+        }
     }
 
     private bool CanMoveSelectedTargets(int direction)
@@ -1729,6 +1929,83 @@ public sealed partial class MainForm : Form
             _ => "\u2022"
         };
         return icon + " " + GetPlanActionName(step);
+    }
+
+    private static string CreatePlanActionCellText(WorkPlanDisplayRow row, int groupIndex, int groupSize)
+    {
+        if (row.Kind == WorkPlanDisplayRowKind.Input)
+        {
+            return GetInputGroupPrefix(groupIndex, groupSize) + row.ActionText;
+        }
+
+        return row.Step is null
+            ? row.ActionText
+            : CreatePlanActionCellText(row.Step);
+    }
+
+    internal static string GetInputGroupPrefix(int index, int groupSize)
+    {
+        return groupSize <= 1
+            ? "  "
+            : index == groupSize - 1
+                ? "└ "
+                : "├ ";
+    }
+
+    private static string FormatPlanPathCell(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return "";
+        }
+
+        var fileName = Path.GetFileName(text);
+        return string.IsNullOrWhiteSpace(fileName) ? text : fileName;
+    }
+
+    private static string CreatePlanDisplayToolTip(WorkPlanDisplayRow row)
+    {
+        var parts = new List<string>();
+        if (!string.IsNullOrWhiteSpace(row.InputText))
+        {
+            parts.Add(row.InputText);
+        }
+
+        if (!string.IsNullOrWhiteSpace(row.OutputText))
+        {
+            parts.Add(row.OutputText);
+        }
+
+        if (!string.IsNullOrWhiteSpace(row.Preview?.ToolTipText))
+        {
+            parts.Add(row.Preview.ToolTipText);
+        }
+
+        return string.Join(Environment.NewLine, parts.Distinct());
+    }
+
+    private static void ApplyPlanDisplayRowStyle(
+        DataGridViewRow gridRow,
+        WorkPlanDisplayRow displayRow,
+        bool isGroupedInput)
+    {
+        if (displayRow.Kind == WorkPlanDisplayRowKind.OperationGroup)
+        {
+            gridRow.DefaultCellStyle.BackColor = Color.FromArgb(241, 245, 249);
+            gridRow.Cells[PlanActionColumnName].Style.ForeColor = Color.FromArgb(31, 41, 55);
+            gridRow.Cells[PlanActionColumnName].Style.Padding = new Padding(0, 0, 0, 0);
+        }
+        else if (displayRow.Kind == WorkPlanDisplayRowKind.Input)
+        {
+            gridRow.DefaultCellStyle.ForeColor = Color.FromArgb(92, 99, 112);
+            gridRow.DefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
+            gridRow.Cells[PlanActionColumnName].Style.Padding = new Padding(isGroupedInput ? 10 : 0, 0, 0, 0);
+        }
+
+        if (!displayRow.MatchesFilter && displayRow.Kind == WorkPlanDisplayRowKind.Input)
+        {
+            gridRow.DefaultCellStyle.ForeColor = Color.FromArgb(148, 163, 184);
+        }
     }
 
     private static string GetPlanActionName(WorkPlanStep step)

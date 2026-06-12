@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="980" height="700" viewBox="0 0 980 700" role="img" aria-labelledby="title desc">
   <title id="title">Current MainForm planner layout</title>
-  <desc id="desc">Current FileTools standalone planner UI with menu bar, target grid, icon-only task toolbar, work-plan scope header, step toolbar, plan grid, log box, and run button.</desc>
+  <desc id="desc">Current FileTools standalone planner UI with a top target and task/log split, plus a bottom work-plan group containing plan rows, execution status, progress, and the run button.</desc>
   <defs>
     <style>
       .bg { fill: #f4f6f8; }
@@ -13,6 +13,9 @@
       .toolbar { fill: #ffffff; stroke: #c8d0da; stroke-width: 1; }
       .button { fill: #f9fafb; stroke: #c8d0da; stroke-width: 1; }
       .run { fill: #eaf3ef; stroke: #9bbfaa; stroke-width: 1; }
+      .progressTrack { fill: #e5e7eb; stroke: #cbd5e1; stroke-width: 1; }
+      .progressFill { fill: #60a5fa; }
+      .selected { fill: #e8f0fe; stroke: #d6e3fa; stroke-width: 1; }
       .titleText { fill: #18212f; font: 16px "Segoe UI", Arial, sans-serif; font-weight: 600; }
       .body { fill: #1f2937; font: 13px "Segoe UI", Arial, sans-serif; }
       .small { fill: #4b5563; font: 12px "Segoe UI", Arial, sans-serif; }
@@ -29,86 +32,106 @@
   <text class="body" x="60" y="17">작업</text>
   <text class="body" x="106" y="17">설정</text>
 
-  <rect class="pane" x="0" y="24" width="410" height="676"/>
-  <rect class="group" x="8" y="36" width="394" height="652"/>
-  <text class="titleText" x="18" y="59">Targets</text>
+  <rect class="pane" x="0" y="24" width="980" height="344"/>
+  <rect class="pane" x="0" y="368" width="980" height="332"/>
 
-  <rect class="grid" x="18" y="72" width="374" height="584"/>
-  <rect class="header" x="18" y="72" width="374" height="27"/>
+  <rect class="group" x="8" y="36" width="492" height="320"/>
+  <text class="titleText" x="18" y="59">Targets</text>
+  <rect class="grid" x="18" y="72" width="472" height="234"/>
+  <rect class="header" x="18" y="72" width="472" height="27"/>
   <text class="small" x="50" y="90">이름</text>
-  <text class="small" x="206" y="90">위치</text>
-  <text class="small" x="344" y="90">작업</text>
-  <rect x="20" y="102" width="370" height="31" fill="#e8f0fe" stroke="#d6e3fa"/>
+  <text class="small" x="238" y="90">위치</text>
+  <text class="small" x="444" y="90">작업</text>
+  <rect class="selected" x="20" y="102" width="468" height="31"/>
   <rect x="32" y="111" width="14" height="14" fill="#f4b400" stroke="#c58d00"/>
   <text class="body" x="54" y="123">Sample 01.zip</text>
-  <text class="small" x="206" y="123">D:\Work</text>
-  <text class="body" x="354" y="123" fill="#15803d">3</text>
+  <text class="small" x="238" y="123">D:\Work</text>
+  <text class="body" x="454" y="123" fill="#15803d">3</text>
   <rect x="32" y="145" width="14" height="12" fill="#60a5fa" stroke="#2563eb"/>
   <text class="body" x="54" y="156">FolderA</text>
-  <text class="small" x="206" y="156">D:\Work</text>
-  <text class="body" x="354" y="156">1</text>
+  <text class="small" x="238" y="156">D:\Work</text>
+  <text class="body" x="454" y="156">1</text>
   <rect x="32" y="176" width="14" height="14" fill="#e5e7eb" stroke="#94a3b8"/>
   <text class="body" x="54" y="188">image.png</text>
-  <text class="small" x="206" y="188">D:\Images</text>
-  <text class="body" x="354" y="188">0</text>
+  <text class="small" x="238" y="188">D:\Images</text>
+  <text class="body" x="454" y="188">0</text>
 
-  <rect class="toolbar" x="18" y="656" width="374" height="29"/>
-  <circle cx="37" cy="671" r="8" fill="#207b43"/>
-  <text x="33" y="675" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff">+</text>
-  <circle cx="67" cy="671" r="8" fill="#aa3b30"/>
-  <text x="63" y="675" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff">-</text>
-  <path d="M96 677 L104 663 L112 677 Z" fill="#465366"/>
-  <path d="M130 663 L138 677 L146 663 Z" fill="#465366"/>
-  <path d="M168 664 L180 676 M180 664 L168 676" stroke="#7a4b28" stroke-width="3" stroke-linecap="round"/>
-  <text class="muted" x="205" y="675">아이콘 버튼은 툴팁으로 이름을 표시</text>
+  <rect class="toolbar" x="18" y="316" width="472" height="29"/>
+  <circle cx="37" cy="331" r="8" fill="#207b43"/>
+  <text x="33" y="335" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff">+</text>
+  <circle cx="67" cy="331" r="8" fill="#aa3b30"/>
+  <text x="63" y="335" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff">-</text>
+  <path d="M96 337 L104 323 L112 337 Z" fill="#465366"/>
+  <path d="M130 323 L138 337 L146 323 Z" fill="#465366"/>
+  <path d="M168 324 L180 336 M180 324 L168 336" stroke="#7a4b28" stroke-width="3" stroke-linecap="round"/>
+  <text class="muted" x="205" y="335">대상 추가 / 제거 / 순서 변경</text>
 
-  <rect class="pane" x="410" y="24" width="570" height="676"/>
-  <rect class="toolbar" x="418" y="32" width="554" height="31"/>
-  <rect class="button" x="428" y="37" width="26" height="21"/>
-  <path d="M436 52 L442 42 L448 52" fill="none" stroke="#2963a3" stroke-width="2"/>
-  <rect class="button" x="464" y="37" width="26" height="21"/>
-  <path d="M470 51 L484 51 L484 43 L476 43 L476 47 L470 47 Z" fill="none" stroke="#207b43" stroke-width="2"/>
-  <rect class="button" x="500" y="37" width="34" height="21"/>
-  <path d="M507 44 L516 52 L525 44" fill="none" stroke="#985421" stroke-width="2"/>
-  <text class="small" x="526" y="52">▼</text>
-  <rect class="button" x="544" y="37" width="26" height="21"/>
-  <path d="M552 43 L562 43 L562 53 L552 53 Z M548 48 L552 48 M562 48 L566 48" fill="none" stroke="#6050aa" stroke-width="2"/>
-  <text class="muted" x="590" y="52">이름변경 / 감싸기 / 벗기기 / 재배치</text>
+  <rect class="group" x="512" y="36" width="460" height="320"/>
+  <text class="titleText" x="522" y="59">Tasks and log</text>
+  <rect class="toolbar" x="522" y="72" width="440" height="31"/>
+  <rect class="button" x="532" y="77" width="26" height="21"/>
+  <path d="M540 92 L546 82 L552 92" fill="none" stroke="#2963a3" stroke-width="2"/>
+  <rect class="button" x="568" y="77" width="26" height="21"/>
+  <path d="M574 91 L588 91 L588 83 L580 83 L580 87 L574 87 Z" fill="none" stroke="#207b43" stroke-width="2"/>
+  <rect class="button" x="604" y="77" width="34" height="21"/>
+  <path d="M611 84 L620 92 L629 84" fill="none" stroke="#985421" stroke-width="2"/>
+  <text class="small" x="630" y="92">▼</text>
+  <rect class="button" x="648" y="77" width="26" height="21"/>
+  <path d="M656 83 L666 83 L666 93 L656 93 Z M652 88 L656 88 M666 88 L670 88" fill="none" stroke="#6050aa" stroke-width="2"/>
+  <text class="muted" x="696" y="92">이름변경 / 감싸기 / 벗기기 / 병합 / 재배치</text>
 
-  <rect class="group" x="418" y="76" width="554" height="510"/>
-  <text class="titleText" x="428" y="99">Work plan</text>
-  <text class="small" x="428" y="128">표시 중: Sample 01.zip · 선택 대상 2개 · 선택 대상 단계 4개</text>
-  <rect class="toolbar" x="428" y="138" width="534" height="29"/>
-  <rect class="button" x="438" y="142" width="108" height="21"/>
-  <circle cx="451" cy="152" r="7" fill="#aa3b30"/>
-  <text x="448" y="156" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#ffffff">-</text>
-  <text class="small" x="463" y="156">단계 제거</text>
-  <rect class="button" x="558" y="142" width="112" height="21"/>
-  <path d="M568 147 L578 157 M578 147 L568 157" stroke="#7a4b28" stroke-width="2.5" stroke-linecap="round"/>
-  <text class="small" x="586" y="156">작업 비우기</text>
+  <rect class="grid" x="522" y="114" width="440" height="222"/>
+  <text class="mono" x="538" y="144">Ready.</text>
+  <text class="mono" x="538" y="168">실행 로그와 요약은 이 영역에 표시됩니다.</text>
+  <text class="mono" x="538" y="192">실행 버튼과 진행 상태는 아래 작업 플랜 그룹에 있습니다.</text>
 
-  <rect class="grid" x="428" y="176" width="534" height="396"/>
-  <rect class="header" x="428" y="176" width="534" height="27"/>
-  <text class="small" x="446" y="194">순서</text>
-  <text class="small" x="514" y="194">작업</text>
-  <text class="small" x="664" y="194">예상 결과</text>
-  <text class="body" x="450" y="231">1</text>
-  <text class="body" x="514" y="231">이름변경</text>
-  <text class="small" x="664" y="231">Sample 01.zip -&gt; Sample 001.zip</text>
-  <text class="body" x="450" y="263">2</text>
-  <text class="body" x="514" y="263">감싸기</text>
-  <text class="small" x="664" y="263">Sample 001.zip -&gt; Sample 001\Sample 001.zip</text>
-  <text class="body" x="450" y="295">3</text>
-  <text class="body" x="514" y="295">벗기기</text>
-  <text class="small" x="664" y="295">단일 파일 폴더 이름 규칙 적용</text>
-  <text class="body" x="450" y="327">4</text>
-  <text class="body" x="514" y="327">재배치</text>
-  <text class="small" x="664" y="327">D:\Archive\[S]\Sample 001</text>
+  <rect class="group" x="8" y="380" width="964" height="308"/>
+  <text class="titleText" x="18" y="403">Work plan</text>
+  <text class="small" x="18" y="432">전체 플랜 표시 중 · 대상 3개 · 계획 단계 4개 · 경고 0개</text>
 
-  <rect class="grid" x="418" y="596" width="424" height="88"/>
-  <text class="mono" x="434" y="626">Ready.</text>
-  <text class="mono" x="434" y="650">실행 후 이 영역에 진행 로그와 요약이 표시됩니다.</text>
-  <rect class="run" x="858" y="596" width="114" height="88" rx="3"/>
-  <path d="M887 622 L887 654 L916 638 Z" fill="#207b43"/>
-  <text class="body" x="922" y="643" font-weight="600">실행</text>
+  <rect class="toolbar" x="18" y="442" width="944" height="29"/>
+  <rect class="button" x="28" y="446" width="96" height="21"/>
+  <circle cx="41" cy="456" r="7" fill="#2963a3"/>
+  <text x="38" y="460" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#ffffff">e</text>
+  <text class="small" x="54" y="460">단계 수정</text>
+  <rect class="button" x="136" y="446" width="108" height="21"/>
+  <circle cx="149" cy="456" r="7" fill="#aa3b30"/>
+  <text x="146" y="460" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#ffffff">-</text>
+  <text class="small" x="161" y="460">단계 제거</text>
+  <rect class="button" x="256" y="446" width="112" height="21"/>
+  <path d="M266 451 L276 461 M276 451 L266 461" stroke="#7a4b28" stroke-width="2.5" stroke-linecap="round"/>
+  <text class="small" x="284" y="460">작업 비우기</text>
+  <rect class="button" x="500" y="446" width="82" height="21"/>
+  <text class="small" x="518" y="460">전체 플랜</text>
+  <rect class="button" x="590" y="446" width="82" height="21"/>
+  <text class="small" x="610" y="460">선택 대상</text>
+  <rect class="button" x="680" y="446" width="54" height="21"/>
+  <text class="small" x="698" y="460">경고</text>
+
+  <rect class="grid" x="18" y="480" width="944" height="146"/>
+  <rect class="header" x="18" y="480" width="944" height="27"/>
+  <text class="small" x="36" y="498">순서</text>
+  <text class="small" x="112" y="498">작업</text>
+  <text class="small" x="282" y="498">입력</text>
+  <text class="small" x="586" y="498">출력 / 예상 결과</text>
+  <text class="body" x="40" y="534">1</text>
+  <text class="body" x="112" y="534">이름변경</text>
+  <text class="small" x="282" y="534">Sample 01.zip</text>
+  <text class="small" x="586" y="534">Sample 001.zip</text>
+  <text class="body" x="40" y="566">2</text>
+  <text class="body" x="112" y="566">ZIP 병합</text>
+  <text class="small" x="282" y="566">ZIP 입력 2개</text>
+  <text class="small" x="586" y="566">A.zip</text>
+  <text class="small" x="134" y="592">입력</text>
+  <text class="small" x="282" y="592">A 01.zip</text>
+  <text class="small" x="134" y="616">입력</text>
+  <text class="small" x="282" y="616">A 02.zip</text>
+
+  <rect class="toolbar" x="18" y="638" width="944" height="38"/>
+  <text class="body" x="30" y="662">준비됨.</text>
+  <rect class="progressTrack" x="676" y="654" width="146" height="8"/>
+  <rect class="progressFill" x="676" y="654" width="0" height="8"/>
+  <rect class="run" x="840" y="644" width="112" height="26" rx="3"/>
+  <path d="M868 650 L868 664 L881 657 Z" fill="#207b43"/>
+  <text class="body" x="894" y="662" font-weight="600">실행</text>
 </svg>

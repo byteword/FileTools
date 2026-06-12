@@ -2,7 +2,7 @@
 
 Review date: 2026-06-12
 
-Status: design proposal. No implementation has been made for this layout yet.
+Status: layout and projection filters connected. The current implementation has moved target/task/log controls into the top split and moved the work-plan grid plus run/stop/progress state into the bottom group. `WorkPlanDisplayBuilder` projects target plans into execution-order display rows with all-plan, selected-target, and warning filters plus shared archive-merge de-duplication, and the visible grid now uses that projection.
 
 ![Proposed MainForm plan list layout](images/mainform-plan-list-layout-proposal.svg)
 
@@ -81,6 +81,7 @@ Order | Operation        | Input                         | Output
 ```
 
 Later, owner drawing can make group rows look like vertically spanned cells if the group-row approach proves too visually weak.
+Current implementation uses connector-style cell painting to emulate grouped input rows until full span rendering is needed.
 
 ## Command Semantics
 
@@ -107,19 +108,23 @@ Duplicate delete should also be shown as a grouped operation when it came from a
 
 ## Implementation Slices
 
-1. Add documentation and branch the work.
-2. Extract plan-display projection generation without changing layout.
-3. Add tests for projection ordering, selected-target filtering, shared archive merge de-duplication, and warning propagation.
-4. Move the run/stop button and progress label into the plan group while keeping current plan grid behavior.
-5. Replace the current selected-target-only plan grid with the bottom plan grid and filter controls.
-6. Move task buttons/log into the top-right pane.
-7. Add grouped display rows for shared and uncertain operations.
+1. Add documentation and branch the work. Done.
+2. Move task buttons/log into the top-right pane while preserving existing command behavior. Done.
+3. Move the run/stop button and progress label into the plan group while keeping current plan grid behavior. Done.
+4. Extract plan-display projection generation without changing layout. Done.
+5. Add tests for projection ordering, selected-target filtering, shared archive merge de-duplication, and warning propagation. Done.
+6. Connect the projection to the bottom plan grid and add filter controls. Done.
+7. Grouped display rows for shared and uncertain operations with connector-style row painting for grouped input rows.
 8. Perform manual UI validation at small, default, and wide window sizes.
+9. Fix connector paint index math so multi-input groups draw top/middle/bottom segments correctly for all group sizes.
+10. Add unit coverage for input-group lookup to protect connector-index regressions.
+11. Add unit coverage for input prefix markers (`├`/`└`) so grouped row rendering remains stable.
 
 ## Expected Risks
 
 - `EditStep` currently depends on the selected target grid row. The new plan grid must carry target context per row.
 - `RemoveSelectedStep` currently removes from the displayed target. Shared operations need group-level removal.
+- Connector-style input group painting now tracks input-only offsets (not operation row offsets) so visual connectors are consistent across 2+ input rows.
 - Preview refresh may become more expensive because all target previews are built for the full plan view.
 - Large target sets can create many display rows. Filtering and row virtualization may become necessary later.
 - Folder operations with runtime-dependent output should be marked as uncertain rather than pretending to know every output path.

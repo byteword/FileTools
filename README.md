@@ -53,16 +53,18 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
 - 파일/폴더를 수동으로 선택합니다.
 - 파일을 변경하기 전에 각 대상에 여러 계획 작업을 추가합니다.
 - 파일명 교정, 폴더 wrapping, 폴더 unwrapping, AutoRelocation 작업을 체인으로 연결합니다.
-- 메뉴 모음에서 파일, 작업, 설정 명령에 접근하고, 자주 쓰는 작업 명령은 고정 작업 도구 모음에 유지합니다.
+- 메뉴 모음에서 파일, 작업, 설정 명령에 접근하고, 자주 쓰는 작업 명령은 오른쪽 위 작업/로그 패널의 고정 도구 모음에 유지합니다.
 - 파일 비교 전용 창에서 파일/폴더 대상을 모으고 이름/메타데이터/내용/압축 해제 옵션을 조정한 뒤, modeless 진행률 창과 결과 창에서 중복 후보, JSON 저장, 중복 삭제 step 추가를 처리합니다.
 - ZIP 압축 병합 작업은 `A 01.zip`, `A 02.zip` 같은 번호 붙은 압축 묶음을 `A.zip`으로 제안하고, 옵션 창 하단에서 압축 내부 엔트리의 원래 경로와 충돌 처리 후 대상 경로를 미리 보여줍니다.
 - 분할 버튼에서 폴더 unwrapping 변형을 선택합니다. 기본 설정, 같은 이름 폴더, 단일 파일 폴더 이름 불일치 처리 방식, 바로 아래 자식 파일 상위 이동을 포함합니다.
-- 각 선택 대상의 작업 계획을 순서, 아이콘이 붙은 작업 종류, 예상 결과와 함께 그리드에서 검토합니다. 이름 변경 단계는 `original -> new name` 형식으로 표시됩니다.
-- 작업 계획 위에 현재 표시 중인 대상, 선택된 대상 수, 선택된 대상의 계획 단계 수를 표시합니다.
+- 아래쪽 작업 플랜 그리드에서 실행될 전체 작업, 선택 대상 관련 작업, 경고 작업을 필터로 전환해 검토합니다.
+- 작업 계획 위에 현재 필터, 대상 수, 계획 단계 수, 경고 수를 표시합니다.
+- 작업 플랜 그리드는 순서, 아이콘이 붙은 작업 종류, 입력, 출력/예상 결과를 표시합니다. ZIP 병합 같은 공유 작업은 하나의 그룹 작업과 입력 행으로 표시됩니다.
 - 별도 설정 열을 두지 않고 그리드 행 툴팁으로 단계별 상세 옵션을 보여줍니다.
-- 계획 쪽 도구 모음에서 선택한 단계 하나를 제거하거나 현재 표시 중인 대상의 단계를 모두 지울 수 있으며, 남은 단계 체인을 기준으로 미리보기가 다시 계산됩니다.
+- 아래쪽 계획 도구 모음에서 선택한 작업 하나를 제거하거나 선택한 계획 행의 대상 단계를 모두 지울 수 있으며, 남은 단계 체인을 기준으로 미리보기가 다시 계산됩니다.
 - 계획 작업을 두 번 클릭하면 해당 작업 대화상자를 다시 엽니다. 이름 변경 단계는 파일별 후보, 수동 편집, 건너뛰기 컨트롤이 포함된 이름 바꾸기 검토 창을 다시 엽니다.
-- 오른쪽 아래 실행/중지 버튼 하나로 모든 대상 계획을 순서대로 실행하고, 아래쪽 로그 보기에서 진행 상황을 검토합니다.
+- 아래쪽 작업 플랜 그룹 안의 실행/중지 버튼 하나로 모든 대상 계획을 순서대로 실행하고, 같은 그룹의 상태 라벨과 진행 막대에서 실행 상태를 확인합니다.
+- 오른쪽 위 로그 보기에서 실행 메시지와 요약을 검토합니다.
 - 탐색기 ContextMenu 등록, 이름 변경 기본값, 폴더 기본값, AutoRelocation 기본값을 위한 고정 상태 헤더와 접을 수 있는 옵션 그룹이 있는 크기 조절 가능한 설정 창을 엽니다.
 
 설정 창은 동작 기본값과 탐색기 ContextMenu 설치/제거를 관리합니다. 네이티브 ShellExt 등록은 하나의 FileTools 하위 메뉴를 사용하며, 개별 ContextMenu 작업은 켜거나 끌 수 있습니다.
@@ -432,16 +434,18 @@ The standalone window supports:
 - Manual file/folder selection.
 - Adding multiple planned actions to each target before changing files.
 - Chaining filename correction, folder wrapping, folder unwrapping, and AutoRelocation actions.
-- Accessing file, task, and settings commands from the menu bar, while common task commands stay on the fixed task toolbar.
+- Accessing file, task, and settings commands from the menu bar, while common task commands stay on the fixed toolbar in the top-right task/log panel.
 - Opening the dedicated file-compare dialog to collect files/folders, adjust name, metadata, content, and archive-extraction options, then use the modeless progress dialog and result dialog for duplicate candidates, JSON saving, and duplicate-delete step handoff.
 - Adding ZIP archive merge steps that suggest common logical output names such as `A.zip` for `A 01.zip` and `A 02.zip`, with an options-dialog detail grid showing each internal entry's original path and collision-resolved target path.
 - Selecting folder unwrapping variants from a split button, including the default setting, same-name folders, single-file folder name mismatch modes, and moving direct child files upward.
-- Reviewing each selected target's work plan in a grid with order, icon-labeled action kind, and expected result; rename steps show `original -> new name`.
-- Showing the currently displayed target, selected target count, and selected targets' planned step count above the work plan.
+- Reviewing all planned operations, selected-target operations, or warning operations by switching filters in the bottom work-plan grid.
+- Showing the current filter, target count, planned step count, and warning count above the work plan.
+- Showing order, icon-labeled action kind, input, and output/expected result in the work-plan grid. Shared operations such as ZIP merge appear as one operation group with input rows.
 - Showing detailed per-step options in grid row tooltips instead of dedicating a separate settings column.
-- Removing one selected step or clearing the currently displayed target's steps from the plan-side toolbar; the preview is recalculated from the remaining step chain.
+- Removing one selected operation or clearing the selected plan row's target steps from the bottom plan toolbar; the preview is recalculated from the remaining step chain.
 - Double-clicking a planned action to reopen the matching action dialog; rename steps reopen the rename review dialog with per-file candidates, manual editing, and skip controls.
-- Running all target plans in order with one bottom-right run/stop button and reviewing progress in the bottom log view.
+- Running all target plans in order with one run/stop button inside the bottom work-plan group, with execution state shown by the neighboring status label and progress bar.
+- Reviewing execution messages and summaries in the top-right log view.
 - Opening a resizable settings window with a fixed status header and collapsible option groups for Explorer ContextMenu registration, rename defaults, folder defaults, and AutoRelocation defaults.
 
 The settings window owns operational defaults and Explorer ContextMenu installation/removal. Native ShellExt registration uses one FileTools submenu, and individual ContextMenu actions can be enabled or disabled.

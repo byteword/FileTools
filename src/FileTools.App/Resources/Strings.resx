@@ -153,6 +153,9 @@
   <data name="PlanScopeNoSelection" xml:space="preserve"><value>No target selected.</value></data>
   <data name="PlanScopeSingleFormat" xml:space="preserve"><value>Showing {0} · {1} planned steps</value></data>
   <data name="PlanScopeSelectedFormat" xml:space="preserve"><value>Showing {0} · {1} selected targets · {2} selected planned steps</value></data>
+  <data name="PlanScopeAllFormat" xml:space="preserve"><value>Showing all plan · {0} targets · {1} planned steps · {2} warnings</value></data>
+  <data name="PlanScopeSelectedOnlyFormat" xml:space="preserve"><value>Showing selected targets · {0} targets · {1} planned steps · {2} warnings</value></data>
+  <data name="PlanScopeWarningsFormat" xml:space="preserve"><value>Showing warnings · {0} warning operations · {1} planned steps</value></data>
   <data name="PlanExecutionTitle" xml:space="preserve"><value>Plan execution</value></data>
   <data name="DialogRenameTitle" xml:space="preserve"><value>Rename action</value></data>
   <data name="DialogFolderWrapTitle" xml:space="preserve"><value>Folder wrap action</value></data>
@@ -344,6 +347,8 @@
   <data name="ColumnTargetActions" xml:space="preserve"><value>Actions</value></data>
   <data name="ColumnPlanOrder" xml:space="preserve"><value>#</value></data>
   <data name="ColumnPlanAction" xml:space="preserve"><value>Action</value></data>
+  <data name="ColumnPlanInput" xml:space="preserve"><value>Input</value></data>
+  <data name="ColumnPlanOutput" xml:space="preserve"><value>Output / expected result</value></data>
   <data name="ColumnPlanPreview" xml:space="preserve"><value>Expected result</value></data>
   <data name="PlanActionRename" xml:space="preserve"><value>Rename</value></data>
   <data name="PlanActionWrap" xml:space="preserve"><value>Wrap</value></data>
@@ -414,6 +419,18 @@
   <data name="ToolTipClearSteps" xml:space="preserve"><value>Clear every step shown in the current work plan.</value></data>
   <data name="ToolTipRunPlan" xml:space="preserve"><value>Run the current plan.</value></data>
   <data name="ToolTipStopPlan" xml:space="preserve"><value>Request a stop after the current operation completes.</value></data>
+  <data name="PlanExecutionStatusReady" xml:space="preserve"><value>Ready.</value></data>
+  <data name="PlanExecutionStatusRunning" xml:space="preserve"><value>Working through the current plan.</value></data>
+  <data name="PlanExecutionStatusStopping" xml:space="preserve"><value>Stop requested. Waiting for the current operation to finish.</value></data>
+  <data name="PlanDisplayInputSummaryFormat" xml:space="preserve"><value>{0} input items</value></data>
+  <data name="PlanDisplayArchiveInputSummaryFormat" xml:space="preserve"><value>{0} ZIP sources</value></data>
+  <data name="PlanDisplayInputRow" xml:space="preserve"><value>Input</value></data>
+  <data name="PlanFilterAll" xml:space="preserve"><value>All plan</value></data>
+  <data name="PlanFilterAllToolTip" xml:space="preserve"><value>Show every planned operation that will run.</value></data>
+  <data name="PlanFilterSelectedTargets" xml:space="preserve"><value>Selected targets</value></data>
+  <data name="PlanFilterSelectedTargetsToolTip" xml:space="preserve"><value>Show operations related to the selected target rows.</value></data>
+  <data name="PlanFilterWarnings" xml:space="preserve"><value>Warnings</value></data>
+  <data name="PlanFilterWarningsToolTip" xml:space="preserve"><value>Show operations with preview warnings.</value></data>
   <data name="LogReady" xml:space="preserve"><value>Ready.</value></data>
   <data name="LogExecutionStartingFormat" xml:space="preserve"><value>Starting plan: {0} targets, {1} steps.</value></data>
   <data name="LogExecutionSummaryFormat" xml:space="preserve"><value>Summary: targets {0}, applied {1}, skipped {2}, errors {3}.</value></data>

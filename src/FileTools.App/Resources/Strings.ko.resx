@@ -153,6 +153,9 @@
   <data name="PlanScopeNoSelection" xml:space="preserve"><value>선택한 대상이 없습니다.</value></data>
   <data name="PlanScopeSingleFormat" xml:space="preserve"><value>표시 중: {0} · 계획된 단계 {1}개</value></data>
   <data name="PlanScopeSelectedFormat" xml:space="preserve"><value>표시 중: {0} · 선택 대상 {1}개 · 선택 대상 단계 {2}개</value></data>
+  <data name="PlanScopeAllFormat" xml:space="preserve"><value>전체 플랜 표시 중 · 대상 {0}개 · 계획 단계 {1}개 · 경고 {2}개</value></data>
+  <data name="PlanScopeSelectedOnlyFormat" xml:space="preserve"><value>선택 대상 표시 중 · 대상 {0}개 · 계획 단계 {1}개 · 경고 {2}개</value></data>
+  <data name="PlanScopeWarningsFormat" xml:space="preserve"><value>경고 표시 중 · 경고 작업 {0}개 · 계획 단계 {1}개</value></data>
   <data name="PlanExecutionTitle" xml:space="preserve"><value>플랜 실행</value></data>
   <data name="DialogRenameTitle" xml:space="preserve"><value>이름변경 작업</value></data>
   <data name="DialogFolderWrapTitle" xml:space="preserve"><value>폴더 감싸기 작업</value></data>
@@ -344,6 +347,8 @@
   <data name="ColumnTargetActions" xml:space="preserve"><value>작업</value></data>
   <data name="ColumnPlanOrder" xml:space="preserve"><value>순서</value></data>
   <data name="ColumnPlanAction" xml:space="preserve"><value>작업</value></data>
+  <data name="ColumnPlanInput" xml:space="preserve"><value>입력</value></data>
+  <data name="ColumnPlanOutput" xml:space="preserve"><value>출력 / 예상 결과</value></data>
   <data name="ColumnPlanPreview" xml:space="preserve"><value>예상 결과</value></data>
   <data name="PlanActionRename" xml:space="preserve"><value>이름변경</value></data>
   <data name="PlanActionWrap" xml:space="preserve"><value>감싸기</value></data>
@@ -414,6 +419,18 @@
   <data name="ToolTipClearSteps" xml:space="preserve"><value>현재 작업 플랜에 표시된 모든 단계를 삭제합니다.</value></data>
   <data name="ToolTipRunPlan" xml:space="preserve"><value>현재 플랜을 실행합니다.</value></data>
   <data name="ToolTipStopPlan" xml:space="preserve"><value>현재 작업이 끝난 뒤 중지하도록 요청합니다.</value></data>
+  <data name="PlanExecutionStatusReady" xml:space="preserve"><value>준비됨.</value></data>
+  <data name="PlanExecutionStatusRunning" xml:space="preserve"><value>현재 플랜을 실행 중입니다.</value></data>
+  <data name="PlanExecutionStatusStopping" xml:space="preserve"><value>중지를 요청했습니다. 현재 작업이 끝나기를 기다립니다.</value></data>
+  <data name="PlanDisplayInputSummaryFormat" xml:space="preserve"><value>입력 항목 {0}개</value></data>
+  <data name="PlanDisplayArchiveInputSummaryFormat" xml:space="preserve"><value>ZIP 입력 {0}개</value></data>
+  <data name="PlanDisplayInputRow" xml:space="preserve"><value>입력</value></data>
+  <data name="PlanFilterAll" xml:space="preserve"><value>전체 플랜</value></data>
+  <data name="PlanFilterAllToolTip" xml:space="preserve"><value>실행될 모든 계획 작업을 표시합니다.</value></data>
+  <data name="PlanFilterSelectedTargets" xml:space="preserve"><value>선택 대상</value></data>
+  <data name="PlanFilterSelectedTargetsToolTip" xml:space="preserve"><value>선택한 대상 행과 관련된 작업만 표시합니다.</value></data>
+  <data name="PlanFilterWarnings" xml:space="preserve"><value>경고</value></data>
+  <data name="PlanFilterWarningsToolTip" xml:space="preserve"><value>미리보기 경고가 있는 작업만 표시합니다.</value></data>
   <data name="LogReady" xml:space="preserve"><value>준비됨.</value></data>
   <data name="LogExecutionStartingFormat" xml:space="preserve"><value>플랜 실행 시작: 대상 {0}개, 단계 {1}개.</value></data>
   <data name="LogExecutionSummaryFormat" xml:space="preserve"><value>요약: 대상 {0}, 적용 {1}, 건너뜀 {2}, 오류 {3}.</value></data>
