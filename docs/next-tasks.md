@@ -51,8 +51,11 @@ Scope reviewed:
     notes, and MainForm UX tracking docs to match the new layout skeleton.
   - Added the UI-independent `WorkPlanDisplayBuilder` projection with coverage
     for execution order, selected-target filtering, shared archive-merge
-    de-duplication, and warning propagation. The projection is not yet wired to
-    the visible grid.
+    de-duplication, and warning propagation.
+  - Connected the projection to the bottom plan grid with all-plan,
+    selected-target, and warning filter buttons. The grid now shows order,
+    action, input, and output/expected-result columns, with shared archive merge
+    displayed once per plan ID plus source input rows.
 - Added `docs/in-app-context-menu-folder-merge-design.md` and
   `docs/images/in-app-context-menu-folder-merge-design.svg` on 2026-06-11 to
   prepare the in-app right-click menu implementation and the safer selected-target

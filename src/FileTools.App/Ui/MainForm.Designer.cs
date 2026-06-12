@@ -82,6 +82,9 @@ partial class MainForm
     private ToolStripButton _editStepToolButton = null!;
     private ToolStripButton _removeStepToolButton = null!;
     private ToolStripButton _clearStepsToolButton = null!;
+    private ToolStripButton _planFilterAllToolButton = null!;
+    private ToolStripButton _planFilterSelectedToolButton = null!;
+    private ToolStripButton _planFilterWarningsToolButton = null!;
     private TableLayoutPanel _planExecutionPanel = null!;
     private Label _planExecutionStatusLabel = null!;
     private ProgressBar _planProgressBar = null!;
@@ -179,6 +182,9 @@ partial class MainForm
         _editStepToolButton = new ToolStripButton();
         _removeStepToolButton = new ToolStripButton();
         _clearStepsToolButton = new ToolStripButton();
+        _planFilterAllToolButton = new ToolStripButton();
+        _planFilterSelectedToolButton = new ToolStripButton();
+        _planFilterWarningsToolButton = new ToolStripButton();
         _planExecutionPanel = new TableLayoutPanel();
         _planExecutionStatusLabel = new Label();
         _planProgressBar = new ProgressBar();
@@ -615,7 +621,11 @@ partial class MainForm
         {
             _editStepToolButton,
             _removeStepToolButton,
-            _clearStepsToolButton
+            _clearStepsToolButton,
+            new ToolStripSeparator(),
+            _planFilterAllToolButton,
+            _planFilterSelectedToolButton,
+            _planFilterWarningsToolButton
         });
         _planToolStrip.LayoutStyle = ToolStripLayoutStyle.HorizontalStackWithOverflow;
         _planToolStrip.Name = "_planToolStrip";
@@ -639,6 +649,21 @@ partial class MainForm
         _clearStepsToolButton.Name = "_clearStepsToolButton";
         _clearStepsToolButton.Text = "Clear steps";
         _clearStepsToolButton.TextImageRelation = TextImageRelation.ImageBeforeText;
+
+        _planFilterAllToolButton.CheckOnClick = false;
+        _planFilterAllToolButton.DisplayStyle = ToolStripItemDisplayStyle.Text;
+        _planFilterAllToolButton.Name = "_planFilterAllToolButton";
+        _planFilterAllToolButton.Text = "All";
+
+        _planFilterSelectedToolButton.CheckOnClick = false;
+        _planFilterSelectedToolButton.DisplayStyle = ToolStripItemDisplayStyle.Text;
+        _planFilterSelectedToolButton.Name = "_planFilterSelectedToolButton";
+        _planFilterSelectedToolButton.Text = "Selected";
+
+        _planFilterWarningsToolButton.CheckOnClick = false;
+        _planFilterWarningsToolButton.DisplayStyle = ToolStripItemDisplayStyle.Text;
+        _planFilterWarningsToolButton.Name = "_planFilterWarningsToolButton";
+        _planFilterWarningsToolButton.Text = "Warnings";
 
         _planExecutionPanel.ColumnCount = 3;
         _planExecutionPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));

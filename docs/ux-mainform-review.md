@@ -13,11 +13,11 @@ Scope:
 
 ## Summary
 
-The standalone window is now organized as a planner with a top target/task area and a bottom work-plan area. The top-left pane contains the target list, the top-right pane contains task commands and the compact execution log, and the bottom pane contains the selected-target work plan plus run/stop/progress state.
+The standalone window is now organized as a planner with a top target/task area and a bottom work-plan area. The top-left pane contains the target list, the top-right pane contains task commands and the compact execution log, and the bottom pane contains the filtered work plan plus run/stop/progress state.
 
-The README now references `docs/images/current-mainform-designer-layout.svg`, which describes the current planner-oriented layout. The reference image was refreshed on 2026-06-12 to match the first plan-list layout slice: menu bar, top target/task split, top-right log box, bottom work-plan grid, plan execution status, progress indicator, and run/stop button.
+The README now references `docs/images/current-mainform-designer-layout.svg`, which describes the current planner-oriented layout. The reference image was refreshed on 2026-06-12 to match the plan-list layout slice: menu bar, top target/task split, top-right log box, bottom filtered work-plan grid, plan execution status, progress indicator, and run/stop button.
 
-The next layout proposal is tracked in `docs/mainform-plan-list-layout-proposal.md`. The first implementation slice has moved the plan review surface to the bottom of the window and placed run/stop/progress state inside the same work-plan group. The plan grid still shows the currently selected target only; all-plan filtering and execution-order grouping remain future slices.
+The next layout proposal is tracked in `docs/mainform-plan-list-layout-proposal.md`. The implementation has moved the plan review surface to the bottom of the window, placed run/stop/progress state inside the same work-plan group, and connected the all-plan/selected-target/warning projection to the visible grid. Richer group rendering and more manual layout validation remain future slices.
 
 ## Implemented Layout Changes
 
@@ -26,7 +26,9 @@ The next layout proposal is tracked in `docs/mainform-plan-list-layout-proposal.
 - Target add/remove/reorder/clear commands sit near the target grid as icon toolbar commands.
 - Main task commands sit in a fixed `ToolStrip` in the top-right task/log pane.
 - Folder unwrapping uses `ToolStripSplitButton` for default unwrap, same-name unwrap, single-file mismatch modes, and moving direct child files upward.
-- The work plan area sits in the bottom pane and uses a read-only `DataGridView` with order, icon-labeled action kind, and expected result columns.
+- The work plan area sits in the bottom pane and uses a read-only `DataGridView` with order, icon-labeled action kind, input, and output/expected result columns.
+- The plan toolbar includes all-plan, selected-target, and warning filters backed by `WorkPlanDisplayBuilder`.
+- Shared archive-merge steps are displayed once per plan ID with input rows for source archives.
 - Step options are moved out of the grid body and into row tooltips, keeping the visible grid focused on action and outcome.
 - Step delete and clear-all-for-current-target commands sit on a horizontal icon+text toolbar above the plan grid.
 - The work plan area shows which target is currently displayed, how many targets are selected, and the selected targets' planned step count for multi-target selections.
@@ -43,9 +45,9 @@ The next layout proposal is tracked in `docs/mainform-plan-list-layout-proposal.
 
 ## Remaining UX Notes
 
-### 1. Plan scope is still selected-target-first
+### 1. Plan grid is filtered but still uses simple grouped rows
 
-The target grid shows per-target action counts, and the bottom plan grid still shows the currently selected target only. The scope header reduces ambiguity by showing the displayed target, selected target count, and the selected targets' aggregate planned step count. The planned all-plan/selected-target filter has not been implemented yet.
+The target grid shows per-target action counts, and the bottom plan grid can now switch between all plan, selected targets, and warnings. Shared operations use simple group/input rows rather than owner-drawn merged cells, so richer visual grouping remains a later pass.
 
 ### 2. Icon-only commands need real-use validation
 
@@ -65,6 +67,6 @@ The plan grid now predicts rename, wrap, unwrap, and relocation where enough pat
 
 ## Suggested Next Priority
 
-1. Prototype the bottom work-plan list behind a UI-only plan display projection.
-2. Add all-plan, selected-target, and warning filters before replacing the current selected-target-only plan grid.
-3. Revisit splitter constraints after manual validation at small, default, and wide window sizes.
+1. Improve visual grouping for shared and multi-output operations without making grid selection brittle.
+2. Add manual UI validation at small, default, and wide window sizes.
+3. Revisit splitter constraints after manual validation.
