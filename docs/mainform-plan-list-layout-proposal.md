@@ -116,11 +116,13 @@ Duplicate delete should also be shown as a grouped operation when it came from a
 6. Connect the projection to the bottom plan grid and add filter controls. Done.
 7. Grouped display rows for shared and uncertain operations with connector-style row painting for grouped input rows.
 8. Perform manual UI validation at small, default, and wide window sizes.
+9. Fix connector paint index math so multi-input groups draw top/middle/bottom segments correctly for all group sizes.
 
 ## Expected Risks
 
 - `EditStep` currently depends on the selected target grid row. The new plan grid must carry target context per row.
 - `RemoveSelectedStep` currently removes from the displayed target. Shared operations need group-level removal.
+- Connector-style input group painting must treat group-local input offsets consistently when grouped operations have more than two inputs.
 - Preview refresh may become more expensive because all target previews are built for the full plan view.
 - Large target sets can create many display rows. Filtering and row virtualization may become necessary later.
 - Folder operations with runtime-dependent output should be marked as uncertain rather than pretending to know every output path.

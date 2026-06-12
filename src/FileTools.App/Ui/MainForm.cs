@@ -1228,7 +1228,7 @@ public sealed partial class MainForm : Form
             var isInputWithNoGroup = displayRow.Kind == WorkPlanDisplayRowKind.Input && groupSize == 0;
             if (isGroupedInput)
             {
-                _planInputGroupByGridRow[gridRowIndex] = (InputIndex: groupIndex - 1, InputCount: groupSize - 1);
+                _planInputGroupByGridRow[gridRowIndex] = (InputIndex: groupIndex - 1, InputCount: groupSize);
             }
             var actionText = CreatePlanActionCellText(
                 displayRow,
