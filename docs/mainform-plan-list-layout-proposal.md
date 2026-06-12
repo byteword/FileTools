@@ -81,6 +81,7 @@ Order | Operation        | Input                         | Output
 ```
 
 Later, owner drawing can make group rows look like vertically spanned cells if the group-row approach proves too visually weak.
+Current implementation uses connector-style cell painting to emulate grouped input rows until full span rendering is needed.
 
 ## Command Semantics
 
@@ -113,7 +114,7 @@ Duplicate delete should also be shown as a grouped operation when it came from a
 4. Extract plan-display projection generation without changing layout. Done.
 5. Add tests for projection ordering, selected-target filtering, shared archive merge de-duplication, and warning propagation. Done.
 6. Connect the projection to the bottom plan grid and add filter controls. Done.
-7. Grouped display rows for shared and uncertain operations (duplicate-delete input grouping added; one-row visual merging still pending).
+7. Grouped display rows for shared and uncertain operations with connector-style row painting for grouped input rows.
 8. Perform manual UI validation at small, default, and wide window sizes.
 
 ## Expected Risks

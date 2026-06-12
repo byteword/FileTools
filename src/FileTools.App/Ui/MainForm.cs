@@ -29,6 +29,9 @@ public sealed partial class MainForm : Form
     private bool _updatingTargetGridSelection;
     private FolderMergeMode _folderMergeMode = FolderMergeMode.MergeFolderUnits;
     private WorkPlanDisplayFilter _planDisplayFilter = WorkPlanDisplayFilter.All;
+    private readonly Dictionary<int, (int InputIndex, int InputCount)> _planInputGroupByGridRow = [];
+    private static readonly Color PlanGroupConnectorColor = Color.FromArgb(148, 163, 184);
+    private static readonly Color PlanGroupConnectorSelectedColor = SystemColors.HighlightText;
 
     public MainForm()
         : this(null, MainFormStartupAction.None)
@@ -78,6 +81,7 @@ public sealed partial class MainForm : Form
         _targetGrid.DragDrop += FileDrop_DragDrop;
         _planGrid.CellDoubleClick += (_, _) => EditSelectedStep();
         _planGrid.CellMouseDown += PlanGrid_CellMouseDown;
+        _planGrid.CellPainting += PlanGrid_CellPainting;
         _planGrid.SelectionChanged += (_, _) => UpdateCommandStates();
 
         _addFilesMenuItem.Click += (_, _) => AddFiles();
@@ -1189,6 +1193,7 @@ public sealed partial class MainForm : Form
 
     private void RefreshPlanList()
     {
+        _planInputGroupByGridRow.Clear();
         _planGrid.Rows.Clear();
         UpdatePlanScopeHeader();
         UpdatePlanFilterButtons();
@@ -1221,6 +1226,10 @@ public sealed partial class MainForm : Form
             var groupIndex = groupIndexByRowIndex.GetValueOrDefault(rowIndex);
             var isGroupedInput = displayRow.Kind == WorkPlanDisplayRowKind.Input && groupSize > 1;
             var isInputWithNoGroup = displayRow.Kind == WorkPlanDisplayRowKind.Input && groupSize == 0;
+            if (isGroupedInput)
+            {
+                _planInputGroupByGridRow[gridRowIndex] = (InputIndex: groupIndex - 1, InputCount: groupSize - 1);
+            }
             var actionText = CreatePlanActionCellText(
                 displayRow,
                 isGroupedInput || isInputWithNoGroup ? groupIndex : 0,
@@ -1246,6 +1255,45 @@ public sealed partial class MainForm : Form
                 cell.ToolTipText = toolTip;
             }
         }
+    }
+
+    private void PlanGrid_CellPainting(object? sender, DataGridViewCellPaintingEventArgs e)
+    {
+        if (e.RowIndex < 0 || e.ColumnIndex < 0 ||
+            e.ColumnIndex != _planGrid.Columns[PlanActionColumnName].Index)
+        {
+            return;
+        }
+
+        if (_planGrid.Rows[e.RowIndex].Tag is not WorkPlanDisplayRow { Kind: WorkPlanDisplayRowKind.Input } ||
+            !_planInputGroupByGridRow.TryGetValue(e.RowIndex, out var groupInfo) ||
+            groupInfo.InputCount <= 1)
+        {
+            return;
+        }
+
+        e.Paint(e.CellBounds, DataGridViewPaintParts.All);
+
+        var isSelected = _planGrid.Rows[e.RowIndex].Selected;
+        using var pen = new Pen(isSelected
+            ? PlanGroupConnectorSelectedColor
+            : PlanGroupConnectorColor);
+        var lineColorX = e.CellBounds.Left + 16f;
+        var lineTop = e.CellBounds.Top + 2f;
+        var lineBottom = e.CellBounds.Bottom - 2f;
+        var lineMiddle = e.CellBounds.Top + (e.CellBounds.Height / 2f);
+        if (groupInfo.InputIndex > 0)
+        {
+            e.Graphics.DrawLine(pen, lineColorX, lineTop, lineColorX, lineMiddle);
+        }
+
+        if (groupInfo.InputIndex < groupInfo.InputCount - 1)
+        {
+            e.Graphics.DrawLine(pen, lineColorX, lineMiddle, lineColorX, lineBottom);
+        }
+
+        e.Graphics.DrawLine(pen, lineColorX, lineMiddle, e.CellBounds.Left + 30f, lineMiddle);
+        e.Handled = true;
     }
 
     private void UpdatePlanScopeHeader()
