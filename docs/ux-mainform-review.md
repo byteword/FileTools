@@ -42,6 +42,7 @@ The next layout proposal is tracked in `docs/mainform-plan-list-layout-proposal.
 - The "Merge selected into folder" split button moved into the action toolbar on the right panel.
 - Added folder-merge option flow with target-name preview/edit and split-button mode support.
 - For folder merges, multiple-folder selections expose a "merge folder contents only" mode and the current plan/confirmation now reflects the selected merge mode.
+- Fixed the folder-merge option dialog layout so the merge-mode radio buttons and confirmation preview no longer overlap the OK/Cancel button row on Korean localized text.
 
 ## Remaining UX Notes
 
@@ -61,6 +62,7 @@ The top-right log now handles progress and summary feedback. It is not a structu
 ### 4. Layout proportions are not final
 
 The form still starts at `980 x 700` and now uses a top/bottom split plus a fixed top-left target split distance. This is reasonable while the plan/result model is still moving, but the next layout pass should revisit minimum size, splitter constraints, and how much vertical space the log should occupy.
+The folder-merge options dialog now uses client-size-based bounds and fixed radio-button rows after a localized layout issue was found during manual validation.
 
 ### 5. Preview coverage still has real-file limits
 
