@@ -7,6 +7,9 @@ namespace FileTools;
 
 internal sealed class FolderMergeOptionsDialog : Form
 {
+    private const int DialogClientWidth = 584;
+    private const int DialogClientHeight = 380;
+
     private readonly IReadOnlyList<string> _sourcePaths;
     private readonly FileToolsSettings _settings;
     private readonly bool _allowFolderContentsMode;
@@ -34,8 +37,8 @@ internal sealed class FolderMergeOptionsDialog : Form
 
         Text = Localizer.Get("FolderMergeOptionsDialogTitle");
         StartPosition = FormStartPosition.CenterParent;
-        Size = new Size(600, 320);
-        MinimumSize = new Size(540, 280);
+        ClientSize = new Size(DialogClientWidth, DialogClientHeight);
+        MinimumSize = new Size(600, 420);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
@@ -56,13 +59,12 @@ internal sealed class FolderMergeOptionsDialog : Form
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
-            RowCount = 6,
+            RowCount = 5,
             Padding = new Padding(12)
         };
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 82));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 70));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 62));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 104));
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
 
@@ -82,7 +84,8 @@ internal sealed class FolderMergeOptionsDialog : Form
         {
             Dock = DockStyle.Fill,
             FlowDirection = FlowDirection.RightToLeft,
-            WrapContents = false
+            WrapContents = false,
+            Padding = new Padding(0, 6, 0, 0)
         };
 
         var cancelButton = new Button
@@ -102,7 +105,7 @@ internal sealed class FolderMergeOptionsDialog : Form
 
         _okButton.Click += (_, _) => SaveAndClose();
         CancelButton = cancelButton;
-        root.Controls.Add(buttons, 0, 5);
+        root.Controls.Add(buttons, 0, 4);
         root.SetColumnSpan(buttons, 1);
         Controls.Add(root);
     }
@@ -143,6 +146,7 @@ internal sealed class FolderMergeOptionsDialog : Form
         _targetFolderPathLabel.Dock = DockStyle.Fill;
         _targetFolderPathLabel.ForeColor = Color.FromArgb(71, 85, 105);
         _targetFolderPathLabel.TextAlign = ContentAlignment.MiddleLeft;
+        _targetFolderPathLabel.AutoEllipsis = true;
         panel.Controls.Add(_targetFolderPathLabel, 1, 1);
 
         return panel;
@@ -154,28 +158,33 @@ internal sealed class FolderMergeOptionsDialog : Form
         {
             Dock = DockStyle.Fill,
             Text = Localizer.Get("FolderMergeModeGroup"),
-            Padding = new Padding(8)
+            Padding = new Padding(8, 20, 8, 8)
         };
-        var panel = new FlowLayoutPanel
+        var panel = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
-            FlowDirection = FlowDirection.TopDown,
-            WrapContents = false
+            ColumnCount = 1,
+            RowCount = 2
         };
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
 
         _mergeFolderUnitsRadio.Text = Localizer.Get("FolderMergeModeMergeFolders");
         _mergeFolderUnitsRadio.Dock = DockStyle.Fill;
-        _mergeFolderUnitsRadio.Margin = new Padding(0, 2, 0, 2);
+        _mergeFolderUnitsRadio.Margin = new Padding(0);
+        _mergeFolderUnitsRadio.TextAlign = ContentAlignment.MiddleLeft;
         _mergeFolderUnitsRadio.Checked = mode == FolderMergeMode.MergeFolderUnits;
-        panel.Controls.Add(_mergeFolderUnitsRadio);
+        panel.Controls.Add(_mergeFolderUnitsRadio, 0, 0);
 
         _mergeFolderContentsRadio.Text = Localizer.Get("FolderMergeModeMergeContentsOnly");
         _mergeFolderContentsRadio.Dock = DockStyle.Fill;
+        _mergeFolderContentsRadio.Margin = new Padding(0);
+        _mergeFolderContentsRadio.TextAlign = ContentAlignment.MiddleLeft;
         _mergeFolderContentsRadio.Enabled = _allowFolderContentsMode;
         _mergeFolderContentsRadio.Visible = _allowFolderContentsMode;
         _mergeFolderContentsRadio.Checked =
             _allowFolderContentsMode && mode == FolderMergeMode.MergeFolderContentsOnly;
-        panel.Controls.Add(_mergeFolderContentsRadio);
+        panel.Controls.Add(_mergeFolderContentsRadio, 0, 1);
 
         group.Controls.Add(panel);
         return group;
@@ -192,6 +201,7 @@ internal sealed class FolderMergeOptionsDialog : Form
         _messageLabel.Padding = new Padding(8);
         _messageLabel.TextAlign = ContentAlignment.TopLeft;
         _messageLabel.AutoSize = false;
+        _messageLabel.AutoEllipsis = true;
         panel.Controls.Add(_messageLabel);
         return panel;
     }

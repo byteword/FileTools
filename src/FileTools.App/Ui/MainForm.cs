@@ -1931,7 +1931,7 @@ public sealed partial class MainForm : Form
         return icon + " " + GetPlanActionName(step);
     }
 
-    private static string CreatePlanActionCellText(WorkPlanDisplayRow row, int groupIndex, int groupSize)
+    internal static string CreatePlanActionCellText(WorkPlanDisplayRow row, int groupIndex, int groupSize)
     {
         if (row.Kind == WorkPlanDisplayRowKind.Input)
         {
