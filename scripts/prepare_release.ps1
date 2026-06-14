@@ -23,7 +23,7 @@ function Resolve-ReleaseTag {
 
     $normalizedTag = $InputTag.Trim()
     if ($normalizedTag -notmatch '^v\d+\.\d+\.\d+\.\d+$') {
-        throw "Tag '$InputTag' must use v<major>.<minor>.<build>.<revision>, for example v1.3.0.0."
+        throw "Tag '$InputTag' must use v<major>.<minor>.<build>.<revision>, for example v1.4.0.0."
     }
 
     $versionText = $normalizedTag.Substring(1)

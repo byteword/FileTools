@@ -4,13 +4,13 @@
 
 Windows 탐색기 ContextMenu와 독립 실행형 WinForms 유틸리티를 제공하는 작은 파일 관리 도구입니다.
 
-현재 버전: `1.3.0.0-beta`.
+현재 버전: `1.4.0.0-beta`.
 
 ### 개발 및 안정성 안내
 
 FileTools는 취미 개발자가 개인적으로 관리하는 프로젝트이며, Codex를 활용해 제작 및 업데이트하고 있습니다. 따라서 일부 업데이트는 충분히 안정화되지 않았을 수 있고, 버그 테스트도 제한적으로 이루어질 수 있습니다. 중요한 파일에 적용하기 전에는 백업을 권장드리며, 문제가 발견되면 이슈로 알려주시면 가능한 범위에서 확인하겠습니다.
 
-`1.3.0.0`은 베타 릴리스로 배포됩니다. ZIP 병합, 파일 비교, 이름변경 교정 플러그인 경계를 실제 사용 사례로 더 안정화한 뒤 같은 계열을 stable로 전환할 예정입니다.
+`1.4.0.0`은 베타 릴리스로 배포됩니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 로컬 이름변경 학습 기반, 릴리스 검증 흐름을 실제 사용 사례로 더 안정화한 뒤 같은 계열을 stable로 전환할 예정입니다.
 
 ### 기능
 
@@ -238,7 +238,7 @@ MSI는 네이티브 `FileTools.ShellExt.dll`을 현재 사용자 COM ExplorerCom
 
 GitHub Releases는 setup bootstrapper, MSI, sparse MSIX identity package를 빌드하고 서명하며, `checksums.txt`를 생성하고, 릴리스 자산에 대한 GitHub artifact attestation을 만드는 수동 workflow를 사용합니다.
 
-`1.3.0.0`은 GitHub prerelease/beta로 게시합니다. 위키 문서와 tag별 변경사항 문서를 먼저 업데이트하고, 릴리스 자산 검증 및 설치 smoke test가 끝난 뒤 draft를 게시합니다. 안정화 작업 후 stable 전환 릴리스를 별도로 게시합니다.
+`1.4.0.0`은 GitHub prerelease/beta로 게시합니다. 위키 문서와 tag별 변경사항 문서를 먼저 업데이트하고, 릴리스 자산 검증 및 설치 smoke test가 끝난 뒤 draft를 게시합니다. 안정화 작업 후 stable 전환 릴리스를 별도로 게시합니다.
 
 릴리스는 GitHub Secrets에 base64 PFX와 비밀번호로 저장된 self-signed FileTools 인증서를 사용합니다. 이는 무료 GitHub 배포와 CER 신뢰 후 MSIX identity 등록에는 적합하지만, 공개 CA 코드 서명 인증서는 아닙니다. Windows는 첫 사용 사용자에게 SmartScreen 또는 신뢰 경고를 계속 표시할 수 있습니다.
 
@@ -385,13 +385,13 @@ FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE`를 �
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
-Current version: `1.3.0.0-beta`.
+Current version: `1.4.0.0-beta`.
 
 ### Development and Stability Notice
 
 FileTools is maintained as a personal hobby project and is built and updated with the help of Codex. As a result, some updates may not be fully stable, and bug testing may be limited. Please consider backing up important files before using FileTools on them, and feel free to report issues so they can be reviewed as time permits.
 
-`1.3.0.0` is distributed as a beta release. The ZIP merge, file comparison, and rename-correction plugin boundary will move to stable after additional real-world stabilization.
+`1.4.0.0` is distributed as a beta release. The standalone planner work-plan display, folder-merge options flow, local rename-learning foundation, and release verification flow will move to stable after additional real-world stabilization.
 
 ### Features
 
@@ -620,7 +620,7 @@ GitHub Releases use a manual workflow that builds and signs the setup
 bootstrapper, MSI, and sparse MSIX identity package, generates `checksums.txt`,
 and creates GitHub artifact attestations for the release assets.
 
-`1.3.0.0` is published as a GitHub prerelease/beta. Update the wiki and
+`1.4.0.0` is published as a GitHub prerelease/beta. Update the wiki and
 tag-specific change notes before tagging, then publish the draft only after
 release asset verification and install smoke testing. A stable release will
 follow after the beta stabilization pass.

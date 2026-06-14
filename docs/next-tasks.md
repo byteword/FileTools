@@ -223,6 +223,25 @@ Scope reviewed:
   - Re-ran `build_msi.ps1 -Version v1.3.0.0`; it produced the MSI, setup
     bootstrapper, sparse MSIX identity, and CER with 0 warnings and 0 errors
     using a temporary self-signed certificate.
+- Prepared the `v1.4.0.0` prerelease documentation and changelog pass on
+  2026-06-14:
+  - Bumped app, MSI, bundle, and local build-script default versions to
+    `1.4.0.0`.
+  - Updated README, release workflow examples, maintainer release instructions,
+    local wiki pages, `CHANGELOG.md`, and `docs/release-notes/v1.4.0.0.md`.
+  - Scoped the `1.4.0.0-beta` changelog to the standalone planner work-plan
+    refresh, grouped input rows, folder-merge options flow, local rename
+    pattern-learning foundation, and release workflow hardening.
+  - Re-ran Debug and Release managed tests on .NET SDK 8.0.422; both passed
+    99/99.
+  - Re-ran `MSBuild.exe FileTools.sln /p:Configuration=Release /p:Platform=x64`;
+    it passed with 0 warnings and 0 errors after sandbox escalation for Windows
+    SDK lookup.
+  - Re-ran `build_msi.ps1 -Version v1.4.0.0`; it produced the MSI, setup
+    bootstrapper, sparse MSIX identity, and CER with 0 warnings and 0 errors
+    using a temporary self-signed certificate.
+  - Created local release assets under `artifacts\release` and verified
+    checksums/signature presence with `scripts\verify_release_assets.ps1`.
 
 ## Deferred Follow-Up Tracks
 
@@ -251,7 +270,7 @@ Scope reviewed:
    - Decide whether ZIP32 limits are acceptable for the first release or whether Zip64 output support must be added before release.
 
 2. Finalize the next release notes.
-   - `docs/release-notes/v1.3.0.0.md` is the beta release-note document for the
+   - `docs/release-notes/v1.4.0.0.md` is the beta release-note document for the
      next tag.
    - Binary, generated app manifest, MSI, Burn bundle, and sparse MSIX identity
      versions are injected from the release tag through `build_msi.ps1`. Before
