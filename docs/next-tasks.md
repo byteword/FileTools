@@ -240,6 +240,15 @@ Scope reviewed:
   - Debug managed tests passed 109/109 for the `v1.4.2.0` documentation/fix
     pass. Release asset verification and install smoke testing remain the
     publish gate for the `v1.4.2.0` prerelease.
+- Added generated ZIP release-sample regression coverage on 2026-06-14:
+  - The test corpus is created in the test temp folder instead of storing binary
+    ZIP fixtures in the repository.
+  - Coverage includes UTF-8 names, legacy CP949 names, legacy Shift-JIS names,
+    archive comments, entry comments, directory entries, external attributes,
+    local/central extra fields, internal path collision auto-numbering, and
+    same-content duplicate skipping.
+  - Ran `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj`; all 110
+    managed tests passed.
 
 ## Deferred Follow-Up Tracks
 
@@ -249,10 +258,10 @@ Scope reviewed:
   through deterministic pattern discovery, render-pattern candidates, persisted
   bounded local feedback history, and review UI integration before any neural
   ranker affects candidate order.
-- #6 file comparison: continue with JSON result import/reload, manual UI
-  validation with large mixed file sets and narrow result dialog sizes, and
-  eventual Explorer menu exposure after the internal `/context FileCompare`
-  route is smoke-tested.
+- #6 file comparison: continue with JSON result import/reload and manual UI
+  validation with large mixed file sets and narrow result dialog sizes. The
+  internal `/context FileCompare` route has been manually smoke-tested; Explorer
+  menu exposure remains a separate decision.
 - #7 Windows ARM64 build and installer support: resume only when ARM64 Windows
   hardware or a VM is available for end-to-end installer and Explorer
   validation.
@@ -275,9 +284,14 @@ Scope reviewed:
      explicitly in the release notes before publishing.
    - Keep the archive merge support note explicit: ZIP input and ZIP output are
      supported; 7Z input is not yet supported and is tracked by #8.
-   - Validate real ZIP samples that include legacy filename encodings, comments,
-     directory entries, external attributes, and local/central extra fields
-     during beta verification.
+   - Generated ZIP release-sample coverage now exercises legacy filename
+     encodings, comments, directory entries, external attributes,
+     local/central extra fields, collision auto-numbering, and same-content
+     duplicate skipping.
+   - ZIP caution notes only: very large ZIPs and third-party ZIPs from external
+     tools may still expose producer-specific behavior that is not represented
+     by the generated corpus. Treat those as beta caution items, not release
+     blockers, unless a concrete failure is found.
    - Re-run the managed regression suite, Release build, and `build_msi.ps1`
      only if code, build scripts, or release-facing metadata changes again
      before publishing.
@@ -288,9 +302,9 @@ Scope reviewed:
      `%LOCALAPPDATA%\Microsoft SDKs`; ShellExt or full `build_msi.ps1` checks may
      need external permission locally even though GitHub Actions should not.
 
-2. Keep post-`v1.4.2.0` release notes clean until new work starts.
+2. Keep post-`v1.4.2.0` release notes current as new work starts.
    - `docs/release-notes/next.md` is the draft for changes after `v1.4.2.0`
-     and currently has no post-`v1.4.2.0` changes recorded.
+     and now includes the generated ZIP release-sample regression coverage.
    - For the next tag, use `scripts/prepare_release.ps1 -Tag <tag> -Channel beta`
      to update release-facing README/wiki version references and create
      `docs/release-notes/<tag>.md` when it does not already exist.
@@ -306,9 +320,9 @@ Scope reviewed:
    - Validate the expanded option UI manually, especially common-name thresholds,
      middle-part start/length units, archive same-relative-path pairing, narrow
      result dialog sizes, and the duplicate-delete step editor.
-   - After `/context FileCompare` smoke testing, decide whether to expose the
-     command through Explorer registration, settings, and the native ShellExt
-     submenu.
+   - The internal `/context FileCompare` route has been manually smoke-tested.
+     Decide whether to expose it through Explorer registration, settings, and
+     the native ShellExt submenu.
 
 4. Continue UI validation for the 1.4 beta surfaces when manually exercised.
    - MainForm planner: validate small, default, and wide window sizes, then

@@ -180,7 +180,7 @@ src\FileTools.App\bin\Release\net8.0-windows\win-x64\publish\FileTools.exe
 
 ### 테스트
 
-자동 테스트는 `tests\FileTools.Tests`에 있습니다. 현재 회귀 범위는 파일명 교정, 이름 템플릿과 충돌 해결, 이름 변경 적용, 폴더 병합, AutoRelocation 분류/계획 생성, 작업 계획 미리보기, 설정/규칙 정규화, ZIP 병합, ZIP extra field byte 보존, ZIP 병합 중복/충돌/취소 cleanup, 파일 비교 엔진의 폴더 확장/부분 일치/해시 캐시/ZIP 엔트리 순서 비교/공통 이름 비교/중간 부분 범위/압축 엔트리 범위, 파일 비교 결과의 중복 그룹 산출, 보존 기준 정렬, JSON export schema입니다. ZIP 출력 파일시스템 오류는 내부 `IArchiveMergeFileSystem` 어댑터로 주입하며, 테스트 프로젝트는 `InternalsVisibleTo`로 내부 엔진 API에 접근합니다.
+자동 테스트는 `tests\FileTools.Tests`에 있습니다. 현재 회귀 범위는 파일명 교정, 이름 템플릿과 충돌 해결, 이름 변경 적용, 폴더 병합, AutoRelocation 분류/계획 생성, 작업 계획 미리보기, 설정/규칙 정규화, ZIP 병합, ZIP extra field byte 보존, ZIP 병합 중복/충돌/취소 cleanup, UTF-8/CP949/Shift-JIS 파일명과 comment/디렉터리/외부 속성/extra field를 포함한 생성 ZIP 릴리스 샘플 corpus, 파일 비교 엔진의 폴더 확장/부분 일치/해시 캐시/ZIP 엔트리 순서 비교/공통 이름 비교/중간 부분 범위/압축 엔트리 범위, 파일 비교 결과의 중복 그룹 산출, 보존 기준 정렬, JSON export schema입니다. ZIP 출력 파일시스템 오류는 내부 `IArchiveMergeFileSystem` 어댑터로 주입하며, 테스트 프로젝트는 `InternalsVisibleTo`로 내부 엔진 API에 접근합니다.
 
 ```powershell
 dotnet test .\tests\FileTools.Tests\FileTools.Tests.csproj
@@ -562,7 +562,7 @@ src\FileTools.App\bin\Release\net8.0-windows\win-x64\publish\FileTools.exe
 
 ### Tests
 
-Automated tests live in `tests\FileTools.Tests`. The current regression scope covers filename correction, name templates and collision resolution, rename apply, folder merge, AutoRelocation classification and planning, work-plan previews, settings/rule normalization, ZIP merge, ZIP extra field byte preservation, ZIP merge duplicate/collision/cancellation cleanup, the file-compare engine's folder expansion, partial match, hash cache, ZIP entry-order comparison behavior, common-name matching, middle-part ranges, archive entry scope, duplicate-group construction from file-compare results, keep-mode ordering, and the JSON export schema. ZIP output filesystem errors are injected through the internal `IArchiveMergeFileSystem` adapter, and the test project uses `InternalsVisibleTo` for internal engine APIs.
+Automated tests live in `tests\FileTools.Tests`. The current regression scope covers filename correction, name templates and collision resolution, rename apply, folder merge, AutoRelocation classification and planning, work-plan previews, settings/rule normalization, ZIP merge, ZIP extra field byte preservation, ZIP merge duplicate/collision/cancellation cleanup, a generated ZIP release-sample corpus with UTF-8, CP949, and Shift-JIS filenames plus comments, directory entries, external attributes, and extra fields, the file-compare engine's folder expansion, partial match, hash cache, ZIP entry-order comparison behavior, common-name matching, middle-part ranges, archive entry scope, duplicate-group construction from file-compare results, keep-mode ordering, and the JSON export schema. ZIP output filesystem errors are injected through the internal `IArchiveMergeFileSystem` adapter, and the test project uses `InternalsVisibleTo` for internal engine APIs.
 
 ```powershell
 dotnet test .\tests\FileTools.Tests\FileTools.Tests.csproj

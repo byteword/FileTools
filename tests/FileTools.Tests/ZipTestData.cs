@@ -31,15 +31,95 @@ internal static class ZipTestData
 {
     public static void CreateStoredZip(string path, params TestZipEntry[] entries)
     {
-        CreateZip(path, CompressionMethod.Stored, entries);
+        CreateZip(path, CompressionMethod.Stored, archiveComment: null, entries);
+    }
+
+    public static void CreateStoredZipWithArchiveComment(string path, string archiveComment, params TestZipEntry[] entries)
+    {
+        CreateZip(path, CompressionMethod.Stored, archiveComment, entries);
     }
 
     public static void CreateDeflatedZip(string path, params TestZipEntry[] entries)
     {
-        CreateZip(path, CompressionMethod.Deflated, entries);
+        CreateZip(path, CompressionMethod.Deflated, archiveComment: null, entries);
     }
 
-    private static void CreateZip(string path, CompressionMethod compressionMethod, params TestZipEntry[] entries)
+    public static void CreateLegacyStoredZip(string path, Encoding nameEncoding, params TestZipEntry[] entries)
+    {
+        CreateLegacyStoredZip(path, nameEncoding, archiveComment: null, entries);
+    }
+
+    public static void CreateLegacyStoredZip(
+        string path,
+        Encoding nameEncoding,
+        string? archiveComment,
+        params TestZipEntry[] entries)
+    {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        var centralDirectory = new List<LegacyZipCentralEntry>();
+
+        using (var file = File.Create(path))
+        {
+            foreach (var testEntry in entries)
+            {
+                var name = NormalizeEntryName(testEntry);
+                var nameBytes = nameEncoding.GetBytes(name);
+                var localExtraData = testEntry.LocalExtraData ?? testEntry.CentralDirectoryExtraData ?? [];
+                var centralExtraData = testEntry.CentralDirectoryExtraData ?? testEntry.LocalExtraData ?? [];
+                var commentBytes = string.IsNullOrWhiteSpace(testEntry.Comment)
+                    ? []
+                    : nameEncoding.GetBytes(testEntry.Comment);
+                var content = testEntry.IsDirectory ? [] : Encoding.UTF8.GetBytes(testEntry.Content);
+                var crc = new Crc32();
+                crc.Update(content);
+                var localHeaderOffset = checked((uint)file.Position);
+                var (dosTime, dosDate) = ToDosTimestamp(testEntry.LastModified ?? DateTime.Now);
+
+                WriteLocalHeader(
+                    file,
+                    nameBytes,
+                    localExtraData,
+                    crc.Value,
+                    content.Length,
+                    dosTime,
+                    dosDate);
+                file.Write(content);
+
+                centralDirectory.Add(new LegacyZipCentralEntry(
+                    nameBytes,
+                    centralExtraData,
+                    commentBytes,
+                    crc.Value,
+                    content.Length,
+                    dosTime,
+                    dosDate,
+                    testEntry.IsDirectory
+                        ? testEntry.ExternalAttributes == 0 ? 0x10 : testEntry.ExternalAttributes
+                        : testEntry.ExternalAttributes,
+                    localHeaderOffset));
+            }
+
+            var centralDirectoryOffset = checked((uint)file.Position);
+            foreach (var entry in centralDirectory)
+            {
+                WriteCentralDirectoryHeader(file, entry);
+            }
+
+            var centralDirectorySize = checked((uint)(file.Position - centralDirectoryOffset));
+            WriteEndOfCentralDirectory(
+                file,
+                centralDirectory.Count,
+                centralDirectorySize,
+                centralDirectoryOffset,
+                string.IsNullOrWhiteSpace(archiveComment) ? [] : nameEncoding.GetBytes(archiveComment));
+        }
+    }
+
+    private static void CreateZip(
+        string path,
+        CompressionMethod compressionMethod,
+        string? archiveComment,
+        params TestZipEntry[] entries)
     {
         using (var file = File.Create(path))
         using (var zip = new ZipOutputStream(file)
@@ -48,6 +128,10 @@ internal static class ZipTestData
         })
         {
             zip.SetLevel(compressionMethod == CompressionMethod.Stored ? 0 : 6);
+            if (!string.IsNullOrWhiteSpace(archiveComment))
+            {
+                zip.SetComment(archiveComment);
+            }
 
             foreach (var testEntry in entries)
             {
@@ -407,4 +491,121 @@ internal static class ZipTestData
             entry.ExtraData = extraData;
         }
     }
+
+    private static string NormalizeEntryName(TestZipEntry entry)
+    {
+        return entry.IsDirectory
+            ? entry.Name.Replace('\\', '/').TrimEnd('/') + "/"
+            : entry.Name.Replace('\\', '/');
+    }
+
+    private static void WriteLocalHeader(
+        Stream stream,
+        byte[] nameBytes,
+        byte[] extraData,
+        long crc,
+        int size,
+        ushort dosTime,
+        ushort dosDate)
+    {
+        WriteUInt32(stream, 0x04034b50);
+        WriteUInt16(stream, 20);
+        WriteUInt16(stream, 0);
+        WriteUInt16(stream, 0);
+        WriteUInt16(stream, dosTime);
+        WriteUInt16(stream, dosDate);
+        WriteUInt32(stream, checked((uint)crc));
+        WriteUInt32(stream, checked((uint)size));
+        WriteUInt32(stream, checked((uint)size));
+        WriteUInt16(stream, ToUInt16Length(nameBytes));
+        WriteUInt16(stream, ToUInt16Length(extraData));
+        stream.Write(nameBytes);
+        stream.Write(extraData);
+    }
+
+    private static void WriteCentralDirectoryHeader(Stream stream, LegacyZipCentralEntry entry)
+    {
+        WriteUInt32(stream, 0x02014b50);
+        WriteUInt16(stream, 0x0314);
+        WriteUInt16(stream, 20);
+        WriteUInt16(stream, 0);
+        WriteUInt16(stream, 0);
+        WriteUInt16(stream, entry.DosTime);
+        WriteUInt16(stream, entry.DosDate);
+        WriteUInt32(stream, checked((uint)entry.Crc));
+        WriteUInt32(stream, checked((uint)entry.Size));
+        WriteUInt32(stream, checked((uint)entry.Size));
+        WriteUInt16(stream, ToUInt16Length(entry.NameBytes));
+        WriteUInt16(stream, ToUInt16Length(entry.ExtraData));
+        WriteUInt16(stream, ToUInt16Length(entry.CommentBytes));
+        WriteUInt16(stream, 0);
+        WriteUInt16(stream, 0);
+        WriteUInt32(stream, checked((uint)entry.ExternalAttributes));
+        WriteUInt32(stream, entry.LocalHeaderOffset);
+        stream.Write(entry.NameBytes);
+        stream.Write(entry.ExtraData);
+        stream.Write(entry.CommentBytes);
+    }
+
+    private static void WriteEndOfCentralDirectory(
+        Stream stream,
+        int entryCount,
+        uint centralDirectorySize,
+        uint centralDirectoryOffset,
+        byte[] commentBytes)
+    {
+        WriteUInt32(stream, 0x06054b50);
+        WriteUInt16(stream, 0);
+        WriteUInt16(stream, 0);
+        WriteUInt16(stream, ToUInt16Count(entryCount));
+        WriteUInt16(stream, ToUInt16Count(entryCount));
+        WriteUInt32(stream, centralDirectorySize);
+        WriteUInt32(stream, centralDirectoryOffset);
+        WriteUInt16(stream, ToUInt16Length(commentBytes));
+        stream.Write(commentBytes);
+    }
+
+    private static (ushort Time, ushort Date) ToDosTimestamp(DateTime value)
+    {
+        var local = value.Kind == DateTimeKind.Utc ? value.ToLocalTime() : value;
+        var year = Math.Clamp(local.Year, 1980, 2107);
+        var dosDate = (ushort)(((year - 1980) << 9) | (local.Month << 5) | local.Day);
+        var dosTime = (ushort)((local.Hour << 11) | (local.Minute << 5) | (local.Second / 2));
+        return (dosTime, dosDate);
+    }
+
+    private static ushort ToUInt16Length(byte[] value)
+    {
+        return checked((ushort)value.Length);
+    }
+
+    private static ushort ToUInt16Count(int value)
+    {
+        return checked((ushort)value);
+    }
+
+    private static void WriteUInt16(Stream stream, ushort value)
+    {
+        Span<byte> buffer = stackalloc byte[2];
+        BinaryPrimitives.WriteUInt16LittleEndian(buffer, value);
+        stream.Write(buffer);
+    }
+
+    private static void WriteUInt32(Stream stream, uint value)
+    {
+        Span<byte> buffer = stackalloc byte[4];
+        BinaryPrimitives.WriteUInt32LittleEndian(buffer, value);
+        stream.Write(buffer);
+    }
+
+    private sealed record LegacyZipCentralEntry(
+        byte[] NameBytes,
+        byte[] ExtraData,
+        byte[] CommentBytes,
+        long Crc,
+        int Size,
+        ushort DosTime,
+        ushort DosDate,
+        int ExternalAttributes,
+        uint LocalHeaderOffset);
 }

@@ -136,6 +136,78 @@ public sealed class ArchiveMergeRegressionTests
     }
 
     [Fact]
+    public void Merge_GeneratedReleaseZipSamples_CoversLegacyNamesAndMetadata()
+    {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        using var temp = TempDirectory.Create();
+        var utf8Source = temp.GetPath("utf8-basic.zip");
+        var cp949Source = temp.GetPath("legacy-cp949-names.zip");
+        var shiftJisSource = temp.GetPath("legacy-shiftjis-names.zip");
+        var collisionA = temp.GetPath("collision-a.zip");
+        var collisionB = temp.GetPath("collision-b.zip");
+        var duplicateSource = temp.GetPath("duplicate-content.zip");
+        var output = temp.GetPath("release-corpus-merged.zip");
+        var expectedModified = new DateTime(2024, 4, 6, 7, 8, 10, DateTimeKind.Unspecified);
+        var localExtraData = new byte[] { 0x55, 0x54, 0x05, 0x00, 0x01, 0x10, 0x20, 0x30, 0x40 };
+        var centralExtraData = new byte[] { 0x55, 0x54, 0x05, 0x00, 0x01, 0x50, 0x60, 0x70, 0x80 };
+        const string koreanLegacyName = "legacy-kr/\uD55C\uAE00 \uC774\uB984.txt";
+        const string japaneseLegacyName = "legacy-jp/\u65E5\u672C\u8A9E.txt";
+
+        ZipTestData.CreateStoredZipWithArchiveComment(
+            utf8Source,
+            "archive metadata comment",
+            new TestZipEntry("metadata/", IsDirectory: true, LastModified: expectedModified, ExternalAttributes: 0x10),
+            new TestZipEntry(
+                "metadata/commented.txt",
+                "metadata payload",
+                expectedModified,
+                ExternalAttributes: 0x20,
+                Comment: "entry metadata comment",
+                LocalExtraData: localExtraData,
+                CentralDirectoryExtraData: centralExtraData),
+            new TestZipEntry("utf8-folder/readme.txt", "utf8 payload"),
+            new TestZipEntry("duplicate/first.txt", "same duplicate payload"));
+        ZipTestData.CreateLegacyStoredZip(
+            cp949Source,
+            Encoding.GetEncoding(949),
+            "cp949 archive comment",
+            new TestZipEntry(koreanLegacyName, "cp949 payload"));
+        ZipTestData.CreateLegacyStoredZip(
+            shiftJisSource,
+            Encoding.GetEncoding(932),
+            "shift-jis archive comment",
+            new TestZipEntry(japaneseLegacyName, "shift-jis payload"));
+        ZipTestData.CreateStoredZip(collisionA, new TestZipEntry("collision/same.txt", "first collision payload"));
+        ZipTestData.CreateStoredZip(collisionB, new TestZipEntry("collision/same.txt", "second collision payload"));
+        ZipTestData.CreateStoredZip(duplicateSource, new TestZipEntry("duplicate/second.txt", "same duplicate payload"));
+
+        var result = Merge(
+            [utf8Source, cp949Source, shiftJisSource, collisionA, collisionB, duplicateSource],
+            output,
+            duplicatePolicy: ArchiveMergeDuplicatePolicy.SameContentKeepFirst,
+            compressionLevel: ArchiveMergeCompressionLevel.Default);
+
+        Assert.Empty(result.Errors);
+        Assert.Equal(1, result.SkippedCount);
+        Assert.True(File.Exists(output), string.Join(Environment.NewLine, result.Messages));
+        var entries = ZipTestData.ReadEntries(output);
+        Assert.True(entries["metadata/"].IsDirectory);
+        Assert.Equal("metadata payload", entries["metadata/commented.txt"].Content);
+        Assert.Equal(0x20, entries["metadata/commented.txt"].ExternalAttributes);
+        Assert.Equal("entry metadata comment", entries["metadata/commented.txt"].Comment);
+        Assert.Equal("utf8 payload", entries["utf8-folder/readme.txt"].Content);
+        Assert.Equal("cp949 payload", entries[koreanLegacyName].Content);
+        Assert.Equal("shift-jis payload", entries[japaneseLegacyName].Content);
+        Assert.Equal("first collision payload", entries["collision/same.txt"].Content);
+        Assert.Equal("second collision payload", entries["collision/same (2).txt"].Content);
+        Assert.Equal("same duplicate payload", entries["duplicate/first.txt"].Content);
+        Assert.False(entries.ContainsKey("duplicate/second.txt"));
+        var extraFields = ZipTestData.ReadExtraFields(output, "metadata/commented.txt");
+        Assert.Equal(localExtraData, extraFields.LocalHeader);
+        Assert.Equal(centralExtraData, extraFields.CentralDirectory);
+    }
+
+    [Fact]
     public void Merge_SkipFailedArchive_ContinuesWithReadableSources()
     {
         using var temp = TempDirectory.Create();

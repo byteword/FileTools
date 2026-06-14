@@ -6,11 +6,17 @@ the next release tag.
 
 ## Highlights
 
-- No post-`v1.4.2.0` changes recorded yet.
+- Added generated ZIP release-sample regression coverage for UTF-8 filenames,
+  legacy CP949 filenames, legacy Shift-JIS filenames, archive and entry
+  comments, directory entries, external attributes, local/central extra fields,
+  collision auto-numbering, and same-content duplicate skipping.
 
 ## Support Scope
 
-- To be updated with the next release scope.
+- No runtime support scope change yet. ZIP input and ZIP output remain the
+  supported archive merge scope; 7Z input remains deferred under issue #8.
+- ZIP caution notes: very large ZIPs and ZIPs produced by external tools may
+  still show producer-specific behavior beyond the generated regression corpus.
 
 ## Verification Before Publishing
 
@@ -21,3 +27,8 @@ the next release tag.
   release tag is accepted and propagated into the installer build.
 - Verify release assets, checksums, signatures, and GitHub artifact attestations
   before publishing the draft release.
+
+Latest local verification:
+
+- `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` passed 110/110 on
+  2026-06-14.
