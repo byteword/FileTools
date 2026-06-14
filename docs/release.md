@@ -41,7 +41,7 @@ Repository prerequisites:
 
 Before running it, update repository docs, wiki docs, and the tag-specific
 release notes, then create and push a four-part version tag such as
-`v1.4.2.0`. Then run the `Release` workflow from GitHub Actions and provide
+`v1.4.3.0`. Then run the `Release` workflow from GitHub Actions and provide
 that existing tag. The workflow strips the leading `v` and passes that value to
 `build_msi.ps1 -Version`, so the app binary, generated app manifest, MSI, Burn
 bundle, and sparse MSIX identity use the same release version.
@@ -90,7 +90,7 @@ git status --short
 - Prepare release-facing repository docs and local wiki files:
 
 ```powershell
-.\scripts\prepare_release.ps1 -Tag v1.4.2.0 -Channel beta
+.\scripts\prepare_release.ps1 -Tag v1.4.3.0 -Channel beta
 ```
 
 Use `-WhatIf` to preview file changes, and use `-Force` only when the
@@ -102,7 +102,7 @@ by default.
   the same value:
 
 ```powershell
-.\build_msi.ps1 -Version v1.4.2.0
+.\build_msi.ps1 -Version v1.4.3.0
 ```
 
 For a full release build, `build_msi.ps1` validates the version and passes it
@@ -130,7 +130,7 @@ MSBuild.exe FileTools.sln /p:Configuration=Release /p:Platform=x64
 ```powershell
 git -C .wiki status --short
 git -C .wiki add .
-git -C .wiki commit -m "Update wiki for FileTools 1.4.2.0 beta"
+git -C .wiki commit -m "Update wiki for FileTools 1.4.3.0 beta"
 git -C .wiki push origin master
 ```
 
@@ -138,9 +138,9 @@ git -C .wiki push origin master
   push the tag:
 
 ```powershell
-git tag v1.4.2.0
+git tag v1.4.3.0
 git push origin master
-git push origin v1.4.2.0
+git push origin v1.4.3.0
 ```
 
 ### After The Release Workflow Finishes
@@ -264,7 +264,7 @@ make Windows trust the self-signed certificate.
 After downloading a release asset, verify its SHA256 hash:
 
 ```powershell
-Get-FileHash .\FileTools-1.4.2.0-win-x64-setup.exe -Algorithm SHA256
+Get-FileHash .\FileTools-1.4.3.0-win-x64-setup.exe -Algorithm SHA256
 ```
 
 Compare the result with `checksums.txt`.
@@ -272,19 +272,19 @@ Compare the result with `checksums.txt`.
 Users with GitHub CLI can also verify artifact attestations:
 
 ```powershell
-gh attestation verify .\FileTools-1.4.2.0-win-x64-setup.exe -R byteword/FileTools
-gh attestation verify .\FileTools-1.4.2.0-win-x64.msi -R byteword/FileTools
-gh attestation verify .\FileTools-1.4.2.0-win-x64-identity.msix -R byteword/FileTools
-gh attestation verify .\FileTools-1.4.2.0-msix-self-signed.cer -R byteword/FileTools
+gh attestation verify .\FileTools-1.4.3.0-win-x64-setup.exe -R byteword/FileTools
+gh attestation verify .\FileTools-1.4.3.0-win-x64.msi -R byteword/FileTools
+gh attestation verify .\FileTools-1.4.3.0-win-x64-identity.msix -R byteword/FileTools
+gh attestation verify .\FileTools-1.4.3.0-msix-self-signed.cer -R byteword/FileTools
 gh attestation verify .\checksums.txt -R byteword/FileTools
 ```
 
 On Windows, the self-signed Authenticode/MSIX signatures can also be inspected:
 
 ```powershell
-Get-AuthenticodeSignature .\FileTools-1.4.2.0-win-x64-setup.exe
-Get-AuthenticodeSignature .\FileTools-1.4.2.0-win-x64.msi
-Get-AuthenticodeSignature .\FileTools-1.4.2.0-win-x64-identity.msix
+Get-AuthenticodeSignature .\FileTools-1.4.3.0-win-x64-setup.exe
+Get-AuthenticodeSignature .\FileTools-1.4.3.0-win-x64.msi
+Get-AuthenticodeSignature .\FileTools-1.4.3.0-win-x64-identity.msix
 ```
 
 Before the self-signed CER is trusted, `Get-AuthenticodeSignature` may report an

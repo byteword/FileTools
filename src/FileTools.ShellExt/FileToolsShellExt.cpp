@@ -31,12 +31,14 @@ enum class CommandKind
     FolderUnwrapSameName,
     FolderUnwrapUseFolderName,
     FolderUnwrapKeepFileName,
+    FolderUnwrapPrefixFolderName,
     FolderMoveInnerFilesUp,
     FolderMergeSelectedTargets,
     AutoRelocationCurrentFolder,
     AutoRelocationChooseTarget,
     ArchiveMergeGroupByArchiveName,
     ArchiveMergePreserveInternalPaths,
+    FileCompare,
     OpenApp
 };
 
@@ -60,12 +62,14 @@ constexpr CommandDefinition SubCommands[] =
     { CommandKind::FolderUnwrapSameName, L"폴더 벗기기", L"FolderUnwrapSameNameSingleFile", L"ContextMenuFolderUnwrapSameNameSingleFile" },
     { CommandKind::FolderUnwrapUseFolderName, L"폴더명으로 벗기기", L"FolderUnwrapUseFolderName", L"ContextMenuFolderUnwrapSingleFile" },
     { CommandKind::FolderUnwrapKeepFileName, L"파일명으로 벗기기", L"FolderUnwrapKeepFileName", L"ContextMenuFolderUnwrapSingleFile" },
+    { CommandKind::FolderUnwrapPrefixFolderName, L"폴더명-파일명으로 벗기기", L"FolderUnwrapPrefixFolderName", L"ContextMenuFolderUnwrapSingleFile" },
     { CommandKind::FolderMoveInnerFilesUp, L"폴더 내부 파일 상위로 이동", L"FolderMoveInnerFilesUp", L"ContextMenuFolderMoveInnerFilesUp" },
     { CommandKind::FolderMergeSelectedTargets, L"폴더합치기", L"FolderMergeSelectedTargets", L"ContextMenuFolderMergeSelectedTargets" },
     { CommandKind::AutoRelocationCurrentFolder, L"현재 폴더에서 자동 재배치", L"AutoRelocationCurrentFolder", L"ContextMenuAutoRelocationCurrentFolder" },
     { CommandKind::AutoRelocationChooseTarget, L"선택한 폴더로 자동 재배치", L"AutoRelocationChooseTarget", L"ContextMenuAutoRelocationChooseTarget" },
     { CommandKind::ArchiveMergeGroupByArchiveName, L"ZIP 병합: 압축파일명 폴더로", L"ArchiveMergeGroupByArchiveName", L"ContextMenuArchiveMergeGroupByArchiveName" },
     { CommandKind::ArchiveMergePreserveInternalPaths, L"ZIP 병합: 내부 경로 유지", L"ArchiveMergePreserveInternalPaths", L"ContextMenuArchiveMergePreserveInternalPaths" },
+    { CommandKind::FileCompare, L"파일 비교", L"FileCompare", L"ContextMenuFileCompare" },
     { CommandKind::OpenApp, L"FileTools 열기", L"OpenApp", L"ContextMenuOpenApp" }
 };
 
@@ -337,6 +341,7 @@ bool IsCommandVisible(CommandKind kind, const std::vector<std::wstring>& paths)
         return SelectionSingleFileFolderState(paths, SingleFileFolderState::SameName);
     case CommandKind::FolderUnwrapUseFolderName:
     case CommandKind::FolderUnwrapKeepFileName:
+    case CommandKind::FolderUnwrapPrefixFolderName:
         return SelectionSingleFileFolderState(paths, SingleFileFolderState::DifferentName);
     case CommandKind::FolderMoveInnerFilesUp:
         return SelectionAllDirectories(paths);
@@ -348,6 +353,8 @@ bool IsCommandVisible(CommandKind kind, const std::vector<std::wstring>& paths)
     case CommandKind::ArchiveMergeGroupByArchiveName:
     case CommandKind::ArchiveMergePreserveInternalPaths:
         return SelectionAllZipFiles(paths);
+    case CommandKind::FileCompare:
+        return paths.size() >= 2 && SelectionAnyFileSystemItem(paths);
     case CommandKind::OpenApp:
         return SelectionAnyFileSystemItem(paths);
     default:

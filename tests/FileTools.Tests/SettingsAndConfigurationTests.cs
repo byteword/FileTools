@@ -32,6 +32,7 @@ public sealed class SettingsAndConfigurationTests
             },
             RenamePatternLearningEnabled = false,
             RenamePatternFeedbackLimit = 1234,
+            ContextMenuFileCompare = false,
             ContextMenuFolderMergeSelectedTargets = false,
             FileKindExtensionRules =
             [
@@ -56,6 +57,7 @@ public sealed class SettingsAndConfigurationTests
         Assert.Equal("changed.txt", clone.RenameCorrectionPlugins.Plugins[0].Settings["dictionaryPath"]);
         Assert.False(clone.RenamePatternLearningEnabled);
         Assert.Equal(1234, clone.RenamePatternFeedbackLimit);
+        Assert.False(clone.ContextMenuFileCompare);
         Assert.False(clone.ContextMenuFolderMergeSelectedTargets);
     }
 
@@ -139,6 +141,15 @@ public sealed class SettingsAndConfigurationTests
     }
 
     [Fact]
+    public void ContextMenuCommandLine_TryParseCommandAcceptsFolderUnwrapPrefixFolderName()
+    {
+        var parsed = ContextMenuCommandLine.TryParseCommand("FolderUnwrapPrefixFolderName", out var command);
+
+        Assert.True(parsed);
+        Assert.Equal(ContextMenuCommand.FolderUnwrapPrefixFolderName, command);
+    }
+
+    [Fact]
     public void ContextMenuCommandLine_CreateRegistryCommandBuildsFileCompareContextLaunch()
     {
         var commandLine = ContextMenuCommandLine.CreateRegistryCommand(
@@ -156,6 +167,16 @@ public sealed class SettingsAndConfigurationTests
             ContextMenuCommand.FolderMergeSelectedTargets);
 
         Assert.Equal(@"""C:\Tools\FileTools.exe"" /context FolderMergeSelectedTargets ""%1""", commandLine);
+    }
+
+    [Fact]
+    public void ContextMenuCommandLine_CreateRegistryCommandBuildsFolderUnwrapPrefixContextLaunch()
+    {
+        var commandLine = ContextMenuCommandLine.CreateRegistryCommand(
+            @"C:\Tools\FileTools.exe",
+            ContextMenuCommand.FolderUnwrapPrefixFolderName);
+
+        Assert.Equal(@"""C:\Tools\FileTools.exe"" /context FolderUnwrapPrefixFolderName ""%1""", commandLine);
     }
 
     [Fact]

@@ -4,17 +4,17 @@
 
 Windows 탐색기 ContextMenu와 독립 실행형 WinForms 유틸리티를 제공하는 작은 파일 관리 도구입니다.
 
-현재 버전: `1.4.2.0`.
+현재 버전: `1.4.3.0-beta`.
 
 ### 개발 및 안정성 안내
 
 FileTools는 취미 개발자가 개인적으로 관리하는 프로젝트이며, Codex를 활용해 제작 및 업데이트하고 있습니다. 따라서 일부 업데이트는 충분히 안정화되지 않았을 수 있고, 버그 테스트도 제한적으로 이루어질 수 있습니다. 중요한 파일에 적용하기 전에는 백업을 권장드리며, 문제가 발견되면 이슈로 알려주시면 가능한 범위에서 확인하겠습니다.
 
-`1.4.2.0`은 베타 릴리스로 배포됩니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 로컬 이름변경 학습 기반, 릴리스 검증 흐름을 실제 사용 사례로 더 안정화한 뒤 같은 계열을 stable로 전환할 예정입니다.
+`1.4.3.0`은 베타 릴리스로 배포됩니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 파일 비교 ContextMenu 노출, 로컬 이름변경 학습 기반, 릴리스 검증 흐름을 실제 사용 사례로 더 안정화한 뒤 같은 계열을 stable로 전환할 예정입니다.
 
 ### 기능
 
-FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMenu 작업 세 가지를 제공합니다.
+FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMenu 작업을 제공합니다.
 
 1. **파일이름 자동 교정**
    - 파일명 교정 흐름을 사용합니다.
@@ -66,11 +66,11 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
 - 계획 작업을 두 번 클릭하면 해당 작업 대화상자를 다시 엽니다. 이름 변경 단계는 파일별 후보, 수동 편집, 건너뛰기 컨트롤이 포함된 이름 바꾸기 검토 창을 다시 엽니다.
 - 아래쪽 작업 플랜 그룹 안의 실행/중지 버튼 하나로 모든 대상 계획을 순서대로 실행하고, 같은 그룹의 상태 라벨과 진행 막대에서 실행 상태를 확인합니다.
 - 오른쪽 위 로그 보기에서 실행 메시지와 요약을 검토합니다.
-- 탐색기 ContextMenu 등록, 이름 변경 기본값, 폴더 기본값, AutoRelocation 기본값을 위한 고정 상태 헤더와 접을 수 있는 옵션 그룹이 있는 크기 조절 가능한 설정 창을 엽니다.
+- 탐색기 ContextMenu 등록, 이름 변경 기본값, 폴더 기본값, 파일 비교, 압축 병합, AutoRelocation 기본값을 위한 고정 상태 헤더와 접을 수 있는 옵션 그룹이 있는 크기 조절 가능한 설정 창을 엽니다.
 - 설정 하위 메뉴의 프로그램 정보 창에서 현재 앱 버전과 MIT 라이선스 전문을 확인할 수 있습니다.
 
 설정 창은 동작 기본값과 탐색기 ContextMenu 설치/제거를 관리합니다. 네이티브 ShellExt 등록은 하나의 FileTools 하위 메뉴를 사용하며, 개별 ContextMenu 작업은 켜거나 끌 수 있습니다.
-폴더 wrapping/unwrapping과 AutoRelocation 명령은 탐색기 등록용으로 각각 선택할 수 있습니다. 설정 창에서 OK를 누르면 Install/Remove 버튼을 누르지 않았더라도 옵션을 저장하고 현재 사용자 ContextMenu 등록을 동기화합니다.
+파일 비교, 압축 병합, 폴더 wrapping/unwrapping, AutoRelocation 명령은 탐색기 등록용으로 각각 선택할 수 있습니다. 설정 창에서 OK를 누르면 Install/Remove 버튼을 누르지 않았더라도 옵션을 저장하고 현재 사용자 ContextMenu 등록을 동기화합니다.
 설정 레이아웃 메모는 `docs/ux-settings-dialog-review.md`에서 추적합니다.
 앱 아이콘은 `src\FileTools.App\Resources` 아래에 투명 PNG와 다중 크기 ICO 자산으로 저장되어 있으며, EXE와 MSI 제품 메타데이터 모두 ICO를 사용합니다. Burn 설치 및 제거 UI는 `installer\FileTools.Bundle\Assets` 아래의 별도 파란색 설치 로고를 사용하고, MSI 마법사는 `installer\FileTools.Installer\Assets` 아래의 별도 파란색 대화상자/배너 비트맵을 사용합니다.
 
@@ -240,7 +240,7 @@ MSI는 네이티브 `FileTools.ShellExt.dll`을 현재 사용자 COM ExplorerCom
 
 GitHub Releases는 setup bootstrapper, MSI, sparse MSIX identity package를 빌드하고 서명하며, `checksums.txt`를 생성하고, 릴리스 자산에 대한 GitHub artifact attestation을 만드는 수동 workflow를 사용합니다.
 
-`1.4.2.0`은 GitHub prerelease/beta로 게시합니다. 위키 문서와 tag별 변경사항 문서를 먼저 업데이트하고, 릴리스 자산 검증 및 설치 smoke test가 끝난 뒤 draft를 게시합니다. 안정화 작업 후 stable 전환 릴리스를 별도로 게시합니다.
+`1.4.3.0`은 GitHub prerelease/beta로 게시합니다. 위키 문서와 tag별 변경사항 문서를 먼저 업데이트하고, 릴리스 자산 검증 및 설치 smoke test가 끝난 뒤 draft를 게시합니다. 안정화 작업 후 stable 전환 릴리스를 별도로 게시합니다.
 
 릴리스는 GitHub Secrets에 base64 PFX와 비밀번호로 저장된 self-signed FileTools 인증서를 사용합니다. 이는 무료 GitHub 배포와 CER 신뢰 후 MSIX identity 등록에는 적합하지만, 공개 CA 코드 서명 인증서는 아닙니다. Windows는 첫 사용 사용자에게 SmartScreen 또는 신뢰 경고를 계속 표시할 수 있습니다.
 
@@ -346,17 +346,20 @@ FileTools.exe /context FolderUnwrapSameNameSingleFile "%1"
 FileTools.exe /context FolderUnwrapSingleFile "%1"
 FileTools.exe /context FolderUnwrapUseFolderName "%1"
 FileTools.exe /context FolderUnwrapKeepFileName "%1"
+FileTools.exe /context FolderUnwrapPrefixFolderName "%1"
 FileTools.exe /context FolderMoveInnerFilesUp "%1"
 FileTools.exe /context FolderMergeSelectedTargets "%1"
 FileTools.exe /context AutoRelocationCurrentFolder "%1"
 FileTools.exe /context AutoRelocationChooseTarget "%1"
+FileTools.exe /context ArchiveMergeGroupByArchiveName "%1"
+FileTools.exe /context ArchiveMergePreserveInternalPaths "%1"
+FileTools.exe /context FileCompare "%1"
 ```
 
-처음 세 `/context` 명령은 하위 호환성을 위해 유지됩니다. 네이티브 ShellExt는 선택 항목 종류에 따라 표시할 하위 메뉴 항목을 결정합니다. 단일 파일 폴더의 경우 단일 파일 stem이 폴더 이름과 일치하는지도 확인하고, 단순 unwrap 명령 또는 명시적인 폴더 이름/파일 이름 unwrap 명령을 노출합니다.
+처음 세 `/context` 명령은 하위 호환성을 위해 유지됩니다. 네이티브 ShellExt는 선택 항목 종류에 따라 표시할 하위 메뉴 항목을 결정합니다. 단일 파일 폴더의 경우 단일 파일 stem이 폴더 이름과 일치하는지도 확인하고, 단순 unwrap 명령 또는 명시적인 폴더 이름/파일 이름/폴더명-파일명 unwrap 명령을 노출합니다. 파일 비교 명령은 선택한 파일/폴더를 독립 실행 UI에 전달하고 파일 비교 설정 창을 미리 엽니다.
 
 Explorer는 선택 항목마다 프로세스를 하나씩 시작하는 경우가 많습니다. FileTools는 잠시 기다린 뒤 임시 큐를 통해 선택 경로를 병합하고, 선택된 작업을 실행한 다음 비대화형 명령에서는 자동으로 종료합니다. Open FileTools 명령도 선택한 모든 경로를 받아 큐에 넣기 때문에 독립 실행형 플래너가 전체 선택 항목으로 시작됩니다. 파일명 교정은 구성된 검토 모드에 따라 적용 전에 이름 바꾸기 검토 창을 엽니다. 예외가 발생하면 오류 요약이 표시됩니다.
-
-내부 시험용으로 `FileTools.exe /context FileCompare "%1"` 경로도 준비되어 있습니다. 이 명령은 선택 경로를 큐로 병합한 뒤 FileTools를 열고 파일 비교 설정창을 미리 채워서 표시하지만, 아직 설정창이나 Explorer 등록에는 노출하지 않습니다.
+파일 비교 명령은 선택 경로를 큐로 병합한 뒤 FileTools를 열고 파일 비교 설정창을 미리 채워서 표시합니다.
 
 ### 안전 동작
 
@@ -387,17 +390,17 @@ FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE` 또�
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
-Current version: `1.4.2.0`.
+Current version: `1.4.3.0-beta`.
 
 ### Development and Stability Notice
 
 FileTools is maintained as a personal hobby project and is built and updated with the help of Codex. As a result, some updates may not be fully stable, and bug testing may be limited. Please consider backing up important files before using FileTools on them, and feel free to report issues so they can be reviewed as time permits.
 
-`1.4.2.0` is distributed as a beta release. The standalone planner work-plan display, folder-merge options flow, local rename-learning foundation, and release verification flow will move to stable after additional real-world stabilization.
+`1.4.3.0` is distributed as a beta release. The standalone planner work-plan display, folder-merge options flow, file-compare ContextMenu exposure, local rename-learning foundation, and release verification flow will move to stable after additional real-world stabilization.
 
 ### Features
 
-FileTools provides three current-user ContextMenu actions for selected files and folders:
+FileTools provides current-user ContextMenu actions for selected files and folders:
 
 1. **파일이름 자동 교정**
    - Uses the filename correction flow.
@@ -449,11 +452,11 @@ The standalone window supports:
 - Double-clicking a planned action to reopen the matching action dialog; rename steps reopen the rename review dialog with per-file candidates, manual editing, and skip controls.
 - Running all target plans in order with one run/stop button inside the bottom work-plan group, with execution state shown by the neighboring status label and progress bar.
 - Reviewing execution messages and summaries in the top-right log view.
-- Opening a resizable settings window with a fixed status header and collapsible option groups for Explorer ContextMenu registration, rename defaults, folder defaults, and AutoRelocation defaults.
+- Opening a resizable settings window with a fixed status header and collapsible option groups for Explorer ContextMenu registration, rename defaults, folder defaults, file compare, archive merge, and AutoRelocation defaults.
 - Opening program info from the settings submenu to check the current app version and the full MIT license text.
 
 The settings window owns operational defaults and Explorer ContextMenu installation/removal. Native ShellExt registration uses one FileTools submenu, and individual ContextMenu actions can be enabled or disabled.
-Folder wrapping/unwrapping and AutoRelocation commands can be selected independently for Explorer registration. Pressing OK in the settings window saves the options and synchronizes the current-user ContextMenu registration, even if the Install/Remove buttons are not pressed.
+File compare, archive merge, folder wrapping/unwrapping, and AutoRelocation commands can be selected independently for Explorer registration. Pressing OK in the settings window saves the options and synchronizes the current-user ContextMenu registration, even if the Install/Remove buttons are not pressed.
 The settings layout notes are tracked in `docs/ux-settings-dialog-review.md`.
 The app icon is stored as transparent PNG and multi-size ICO assets under `src\FileTools.App\Resources`; the EXE and MSI product metadata both use the ICO. The Burn setup and uninstall UI use a separate blue setup logo under `installer\FileTools.Bundle\Assets`, and the MSI wizard uses separate blue dialog/banner bitmaps under `installer\FileTools.Installer\Assets`.
 
@@ -624,7 +627,7 @@ GitHub Releases use a manual workflow that builds and signs the setup
 bootstrapper, MSI, and sparse MSIX identity package, generates `checksums.txt`,
 and creates GitHub artifact attestations for the release assets.
 
-`1.4.2.0` is published as a GitHub prerelease/beta. Update the wiki and
+`1.4.3.0` is published as a GitHub prerelease/beta. Update the wiki and
 tag-specific change notes before tagging, then publish the draft only after
 release asset verification and install smoke testing. A stable release will
 follow after the beta stabilization pass.
@@ -737,17 +740,21 @@ FileTools.exe /context FolderUnwrapSameNameSingleFile "%1"
 FileTools.exe /context FolderUnwrapSingleFile "%1"
 FileTools.exe /context FolderUnwrapUseFolderName "%1"
 FileTools.exe /context FolderUnwrapKeepFileName "%1"
+FileTools.exe /context FolderUnwrapPrefixFolderName "%1"
 FileTools.exe /context FolderMoveInnerFilesUp "%1"
 FileTools.exe /context FolderMergeSelectedTargets "%1"
 FileTools.exe /context AutoRelocationCurrentFolder "%1"
 FileTools.exe /context AutoRelocationChooseTarget "%1"
+FileTools.exe /context ArchiveMergeGroupByArchiveName "%1"
+FileTools.exe /context ArchiveMergePreserveInternalPaths "%1"
+FileTools.exe /context FileCompare "%1"
 ```
 
-The first three `/context` commands are kept for backward compatibility. Native ShellExt decides which submenu items are visible from the selected item type. For single-file folders, it also checks whether the single file stem matches the folder name and exposes either the simple unwrap command or explicit folder-name/file-name unwrap commands.
+The first three `/context` commands are kept for backward compatibility. Native ShellExt decides which submenu items are visible from the selected item type. For single-file folders, it also checks whether the single file stem matches the folder name and exposes either the simple unwrap command or explicit folder-name/file-name/folder-file-name unwrap commands. File compare queues the selected files/folders into the standalone UI and preloads the file compare settings dialog.
 
 Explorer often starts one process per selected item. FileTools waits briefly, merges those selected paths through a temporary queue, runs the selected operation, and exits automatically for non-interactive commands. The Open FileTools command also accepts and queues every selected path so the standalone planner starts with the full selection. File name correction opens the rename review dialog according to the configured review mode before applying changes. If any exception occurs, an error summary is shown.
 
-An internal smoke-test route is also prepared as `FileTools.exe /context FileCompare "%1"`. It merges selected paths through the same queue, opens FileTools, and preloads the file compare settings dialog, but it is not exposed in settings or Explorer registration yet.
+The file-compare command merges selected paths through the same queue, opens FileTools, and preloads the file compare settings dialog.
 
 ### Safety Behavior
 

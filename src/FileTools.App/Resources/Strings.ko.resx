@@ -347,6 +347,7 @@
   <data name="GroupAutoRelocationContextMenu" xml:space="preserve"><value>자동 재배치 Context Menu 명령</value></data>
   <data name="ContextCommandFolderUnwrapUseFolderName" xml:space="preserve"><value>폴더명으로 벗기기</value></data>
   <data name="ContextCommandFolderUnwrapKeepFileName" xml:space="preserve"><value>파일명으로 벗기기</value></data>
+  <data name="ContextCommandFolderUnwrapPrefixFolderName" xml:space="preserve"><value>폴더명-파일명으로 벗기기</value></data>
   <data name="ButtonApply" xml:space="preserve"><value>적용</value></data>
   <data name="ColumnTargetName" xml:space="preserve"><value>이름</value></data>
   <data name="ColumnTargetLocation" xml:space="preserve"><value>위치</value></data>

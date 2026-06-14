@@ -172,9 +172,10 @@ Implemented on 2026-06-07:
   keep-mode selection, and JSON export.
 - Modeless progress dialog with cancel and reopen support.
 - `DuplicateDelete` work-plan step that moves duplicate files to the Recycle Bin.
-- Internal-only Explorer command route: `/context FileCompare "%1"` queues
-  selected files/folders, opens the main window, and preloads the dedicated file
-  compare dialog. It is intentionally not registered or exposed in settings yet.
+- Explorer command route: `/context FileCompare "%1"` queues selected
+  files/folders, opens the main window, and preloads the dedicated file compare
+  dialog. It is now exposed through Explorer registration, settings, and the
+  native ShellExt submenu.
 - Duplicate-delete step editor opened by double-clicking the work-plan step or
   pressing the edit step button, with separate delete-target and keep-target
   panes plus Recycle-Bin-only behavior.
@@ -196,6 +197,6 @@ Implemented on 2026-06-07:
 - Manually validate the expanded file compare option UI and two-pane
   duplicate-delete step editor with small and narrow window sizes, including the
   result dialog action panel splitter.
-- After manual smoke testing of `/context FileCompare`, decide whether to expose
-  the command through Explorer registration, settings, and the native ShellExt
-  submenu.
+- Continue Explorer menu smoke testing with mixed file/folder selections after
+  release packaging, including the native ShellExt submenu and the classic
+  registry fallback path.

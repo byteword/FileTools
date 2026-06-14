@@ -36,6 +36,8 @@ internal sealed class FileToolsSettings
 
     public bool ContextMenuFileNameCorrection { get; set; } = true;
 
+    public bool ContextMenuFileCompare { get; set; } = true;
+
     public bool ContextMenuFolderStructure { get; set; } = true;
 
     public bool ContextMenuFolderWrapFiles { get; set; } = true;
@@ -143,6 +145,7 @@ internal sealed class FileToolsSettings
             ContextMenuLayout = ContextMenuLayout,
             ContextMenuOpenApp = ContextMenuOpenApp,
             ContextMenuFileNameCorrection = ContextMenuFileNameCorrection,
+            ContextMenuFileCompare = ContextMenuFileCompare,
             ContextMenuFolderStructure = ContextMenuFolderStructure,
             ContextMenuFolderWrapFiles = ContextMenuFolderWrapFiles,
             ContextMenuFolderUnwrapSameNameSingleFile = ContextMenuFolderUnwrapSameNameSingleFile,

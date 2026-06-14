@@ -244,6 +244,7 @@ internal static class Program
             ContextMenuCommand.FolderUnwrapSingleFile => ToolMode.FolderStructure,
             ContextMenuCommand.FolderUnwrapUseFolderName => ToolMode.FolderStructure,
             ContextMenuCommand.FolderUnwrapKeepFileName => ToolMode.FolderStructure,
+            ContextMenuCommand.FolderUnwrapPrefixFolderName => ToolMode.FolderStructure,
             ContextMenuCommand.FolderMoveInnerFilesUp => ToolMode.FolderStructure,
             ContextMenuCommand.AutoRelocation => ToolMode.AutoRelocation,
             ContextMenuCommand.AutoRelocationCurrentFolder => ToolMode.AutoRelocation,
@@ -269,6 +270,10 @@ internal static class Program
             case ContextMenuCommand.FolderUnwrapKeepFileName:
                 settings.FolderStructureOperation = FolderStructureOperation.UnwrapSingleFileFolder;
                 settings.FolderUnwrapNameMismatchMode = FolderUnwrapNameMismatchMode.KeepFileName;
+                break;
+            case ContextMenuCommand.FolderUnwrapPrefixFolderName:
+                settings.FolderStructureOperation = FolderStructureOperation.UnwrapSingleFileFolder;
+                settings.FolderUnwrapNameMismatchMode = FolderUnwrapNameMismatchMode.PrefixFolderName;
                 break;
             case ContextMenuCommand.FolderMoveInnerFilesUp:
                 settings.FolderStructureOperation = FolderStructureOperation.MoveInnerFilesUp;

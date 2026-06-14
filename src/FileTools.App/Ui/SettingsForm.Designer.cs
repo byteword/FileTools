@@ -158,6 +158,8 @@ internal sealed partial class SettingsForm
         ConfigureCheckBox(_contextMenuOpenCheckBox);
         _contextMenuRenameCheckBox.Text = ToolModeText.GetDisplayName(ToolMode.FileNameCorrection);
         ConfigureCheckBox(_contextMenuRenameCheckBox);
+        _contextMenuFileCompareCheckBox.Text = Localizer.Get("ContextCommandFileCompare");
+        ConfigureCheckBox(_contextMenuFileCompareCheckBox);
         _contextMenuFolderWrapCheckBox.Text = ToolModeText.GetDisplayName(FolderStructureOperation.WrapFiles);
         ConfigureCheckBox(_contextMenuFolderWrapCheckBox);
         _contextMenuFolderUnwrapSameNameCheckBox.Text = ToolModeText.GetDisplayName(FolderStructureOperation.UnwrapSameNameSingleFile);
@@ -191,6 +193,7 @@ internal sealed partial class SettingsForm
             Localizer.Get("SettingsContextMenuLayoutHelp")));
         group.AddBodyControl(CreateSectionLabel(Localizer.Get("GroupContextMenuTasks")));
         group.AddBodyControl(_contextMenuRenameCheckBox);
+        group.AddBodyControl(_contextMenuFileCompareCheckBox);
         group.AddBodyControl(CreateSectionLabel(Localizer.Get("GroupFolderStructure")));
         group.AddBodyControl(_contextMenuFolderWrapCheckBox);
         group.AddBodyControl(_contextMenuFolderUnwrapSameNameCheckBox);

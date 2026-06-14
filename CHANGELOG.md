@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.4.3.0-beta - 2026-06-14
+
+### Added
+
+- Exposed file comparison through Explorer registration, the settings command
+  list, and the native Windows 11 ShellExt submenu.
+- Added a context-menu command for single-file-folder unwrap using the
+  folder-file naming mode.
+- Added generated ZIP release-sample regression coverage for UTF-8 filenames,
+  legacy CP949 filenames, legacy Shift-JIS filenames, archive and entry
+  comments, directory entries, external attributes, local/central extra fields,
+  collision auto-numbering, and same-content duplicate skipping.
+- Added release notes for `v1.4.3.0`.
+
+### Changed
+
+- Updated app, installer, bundle, release, and Program info version metadata to
+  `1.4.3.0`.
+
+### Verification
+
+- Debug managed tests passed 112/112 on 2026-06-14.
+- Release managed tests passed 112/112 on 2026-06-14.
+- Full `Release|x64` solution build passed with 0 warnings and 0 errors on
+  2026-06-14 after sandbox escalation for Windows SDK lookup.
+- `build_msi.ps1 -Version v1.4.3.0` produced the MSI, setup bootstrapper,
+  sparse MSIX identity, and CER with 0 warnings and 0 errors on 2026-06-14
+  using a temporary self-signed certificate.
+
 ## 1.4.2.0-beta - 2026-06-14
 
 ### Added

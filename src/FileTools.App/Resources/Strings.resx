@@ -347,6 +347,7 @@
   <data name="GroupAutoRelocationContextMenu" xml:space="preserve"><value>Auto relocation context commands</value></data>
   <data name="ContextCommandFolderUnwrapUseFolderName" xml:space="preserve"><value>Unwrap using folder name</value></data>
   <data name="ContextCommandFolderUnwrapKeepFileName" xml:space="preserve"><value>Unwrap using file name</value></data>
+  <data name="ContextCommandFolderUnwrapPrefixFolderName" xml:space="preserve"><value>Unwrap with folder-file name</value></data>
   <data name="ButtonApply" xml:space="preserve"><value>Apply</value></data>
   <data name="ColumnTargetName" xml:space="preserve"><value>Name</value></data>
   <data name="ColumnTargetLocation" xml:space="preserve"><value>Location</value></data>

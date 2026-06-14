@@ -6,8 +6,8 @@ Last updated: 2026-06-14
 Scope reviewed:
 
 - Local commits after `v1.2.0.0`, including archive merge, issue split
-  documentation, 1.4 beta planner work, and release documentation through
-  `v1.4.2.0`.
+  documentation, 1.4 beta planner work, generated ZIP release-sample coverage,
+  context-menu exposure updates, and release documentation through `v1.4.3.0`.
 - GitHub issues #1 through #9 in `byteword/FileTools`.
 - README, `docs/name-template-and-collision-policy.md`, `docs/release.md`, and `docs/release-notes/next.md`.
 - `docs/ux-mainform-review.md` and `docs/mainform-plan-list-layout-proposal.md`.
@@ -28,8 +28,9 @@ Scope reviewed:
 - #6 compare two or more files: active. The engine/options slice is implemented,
   the dedicated compare dialog is wired, and the result dialog now includes
   content-confirmed duplicate groups, duplicate-delete step handoff, keep-mode
-  selection, JSON export, and modeless progress reporting. JSON import/reload,
-  manual validation, and optional Explorer context menu integration remain open.
+  selection, JSON export, modeless progress reporting, and Explorer/native
+  ShellExt context-menu exposure. JSON import/reload and broader manual
+  validation remain open.
 - #7 Windows ARM64 build and installer support: keep open and deferred until there is ARM64 Windows hardware or VM validation.
 - #8 7Z input archive merge support: keep open as the archive merge follow-up.
 - #9 common-filename-based file merge flow: archive-first implementation slice
@@ -235,11 +236,12 @@ Scope reviewed:
     syllable/jamo obfuscation candidates such as
     `혀ㄴ주ㅇ구l호rㄴ로ㄱ -> 현중귀환록`.
   - README, `CHANGELOG.md`, `docs/release.md`, tag-specific release notes, and
-    `docs/release-notes/next.md` now use `v1.4.2.0` as the current prerelease
-    baseline, with `next.md` reserved for changes after `v1.4.2.0`.
+    `docs/release-notes/next.md` used `v1.4.2.0` as the prerelease baseline for
+    that pass before being superseded by `v1.4.3.0`.
   - Debug managed tests passed 109/109 for the `v1.4.2.0` documentation/fix
     pass. Release asset verification and install smoke testing remain the
-    publish gate for the `v1.4.2.0` prerelease.
+    publish gate for the `v1.4.2.0` prerelease before the `v1.4.3.0` context
+    menu exposure pass superseded it.
 - Added generated ZIP release-sample regression coverage on 2026-06-14:
   - The test corpus is created in the test temp folder instead of storing binary
     ZIP fixtures in the repository.
@@ -249,6 +251,18 @@ Scope reviewed:
     same-content duplicate skipping.
   - Ran `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj`; all 110
     managed tests passed.
+- Exposed the remaining implemented context-menu entry points for `v1.4.3.0` on
+  2026-06-14:
+  - Added Explorer/settings/native ShellExt exposure for file comparison.
+  - Added the explicit folder-file-name single-file unwrap context command.
+  - Updated app, installer, bundle, release, Program info, changelog, and
+    tag-specific release notes to the `v1.4.3.0` beta baseline.
+  - Ran Debug and Release managed tests; both passed 112/112.
+  - Ran Visual Studio MSBuild `Release|x64`; it passed with 0 warnings and 0
+    errors after sandbox escalation for Windows SDK lookup.
+  - Ran `build_msi.ps1 -Version v1.4.3.0`; it produced the MSI, setup
+    bootstrapper, sparse MSIX identity, and CER with 0 warnings and 0 errors
+    using a temporary self-signed certificate.
 
 ## Deferred Follow-Up Tracks
 
@@ -260,13 +274,14 @@ Scope reviewed:
   ranker affects candidate order.
 - #6 file comparison: continue with JSON result import/reload and manual UI
   validation with large mixed file sets and narrow result dialog sizes. The
-  internal `/context FileCompare` route has been manually smoke-tested; Explorer
-  menu exposure remains a separate decision.
+  `/context FileCompare` route is exposed through Explorer registration,
+  settings, and native ShellExt; continue packaged menu smoke testing as part of
+  release validation.
 - #7 Windows ARM64 build and installer support: resume only when ARM64 Windows
   hardware or a VM is available for end-to-end installer and Explorer
   validation.
 - #8 7Z input archive merge support: resume after ZIP archive merge real-sample
-  validation and the `v1.4.2.0` release gate, then decide ZIP-only output
+  validation and the `v1.4.3.0` release gate, then decide ZIP-only output
   versus 7Z output scope.
 - #9 common-filename-based file merge flow: archive-first slice is implemented.
   General file-content merge is deferred until overlap/duplicate content policy
@@ -274,7 +289,7 @@ Scope reviewed:
 
 ## Next Priority
 
-1. Finish the `v1.4.2.0` prerelease publish gate.
+1. Finish the `v1.4.3.0` prerelease publish gate.
    - Follow the maintainer checklist in `docs/release.md` before publishing the
      draft GitHub Release.
    - Verify release workflow assets, `checksums.txt`, local signatures, and
@@ -302,9 +317,9 @@ Scope reviewed:
      `%LOCALAPPDATA%\Microsoft SDKs`; ShellExt or full `build_msi.ps1` checks may
      need external permission locally even though GitHub Actions should not.
 
-2. Keep post-`v1.4.2.0` release notes current as new work starts.
-   - `docs/release-notes/next.md` is the draft for changes after `v1.4.2.0`
-     and now includes the generated ZIP release-sample regression coverage.
+2. Keep post-`v1.4.3.0` release notes current as new work starts.
+   - `docs/release-notes/next.md` is the draft for changes after `v1.4.3.0`
+     and is currently empty except for the standard release checklist.
    - For the next tag, use `scripts/prepare_release.ps1 -Tag <tag> -Channel beta`
      to update release-facing README/wiki version references and create
      `docs/release-notes/<tag>.md` when it does not already exist.
@@ -316,13 +331,12 @@ Scope reviewed:
    - Use mixed files and folders to verify pair counts, status filtering, and
      criterion details.
    - Validate hash and byte-to-byte range settings with large files before
-     adding JSON import/reload or exposing the prepared Explorer context command.
+     adding JSON import/reload.
    - Validate the expanded option UI manually, especially common-name thresholds,
      middle-part start/length units, archive same-relative-path pairing, narrow
      result dialog sizes, and the duplicate-delete step editor.
-   - The internal `/context FileCompare` route has been manually smoke-tested.
-     Decide whether to expose it through Explorer registration, settings, and
-     the native ShellExt submenu.
+   - Continue Explorer and native ShellExt smoke testing for the exposed
+     `/context FileCompare` route.
 
 4. Continue UI validation for the 1.4 beta surfaces when manually exercised.
    - MainForm planner: validate small, default, and wide window sizes, then

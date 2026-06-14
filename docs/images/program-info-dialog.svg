@@ -9,7 +9,7 @@
   <rect x="108" y="112" width="48" height="48" rx="8" fill="#1f6fb2"/>
   <text x="126" y="144" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#ffffff">F</text>
   <text x="176" y="132" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#111827">FileTools</text>
-  <text x="176" y="158" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#374151">Version: 1.4.2.0</text>
+  <text x="176" y="158" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#374151">Version: 1.4.3.0</text>
 
   <text x="108" y="205" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" fill="#111827">License</text>
   <rect x="108" y="220" width="544" height="176" fill="#f9fafb" stroke="#cbd5e1"/>

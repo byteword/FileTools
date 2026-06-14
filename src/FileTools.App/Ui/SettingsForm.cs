@@ -9,6 +9,7 @@ internal sealed partial class SettingsForm : Form
     private readonly CheckBox _registerContextMenuCheckBox = new();
     private readonly CheckBox _contextMenuOpenCheckBox = new();
     private readonly CheckBox _contextMenuRenameCheckBox = new();
+    private readonly CheckBox _contextMenuFileCompareCheckBox = new();
     private readonly CheckBox _contextMenuFolderWrapCheckBox = new();
     private readonly CheckBox _contextMenuFolderUnwrapSameNameCheckBox = new();
     private readonly CheckBox _contextMenuFolderUnwrapSingleFileCheckBox = new();
@@ -94,6 +95,7 @@ internal sealed partial class SettingsForm : Form
         _registerContextMenuCheckBox.Checked = Settings.RegisterContextMenu;
         _contextMenuOpenCheckBox.Checked = Settings.ContextMenuOpenApp;
         _contextMenuRenameCheckBox.Checked = Settings.ContextMenuFileNameCorrection;
+        _contextMenuFileCompareCheckBox.Checked = Settings.ContextMenuFileCompare;
         _contextMenuFolderWrapCheckBox.Checked = Settings.ContextMenuFolderWrapFiles;
         _contextMenuFolderUnwrapSameNameCheckBox.Checked = Settings.ContextMenuFolderUnwrapSameNameSingleFile;
         _contextMenuFolderUnwrapSingleFileCheckBox.Checked = Settings.ContextMenuFolderUnwrapSingleFile;
@@ -238,6 +240,7 @@ internal sealed partial class SettingsForm : Form
             _registerContextMenuCheckBox,
             _contextMenuOpenCheckBox,
             _contextMenuRenameCheckBox,
+            _contextMenuFileCompareCheckBox,
             _contextMenuFolderWrapCheckBox,
             _contextMenuFolderUnwrapSameNameCheckBox,
             _contextMenuFolderUnwrapSingleFileCheckBox,
@@ -439,6 +442,7 @@ internal sealed partial class SettingsForm : Form
         {
             _contextMenuOpenCheckBox,
             _contextMenuRenameCheckBox,
+            _contextMenuFileCompareCheckBox,
             _contextMenuFolderWrapCheckBox,
             _contextMenuFolderUnwrapSameNameCheckBox,
             _contextMenuFolderUnwrapSingleFileCheckBox,
@@ -472,6 +476,7 @@ internal sealed partial class SettingsForm : Form
         Settings.RegisterContextMenu = _registerContextMenuCheckBox.Checked;
         Settings.ContextMenuOpenApp = _contextMenuOpenCheckBox.Checked;
         Settings.ContextMenuFileNameCorrection = _contextMenuRenameCheckBox.Checked;
+        Settings.ContextMenuFileCompare = _contextMenuFileCompareCheckBox.Checked;
         Settings.ContextMenuFolderStructure = true;
         Settings.ContextMenuFolderWrapFiles = _contextMenuFolderWrapCheckBox.Checked;
         Settings.ContextMenuFolderUnwrapSameNameSingleFile = _contextMenuFolderUnwrapSameNameCheckBox.Checked;

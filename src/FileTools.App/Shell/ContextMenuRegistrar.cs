@@ -50,6 +50,11 @@ internal static class ContextMenuRegistrar
             ContextMenuTargetKind.Directory,
             settings => settings.ContextMenuFolderStructure && settings.ContextMenuFolderUnwrapSingleFile),
         new(
+            "FileTools_04c_FolderUnwrapPrefixFolderName",
+            ContextMenuCommand.FolderUnwrapPrefixFolderName,
+            ContextMenuTargetKind.Directory,
+            settings => settings.ContextMenuFolderStructure && settings.ContextMenuFolderUnwrapSingleFile),
+        new(
             "FileTools_05_FolderMoveInnerFilesUp",
             ContextMenuCommand.FolderMoveInnerFilesUp,
             ContextMenuTargetKind.Directory,
@@ -80,6 +85,11 @@ internal static class ContextMenuRegistrar
             ContextMenuTargetKind.File,
             settings => settings.ContextMenuArchiveMergePreserveInternalPaths),
         new(
+            "FileTools_10_FileCompare",
+            ContextMenuCommand.FileCompare,
+            ContextMenuTargetKind.File | ContextMenuTargetKind.Directory,
+            settings => settings.ContextMenuFileCompare),
+        new(
             "FileTools_99_Open",
             ContextMenuCommand.OpenApp,
             ContextMenuTargetKind.File | ContextMenuTargetKind.Directory,
@@ -99,8 +109,10 @@ internal static class ContextMenuRegistrar
         "FolderUnwrap_MoveAll",
         "FileTools_04a_FolderUnwrapUseFolderName",
         "FileTools_04b_FolderUnwrapKeepFileName",
+        "FileTools_04c_FolderUnwrapPrefixFolderName",
         "FileTools_08_ArchiveMergeGroupByArchiveName",
-        "FileTools_09_ArchiveMergePreserveInternalPaths"
+        "FileTools_09_ArchiveMergePreserveInternalPaths",
+        "FileTools_10_FileCompare"
     ];
 
     public static string Install(string executablePath, FileToolsSettings settings)
@@ -320,6 +332,7 @@ internal static class ContextMenuRegistrar
             {
                 options.SetValue(nameof(FileToolsSettings.ContextMenuOpenApp), settings.ContextMenuOpenApp ? 1 : 0, RegistryValueKind.DWord);
                 options.SetValue(nameof(FileToolsSettings.ContextMenuFileNameCorrection), settings.ContextMenuFileNameCorrection ? 1 : 0, RegistryValueKind.DWord);
+                options.SetValue(nameof(FileToolsSettings.ContextMenuFileCompare), settings.ContextMenuFileCompare ? 1 : 0, RegistryValueKind.DWord);
                 options.SetValue(nameof(FileToolsSettings.ContextMenuFolderWrapFiles), settings.ContextMenuFolderWrapFiles ? 1 : 0, RegistryValueKind.DWord);
                 options.SetValue(nameof(FileToolsSettings.ContextMenuFolderUnwrapSameNameSingleFile), settings.ContextMenuFolderUnwrapSameNameSingleFile ? 1 : 0, RegistryValueKind.DWord);
                 options.SetValue(nameof(FileToolsSettings.ContextMenuFolderUnwrapSingleFile), settings.ContextMenuFolderUnwrapSingleFile ? 1 : 0, RegistryValueKind.DWord);
