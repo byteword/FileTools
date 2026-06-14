@@ -22,6 +22,7 @@ permissions:
   contents: write
   id-token: write
   attestations: write
+  artifact-metadata: write
 
 jobs:
   release:
@@ -37,7 +38,7 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 8.0.422
 
       - name: Validate signing secrets
         shell: pwsh
@@ -168,12 +169,29 @@ jobs:
               exit $uploadExitCode
             }
 
+            $editArgs = @(
+              'release',
+              'edit',
+              $tag,
+              '--title',
+              "FileTools $tag",
+              '--notes-file',
+              $notesPath
+            )
+
+            if ('${{ inputs.draft }}' -eq 'true') {
+              $editArgs += '--draft'
+            } else {
+              $editArgs += '--draft=false'
+            }
             if ('${{ inputs.prerelease }}' -eq 'true') {
-              gh release edit $tag --prerelease
-              exit $LASTEXITCODE
+              $editArgs += '--prerelease'
+            } else {
+              $editArgs += '--prerelease=false'
             }
 
-            exit 0
+            gh @editArgs
+            exit $LASTEXITCODE
           }
 
           $releaseArgs = @(

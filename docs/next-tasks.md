@@ -1,7 +1,7 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-12
+Last updated: 2026-06-14
 
 Scope reviewed:
 
@@ -205,6 +205,24 @@ Scope reviewed:
   `FileNameRenderPatterns`, `NameTemplate`). The same member/function/block
   criteria were applied: member/함수 설명을 먼저 추가하고, 해석이
   난해한 루프/필터 블록은 요약 블록 주석을 추가했습니다.
+- Ran the 2026-06-14 release-readiness fix pass:
+  - Added `artifact-metadata: write` to the release workflow for
+    `actions/attest@v4`.
+  - Updated the existing-release workflow branch to refresh release notes,
+    title, draft state, and prerelease state after asset replacement.
+  - Added `global.json` to pin local and CI SDK selection to .NET SDK 8.0.422
+    with feature-band roll-forward.
+  - Removed the remaining xUnit analyzer warning in
+    `tests\FileTools.Tests\WorkPlanDisplayBuilderTests.cs`.
+  - Refreshed release-note verification text to the 2026-06-14 99-test pass.
+  - Re-ran Debug and Release managed tests on .NET SDK 8.0.422; both passed
+    99/99.
+  - Re-ran `MSBuild.exe FileTools.sln /p:Configuration=Release /p:Platform=x64`;
+    it passed with 0 warnings and 0 errors after sandbox escalation for Windows
+    SDK lookup.
+  - Re-ran `build_msi.ps1 -Version v1.3.0.0`; it produced the MSI, setup
+    bootstrapper, sparse MSIX identity, and CER with 0 warnings and 0 errors
+    using a temporary self-signed certificate.
 
 ## Deferred Follow-Up Tracks
 
@@ -250,12 +268,9 @@ Scope reviewed:
 
 3. Run the release verification checklist during the release pass.
    - Follow the maintainer checklist in `docs/release.md` before publishing the draft GitHub Release.
-   - Decide whether to add a `global.json` SDK pin before release. Local
-     verification used .NET SDK 10.0.300 while the release workflow installs
-     .NET SDK 8.0.x. A temporary `global.json` check with SDK 8.0.421 on
-     2026-06-07 built both the MSI and Burn bundle projects with 0 warnings and
-     0 errors, so SDK alignment is currently a reproducibility cleanup rather
-     than a known installer-build blocker.
+   - `global.json` now pins SDK selection to .NET SDK 8.0.422 with
+     feature-band roll-forward so local verification and the release workflow
+     stay aligned on the .NET 8 SDK line.
    - The local sandbox blocks Visual Studio/Windows SDK lookup under
      `%LOCALAPPDATA%\Microsoft SDKs`; ShellExt or full `build_msi.ps1` checks may
      need external permission locally even though GitHub Actions should not.

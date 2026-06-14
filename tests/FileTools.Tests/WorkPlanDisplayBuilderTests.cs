@@ -187,7 +187,7 @@ public sealed class WorkPlanDisplayBuilderTests
             [target]);
 
         Assert.Equal(3, rows.Count);
-        Assert.True(rows.Any(static row => row.MatchesFilter));
+        Assert.Contains(rows, static row => row.MatchesFilter);
         Assert.Single(rows.Where(static row => row.Kind == WorkPlanDisplayRowKind.OperationGroup));
     }
 

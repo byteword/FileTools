@@ -47,19 +47,18 @@ notes.
 ## Verification Before Publishing
 
 - Run `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj`. Last
-  automated pass on 2026-06-07 passed 62 managed tests in Debug.
+  automated pass on 2026-06-14 passed 99 managed tests in Debug.
 - Run the Release managed test command:
-  `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj -c Release --no-build`.
-  Last automated pass on 2026-06-07 passed 62 managed tests after the Release
+  `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj -c Release`.
+  Last automated pass on 2026-06-14 passed 99 managed tests after the Release
   build.
 - Build `FileTools.sln` with Visual Studio MSBuild in `Release|x64`. Last
-  automated pass on 2026-06-07 completed with 0 warnings and 0 errors.
+  automated pass on 2026-06-14 completed with 0 warnings and 0 errors.
 - Build or dry-run `build_msi.ps1 -Version <tag>` before tagging to confirm the
   release tag is accepted and propagated into the installer build.
-  Last automated pass on 2026-06-07 used `v1.2.0.3` and confirmed the app EXE,
+  Last automated pass on 2026-06-14 used `v1.3.0.0` and confirmed the app EXE,
   generated app manifest, MSI `ProductVersion`, setup EXE, and sparse MSIX
-  identity all reported `1.2.0.3`. The `v1.3.0.0` beta pass should repeat this
-  check before tagging.
+  identity all reported `1.3.0.0`.
 - Build the full solution with Visual Studio MSBuild because `FileTools.ShellExt` requires Visual C++ targets.
 - Validate real ZIP samples with legacy filename encodings, comments, directory entries, external attributes, and local/central extra fields.
 - Check large ZIP merge progress, cancellation, temp-file cleanup, and final move failure behavior.
