@@ -13,6 +13,34 @@ public sealed class NamingRegressionTests
     }
 
     [Theory]
+    [InlineData("ㅇr", "아")]
+    [InlineData("ㅎH", "해")]
+    [InlineData("ㅇr이돌", "아이돌")]
+    public void ObfuscatedHangulCandidateGenerator_RestoresYaminJungeumTokens(string input, string expected)
+    {
+        var generator = new ObfuscatedHangulCandidateGenerator();
+
+        var candidate = Assert.Single(generator.Generate(input));
+
+        Assert.Equal(expected, candidate.Value);
+        Assert.True(candidate.RequiresReview);
+    }
+
+    [Fact]
+    public void KoreanFileNameCorrector_OffersYaminJungeumAsReviewCandidate()
+    {
+        var corrector = new KoreanFileNameCorrector();
+
+        var preview = corrector.CreatePreview(@"C:\Temp\ㅎH 1화.zip");
+
+        Assert.Contains(preview.Candidates, candidate =>
+            candidate.Value == "해 1화.zip" &&
+            candidate.Reason == "왜곡 한글 복원 후보" &&
+            candidate.RequiresReview);
+        Assert.Equal(RenamePreviewStatus.NeedsReview, preview.Status);
+    }
+
+    [Theory]
     [InlineData("CON.txt", "CON_.txt")]
     [InlineData("a<b>|c?.txt", "a b c.txt")]
     [InlineData("   .txt", "untitled.txt")]

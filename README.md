@@ -4,13 +4,13 @@
 
 Windows 탐색기 ContextMenu와 독립 실행형 WinForms 유틸리티를 제공하는 작은 파일 관리 도구입니다.
 
-현재 버전: `1.4.0.0-beta`.
+현재 버전: `1.4.1.0`.
 
 ### 개발 및 안정성 안내
 
 FileTools는 취미 개발자가 개인적으로 관리하는 프로젝트이며, Codex를 활용해 제작 및 업데이트하고 있습니다. 따라서 일부 업데이트는 충분히 안정화되지 않았을 수 있고, 버그 테스트도 제한적으로 이루어질 수 있습니다. 중요한 파일에 적용하기 전에는 백업을 권장드리며, 문제가 발견되면 이슈로 알려주시면 가능한 범위에서 확인하겠습니다.
 
-`1.4.0.0`은 베타 릴리스로 배포됩니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 로컬 이름변경 학습 기반, 릴리스 검증 흐름을 실제 사용 사례로 더 안정화한 뒤 같은 계열을 stable로 전환할 예정입니다.
+`1.4.1.0`은 베타 릴리스로 배포됩니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 로컬 이름변경 학습 기반, 릴리스 검증 흐름을 실제 사용 사례로 더 안정화한 뒤 같은 계열을 stable로 전환할 예정입니다.
 
 ### 기능
 
@@ -59,9 +59,10 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
 - 분할 버튼에서 폴더 unwrapping 변형을 선택합니다. 기본 설정, 같은 이름 폴더, 단일 파일 폴더 이름 불일치 처리 방식, 바로 아래 자식 파일 상위 이동을 포함합니다.
 - 아래쪽 작업 플랜 그리드에서 실행될 전체 작업, 선택 대상 관련 작업, 경고 작업을 필터로 전환해 검토합니다.
 - 작업 계획 위에 현재 필터, 대상 수, 계획 단계 수, 경고 수를 표시합니다.
+- 실행 완료 후 적용이 끝난 작업 단계는 플랜에서 제거하고, 이동/이름 변경으로 대상 경로가 바뀌면 대상 목록을 새 경로로 갱신하며, 삭제되어 더 이상 존재하지 않는 대상은 목록에서 제거합니다.
 - 작업 플랜 그리드는 순서, 아이콘이 붙은 작업 종류, 입력, 출력/예상 결과를 표시합니다. ZIP 병합 같은 공유 작업은 하나의 그룹 작업과 입력 행으로 표시됩니다.
 - 별도 설정 열을 두지 않고 그리드 행 툴팁으로 단계별 상세 옵션을 보여줍니다.
-- 아래쪽 계획 도구 모음에서 선택한 작업 하나를 제거하거나 선택한 계획 행의 대상 단계를 모두 지울 수 있으며, 남은 단계 체인을 기준으로 미리보기가 다시 계산됩니다.
+- 아래쪽 계획 도구 모음에서 선택한 작업 여러 개를 제거하거나 전체 작업 플랜을 비울 수 있으며, 남은 단계 체인을 기준으로 미리보기가 다시 계산됩니다.
 - 계획 작업을 두 번 클릭하면 해당 작업 대화상자를 다시 엽니다. 이름 변경 단계는 파일별 후보, 수동 편집, 건너뛰기 컨트롤이 포함된 이름 바꾸기 검토 창을 다시 엽니다.
 - 아래쪽 작업 플랜 그룹 안의 실행/중지 버튼 하나로 모든 대상 계획을 순서대로 실행하고, 같은 그룹의 상태 라벨과 진행 막대에서 실행 상태를 확인합니다.
 - 오른쪽 위 로그 보기에서 실행 메시지와 요약을 검토합니다.
@@ -81,7 +82,7 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
 
 별도 대화상자는 다음 용도로 제공됩니다.
 
-- 이름 변경 교정 규칙. 내장 규칙 표시 여부, 활성 상태, 단계별 순서, 자동/검토/후보 전용 모드를 포함합니다. 오른쪽 `세부 설정` 탭은 기존 이름변경 사전(`source -> replacement`), 검토창 삽입 문구, 왜곡 한글 후보 점수 단어와 보호 영어 단어, 파서 프로파일의 태그 단어/작가 접두어/회차 접두어와 단위/제목 노이즈 단어를 선택 규칙 맥락에서 직접 편집합니다. 후보 프로파일은 `rename-candidate-profile.json`, 파서 프로파일은 `rename-parser-profile.json`에 저장하며, 스크립트 기반 규칙은 보류 중이고 `docs/ux-rename-rule-management.md`에 문서화되어 있습니다.
+- 이름 변경 교정 규칙. 내장 규칙 표시 여부, 활성 상태, 단계별 순서, 자동/검토/후보 전용 모드를 포함합니다. 오른쪽 `세부 설정` 탭은 기존 이름변경 사전(`source -> replacement`), 검토창 삽입 문구, 왜곡 한글 후보 점수 단어와 보호 영어 단어, 파서 프로파일의 태그 단어/작가 접두어/회차 접두어와 단위/제목 노이즈 단어를 선택 규칙 맥락에서 직접 편집합니다. 왜곡 한글 후보는 `ㅇr -> 아`, `ㅎH -> 해` 같은 짧은 야민정음 표기도 검토 후보로 제안합니다. 후보 프로파일은 `rename-candidate-profile.json`, 파서 프로파일은 `rename-parser-profile.json`에 저장하며, 스크립트 기반 규칙은 보류 중이고 `docs/ux-rename-rule-management.md`에 문서화되어 있습니다.
 - 이름변경 교정 플러그인. 기본 언어와 플러그인별 활성 상태 및 설정을 관리합니다. 플러그인은 자동 적용 없이 검토 가능한 후보만 추가하며, 첫 샘플은 사용자 제공 사전/말뭉치 파일을 쓰는 SymSpell 후보 provider입니다. 설계 경계는 `docs/rename-correction-plugin-design.md`에 문서화되어 있습니다.
 - AutoRelocation 템플릿 편집. 경로 규칙 단계는 순서대로 평가되므로 템플릿은 `{KnownFileKind}\[{Initial}]\{EpisodeRange}` 같은 경로를 만들 수 있습니다. 템플릿 편집기와 단계별 작업 대화상자는 긴 템플릿 이름, 경로, 현지화된 라벨을 위해 크기를 조절할 수 있습니다.
 
@@ -238,7 +239,7 @@ MSI는 네이티브 `FileTools.ShellExt.dll`을 현재 사용자 COM ExplorerCom
 
 GitHub Releases는 setup bootstrapper, MSI, sparse MSIX identity package를 빌드하고 서명하며, `checksums.txt`를 생성하고, 릴리스 자산에 대한 GitHub artifact attestation을 만드는 수동 workflow를 사용합니다.
 
-`1.4.0.0`은 GitHub prerelease/beta로 게시합니다. 위키 문서와 tag별 변경사항 문서를 먼저 업데이트하고, 릴리스 자산 검증 및 설치 smoke test가 끝난 뒤 draft를 게시합니다. 안정화 작업 후 stable 전환 릴리스를 별도로 게시합니다.
+`1.4.1.0`은 GitHub prerelease/beta로 게시합니다. 위키 문서와 tag별 변경사항 문서를 먼저 업데이트하고, 릴리스 자산 검증 및 설치 smoke test가 끝난 뒤 draft를 게시합니다. 안정화 작업 후 stable 전환 릴리스를 별도로 게시합니다.
 
 릴리스는 GitHub Secrets에 base64 PFX와 비밀번호로 저장된 self-signed FileTools 인증서를 사용합니다. 이는 무료 GitHub 배포와 CER 신뢰 후 MSIX identity 등록에는 적합하지만, 공개 CA 코드 서명 인증서는 아닙니다. Windows는 첫 사용 사용자에게 SmartScreen 또는 신뢰 경고를 계속 표시할 수 있습니다.
 
@@ -385,13 +386,13 @@ FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE`를 �
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
-Current version: `1.4.0.0-beta`.
+Current version: `1.4.1.0`.
 
 ### Development and Stability Notice
 
 FileTools is maintained as a personal hobby project and is built and updated with the help of Codex. As a result, some updates may not be fully stable, and bug testing may be limited. Please consider backing up important files before using FileTools on them, and feel free to report issues so they can be reviewed as time permits.
 
-`1.4.0.0` is distributed as a beta release. The standalone planner work-plan display, folder-merge options flow, local rename-learning foundation, and release verification flow will move to stable after additional real-world stabilization.
+`1.4.1.0` is distributed as a beta release. The standalone planner work-plan display, folder-merge options flow, local rename-learning foundation, and release verification flow will move to stable after additional real-world stabilization.
 
 ### Features
 
@@ -440,9 +441,10 @@ The standalone window supports:
 - Selecting folder unwrapping variants from a split button, including the default setting, same-name folders, single-file folder name mismatch modes, and moving direct child files upward.
 - Reviewing all planned operations, selected-target operations, or warning operations by switching filters in the bottom work-plan grid.
 - Showing the current filter, target count, planned step count, and warning count above the work plan.
+- After execution, applied steps are removed from the plan, moved or renamed targets are refreshed to their new paths, and deleted targets are removed from the target list.
 - Showing order, icon-labeled action kind, input, and output/expected result in the work-plan grid. Shared operations such as ZIP merge appear as one operation group with input rows.
 - Showing detailed per-step options in grid row tooltips instead of dedicating a separate settings column.
-- Removing one selected operation or clearing the selected plan row's target steps from the bottom plan toolbar; the preview is recalculated from the remaining step chain.
+- Removing multiple selected operations or clearing the entire work plan from the bottom plan toolbar; the preview is recalculated from the remaining step chain.
 - Double-clicking a planned action to reopen the matching action dialog; rename steps reopen the rename review dialog with per-file candidates, manual editing, and skip controls.
 - Running all target plans in order with one run/stop button inside the bottom work-plan group, with execution state shown by the neighboring status label and progress bar.
 - Reviewing execution messages and summaries in the top-right log view.
@@ -462,7 +464,7 @@ UX review notes for the current rename dialog are tracked in `docs/ux-rename-dia
 
 Separate dialogs are available for:
 
-- Rename correction rules, including built-in rule visibility, enabled state, stage-scoped ordering, and automatic/review/candidate-only modes. The right-side `Details` tab edits existing rename dictionary entries (`source -> replacement`), rename-review insert phrases, obfuscated Hangul candidate scoring words and protected English words, and parser-profile lists for tag words, author prefixes, episode prefixes/units, and title noise words in the context of the selected rule. Candidate lists are stored in `rename-candidate-profile.json`, and parser lists are stored in `rename-parser-profile.json`. Script-backed rules are deferred and documented in `docs/ux-rename-rule-management.md`.
+- Rename correction rules, including built-in rule visibility, enabled state, stage-scoped ordering, and automatic/review/candidate-only modes. The right-side `Details` tab edits existing rename dictionary entries (`source -> replacement`), rename-review insert phrases, obfuscated Hangul candidate scoring words and protected English words, and parser-profile lists for tag words, author prefixes, episode prefixes/units, and title noise words in the context of the selected rule. Obfuscated Hangul candidates also cover short Yaminjeongeum forms such as `ㅇr -> 아` and `ㅎH -> 해` as review candidates. Candidate lists are stored in `rename-candidate-profile.json`, and parser lists are stored in `rename-parser-profile.json`. Script-backed rules are deferred and documented in `docs/ux-rename-rule-management.md`.
 - Rename correction plugins. The settings dialog manages the default language, per-plugin enable state, and generated plugin settings. Plugins only add reviewable candidates without automatic apply; the first sample is a SymSpell candidate provider that uses user-supplied dictionary or corpus data. The boundary is documented in `docs/rename-correction-plugin-design.md`.
 - AutoRelocation template editing. Path rule steps are evaluated in order, so a template can produce paths such as `{KnownFileKind}\[{Initial}]\{EpisodeRange}`. The template editor and per-step action dialogs resize for long template names, paths, and localized labels.
 
@@ -620,7 +622,7 @@ GitHub Releases use a manual workflow that builds and signs the setup
 bootstrapper, MSI, and sparse MSIX identity package, generates `checksums.txt`,
 and creates GitHub artifact attestations for the release assets.
 
-`1.4.0.0` is published as a GitHub prerelease/beta. Update the wiki and
+`1.4.1.0` is published as a GitHub prerelease/beta. Update the wiki and
 tag-specific change notes before tagging, then publish the draft only after
 release asset verification and install smoke testing. A stable release will
 follow after the beta stabilization pass.

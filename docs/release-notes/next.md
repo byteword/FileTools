@@ -1,12 +1,12 @@
 # FileTools Next Release Notes Draft
 
-This draft is for changes after `v1.4.0.0`. Add future changes here during
+This draft is for changes after `v1.4.1.0`. Add future changes here during
 development, then copy or regenerate it into `docs/release-notes/<tag>.md` for
 the next release tag.
 
 ## Highlights
 
-- No post-`v1.4.0.0` changes recorded yet.
+- No post-`v1.4.1.0` changes recorded yet.
 
 ## Support Scope
 

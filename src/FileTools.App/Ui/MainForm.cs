@@ -30,6 +30,9 @@ public sealed partial class MainForm : Form
     private FolderMergeMode _folderMergeMode = FolderMergeMode.MergeFolderUnits;
     private WorkPlanDisplayFilter _planDisplayFilter = WorkPlanDisplayFilter.All;
     private readonly Dictionary<int, (int InputIndex, int InputCount)> _planInputGroupByGridRow = [];
+    private static readonly StringComparer PathComparer = OperatingSystem.IsWindows()
+        ? StringComparer.OrdinalIgnoreCase
+        : StringComparer.Ordinal;
     private static readonly Color PlanGroupConnectorColor = Color.FromArgb(148, 163, 184);
     private static readonly Color PlanGroupConnectorSelectedColor = SystemColors.HighlightText;
 
@@ -72,7 +75,11 @@ public sealed partial class MainForm : Form
         {
             if (!_updatingTargetGridSelection)
             {
-                RefreshPlanList();
+                if (_planDisplayFilter == WorkPlanDisplayFilter.SelectedTargets)
+                {
+                    RefreshPlanList();
+                }
+
                 UpdateCommandStates();
             }
         };
@@ -1064,15 +1071,18 @@ public sealed partial class MainForm : Form
 
     private void RemoveSelectedStep()
     {
-        var selectedRowIndex = _planGrid.CurrentRow?.Index ?? -1;
-        var target = GetSelectedPlanTarget();
-        var step = GetSelectedStep();
-        if (target is null || step is null)
+        var selectedRowIndex = GetSelectedPlanRowIndexes().DefaultIfEmpty(_planGrid.CurrentRow?.Index ?? -1).Min();
+        var selectedSteps = GetSelectedPlanSteps().ToArray();
+        if (selectedSteps.Length == 0)
         {
             return;
         }
 
-        RemoveStepFromPlans(target, step);
+        foreach (var (target, step) in selectedSteps)
+        {
+            RemoveStepFromPlans(target, step);
+        }
+
         RefreshTargetGridRows();
         RefreshPlanList();
         SelectPlanRow(Math.Min(selectedRowIndex, _planGrid.Rows.Count - 1));
@@ -1081,20 +1091,14 @@ public sealed partial class MainForm : Form
 
     private void ClearSelectedTargetSteps()
     {
-        var target = GetSelectedPlanTarget() ?? GetSelectedTarget();
-        if (target is null || target.Steps.Count == 0)
+        if (_targets.All(static target => target.Steps.Count == 0))
         {
             return;
         }
 
-        var steps = target.Steps.ToArray();
-        target.Steps.Clear();
-        foreach (var step in steps)
+        foreach (var target in _targets)
         {
-            if (step.Kind == WorkPlanStepKind.ArchiveMerge)
-            {
-                RemoveSharedArchiveMergeStep(step);
-            }
+            target.Steps.Clear();
         }
 
         RefreshTargetGridRows();
@@ -1157,8 +1161,10 @@ public sealed partial class MainForm : Form
         {
             var progress = new Progress<string>(AppendLog);
             var questionSink = new UiArchiveMergeQuestionSink(this, _archiveMergeDecisionPanel, cancellation.Token);
-            var result = await Task.Run(() => new WorkPlanExecutor(_settings, questionSink)
-                .Run(targets, cancellation.Token, progress));
+            var execution = await Task.Run(() => new WorkPlanExecutor(_settings, questionSink)
+                .RunDetailed(targets, cancellation.Token, progress));
+            var result = execution.Result;
+            ApplyExecutionPlanUpdates(execution);
 
             AppendLog(Localizer.Format(
                 "LogExecutionSummaryFormat",
@@ -1188,6 +1194,42 @@ public sealed partial class MainForm : Form
             RefreshTargetGrid();
             RefreshPlanList();
             UpdateCommandStates();
+        }
+    }
+
+    private void ApplyExecutionPlanUpdates(WorkPlanExecutionResult execution)
+    {
+        foreach (var targetResult in execution.Targets)
+        {
+            if (!_targets.Contains(targetResult.Target))
+            {
+                continue;
+            }
+
+            foreach (var step in targetResult.CompletedSteps)
+            {
+                RemoveStepFromPlans(targetResult.Target, step);
+            }
+        }
+
+        foreach (var targetResult in execution.Targets)
+        {
+            var target = targetResult.Target;
+            if (!_targets.Contains(target))
+            {
+                continue;
+            }
+
+            if (!PathComparer.Equals(target.Path, targetResult.FinalPath) &&
+                PathExists(targetResult.FinalPath))
+            {
+                target.UpdatePath(targetResult.FinalPath);
+            }
+
+            if (!IsExistingTarget(target))
+            {
+                _targets.Remove(target);
+            }
         }
     }
 
@@ -1398,6 +1440,42 @@ public sealed partial class MainForm : Form
     private WorkPlanDisplayRow? GetSelectedDisplayRow()
     {
         return _planGrid.CurrentRow?.Tag as WorkPlanDisplayRow;
+    }
+
+    private IEnumerable<(WorkTargetPlan Target, WorkPlanStep Step)> GetSelectedPlanSteps()
+    {
+        var seen = new HashSet<(WorkTargetPlan Target, WorkPlanStep Step)>();
+        foreach (var row in GetSelectedDisplayRows())
+        {
+            if (row is { Kind: not WorkPlanDisplayRowKind.Input, Target: { } target, Step: { } step } &&
+                seen.Add((target, step)))
+            {
+                yield return (target, step);
+            }
+        }
+    }
+
+    private IEnumerable<WorkPlanDisplayRow> GetSelectedDisplayRows()
+    {
+        var rows = _planGrid.SelectedRows
+            .Cast<DataGridViewRow>()
+            .OrderBy(static row => row.Index)
+            .Select(static row => row.Tag)
+            .OfType<WorkPlanDisplayRow>()
+            .ToArray();
+        if (rows.Length > 0)
+        {
+            return rows;
+        }
+
+        return GetSelectedDisplayRow() is { } current ? [current] : [];
+    }
+
+    private IEnumerable<int> GetSelectedPlanRowIndexes()
+    {
+        return _planGrid.SelectedRows
+            .Cast<DataGridViewRow>()
+            .Select(static row => row.Index);
     }
 
     private void FileDrop_DragEnter(object? sender, DragEventArgs e)
@@ -1707,7 +1785,6 @@ public sealed partial class MainForm : Form
         var selectedTargets = GetSelectedTargets().ToArray();
         var hasSelectedTargets = selectedTargets.Length > 0;
         var selectedTarget = GetSelectedTarget();
-        var planCommandTarget = GetSelectedPlanTarget() ?? selectedTarget;
         var hasTargets = _targets.Count > 0;
         var anyPlannedSteps = _targets.Any(static target => target.Steps.Count > 0);
         var canModify = !isExecuting;
@@ -1727,8 +1804,8 @@ public sealed partial class MainForm : Form
                        selectedTargets.All(IsExistingTarget) &&
                        selectedTargets.All(static target => target.Steps.Count == 0);
         var canEditStep = canModify && GetSelectedStep() is not null;
-        var canRemoveStep = canEditStep;
-        var canClearSteps = canModify && planCommandTarget?.Steps.Count > 0;
+        var canRemoveStep = canModify && GetSelectedPlanSteps().Any();
+        var canClearSteps = canModify && anyPlannedSteps;
         if (!hasMultipleFolders && _folderMergeMode == FolderMergeMode.MergeFolderContentsOnly)
         {
             _folderMergeMode = FolderMergeMode.MergeFolderUnits;
@@ -2056,7 +2133,12 @@ public sealed partial class MainForm : Form
 
     private static bool IsExistingTarget(WorkTargetPlan target)
     {
-        return File.Exists(target.Path) || Directory.Exists(target.Path);
+        return PathExists(target.Path);
+    }
+
+    private static bool PathExists(string path)
+    {
+        return File.Exists(path) || Directory.Exists(path);
     }
 
     private static string GetTargetName(WorkTargetPlan target)

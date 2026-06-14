@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.4.0.0-beta - 2026-06-14
+## 1.4.1.0-beta - 2026-06-14
 
 ### Added
 
@@ -13,7 +13,7 @@
   selection.
 - Local rename pattern-learning foundation with pattern discovery, render
   candidates, bounded feedback storage, statistical ranking, and settings.
-- Root changelog and tag-specific release notes for `v1.4.0.0`.
+- Root changelog and tag-specific release notes for `v1.4.1.0`.
 
 ### Changed
 
@@ -25,21 +25,30 @@
   GitHub release workflow.
 - Updated release workflow behavior so rerunning against an existing GitHub
   Release refreshes notes, title, draft state, and prerelease state.
+- Updated the 1.4 prerelease line to replace the previous `v1.4.0.0` beta with
+  `v1.4.1.0`.
 
 ### Fixed
 
 - Folder-merge options dialog layout no longer overlaps the OK/Cancel button row
   with Korean localized text.
+- Short Yaminjeongeum/obfuscated Hangul candidates such as `ㅇr -> 아` and
+  `ㅎH -> 해` are proposed again in rename correction review.
+- Completed work-plan steps are removed after successful execution, moved or
+  renamed targets refresh to the new path, deleted targets are removed from the
+  target list, and multiple plan rows can be removed together.
+- Target selection changes now rebuild the work-plan grid only in the
+  selected-target filter view.
 - Remaining xUnit analyzer warning in the managed regression suite was removed.
 - Release workflow artifact attestation permissions now include
   `artifact-metadata: write`.
 
 ### Verification
 
-- Debug managed tests and Release managed tests passed 99/99 on 2026-06-14.
+- Debug managed tests passed 105/105 on 2026-06-14.
 - Full `Release|x64` solution build passed with 0 warnings and 0 errors on
   2026-06-14.
-- `build_msi.ps1 -Version v1.4.0.0` produced the setup EXE, MSI, sparse MSIX
+- `build_msi.ps1 -Version v1.4.1.0` should produce the setup EXE, MSI, sparse MSIX
   identity, and CER with 0 warnings and 0 errors on 2026-06-14.
 - Local release asset checksums verified successfully. Self-signed signatures
   were present and reported expected local trust warnings until the CER is

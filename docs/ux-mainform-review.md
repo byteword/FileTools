@@ -33,6 +33,9 @@ The next layout proposal is tracked in `docs/mainform-plan-list-layout-proposal.
 - Step delete and clear-all-for-current-target commands sit on a horizontal icon+text toolbar above the plan grid.
 - The work plan area shows which target is currently displayed, how many targets are selected, and the selected targets' planned step count for multi-target selections.
 - Plan previews are rebuilt from the remaining step chain after add, edit, delete, or clear so downstream steps reflect the current virtual input path.
+- Completed execution now removes applied steps from the plan, refreshes moved or renamed targets to their new paths, and drops targets that no longer exist after delete or empty-folder cleanup.
+- The plan grid supports multi-row step removal, while the clear-steps command clears every planned step in the current work plan.
+- Target selection changes rebuild the plan grid only while the selected-target filter is active, avoiding unnecessary full-grid refreshes in all-plan and warning views.
 - The old always-large result box is replaced by a compact top-right log view.
 - Execution uses one button inside the bottom work-plan group that shows run in the idle state and stop while running.
 - The work-plan group includes a lightweight status label and marquee progress bar tied to the current execution state.

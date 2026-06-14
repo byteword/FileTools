@@ -597,7 +597,7 @@ partial class MainForm
         _planGrid.BorderStyle = BorderStyle.FixedSingle;
         _planGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
         _planGrid.Dock = DockStyle.Fill;
-        _planGrid.MultiSelect = false;
+        _planGrid.MultiSelect = true;
         _planGrid.Name = "_planGrid";
         _planGrid.ContextMenuStrip = _planContextMenu;
         _planGrid.ReadOnly = true;

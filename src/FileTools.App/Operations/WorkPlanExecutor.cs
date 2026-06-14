@@ -1,5 +1,15 @@
 namespace FileTools;
 
+internal sealed record WorkPlanExecutionResult(
+    OperationResult Result,
+    IReadOnlyList<WorkPlanTargetExecutionResult> Targets);
+
+internal sealed record WorkPlanTargetExecutionResult(
+    WorkTargetPlan Target,
+    string OriginalPath,
+    string FinalPath,
+    IReadOnlyList<WorkPlanStep> CompletedSteps);
+
 /// <summary>
 /// 작업 계획을 실제 실행으로 바인딩하고 결과를 집계하는 엔진.
 /// </summary>
@@ -47,8 +57,20 @@ internal sealed class WorkPlanExecutor
         CancellationToken cancellationToken,
         IProgress<string>? progress)
     {
+        return RunDetailed(targets, cancellationToken, progress).Result;
+    }
+
+    /// <summary>
+    /// 작업 계획을 실행하고 UI가 완료된 step/변경된 경로를 정리할 수 있는 상세 결과를 반환한다.
+    /// </summary>
+    public WorkPlanExecutionResult RunDetailed(
+        IEnumerable<WorkTargetPlan> targets,
+        CancellationToken cancellationToken,
+        IProgress<string>? progress)
+    {
         var aggregate = new OperationResult();
         var executedArchiveMergePlanIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var targetResults = new List<WorkPlanTargetExecutionResult>();
 
         foreach (var target in targets)
         {
@@ -58,13 +80,15 @@ internal sealed class WorkPlanExecutor
             }
 
             progress?.Report(Localizer.Format("LogTargetStartingFormat", Path.GetFileName(target.Path)));
-            if (!RunTarget(target, aggregate, executedArchiveMergePlanIds, cancellationToken, progress))
+            var targetResult = RunTarget(target, aggregate, executedArchiveMergePlanIds, cancellationToken, progress);
+            targetResults.Add(targetResult.Result);
+            if (!targetResult.ContinueExecution)
             {
                 break;
             }
         }
 
-        return aggregate;
+        return new WorkPlanExecutionResult(aggregate, targetResults);
     }
 
     /// <summary>
@@ -73,30 +97,46 @@ internal sealed class WorkPlanExecutor
     /// <remarks>
     /// 단계가 비어 있으면 즉시 건너뛰고, 단계별로 현재 경로를 추적해 체인 입출력을 반영한다.
     /// </remarks>
-    private bool RunTarget(
+    private TargetRunResult RunTarget(
         WorkTargetPlan target,
         OperationResult aggregate,
         HashSet<string> executedArchiveMergePlanIds,
         CancellationToken cancellationToken,
         IProgress<string>? progress)
     {
+        var originalPath = target.Path;
         var currentPath = target.Path;
+        var completedSteps = new List<WorkPlanStep>();
         if (target.Steps.Count == 0)
         {
             aggregate.AddSkipped(Path.GetFileName(target.Path) + " has no planned actions");
-            return true;
+            return new TargetRunResult(
+                new WorkPlanTargetExecutionResult(target, originalPath, currentPath, completedSteps),
+                ContinueExecution: true);
         }
 
         foreach (var step in target.Steps)
         {
             if (cancellationToken.IsCancellationRequested)
             {
-                return false;
+                return new TargetRunResult(
+                    new WorkPlanTargetExecutionResult(target, originalPath, currentPath, completedSteps),
+                    ContinueExecution: false);
             }
 
             if (step.Kind == WorkPlanStepKind.ArchiveMerge)
             {
-                RunArchiveMergeStep(step, aggregate, executedArchiveMergePlanIds, cancellationToken, progress, _archiveMergeQuestionSink);
+                var archiveResult = RunArchiveMergeStep(step, executedArchiveMergePlanIds, cancellationToken, progress, _archiveMergeQuestionSink);
+                if (archiveResult is not null)
+                {
+                    aggregate.Merge(archiveResult);
+                    ReportStepResult(archiveResult, progress);
+                    if (IsStepCompleted(archiveResult))
+                    {
+                        completedSteps.Add(step);
+                    }
+                }
+
                 continue;
             }
 
@@ -111,22 +151,28 @@ internal sealed class WorkPlanExecutor
             var result = RunStep(step, currentPath);
             aggregate.Merge(result);
             ReportStepResult(result, progress);
-            if (!result.HasErrors && result.AppliedCount > 0 && !string.IsNullOrWhiteSpace(predictedPath) &&
+            if (IsStepCompleted(result))
+            {
+                completedSteps.Add(step);
+            }
+
+            if (IsStepCompleted(result) && !string.IsNullOrWhiteSpace(predictedPath) &&
                 (File.Exists(predictedPath) || Directory.Exists(predictedPath)))
             {
                 currentPath = predictedPath;
             }
         }
 
-        return true;
+        return new TargetRunResult(
+            new WorkPlanTargetExecutionResult(target, originalPath, currentPath, completedSteps),
+            ContinueExecution: true);
     }
 
     /// <summary>
     /// 아카이브 병합 step을 실행한다.
     /// </summary>
-    private static void RunArchiveMergeStep(
+    private static OperationResult? RunArchiveMergeStep(
         WorkPlanStep step,
-        OperationResult aggregate,
         HashSet<string> executedArchiveMergePlanIds,
         CancellationToken cancellationToken,
         IProgress<string>? progress,
@@ -134,22 +180,21 @@ internal sealed class WorkPlanExecutor
     {
         if (step.ArchiveMergeOptions is null)
         {
-            aggregate.AddSkipped(Localizer.Get("ArchiveMergePlanMissingOptions"));
-            return;
+            var result = new OperationResult();
+            result.AddSkipped(Localizer.Get("ArchiveMergePlanMissingOptions"));
+            return result;
         }
 
         if (!executedArchiveMergePlanIds.Add(step.ArchiveMergeOptions.PlanId))
         {
-            return;
+            return null;
         }
 
         progress?.Report(Localizer.Format(
             "LogArchiveMergeStartingFormat",
             step.ArchiveMergeOptions.SourcePaths.Count,
             Path.GetFileName(step.ArchiveMergeOptions.OutputPath)));
-        var result = ArchiveMergeOperations.Merge(step.ArchiveMergeOptions, cancellationToken, progress, questionSink);
-        aggregate.Merge(result);
-        ReportStepResult(result, progress);
+        return ArchiveMergeOperations.Merge(step.ArchiveMergeOptions, cancellationToken, progress, questionSink);
     }
 
     /// <summary>
@@ -171,6 +216,11 @@ internal sealed class WorkPlanExecutor
         {
             progress.Report(message);
         }
+    }
+
+    private static bool IsStepCompleted(OperationResult result)
+    {
+        return result.AppliedCount > 0 && result.SkippedCount == 0 && !result.HasErrors;
     }
 
     /// <summary>
@@ -515,6 +565,10 @@ internal sealed class WorkPlanExecutor
     private sealed record RelocationContextWithRoot(
         string RootFolder,
         AutoRelocationItemContext Context);
+
+    private sealed record TargetRunResult(
+        WorkPlanTargetExecutionResult Result,
+        bool ContinueExecution);
 
     /// <summary>
     /// 파일명 정정기 생성 캐시로 플랜별 불필요한 규칙 파싱 비용을 줄인다.

@@ -30,12 +30,20 @@ internal sealed class WorkTargetPlan
     /// <summary>
     /// 실행 대상의 절대 경로.
     /// </summary>
-    public string Path { get; }
+    public string Path { get; private set; }
 
     /// <summary>
     /// 순차 실행될 단계 목록.
     /// </summary>
     public List<WorkPlanStep> Steps { get; } = [];
+
+    /// <summary>
+    /// 실행 후 원본 경로가 이동된 경우 UI 대상 경로를 새 위치로 갱신한다.
+    /// </summary>
+    public void UpdatePath(string path)
+    {
+        Path = System.IO.Path.GetFullPath(path);
+    }
 
     /// <summary>
     /// UI/로그에서 보여줄 식별명으로 원본 파일명 또는 전체 경로를 반환한다.

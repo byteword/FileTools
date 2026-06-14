@@ -69,7 +69,7 @@ Windows filename safety is required and remains active even when shown in the ru
 Currently exposed detail panels are limited to settings that have backing storage:
 
 - Existing rename dictionary application: inline `source -> replacement` editor backed by `rename-dictionary.json`, plus review insert phrases used by the rename review dialog.
-- Obfuscated Hangul candidate generation: inline candidate scoring word and protected English word editors backed by `rename-candidate-profile.json`.
+- Obfuscated Hangul candidate generation: inline candidate scoring word and protected English word editors backed by `rename-candidate-profile.json`. The built-in replacement table remains internal but includes short review candidates such as `ㅇr -> 아` and `ㅎH -> 해`.
 - Bracket metadata extraction: inline known-tag word editor backed by `rename-parser-profile.json`.
 - Author extraction: inline author-prefix editor backed by `rename-parser-profile.json`.
 - Episode extraction: inline episode-prefix and episode-unit editors backed by `rename-parser-profile.json`.

@@ -1043,7 +1043,7 @@ internal sealed partial class ObfuscatedHangulCandidateGenerator
 
         if (converted > 0)
         {
-            score += Math.Min(0.25, converted * 0.08);
+            score += Math.Min(0.25, converted * 0.12);
         }
 
         if (lexiconMatches > 0)
@@ -1071,6 +1071,7 @@ internal sealed partial class ObfuscatedHangulCandidateGenerator
                 'o' when HasKoreanNeighbor(chars, index) => 'ㅇ',
                 'O' when HasKoreanNeighbor(chars, index) => 'ㅇ',
                 '0' when HasKoreanNeighbor(chars, index) => 'ㅇ',
+                'H' when HasKoreanNeighbor(chars, index) => 'ㅐ',
                 'l' when HasKoreanNeighbor(chars, index) => 'ㅣ',
                 'I' when HasKoreanNeighbor(chars, index) => 'ㅣ',
                 '|' when HasKoreanNeighbor(chars, index) => 'ㅣ',
@@ -1113,7 +1114,7 @@ internal sealed partial class ObfuscatedHangulCandidateGenerator
 
     private static bool IsObfuscationCharacter(char ch)
     {
-        return ch is 'r' or 'R' or 'o' or 'O' or '0' or 'l' or 'I' or '|';
+        return ch is 'r' or 'R' or 'o' or 'O' or '0' or 'H' or 'l' or 'I' or '|';
     }
 
     private bool ContainsProtectedEnglishWord(string value)
