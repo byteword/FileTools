@@ -5,7 +5,9 @@ Last updated: 2026-06-14
 
 Scope reviewed:
 
-- Local commits after `v1.2.0.0`, including archive merge and issue split documentation through this review.
+- Local commits after `v1.2.0.0`, including archive merge, issue split
+  documentation, 1.4 beta planner work, and release documentation through
+  `v1.4.2.0`.
 - GitHub issues #1 through #9 in `byteword/FileTools`.
 - README, `docs/name-template-and-collision-policy.md`, `docs/release.md`, and `docs/release-notes/next.md`.
 - `docs/ux-mainform-review.md` and `docs/mainform-plan-list-layout-proposal.md`.
@@ -223,25 +225,21 @@ Scope reviewed:
   - Re-ran `build_msi.ps1 -Version v1.3.0.0`; it produced the MSI, setup
     bootstrapper, sparse MSIX identity, and CER with 0 warnings and 0 errors
     using a temporary self-signed certificate.
-- Prepared the `v1.4.0.0` prerelease documentation and changelog pass on
+- Prepared the 1.4 prerelease documentation and changelog passes on
   2026-06-14:
-  - Bumped app, MSI, bundle, and local build-script default versions to
-    `1.4.0.0`.
-  - Updated README, release workflow examples, maintainer release instructions,
-    local wiki pages, `CHANGELOG.md`, and `docs/release-notes/v1.4.0.0.md`.
-  - Scoped the `1.4.0.0-beta` changelog to the standalone planner work-plan
-    refresh, grouped input rows, folder-merge options flow, local rename
-    pattern-learning foundation, and release workflow hardening.
-  - Re-ran Debug and Release managed tests on .NET SDK 8.0.422; both passed
-    99/99.
-  - Re-ran `MSBuild.exe FileTools.sln /p:Configuration=Release /p:Platform=x64`;
-    it passed with 0 warnings and 0 errors after sandbox escalation for Windows
-    SDK lookup.
-  - Re-ran `build_msi.ps1 -Version v1.4.0.0`; it produced the MSI, setup
-    bootstrapper, sparse MSIX identity, and CER with 0 warnings and 0 errors
-    using a temporary self-signed certificate.
-  - Created local release assets under `artifacts\release` and verified
-    checksums/signature presence with `scripts\verify_release_assets.ps1`.
+  - `v1.4.1.0` replaced the earlier 1.4 beta target and scoped the beta line to
+    the standalone planner refresh, grouped input rows, in-app context menus,
+    folder-merge options flow, local rename pattern-learning foundation, and
+    release workflow hardening.
+  - `v1.4.2.0` added the Program info dialog surface and fixed mixed Hangul
+    syllable/jamo obfuscation candidates such as
+    `혀ㄴ주ㅇ구l호rㄴ로ㄱ -> 현중귀환록`.
+  - README, `CHANGELOG.md`, `docs/release.md`, tag-specific release notes, and
+    `docs/release-notes/next.md` now use `v1.4.2.0` as the current prerelease
+    baseline, with `next.md` reserved for changes after `v1.4.2.0`.
+  - Debug managed tests passed 109/109 for the `v1.4.2.0` documentation/fix
+    pass. Release asset verification and install smoke testing remain the
+    publish gate for the `v1.4.2.0` prerelease.
 
 ## Deferred Follow-Up Tracks
 
@@ -255,63 +253,75 @@ Scope reviewed:
   validation with large mixed file sets and narrow result dialog sizes, and
   eventual Explorer menu exposure after the internal `/context FileCompare`
   route is smoke-tested.
-- #7 Windows ARM64 build and installer support: resume only when ARM64 Windows hardware or a VM is available for end-to-end installer and Explorer validation.
-- #8 7Z input archive merge support: resume after ZIP archive merge real-sample validation and release notes are finished, then decide ZIP-only output versus 7Z output scope.
+- #7 Windows ARM64 build and installer support: resume only when ARM64 Windows
+  hardware or a VM is available for end-to-end installer and Explorer
+  validation.
+- #8 7Z input archive merge support: resume after ZIP archive merge real-sample
+  validation and the `v1.4.2.0` release gate, then decide ZIP-only output
+  versus 7Z output scope.
 - #9 common-filename-based file merge flow: archive-first slice is implemented.
   General file-content merge is deferred until overlap/duplicate content policy
   is defined.
 
 ## Next Priority
 
-1. Stabilize ZIP archive merge release readiness.
-   - Re-run the managed regression suite before tagging if archive merge changes again.
-   - Validate with real ZIP samples that include legacy filename encodings, comments, directory entries, external attributes, and local/central extra fields.
-   - Verify cancellation, temp-file cleanup, and final move failure behavior with large archives.
-   - Decide whether ZIP32 limits are acceptable for the first release or whether Zip64 output support must be added before release.
-
-2. Finalize the next release notes.
-   - `docs/release-notes/v1.4.0.0.md` is the beta release-note document for the
-     next tag.
-   - Binary, generated app manifest, MSI, Burn bundle, and sparse MSIX identity
-     versions are injected from the release tag through `build_msi.ps1`. Before
-     tagging, update only user-facing release documentation such as the README
-     current-version lines when appropriate.
-   - Use `scripts/prepare_release.ps1 -Tag <tag> -Channel beta` to update the
-     release-facing README/wiki version references and create
-     `docs/release-notes/<tag>.md` when it does not already exist. Use `-WhatIf`
-     for review and `-Force` only when the tag-specific notes should be
-     regenerated from `docs/release-notes/next.md`.
-   - Keep the archive merge support note explicit: ZIP input and ZIP output are supported; 7Z input is not yet supported and is tracked by #8.
-   - Keep the #9 release note scoped to archive-first common output naming and
-     entry preview; general file-content merge remains deferred.
-
-3. Run the release verification checklist during the release pass.
-   - Follow the maintainer checklist in `docs/release.md` before publishing the draft GitHub Release.
+1. Finish the `v1.4.2.0` prerelease publish gate.
+   - Follow the maintainer checklist in `docs/release.md` before publishing the
+     draft GitHub Release.
+   - Verify release workflow assets, `checksums.txt`, local signatures, and
+     GitHub artifact attestations before the install smoke test.
+   - Run the install smoke test on a disposable Windows account, VM, or test
+     machine when possible. If any smoke-test scope is skipped, write that
+     explicitly in the release notes before publishing.
+   - Keep the archive merge support note explicit: ZIP input and ZIP output are
+     supported; 7Z input is not yet supported and is tracked by #8.
+   - Validate real ZIP samples that include legacy filename encodings, comments,
+     directory entries, external attributes, and local/central extra fields
+     during beta verification.
+   - Re-run the managed regression suite, Release build, and `build_msi.ps1`
+     only if code, build scripts, or release-facing metadata changes again
+     before publishing.
    - `global.json` now pins SDK selection to .NET SDK 8.0.422 with
      feature-band roll-forward so local verification and the release workflow
      stay aligned on the .NET 8 SDK line.
    - The local sandbox blocks Visual Studio/Windows SDK lookup under
      `%LOCALAPPDATA%\Microsoft SDKs`; ShellExt or full `build_msi.ps1` checks may
      need external permission locally even though GitHub Actions should not.
-   - After the workflow produces draft assets, use
-     `scripts/verify_release_assets.ps1 -Path <download-directory> -VerifyAttestations`
-     to check `checksums.txt`, local signatures, and GitHub artifact
-     attestations before the install smoke test.
-   - Keep release notes and external wiki updates gated on verified assets,
-     checksums, signatures, attestations, and install smoke testing.
 
-4. Defer lower-priority feature tracks.
-   - #3 external providers, #7, and #8 still carry explicit deferred status and resume conditions in GitHub.
-   - #3 local pattern learning may continue independently because it stays local,
-     review-first, and disconnected from network/content-inference providers.
-   - #9 general file-content merge remains deferred; the archive-first output
-     naming and preview slice is implemented.
-   - Do not pull these into the active work queue until the resume conditions in each issue are satisfied.
+2. Keep post-`v1.4.2.0` release notes clean until new work starts.
+   - `docs/release-notes/next.md` is the draft for changes after `v1.4.2.0`
+     and currently has no post-`v1.4.2.0` changes recorded.
+   - For the next tag, use `scripts/prepare_release.ps1 -Tag <tag> -Channel beta`
+     to update release-facing README/wiki version references and create
+     `docs/release-notes/<tag>.md` when it does not already exist.
+   - Use `-WhatIf` for review and `-Force` only when the tag-specific notes
+     should be regenerated from `docs/release-notes/next.md`.
 
-5. Continue issue #6 UI validation when file comparison is exercised manually.
+3. Continue issue #6 file comparison validation and reload work after the
+   release gate.
    - Use mixed files and folders to verify pair counts, status filtering, and
      criterion details.
    - Validate hash and byte-to-byte range settings with large files before
      adding JSON import/reload or exposing the prepared Explorer context command.
    - Validate the expanded option UI manually, especially common-name thresholds,
-     middle-part start/length units, and archive same-relative-path pairing.
+     middle-part start/length units, archive same-relative-path pairing, narrow
+     result dialog sizes, and the duplicate-delete step editor.
+   - After `/context FileCompare` smoke testing, decide whether to expose the
+     command through Explorer registration, settings, and the native ShellExt
+     submenu.
+
+4. Continue UI validation for the 1.4 beta surfaces when manually exercised.
+   - MainForm planner: validate small, default, and wide window sizes, then
+     revisit splitter constraints and grouped-row visual polish.
+   - Rename review dialog: decide whether generated conflict suffixes should
+     remain `Conflict` or become `Auto-resolved conflict`, then consider
+     persisting the last dialog size if long filenames are common in real use.
+
+5. Defer lower-priority feature tracks.
+   - #3 external providers, #7, and #8 still carry explicit deferred status and
+     resume conditions in GitHub.
+   - #3 local pattern learning may continue independently because it stays local,
+     review-first, and disconnected from network/content-inference providers.
+   - #9 general file-content merge remains deferred; the archive-first output
+     naming and preview slice is implemented.
+   - Do not pull these into the active work queue until the resume conditions in each issue are satisfied.
