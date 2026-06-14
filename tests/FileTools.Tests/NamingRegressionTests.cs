@@ -16,6 +16,9 @@ public sealed class NamingRegressionTests
     [InlineData("ㅇr", "아")]
     [InlineData("ㅎH", "해")]
     [InlineData("ㅇr이돌", "아이돌")]
+    [InlineData("혀ㄴ주ㅇ", "현중")]
+    [InlineData("혀ㄴ주ㅇ구l호rㄴ로ㄱ", "현중귀환록")]
+    [InlineData("[소설 - 텍] 혀ㄴ주ㅇ구l호rㄴ로ㄱ - 완", "[소설 - 텍] 현중귀환록 - 완")]
     public void ObfuscatedHangulCandidateGenerator_RestoresYaminJungeumTokens(string input, string expected)
     {
         var generator = new ObfuscatedHangulCandidateGenerator();
@@ -35,6 +38,20 @@ public sealed class NamingRegressionTests
 
         Assert.Contains(preview.Candidates, candidate =>
             candidate.Value == "해 1화.zip" &&
+            candidate.Reason == "왜곡 한글 복원 후보" &&
+            candidate.RequiresReview);
+        Assert.Equal(RenamePreviewStatus.NeedsReview, preview.Status);
+    }
+
+    [Fact]
+    public void KoreanFileNameCorrector_OffersMixedYaminJungeumAsReviewCandidate()
+    {
+        var corrector = new KoreanFileNameCorrector();
+
+        var preview = corrector.CreatePreview(@"C:\Temp\[소설 - 텍] 혀ㄴ주ㅇ구l호rㄴ로ㄱ - 완.txt");
+
+        Assert.Contains(preview.Candidates, candidate =>
+            candidate.Value == "[소설 - 텍] 현중귀환록 - 완.txt" &&
             candidate.Reason == "왜곡 한글 복원 후보" &&
             candidate.RequiresReview);
         Assert.Equal(RenamePreviewStatus.NeedsReview, preview.Status);

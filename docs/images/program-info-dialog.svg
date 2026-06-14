@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="520" viewBox="0 0 760 520" role="img" aria-labelledby="title desc">
+  <title id="title">Program info dialog</title>
+  <desc id="desc">A FileTools program information dialog with version and license text.</desc>
+  <rect width="760" height="520" fill="#f3f4f6"/>
+  <rect x="80" y="48" width="600" height="424" rx="8" fill="#ffffff" stroke="#9ca3af"/>
+  <rect x="80" y="48" width="600" height="36" rx="8" fill="#e5e7eb" stroke="#9ca3af"/>
+  <text x="104" y="72" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" fill="#111827">Program info</text>
+
+  <rect x="108" y="112" width="48" height="48" rx="8" fill="#1f6fb2"/>
+  <text x="126" y="144" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#ffffff">F</text>
+  <text x="176" y="132" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#111827">FileTools</text>
+  <text x="176" y="158" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#374151">Version: 1.4.2.0</text>
+
+  <text x="108" y="205" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="600" fill="#111827">License</text>
+  <rect x="108" y="220" width="544" height="176" fill="#f9fafb" stroke="#cbd5e1"/>
+  <text x="128" y="250" font-family="Consolas, monospace" font-size="13" fill="#111827">MIT License</text>
+  <text x="128" y="278" font-family="Consolas, monospace" font-size="13" fill="#111827">Copyright (c) 2026 byteword</text>
+  <text x="128" y="318" font-family="Consolas, monospace" font-size="13" fill="#374151">Permission is hereby granted, free of charge...</text>
+  <text x="128" y="346" font-family="Consolas, monospace" font-size="13" fill="#374151">THE SOFTWARE IS PROVIDED "AS IS"...</text>
+
+  <rect x="556" y="420" width="96" height="30" rx="4" fill="#2563eb"/>
+  <text x="604" y="440" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#ffffff">Close</text>
+</svg>

@@ -123,6 +123,7 @@ public sealed partial class MainForm : Form
         _clearStepsMenuItem.Click += (_, _) => ClearSelectedTargetSteps();
         _runStopMenuItem.Click += (_, _) => RunOrStopPlan();
         _openSettingsMenuItem.Click += (_, _) => OpenSettings();
+        _programInfoMenuItem.Click += (_, _) => ShowProgramInfo();
         _targetContextAddFilesMenuItem.Click += (_, _) => AddFiles();
         _targetContextAddFolderMenuItem.Click += (_, _) => AddFolder();
         _targetContextRemoveTargetMenuItem.Click += (_, _) => RemoveSelectedTarget();
@@ -221,6 +222,7 @@ public sealed partial class MainForm : Form
         _removeStepMenuItem.Text = Localizer.Get("ButtonRemoveStep");
         _clearStepsMenuItem.Text = Localizer.Get("ButtonClearSteps");
         _openSettingsMenuItem.Text = Localizer.Get("ButtonSettings");
+        _programInfoMenuItem.Text = Localizer.Get("MenuProgramInfo");
         _targetContextAddFilesMenuItem.Text = Localizer.Get("ButtonAddFiles");
         _targetContextAddFolderMenuItem.Text = Localizer.Get("ButtonAddFolder");
         _targetContextRemoveTargetMenuItem.Text = Localizer.Get("ButtonRemoveSelected");
@@ -313,6 +315,7 @@ public sealed partial class MainForm : Form
         _removeStepMenuItem.Image = UiIconFactory.RemoveStep;
         _clearStepsMenuItem.Image = UiIconFactory.Clear;
         _openSettingsMenuItem.Image = UiIconFactory.Settings;
+        _programInfoMenuItem.Image = UiIconFactory.Info;
         _targetContextAddFilesMenuItem.Image = UiIconFactory.Add;
         _targetContextAddFolderMenuItem.Image = UiIconFactory.FolderAdd;
         _targetContextRemoveTargetMenuItem.Image = UiIconFactory.Remove;
@@ -678,6 +681,12 @@ public sealed partial class MainForm : Form
             SettingsStore.Save(_settings);
             AppendLog(Localizer.Format("SettingsSavedFormat", SettingsStore.SettingsPath));
         }
+    }
+
+    private void ShowProgramInfo()
+    {
+        using var dialog = new ProgramInfoDialog();
+        dialog.ShowDialog(this);
     }
 
     private void OpenFileCompareDialog()

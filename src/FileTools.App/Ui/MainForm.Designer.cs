@@ -32,6 +32,7 @@ partial class MainForm
     private ToolStripMenuItem _runStopMenuItem = null!;
     private ToolStripMenuItem _settingsMenuItem = null!;
     private ToolStripMenuItem _openSettingsMenuItem = null!;
+    private ToolStripMenuItem _programInfoMenuItem = null!;
     private SplitContainer _mainSplit = null!;
     private SplitContainer _topSplit = null!;
     private GroupBox _targetsGroup = null!;
@@ -132,6 +133,7 @@ partial class MainForm
         _runStopMenuItem = new ToolStripMenuItem();
         _settingsMenuItem = new ToolStripMenuItem();
         _openSettingsMenuItem = new ToolStripMenuItem();
+        _programInfoMenuItem = new ToolStripMenuItem();
         _mainSplit = new SplitContainer();
         _topSplit = new SplitContainer();
         _targetsGroup = new GroupBox();
@@ -326,13 +328,17 @@ partial class MainForm
 
         _settingsMenuItem.DropDownItems.AddRange(new ToolStripItem[]
         {
-            _openSettingsMenuItem
+            _openSettingsMenuItem,
+            _programInfoMenuItem
         });
         _settingsMenuItem.Name = "_settingsMenuItem";
         _settingsMenuItem.Text = "Settings";
 
         _openSettingsMenuItem.Name = "_openSettingsMenuItem";
         _openSettingsMenuItem.Text = "Settings";
+
+        _programInfoMenuItem.Name = "_programInfoMenuItem";
+        _programInfoMenuItem.Text = "Program info";
 
         _targetContextAddFilesMenuItem.Name = "_targetContextAddFilesMenuItem";
         _targetContextAddFolderMenuItem.Name = "_targetContextAddFolderMenuItem";

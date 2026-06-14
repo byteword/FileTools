@@ -140,6 +140,12 @@
   <data name="SkipPrefix" xml:space="preserve"><value>SKIP: </value></data>
   <data name="GroupWorkPlan" xml:space="preserve"><value>작업 플랜</value></data>
   <data name="ButtonSettings" xml:space="preserve"><value>설정</value></data>
+  <data name="MenuProgramInfo" xml:space="preserve"><value>프로그램 정보</value></data>
+  <data name="ProgramInfoTitle" xml:space="preserve"><value>프로그램 정보</value></data>
+  <data name="ProgramInfoVersionFormat" xml:space="preserve"><value>버전: {0}</value></data>
+  <data name="ProgramInfoLicenseTitle" xml:space="preserve"><value>라이선스</value></data>
+  <data name="ProgramInfoLicenseUnavailable" xml:space="preserve"><value>라이선스 정보를 표시할 수 없습니다.</value></data>
+  <data name="ProgramInfoUnknownVersion" xml:space="preserve"><value>알 수 없음</value></data>
   <data name="ButtonAddRenameStep" xml:space="preserve"><value>이름변경 추가</value></data>
   <data name="ButtonAddWrapStep" xml:space="preserve"><value>감싸기 추가</value></data>
   <data name="ButtonAddUnwrapStep" xml:space="preserve"><value>벗기기 추가</value></data>

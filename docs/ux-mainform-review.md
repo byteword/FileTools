@@ -10,6 +10,7 @@ Scope:
 ![Current MainForm designer layout](images/current-mainform-designer-layout.svg)
 ![In-app folder-merge interaction](images/in-app-context-menu-folder-merge-design.svg)
 ![Proposed MainForm plan list layout](images/mainform-plan-list-layout-proposal.svg)
+![Program info dialog](images/program-info-dialog.svg)
 
 ## Summary
 
@@ -22,7 +23,7 @@ The next layout proposal is tracked in `docs/mainform-plan-list-layout-proposal.
 ## Implemented Layout Changes
 
 - The left target area uses a read-only `DataGridView` with system icons, name, parent location, and action count.
-- File, task, and settings commands are available from a `MenuStrip`.
+- File, task, and settings commands are available from a `MenuStrip`; the settings submenu now contains both operational settings and program information.
 - Target add/remove/reorder/clear commands sit near the target grid as icon toolbar commands.
 - Main task commands sit in a fixed `ToolStrip` in the top-right task/log pane.
 - Folder unwrapping uses `ToolStripSplitButton` for default unwrap, same-name unwrap, single-file mismatch modes, and moving direct child files upward.
@@ -46,6 +47,7 @@ The next layout proposal is tracked in `docs/mainform-plan-list-layout-proposal.
 - Added folder-merge option flow with target-name preview/edit and split-button mode support.
 - For folder merges, multiple-folder selections expose a "merge folder contents only" mode and the current plan/confirmation now reflects the selected merge mode.
 - Fixed the folder-merge option dialog layout so the merge-mode radio buttons and confirmation preview no longer overlap the OK/Cancel button row on Korean localized text.
+- Added a program information dialog under Settings that shows the assembly informational version and the bundled MIT license text.
 
 ## Remaining UX Notes
 

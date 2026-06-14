@@ -140,6 +140,12 @@
   <data name="SkipPrefix" xml:space="preserve"><value>SKIP: </value></data>
   <data name="GroupWorkPlan" xml:space="preserve"><value>Work plan</value></data>
   <data name="ButtonSettings" xml:space="preserve"><value>Settings</value></data>
+  <data name="MenuProgramInfo" xml:space="preserve"><value>Program info</value></data>
+  <data name="ProgramInfoTitle" xml:space="preserve"><value>Program info</value></data>
+  <data name="ProgramInfoVersionFormat" xml:space="preserve"><value>Version: {0}</value></data>
+  <data name="ProgramInfoLicenseTitle" xml:space="preserve"><value>License</value></data>
+  <data name="ProgramInfoLicenseUnavailable" xml:space="preserve"><value>License information is unavailable.</value></data>
+  <data name="ProgramInfoUnknownVersion" xml:space="preserve"><value>Unknown</value></data>
   <data name="ButtonAddRenameStep" xml:space="preserve"><value>Add rename</value></data>
   <data name="ButtonAddWrapStep" xml:space="preserve"><value>Add wrap</value></data>
   <data name="ButtonAddUnwrapStep" xml:space="preserve"><value>Add unwrap</value></data>

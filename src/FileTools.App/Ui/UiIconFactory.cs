@@ -19,6 +19,7 @@ internal static class UiIconFactory
     public static Image Relocate { get; } = CreateIcon(DrawRelocate, Color.FromArgb(96, 80, 170));
     public static Image RemoveStep { get; } = CreateIcon(DrawRemoveStep, Color.FromArgb(170, 59, 48));
     public static Image Settings { get; } = CreateIcon(DrawSettings, Color.FromArgb(70, 83, 102));
+    public static Image Info { get; } = CreateIcon(DrawInfo, Color.FromArgb(41, 99, 163));
     public static Image Play { get; } = CreateIcon(DrawPlay, Color.FromArgb(32, 123, 67));
     public static Image Stop { get; } = CreateIcon(DrawStop, Color.FromArgb(170, 59, 48));
 
@@ -230,6 +231,15 @@ internal static class UiIconFactory
         graphics.DrawLine(pen, bounds.Left + bounds.Width / 2, bounds.Bottom - 5, bounds.Left + bounds.Width / 2, bounds.Bottom - 1);
         graphics.DrawLine(pen, bounds.Left + 1, bounds.Top + bounds.Height / 2, bounds.Left + 5, bounds.Top + bounds.Height / 2);
         graphics.DrawLine(pen, bounds.Right - 5, bounds.Top + bounds.Height / 2, bounds.Right - 1, bounds.Top + bounds.Height / 2);
+    }
+
+    private static void DrawInfo(Graphics graphics, Rectangle bounds, Color color)
+    {
+        using var pen = new Pen(color, 2F);
+        using var brush = new SolidBrush(color);
+        graphics.DrawEllipse(pen, bounds.Left + 3, bounds.Top + 3, bounds.Width - 6, bounds.Height - 6);
+        graphics.FillEllipse(brush, bounds.Left + bounds.Width / 2 - 1, bounds.Top + 6, 3, 3);
+        graphics.FillRectangle(brush, bounds.Left + bounds.Width / 2 - 1, bounds.Top + 11, 3, 7);
     }
 
     private static void DrawPlay(Graphics graphics, Rectangle bounds, Color color)

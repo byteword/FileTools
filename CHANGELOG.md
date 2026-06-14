@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.4.2.0-beta - 2026-06-14
+
+### Added
+
+- Added Settings > Program info with the running app version and bundled MIT
+  license text.
+- Added release notes for `v1.4.2.0`.
+
+### Fixed
+
+- Expanded obfuscated Hangul rename candidates so mixed precomposed syllable and
+  jamo/Latin fragments such as `혀ㄴ주ㅇ구l호rㄴ로ㄱ` are proposed as
+  `현중귀환록` review candidates.
+
+### Verification
+
+- Debug managed tests passed 109/109 on 2026-06-14.
+
 ## 1.4.1.0-beta - 2026-06-14
 
 ### Added

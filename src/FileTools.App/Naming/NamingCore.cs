@@ -976,6 +976,19 @@ internal sealed partial class ObfuscatedHangulCandidateGenerator
 {
     private readonly KoreanLexicon _lexicon;
     private readonly HashSet<string> _protectedEnglishWords;
+    private static readonly Dictionary<char, int> RestoredVowels = new()
+    {
+        ['ㅏ'] = 0, ['ㅐ'] = 1, ['ㅑ'] = 2, ['ㅒ'] = 3, ['ㅓ'] = 4, ['ㅔ'] = 5, ['ㅕ'] = 6, ['ㅖ'] = 7, ['ㅗ'] = 8,
+        ['ㅘ'] = 9, ['ㅙ'] = 10, ['ㅚ'] = 11, ['ㅛ'] = 12, ['ㅜ'] = 13, ['ㅝ'] = 14, ['ㅞ'] = 15, ['ㅟ'] = 16,
+        ['ㅠ'] = 17, ['ㅡ'] = 18, ['ㅢ'] = 19, ['ㅣ'] = 20
+    };
+    private static readonly Dictionary<char, int> RestoredTrailing = new()
+    {
+        ['ㄱ'] = 1, ['ㄲ'] = 2, ['ㄳ'] = 3, ['ㄴ'] = 4, ['ㄵ'] = 5, ['ㄶ'] = 6, ['ㄷ'] = 7, ['ㄹ'] = 8,
+        ['ㄺ'] = 9, ['ㄻ'] = 10, ['ㄼ'] = 11, ['ㄽ'] = 12, ['ㄾ'] = 13, ['ㄿ'] = 14, ['ㅀ'] = 15, ['ㅁ'] = 16,
+        ['ㅂ'] = 17, ['ㅄ'] = 18, ['ㅅ'] = 19, ['ㅆ'] = 20, ['ㅇ'] = 21, ['ㅈ'] = 22, ['ㅊ'] = 23, ['ㅋ'] = 24,
+        ['ㅌ'] = 25, ['ㅍ'] = 26, ['ㅎ'] = 27
+    };
 
     public ObfuscatedHangulCandidateGenerator(ObfuscatedHangulCandidateProfile? profile = null)
     {
@@ -999,12 +1012,13 @@ internal sealed partial class ObfuscatedHangulCandidateGenerator
                 ? match.Value.Replace(" ", "", StringComparison.Ordinal)
                 : match.Value);
         var replaced = ObfuscatedTokenRegex().Replace(compacted, match => RestoreToken(match.Value));
-        if (string.Equals(replaced, value, StringComparison.Ordinal))
+        if (string.Equals(replaced, value, StringComparison.Ordinal) &&
+            !ContainsMixedHangulComposition(replaced))
         {
             return [];
         }
 
-        var normalized = KoreanJamoNormalizer.Normalize(replaced);
+        var normalized = NormalizeRestoredHangul(KoreanJamoNormalizer.Normalize(replaced));
         if (string.Equals(normalized, value, StringComparison.Ordinal))
         {
             return [];
@@ -1032,7 +1046,7 @@ internal sealed partial class ObfuscatedHangulCandidateGenerator
     {
         var originalHangul = CountHangulSyllables(original);
         var candidateHangul = CountHangulSyllables(candidate);
-        var converted = original.Where(IsObfuscationCharacter).Count();
+        var converted = CountObfuscationUnits(original);
         var lexiconMatches = _lexicon.CountMatches(candidate);
 
         var score = 0.0;
@@ -1041,9 +1055,14 @@ internal sealed partial class ObfuscatedHangulCandidateGenerator
             score += 0.35;
         }
 
+        if (ContainsMixedHangulComposition(original) && candidateHangul >= originalHangul)
+        {
+            score += 0.35;
+        }
+
         if (converted > 0)
         {
-            score += Math.Min(0.25, converted * 0.12);
+            score += Math.Min(0.30, converted * 0.12);
         }
 
         if (lexiconMatches > 0)
@@ -1082,6 +1101,99 @@ internal sealed partial class ObfuscatedHangulCandidateGenerator
         return CombineVowelDigraphs(new string(chars));
     }
 
+    private static string NormalizeRestoredHangul(string value)
+    {
+        var builder = new StringBuilder(value.Length);
+        for (var index = 0; index < value.Length; index++)
+        {
+            var current = value[index];
+            if (!TryDecomposeHangul(current, out var leadingIndex, out var vowelIndex, out var trailingIndex))
+            {
+                builder.Append(current);
+                continue;
+            }
+
+            while (index + 1 < value.Length)
+            {
+                var next = value[index + 1];
+                if (trailingIndex == 0 &&
+                    RestoredVowels.TryGetValue(next, out var nextVowelIndex) &&
+                    TryCombineVowel(vowelIndex, nextVowelIndex, out var combinedVowelIndex))
+                {
+                    vowelIndex = combinedVowelIndex;
+                    index++;
+                    continue;
+                }
+
+                if (trailingIndex == 0 &&
+                    RestoredTrailing.TryGetValue(next, out var nextTrailingIndex) &&
+                    !IsNextJamoSyllableStart(value, index + 1))
+                {
+                    trailingIndex = nextTrailingIndex;
+                    index++;
+                    continue;
+                }
+
+                break;
+            }
+
+            builder.Append(ComposeHangul(leadingIndex, vowelIndex, trailingIndex));
+        }
+
+        return builder.ToString();
+    }
+
+    private static bool TryDecomposeHangul(char value, out int leadingIndex, out int vowelIndex, out int trailingIndex)
+    {
+        const int hangulBase = 0xAC00;
+        const int hangulEnd = 0xD7A3;
+        const int vowelCount = 21;
+        const int trailingCount = 28;
+
+        leadingIndex = 0;
+        vowelIndex = 0;
+        trailingIndex = 0;
+        if (value < hangulBase || value > hangulEnd)
+        {
+            return false;
+        }
+
+        var offset = value - hangulBase;
+        leadingIndex = offset / (vowelCount * trailingCount);
+        vowelIndex = offset / trailingCount % vowelCount;
+        trailingIndex = offset % trailingCount;
+        return true;
+    }
+
+    private static char ComposeHangul(int leadingIndex, int vowelIndex, int trailingIndex)
+    {
+        const int hangulBase = 0xAC00;
+        const int vowelCount = 21;
+        const int trailingCount = 28;
+        return (char)(hangulBase + ((leadingIndex * vowelCount) + vowelIndex) * trailingCount + trailingIndex);
+    }
+
+    private static bool TryCombineVowel(int currentVowelIndex, int nextVowelIndex, out int combinedVowelIndex)
+    {
+        combinedVowelIndex = (currentVowelIndex, nextVowelIndex) switch
+        {
+            (0, 20) => 1,
+            (2, 20) => 3,
+            (4, 20) => 5,
+            (6, 20) => 7,
+            (8, 0) => 9,
+            (8, 1) => 10,
+            (8, 20) => 11,
+            (13, 4) => 14,
+            (13, 5) => 15,
+            (13, 20) => 16,
+            (18, 20) => 19,
+            _ => -1
+        };
+
+        return combinedVowelIndex >= 0;
+    }
+
     private static string CombineVowelDigraphs(string value)
     {
         return value
@@ -1099,7 +1211,10 @@ internal sealed partial class ObfuscatedHangulCandidateGenerator
 
     private static bool LooksLikeObfuscatedHangul(string value)
     {
-        return value.Any(IsKoreanLike) && (value.Any(IsObfuscationCharacter) || SplitJamoWhitespaceRegex().IsMatch(value));
+        return value.Any(IsKoreanLike) &&
+            (value.Any(IsObfuscationCharacter) ||
+                SplitJamoWhitespaceRegex().IsMatch(value) ||
+                ContainsMixedHangulComposition(value));
     }
 
     private static int CountHangulSyllables(string value)
@@ -1115,6 +1230,56 @@ internal sealed partial class ObfuscatedHangulCandidateGenerator
     private static bool IsObfuscationCharacter(char ch)
     {
         return ch is 'r' or 'R' or 'o' or 'O' or '0' or 'H' or 'l' or 'I' or '|';
+    }
+
+    private static int CountObfuscationUnits(string value)
+    {
+        var count = 0;
+        var chars = value.ToCharArray();
+        for (var index = 0; index < chars.Length; index++)
+        {
+            if (IsObfuscationCharacter(chars[index]) ||
+                (IsCompatibilityJamo(chars[index]) && HasKoreanNeighbor(chars, index)))
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private static bool ContainsMixedHangulComposition(string value)
+    {
+        for (var index = 0; index < value.Length - 1; index++)
+        {
+            if (!IsHangulSyllable(value[index]))
+            {
+                continue;
+            }
+
+            var next = value[index + 1];
+            if (RestoredVowels.ContainsKey(next) || RestoredTrailing.ContainsKey(next))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsNextJamoSyllableStart(string value, int consonantIndex)
+    {
+        return consonantIndex + 1 < value.Length && RestoredVowels.ContainsKey(value[consonantIndex + 1]);
+    }
+
+    private static bool IsHangulSyllable(char ch)
+    {
+        return ch >= 0xAC00 && ch <= 0xD7A3;
+    }
+
+    private static bool IsCompatibilityJamo(char ch)
+    {
+        return ch >= 0x3130 && ch <= 0x318F;
     }
 
     private bool ContainsProtectedEnglishWord(string value)

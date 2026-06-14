@@ -4,13 +4,13 @@
 
 Windows 탐색기 ContextMenu와 독립 실행형 WinForms 유틸리티를 제공하는 작은 파일 관리 도구입니다.
 
-현재 버전: `1.4.1.0`.
+현재 버전: `1.4.2.0`.
 
 ### 개발 및 안정성 안내
 
 FileTools는 취미 개발자가 개인적으로 관리하는 프로젝트이며, Codex를 활용해 제작 및 업데이트하고 있습니다. 따라서 일부 업데이트는 충분히 안정화되지 않았을 수 있고, 버그 테스트도 제한적으로 이루어질 수 있습니다. 중요한 파일에 적용하기 전에는 백업을 권장드리며, 문제가 발견되면 이슈로 알려주시면 가능한 범위에서 확인하겠습니다.
 
-`1.4.1.0`은 베타 릴리스로 배포됩니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 로컬 이름변경 학습 기반, 릴리스 검증 흐름을 실제 사용 사례로 더 안정화한 뒤 같은 계열을 stable로 전환할 예정입니다.
+`1.4.2.0`은 베타 릴리스로 배포됩니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 로컬 이름변경 학습 기반, 릴리스 검증 흐름을 실제 사용 사례로 더 안정화한 뒤 같은 계열을 stable로 전환할 예정입니다.
 
 ### 기능
 
@@ -53,7 +53,7 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
 - 파일/폴더를 수동으로 선택합니다.
 - 파일을 변경하기 전에 각 대상에 여러 계획 작업을 추가합니다.
 - 파일명 교정, 폴더 wrapping, 폴더 unwrapping, AutoRelocation 작업을 체인으로 연결합니다.
-- 메뉴 모음에서 파일, 작업, 설정 명령에 접근하고, 자주 쓰는 작업 명령은 오른쪽 위 작업/로그 패널의 고정 도구 모음에 유지합니다.
+- 메뉴 모음에서 파일, 작업, 설정 명령에 접근하고, 설정 하위 메뉴에서 동작 설정과 프로그램 정보를 엽니다. 자주 쓰는 작업 명령은 오른쪽 위 작업/로그 패널의 고정 도구 모음에 유지합니다.
 - 파일 비교 전용 창에서 파일/폴더 대상을 모으고 이름/메타데이터/내용/압축 해제 옵션을 조정한 뒤, modeless 진행률 창과 결과 창에서 중복 후보, JSON 저장, 중복 삭제 step 추가를 처리합니다.
 - ZIP 압축 병합 작업은 `A 01.zip`, `A 02.zip` 같은 번호 붙은 압축 묶음을 `A.zip`으로 제안하고, 옵션 창 하단에서 압축 내부 엔트리의 원래 경로와 충돌 처리 후 대상 경로를 미리 보여줍니다.
 - 분할 버튼에서 폴더 unwrapping 변형을 선택합니다. 기본 설정, 같은 이름 폴더, 단일 파일 폴더 이름 불일치 처리 방식, 바로 아래 자식 파일 상위 이동을 포함합니다.
@@ -67,6 +67,7 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
 - 아래쪽 작업 플랜 그룹 안의 실행/중지 버튼 하나로 모든 대상 계획을 순서대로 실행하고, 같은 그룹의 상태 라벨과 진행 막대에서 실행 상태를 확인합니다.
 - 오른쪽 위 로그 보기에서 실행 메시지와 요약을 검토합니다.
 - 탐색기 ContextMenu 등록, 이름 변경 기본값, 폴더 기본값, AutoRelocation 기본값을 위한 고정 상태 헤더와 접을 수 있는 옵션 그룹이 있는 크기 조절 가능한 설정 창을 엽니다.
+- 설정 하위 메뉴의 프로그램 정보 창에서 현재 앱 버전과 MIT 라이선스 전문을 확인할 수 있습니다.
 
 설정 창은 동작 기본값과 탐색기 ContextMenu 설치/제거를 관리합니다. 네이티브 ShellExt 등록은 하나의 FileTools 하위 메뉴를 사용하며, 개별 ContextMenu 작업은 켜거나 끌 수 있습니다.
 폴더 wrapping/unwrapping과 AutoRelocation 명령은 탐색기 등록용으로 각각 선택할 수 있습니다. 설정 창에서 OK를 누르면 Install/Remove 버튼을 누르지 않았더라도 옵션을 저장하고 현재 사용자 ContextMenu 등록을 동기화합니다.
@@ -82,7 +83,7 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
 
 별도 대화상자는 다음 용도로 제공됩니다.
 
-- 이름 변경 교정 규칙. 내장 규칙 표시 여부, 활성 상태, 단계별 순서, 자동/검토/후보 전용 모드를 포함합니다. 오른쪽 `세부 설정` 탭은 기존 이름변경 사전(`source -> replacement`), 검토창 삽입 문구, 왜곡 한글 후보 점수 단어와 보호 영어 단어, 파서 프로파일의 태그 단어/작가 접두어/회차 접두어와 단위/제목 노이즈 단어를 선택 규칙 맥락에서 직접 편집합니다. 왜곡 한글 후보는 `ㅇr -> 아`, `ㅎH -> 해` 같은 짧은 야민정음 표기도 검토 후보로 제안합니다. 후보 프로파일은 `rename-candidate-profile.json`, 파서 프로파일은 `rename-parser-profile.json`에 저장하며, 스크립트 기반 규칙은 보류 중이고 `docs/ux-rename-rule-management.md`에 문서화되어 있습니다.
+- 이름 변경 교정 규칙. 내장 규칙 표시 여부, 활성 상태, 단계별 순서, 자동/검토/후보 전용 모드를 포함합니다. 오른쪽 `세부 설정` 탭은 기존 이름변경 사전(`source -> replacement`), 검토창 삽입 문구, 왜곡 한글 후보 점수 단어와 보호 영어 단어, 파서 프로파일의 태그 단어/작가 접두어/회차 접두어와 단위/제목 노이즈 단어를 선택 규칙 맥락에서 직접 편집합니다. 왜곡 한글 후보는 `ㅇr -> 아`, `ㅎH -> 해` 같은 짧은 야민정음과 `혀ㄴ주ㅇ구l호rㄴ로ㄱ -> 현중귀환록`처럼 조합된 한글 음절 뒤에 받침/모음 치환자가 붙은 표기도 검토 후보로 제안합니다. 후보 프로파일은 `rename-candidate-profile.json`, 파서 프로파일은 `rename-parser-profile.json`에 저장하며, 스크립트 기반 규칙은 보류 중이고 `docs/ux-rename-rule-management.md`에 문서화되어 있습니다.
 - 이름변경 교정 플러그인. 기본 언어와 플러그인별 활성 상태 및 설정을 관리합니다. 플러그인은 자동 적용 없이 검토 가능한 후보만 추가하며, 첫 샘플은 사용자 제공 사전/말뭉치 파일을 쓰는 SymSpell 후보 provider입니다. 설계 경계는 `docs/rename-correction-plugin-design.md`에 문서화되어 있습니다.
 - AutoRelocation 템플릿 편집. 경로 규칙 단계는 순서대로 평가되므로 템플릿은 `{KnownFileKind}\[{Initial}]\{EpisodeRange}` 같은 경로를 만들 수 있습니다. 템플릿 편집기와 단계별 작업 대화상자는 긴 템플릿 이름, 경로, 현지화된 라벨을 위해 크기를 조절할 수 있습니다.
 
@@ -239,7 +240,7 @@ MSI는 네이티브 `FileTools.ShellExt.dll`을 현재 사용자 COM ExplorerCom
 
 GitHub Releases는 setup bootstrapper, MSI, sparse MSIX identity package를 빌드하고 서명하며, `checksums.txt`를 생성하고, 릴리스 자산에 대한 GitHub artifact attestation을 만드는 수동 workflow를 사용합니다.
 
-`1.4.1.0`은 GitHub prerelease/beta로 게시합니다. 위키 문서와 tag별 변경사항 문서를 먼저 업데이트하고, 릴리스 자산 검증 및 설치 smoke test가 끝난 뒤 draft를 게시합니다. 안정화 작업 후 stable 전환 릴리스를 별도로 게시합니다.
+`1.4.2.0`은 GitHub prerelease/beta로 게시합니다. 위키 문서와 tag별 변경사항 문서를 먼저 업데이트하고, 릴리스 자산 검증 및 설치 smoke test가 끝난 뒤 draft를 게시합니다. 안정화 작업 후 stable 전환 릴리스를 별도로 게시합니다.
 
 릴리스는 GitHub Secrets에 base64 PFX와 비밀번호로 저장된 self-signed FileTools 인증서를 사용합니다. 이는 무료 GitHub 배포와 CER 신뢰 후 MSIX identity 등록에는 적합하지만, 공개 CA 코드 서명 인증서는 아닙니다. Windows는 첫 사용 사용자에게 SmartScreen 또는 신뢰 경고를 계속 표시할 수 있습니다.
 
@@ -378,7 +379,7 @@ Explorer는 선택 항목마다 프로세스를 하나씩 시작하는 경우가
 
 ### 라이선스
 
-FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE`를 참고하세요.
+FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE` 또는 앱의 설정 > 프로그램 정보 창을 참고하세요.
 
 ---
 
@@ -386,13 +387,13 @@ FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE`를 �
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
-Current version: `1.4.1.0`.
+Current version: `1.4.2.0`.
 
 ### Development and Stability Notice
 
 FileTools is maintained as a personal hobby project and is built and updated with the help of Codex. As a result, some updates may not be fully stable, and bug testing may be limited. Please consider backing up important files before using FileTools on them, and feel free to report issues so they can be reviewed as time permits.
 
-`1.4.1.0` is distributed as a beta release. The standalone planner work-plan display, folder-merge options flow, local rename-learning foundation, and release verification flow will move to stable after additional real-world stabilization.
+`1.4.2.0` is distributed as a beta release. The standalone planner work-plan display, folder-merge options flow, local rename-learning foundation, and release verification flow will move to stable after additional real-world stabilization.
 
 ### Features
 
@@ -435,7 +436,7 @@ The standalone window supports:
 - Manual file/folder selection.
 - Adding multiple planned actions to each target before changing files.
 - Chaining filename correction, folder wrapping, folder unwrapping, and AutoRelocation actions.
-- Accessing file, task, and settings commands from the menu bar, while common task commands stay on the fixed toolbar in the top-right task/log panel.
+- Accessing file, task, and settings commands from the menu bar. The settings submenu opens operational settings and program info, while common task commands stay on the fixed toolbar in the top-right task/log panel.
 - Opening the dedicated file-compare dialog to collect files/folders, adjust name, metadata, content, and archive-extraction options, then use the modeless progress dialog and result dialog for duplicate candidates, JSON saving, and duplicate-delete step handoff.
 - Adding ZIP archive merge steps that suggest common logical output names such as `A.zip` for `A 01.zip` and `A 02.zip`, with an options-dialog detail grid showing each internal entry's original path and collision-resolved target path.
 - Selecting folder unwrapping variants from a split button, including the default setting, same-name folders, single-file folder name mismatch modes, and moving direct child files upward.
@@ -449,6 +450,7 @@ The standalone window supports:
 - Running all target plans in order with one run/stop button inside the bottom work-plan group, with execution state shown by the neighboring status label and progress bar.
 - Reviewing execution messages and summaries in the top-right log view.
 - Opening a resizable settings window with a fixed status header and collapsible option groups for Explorer ContextMenu registration, rename defaults, folder defaults, and AutoRelocation defaults.
+- Opening program info from the settings submenu to check the current app version and the full MIT license text.
 
 The settings window owns operational defaults and Explorer ContextMenu installation/removal. Native ShellExt registration uses one FileTools submenu, and individual ContextMenu actions can be enabled or disabled.
 Folder wrapping/unwrapping and AutoRelocation commands can be selected independently for Explorer registration. Pressing OK in the settings window saves the options and synchronizes the current-user ContextMenu registration, even if the Install/Remove buttons are not pressed.
@@ -464,7 +466,7 @@ UX review notes for the current rename dialog are tracked in `docs/ux-rename-dia
 
 Separate dialogs are available for:
 
-- Rename correction rules, including built-in rule visibility, enabled state, stage-scoped ordering, and automatic/review/candidate-only modes. The right-side `Details` tab edits existing rename dictionary entries (`source -> replacement`), rename-review insert phrases, obfuscated Hangul candidate scoring words and protected English words, and parser-profile lists for tag words, author prefixes, episode prefixes/units, and title noise words in the context of the selected rule. Obfuscated Hangul candidates also cover short Yaminjeongeum forms such as `ㅇr -> 아` and `ㅎH -> 해` as review candidates. Candidate lists are stored in `rename-candidate-profile.json`, and parser lists are stored in `rename-parser-profile.json`. Script-backed rules are deferred and documented in `docs/ux-rename-rule-management.md`.
+- Rename correction rules, including built-in rule visibility, enabled state, stage-scoped ordering, and automatic/review/candidate-only modes. The right-side `Details` tab edits existing rename dictionary entries (`source -> replacement`), rename-review insert phrases, obfuscated Hangul candidate scoring words and protected English words, and parser-profile lists for tag words, author prefixes, episode prefixes/units, and title noise words in the context of the selected rule. Obfuscated Hangul candidates cover short Yaminjeongeum forms such as `ㅇr -> 아` and `ㅎH -> 해`, plus mixed precomposed-syllable fragments such as `혀ㄴ주ㅇ구l호rㄴ로ㄱ -> 현중귀환록`, as review candidates. Candidate lists are stored in `rename-candidate-profile.json`, and parser lists are stored in `rename-parser-profile.json`. Script-backed rules are deferred and documented in `docs/ux-rename-rule-management.md`.
 - Rename correction plugins. The settings dialog manages the default language, per-plugin enable state, and generated plugin settings. Plugins only add reviewable candidates without automatic apply; the first sample is a SymSpell candidate provider that uses user-supplied dictionary or corpus data. The boundary is documented in `docs/rename-correction-plugin-design.md`.
 - AutoRelocation template editing. Path rule steps are evaluated in order, so a template can produce paths such as `{KnownFileKind}\[{Initial}]\{EpisodeRange}`. The template editor and per-step action dialogs resize for long template names, paths, and localized labels.
 
@@ -622,7 +624,7 @@ GitHub Releases use a manual workflow that builds and signs the setup
 bootstrapper, MSI, and sparse MSIX identity package, generates `checksums.txt`,
 and creates GitHub artifact attestations for the release assets.
 
-`1.4.1.0` is published as a GitHub prerelease/beta. Update the wiki and
+`1.4.2.0` is published as a GitHub prerelease/beta. Update the wiki and
 tag-specific change notes before tagging, then publish the draft only after
 release asset verification and install smoke testing. A stable release will
 follow after the beta stabilization pass.
@@ -768,4 +770,4 @@ An internal smoke-test route is also prepared as `FileTools.exe /context FileCom
 
 ### License
 
-FileTools is licensed under the MIT License. See `LICENSE`.
+FileTools is licensed under the MIT License. See `LICENSE` or Settings > Program info in the app.
