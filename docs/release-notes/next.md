@@ -23,7 +23,7 @@ the next release tag.
   execution progress/run-stop state before the result dialog opens.
 - The native ShellExt now embeds the same file/product version as the app and
   `build_msi.ps1` signs the ShellExt DLL before it is packaged.
-- Bumped the beta release line to `1.4.4.1`.
+- Bumped the stable release line to `1.4.4.1`.
 
 ## Support Scope
 

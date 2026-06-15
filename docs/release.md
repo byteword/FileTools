@@ -90,7 +90,7 @@ git status --short
 - Prepare release-facing repository docs and local wiki files:
 
 ```powershell
-.\scripts\prepare_release.ps1 -Tag v1.4.4.1 -Channel beta
+.\scripts\prepare_release.ps1 -Tag v1.4.4.1 -Channel stable
 ```
 
 Use `-WhatIf` to preview file changes, and use `-Force` only when the
@@ -132,7 +132,7 @@ MSBuild.exe FileTools.sln /p:Configuration=Release /p:Platform=x64
 ```powershell
 git -C .wiki status --short
 git -C .wiki add .
-git -C .wiki commit -m "Update wiki for FileTools 1.4.4.1 beta"
+git -C .wiki commit -m "Update wiki for FileTools 1.4.4.1 stable"
 git -C .wiki push origin master
 ```
 
