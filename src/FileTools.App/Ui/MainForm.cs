@@ -61,6 +61,7 @@ public sealed partial class MainForm : Form
         _initialPaths = initialPaths?.ToArray() ?? [];
         _startupAction = startupAction;
         InitializeComponent();
+        ApplyApplicationIcon();
         InitializeRuntimeBindings();
         ApplyLocalization();
     }
@@ -107,6 +108,7 @@ public sealed partial class MainForm : Form
         _removeTargetMenuItem.Click += (_, _) => RemoveSelectedTarget();
         _mergeSelectedMenuItem.Click += (_, _) => MergeSelectedTargets(_folderMergeMode);
         _clearTargetsMenuItem.Click += (_, _) => ClearTargets();
+        _exitMenuItem.Click += (_, _) => Close();
         _addRenameMenuItem.Click += (_, _) => AddRenameSteps();
         _addWrapMenuItem.Click += (_, _) => AddStep(CreateWrapStep());
         _addDefaultUnwrapMenuItem.Click += (_, _) => AddStep(CreateDefaultUnwrapStep());
@@ -217,6 +219,7 @@ public sealed partial class MainForm : Form
         _removeTargetMenuItem.Text = Localizer.Get("ButtonRemoveSelected");
         _mergeSelectedMenuItem.Text = Localizer.Get("ButtonMergeSelectedTargets");
         _clearTargetsMenuItem.Text = Localizer.Get("ButtonClear");
+        _exitMenuItem.Text = Localizer.Get("MenuExit");
         _addRenameMenuItem.Text = Localizer.Get("ButtonAddRenameStep");
         _addWrapMenuItem.Text = Localizer.Get("ButtonAddWrapStep");
         _addDefaultUnwrapMenuItem.Text = Localizer.Get("MenuUnwrapDefault");
@@ -310,6 +313,7 @@ public sealed partial class MainForm : Form
         _removeTargetMenuItem.Image = UiIconFactory.Remove;
         _mergeSelectedMenuItem.Image = UiIconFactory.FolderAdd;
         _clearTargetsMenuItem.Image = UiIconFactory.Clear;
+        _exitMenuItem.Image = UiIconFactory.Exit;
         _addRenameMenuItem.Image = UiIconFactory.Rename;
         _addWrapMenuItem.Image = UiIconFactory.Wrap;
         _addDefaultUnwrapMenuItem.Image = UiIconFactory.Unwrap;
@@ -366,6 +370,15 @@ public sealed partial class MainForm : Form
         _editStepToolButton.Image = UiIconFactory.Rename;
         _removeStepToolButton.Image = UiIconFactory.RemoveStep;
         _clearStepsToolButton.Image = UiIconFactory.Clear;
+    }
+
+    private void ApplyApplicationIcon()
+    {
+        var icon = ApplicationIconProvider.GetApplicationIcon();
+        if (icon is not null)
+        {
+            Icon = icon;
+        }
     }
 
     private void LoadState()
@@ -745,6 +758,7 @@ public sealed partial class MainForm : Form
                 progress,
                 progressState.Cancellation.Token));
             progressState.Complete(report);
+            FinishFileCompareExecution(progressState, hideProgressDialog: true);
 
             AppendLog(Localizer.Format(
                 "FileCompareCompletedFormat",
@@ -772,13 +786,23 @@ public sealed partial class MainForm : Form
         }
         finally
         {
-            if (ReferenceEquals(_executionCancellation, progressState.Cancellation))
-            {
-                _executionCancellation = null;
-            }
-
-            UpdateCommandStates();
+            FinishFileCompareExecution(progressState, hideProgressDialog: false);
         }
+    }
+
+    internal void FinishFileCompareExecution(FileCompareProgressState progressState, bool hideProgressDialog)
+    {
+        if (ReferenceEquals(_executionCancellation, progressState.Cancellation))
+        {
+            _executionCancellation = null;
+        }
+
+        if (hideProgressDialog && _fileCompareProgressDialog is { IsDisposed: false })
+        {
+            _fileCompareProgressDialog.Hide();
+        }
+
+        UpdateCommandStates();
     }
 
     private void AddCompareResultTargets(IReadOnlyList<string> paths)
@@ -1662,11 +1686,11 @@ public sealed partial class MainForm : Form
     private void ApplyActionToolbarSize()
     {
         var scale = GetActionToolbarScale(_settings.ActionToolbarSize);
+        var imageSize = ActionToolbarBaseImageSize * scale;
         var padding = ActionToolbarBasePadding * scale;
-        _actionToolStrip.ImageScalingSize = new Size(
-            ActionToolbarBaseImageSize * scale,
-            ActionToolbarBaseImageSize * scale);
+        _actionToolStrip.ImageScalingSize = new Size(imageSize, imageSize);
         _actionToolStrip.Padding = new Padding(padding);
+        ApplyActionToolbarImages(imageSize);
         foreach (ToolStripItem item in _actionToolStrip.Items)
         {
             item.AutoSize = true;
@@ -1675,6 +1699,18 @@ public sealed partial class MainForm : Form
 
         _actionToolStrip.PerformLayout();
         _rightPanel.PerformLayout();
+    }
+
+    private void ApplyActionToolbarImages(int imageSize)
+    {
+        _mergeSelectedToolButton.Image = UiIconFactory.GetIcon(UiIconKind.FolderAdd, imageSize);
+        _addRenameToolButton.Image = UiIconFactory.GetIcon(UiIconKind.Rename, imageSize);
+        _addWrapToolButton.Image = UiIconFactory.GetIcon(UiIconKind.Wrap, imageSize);
+        _addUnwrapToolButton.Image = UiIconFactory.GetIcon(UiIconKind.Unwrap, imageSize);
+        _addArchiveMergeToolButton.Image = UiIconFactory.GetIcon(UiIconKind.ArchiveMerge, imageSize);
+        _compareSelectedToolButton.Image = UiIconFactory.GetIcon(UiIconKind.Compare, imageSize);
+        _showCompareProgressToolButton.Image = UiIconFactory.GetIcon(UiIconKind.Compare, imageSize);
+        _addRelocationToolButton.Image = UiIconFactory.GetIcon(UiIconKind.Relocate, imageSize);
     }
 
     internal static int GetActionToolbarScale(ActionToolbarSize size) => size switch

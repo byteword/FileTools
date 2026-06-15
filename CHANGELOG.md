@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.4.4.1-beta - 2026-06-15
+
+### Added
+
+- Added native-sized rendered toolbar icons for the small/medium/large
+  top-right task toolbar options.
+- Added an embedded app-icon loader so the main window explicitly sets the
+  FileTools title bar and taskbar icon at runtime.
+- Added File > Exit to the standalone planner menu.
+
+### Changed
+
+- Updated app, installer, bundle, ShellExt, README, release guide, and Program
+  info version metadata to `1.4.4.1`.
+- File compare request, progress, and result dialogs now share a fixed
+  right-aligned bottom button layout.
+
+### Fixed
+
+- Fixed the file compare progress dialog layout so the Cancel/Hide row is not
+  clipped by the initial dialog height.
+- Fixed completed file comparisons leaving the main progress bar spinning and
+  the stop command enabled while the result dialog was open.
+- Completed file comparisons now hide the progress window before showing the
+  result dialog.
+
+### Verification
+
+- Debug managed tests passed 124/124 on 2026-06-15.
+- Release managed tests passed 124/124 on 2026-06-15.
+
 ## 1.4.4.0-beta - 2026-06-15
 
 ### Added

@@ -1,35 +1,106 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 
 namespace FileTools;
 
+internal enum UiIconKind
+{
+    Add,
+    FolderAdd,
+    Remove,
+    Clear,
+    MoveUp,
+    MoveDown,
+    Rename,
+    Wrap,
+    Unwrap,
+    ArchiveMerge,
+    Compare,
+    Relocate,
+    RemoveStep,
+    Settings,
+    Info,
+    Exit,
+    Play,
+    Stop
+}
+
 internal static class UiIconFactory
 {
-    public static Image Add { get; } = CreateIcon(DrawAdd, Color.FromArgb(32, 123, 67));
-    public static Image FolderAdd { get; } = CreateIcon(DrawFolderAdd, Color.FromArgb(39, 99, 164));
-    public static Image Remove { get; } = CreateIcon(DrawRemove, Color.FromArgb(170, 59, 48));
-    public static Image Clear { get; } = CreateIcon(DrawClear, Color.FromArgb(122, 75, 40));
-    public static Image MoveUp { get; } = CreateIcon(DrawMoveUp, Color.FromArgb(70, 83, 102));
-    public static Image MoveDown { get; } = CreateIcon(DrawMoveDown, Color.FromArgb(70, 83, 102));
-    public static Image Rename { get; } = CreateIcon(DrawRename, Color.FromArgb(41, 99, 163));
-    public static Image Wrap { get; } = CreateIcon(DrawWrap, Color.FromArgb(32, 123, 67));
-    public static Image Unwrap { get; } = CreateIcon(DrawUnwrap, Color.FromArgb(152, 84, 33));
-    public static Image ArchiveMerge { get; } = CreateIcon(DrawArchiveMerge, Color.FromArgb(20, 116, 148));
-    public static Image Compare { get; } = CreateIcon(DrawCompare, Color.FromArgb(59, 130, 246));
-    public static Image Relocate { get; } = CreateIcon(DrawRelocate, Color.FromArgb(96, 80, 170));
-    public static Image RemoveStep { get; } = CreateIcon(DrawRemoveStep, Color.FromArgb(170, 59, 48));
-    public static Image Settings { get; } = CreateIcon(DrawSettings, Color.FromArgb(70, 83, 102));
-    public static Image Info { get; } = CreateIcon(DrawInfo, Color.FromArgb(41, 99, 163));
-    public static Image Play { get; } = CreateIcon(DrawPlay, Color.FromArgb(32, 123, 67));
-    public static Image Stop { get; } = CreateIcon(DrawStop, Color.FromArgb(170, 59, 48));
-
-    private static Bitmap CreateIcon(Action<Graphics, Rectangle, Color> draw, Color color)
+    private const int DefaultIconSize = 24;
+    private const int LogicalCanvasSize = 24;
+    private const int LogicalContentInset = 2;
+    private const int LogicalContentSize = 20;
+    private static readonly Dictionary<(UiIconKind Kind, int Size), Image> IconCache = [];
+    private static readonly Dictionary<UiIconKind, IconDefinition> Definitions = new()
     {
-        var bitmap = new Bitmap(24, 24);
+        [UiIconKind.Add] = new(DrawAdd, Color.FromArgb(32, 123, 67)),
+        [UiIconKind.FolderAdd] = new(DrawFolderAdd, Color.FromArgb(39, 99, 164)),
+        [UiIconKind.Remove] = new(DrawRemove, Color.FromArgb(170, 59, 48)),
+        [UiIconKind.Clear] = new(DrawClear, Color.FromArgb(122, 75, 40)),
+        [UiIconKind.MoveUp] = new(DrawMoveUp, Color.FromArgb(70, 83, 102)),
+        [UiIconKind.MoveDown] = new(DrawMoveDown, Color.FromArgb(70, 83, 102)),
+        [UiIconKind.Rename] = new(DrawRename, Color.FromArgb(41, 99, 163)),
+        [UiIconKind.Wrap] = new(DrawWrap, Color.FromArgb(32, 123, 67)),
+        [UiIconKind.Unwrap] = new(DrawUnwrap, Color.FromArgb(152, 84, 33)),
+        [UiIconKind.ArchiveMerge] = new(DrawArchiveMerge, Color.FromArgb(20, 116, 148)),
+        [UiIconKind.Compare] = new(DrawCompare, Color.FromArgb(59, 130, 246)),
+        [UiIconKind.Relocate] = new(DrawRelocate, Color.FromArgb(96, 80, 170)),
+        [UiIconKind.RemoveStep] = new(DrawRemoveStep, Color.FromArgb(170, 59, 48)),
+        [UiIconKind.Settings] = new(DrawSettings, Color.FromArgb(70, 83, 102)),
+        [UiIconKind.Info] = new(DrawInfo, Color.FromArgb(41, 99, 163)),
+        [UiIconKind.Exit] = new(DrawExit, Color.FromArgb(70, 83, 102)),
+        [UiIconKind.Play] = new(DrawPlay, Color.FromArgb(32, 123, 67)),
+        [UiIconKind.Stop] = new(DrawStop, Color.FromArgb(170, 59, 48))
+    };
+
+    public static Image Add => GetIcon(UiIconKind.Add);
+    public static Image FolderAdd => GetIcon(UiIconKind.FolderAdd);
+    public static Image Remove => GetIcon(UiIconKind.Remove);
+    public static Image Clear => GetIcon(UiIconKind.Clear);
+    public static Image MoveUp => GetIcon(UiIconKind.MoveUp);
+    public static Image MoveDown => GetIcon(UiIconKind.MoveDown);
+    public static Image Rename => GetIcon(UiIconKind.Rename);
+    public static Image Wrap => GetIcon(UiIconKind.Wrap);
+    public static Image Unwrap => GetIcon(UiIconKind.Unwrap);
+    public static Image ArchiveMerge => GetIcon(UiIconKind.ArchiveMerge);
+    public static Image Compare => GetIcon(UiIconKind.Compare);
+    public static Image Relocate => GetIcon(UiIconKind.Relocate);
+    public static Image RemoveStep => GetIcon(UiIconKind.RemoveStep);
+    public static Image Settings => GetIcon(UiIconKind.Settings);
+    public static Image Info => GetIcon(UiIconKind.Info);
+    public static Image Exit => GetIcon(UiIconKind.Exit);
+    public static Image Play => GetIcon(UiIconKind.Play);
+    public static Image Stop => GetIcon(UiIconKind.Stop);
+
+    public static Image GetIcon(UiIconKind kind, int imageSize = DefaultIconSize)
+    {
+        var normalizedSize = Math.Clamp(imageSize, 16, 128);
+        var key = (kind, normalizedSize);
+        if (IconCache.TryGetValue(key, out var cached))
+        {
+            return cached;
+        }
+
+        var definition = Definitions[kind];
+        var icon = CreateIcon(definition.Draw, definition.Color, normalizedSize);
+        IconCache[key] = icon;
+        return icon;
+    }
+
+    private static Bitmap CreateIcon(Action<Graphics, Rectangle, Color> draw, Color color, int imageSize)
+    {
+        var bitmap = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppPArgb);
+        bitmap.SetResolution(96, 96);
         using var graphics = Graphics.FromImage(bitmap);
         graphics.Clear(Color.Transparent);
+        graphics.CompositingQuality = CompositingQuality.HighQuality;
+        graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+        graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
         graphics.SmoothingMode = SmoothingMode.AntiAlias;
-        draw(graphics, new Rectangle(2, 2, 20, 20), color);
+        graphics.ScaleTransform(imageSize / (float)LogicalCanvasSize, imageSize / (float)LogicalCanvasSize);
+        draw(graphics, new Rectangle(LogicalContentInset, LogicalContentInset, LogicalContentSize, LogicalContentSize), color);
         return bitmap;
     }
 
@@ -242,6 +313,22 @@ internal static class UiIconFactory
         graphics.FillRectangle(brush, bounds.Left + bounds.Width / 2 - 1, bounds.Top + 11, 3, 7);
     }
 
+    private static void DrawExit(Graphics graphics, Rectangle bounds, Color color)
+    {
+        using var pen = new Pen(color, 2.2F)
+        {
+            StartCap = LineCap.Round,
+            EndCap = LineCap.Round,
+            LineJoin = LineJoin.Round
+        };
+        var door = new Rectangle(bounds.Left + 3, bounds.Top + 4, 9, bounds.Height - 8);
+        graphics.DrawRectangle(pen, door);
+        graphics.DrawLine(pen, bounds.Left + 12, bounds.Top + 8, bounds.Right - 5, bounds.Top + 8);
+        graphics.DrawLine(pen, bounds.Right - 8, bounds.Top + 5, bounds.Right - 4, bounds.Top + 8);
+        graphics.DrawLine(pen, bounds.Right - 8, bounds.Top + 11, bounds.Right - 4, bounds.Top + 8);
+        graphics.DrawLine(pen, bounds.Left + 9, bounds.Top + 12, bounds.Left + 9, bounds.Top + 12);
+    }
+
     private static void DrawPlay(Graphics graphics, Rectangle bounds, Color color)
     {
         using var brush = new SolidBrush(color);
@@ -258,4 +345,6 @@ internal static class UiIconFactory
         using var brush = new SolidBrush(color);
         graphics.FillRectangle(brush, bounds.Left + 5, bounds.Top + 5, bounds.Width - 10, bounds.Height - 10);
     }
+
+    private sealed record IconDefinition(Action<Graphics, Rectangle, Color> Draw, Color Color);
 }

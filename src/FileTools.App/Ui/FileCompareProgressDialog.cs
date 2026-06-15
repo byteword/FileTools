@@ -18,8 +18,8 @@ internal sealed class FileCompareProgressDialog : Form
         _state = state;
         Text = Localizer.Get("FileCompareProgressTitle");
         StartPosition = FormStartPosition.CenterParent;
-        Size = new Size(560, 210);
-        MinimumSize = new Size(480, 190);
+        Size = new Size(560, 240);
+        MinimumSize = new Size(480, 230);
 
         BuildLayout();
         _state.Changed += StateChanged;
@@ -57,7 +57,7 @@ internal sealed class FileCompareProgressDialog : Form
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
         Controls.Add(root);
 
         _statusLabel.Dock = DockStyle.Fill;
@@ -73,13 +73,6 @@ internal sealed class FileCompareProgressDialog : Form
         _progressBar.Dock = DockStyle.Fill;
         root.Controls.Add(_progressBar, 0, 2);
 
-        var buttons = new FlowLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            FlowDirection = FlowDirection.RightToLeft,
-            WrapContents = false,
-            Padding = new Padding(0, 8, 0, 0)
-        };
         _cancelButton.Text = Localizer.Get("ButtonCancel");
         _cancelButton.Width = 96;
         _cancelButton.Height = 30;
@@ -88,8 +81,7 @@ internal sealed class FileCompareProgressDialog : Form
         _hideButton.Width = 96;
         _hideButton.Height = 30;
         _hideButton.Click += (_, _) => Hide();
-        buttons.Controls.Add(_hideButton);
-        buttons.Controls.Add(_cancelButton);
+        var buttons = DialogButtonPanelFactory.CreateRightAligned(_cancelButton, _hideButton);
         root.Controls.Add(buttons, 0, 3);
     }
 

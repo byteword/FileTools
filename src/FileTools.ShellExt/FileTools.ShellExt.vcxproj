@@ -16,7 +16,7 @@
     <ProjectGuid>{b671e50e-351a-4fb3-9b07-e1c5728c55db}</ProjectGuid>
     <RootNamespace>FileToolsShellExt</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <FileToolsVersion Condition="'$(FileToolsVersion)' == ''">1.4.4.0</FileToolsVersion>
+    <FileToolsVersion Condition="'$(FileToolsVersion)' == ''">1.4.4.1</FileToolsVersion>
     <FileToolsVersionComma>$([System.String]::Copy('$(FileToolsVersion)').Replace('.', ','))</FileToolsVersionComma>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

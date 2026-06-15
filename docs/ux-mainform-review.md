@@ -24,10 +24,11 @@ The next layout proposal is tracked in `docs/mainform-plan-list-layout-proposal.
 
 - The left target area uses a read-only `DataGridView` with system icons, name, parent location, and action count.
 - The target and work-plan grids use fixed column widths with horizontal scrolling, so user-resized columns keep their width instead of being proportionally recomputed to the current window width.
-- File, task, and settings commands are available from a `MenuStrip`; the settings submenu now contains both operational settings and program information.
+- File, task, and settings commands are available from a `MenuStrip`; the file menu includes a program exit command, and the settings submenu contains both operational settings and program information.
 - Target add/remove/reorder/clear commands sit near the target grid as icon toolbar commands.
 - Main task commands sit in a fixed `ToolStrip` in the top-right task/log pane.
-- The top-right task `ToolStrip` supports small, medium, and large scaling from settings; the scale maps to the current icon size, 2x, and 4x.
+- The top-right task `ToolStrip` supports small, medium, and large sizing from settings and renders native-sized command icons for each option instead of scaling up a small bitmap.
+- The main window explicitly loads the embedded multi-size ICO at runtime so the title bar and taskbar use the FileTools application icon.
 - Folder unwrapping uses `ToolStripSplitButton` for default unwrap, same-name unwrap, single-file mismatch modes, and moving direct child files upward.
 - The work plan area sits in the bottom pane and uses a read-only `DataGridView` with order, icon-labeled action kind, input, and output/expected result columns.
 - The plan toolbar includes all-plan, selected-target, and warning filters backed by `WorkPlanDisplayBuilder`.
@@ -42,6 +43,7 @@ The next layout proposal is tracked in `docs/mainform-plan-list-layout-proposal.
 - The old always-large result box is replaced by a compact top-right log view.
 - Execution uses one button inside the bottom work-plan group that shows run in the idle state and stop while running.
 - The work-plan group includes a lightweight status label and marquee progress bar tied to the current execution state.
+- Completed file comparisons now clear the main execution state before the result dialog opens, so the main progress bar stops and the run/stop button returns to its idle state.
 - Command state updates disable commands that do not apply to the current selection or execution state.
 - Added right-click context menus on the target and plan grids, wired to the same command handlers as menu/toolbar actions.
 - Context-menu selection behavior now preserves multi-row selections and updates command availability through the existing `UpdateCommandStates` flow.
@@ -49,6 +51,7 @@ The next layout proposal is tracked in `docs/mainform-plan-list-layout-proposal.
 - Added folder-merge option flow with target-name preview/edit and split-button mode support.
 - For folder merges, multiple-folder selections expose a "merge folder contents only" mode and the current plan/confirmation now reflects the selected merge mode.
 - Fixed the folder-merge option dialog layout so the merge-mode radio buttons and confirmation preview no longer overlap the OK/Cancel button row on Korean localized text.
+- File compare request, progress, and result dialogs now share a fixed right-aligned bottom button layout; the progress dialog also has enough minimum height for the Cancel/Hide row.
 - Added a program information dialog under Settings that shows the assembly informational version and the bundled MIT license text.
 
 ## Remaining UX Notes

@@ -4,13 +4,13 @@
 
 Windows 탐색기 ContextMenu와 독립 실행형 WinForms 유틸리티를 제공하는 작은 파일 관리 도구입니다.
 
-현재 버전: `1.4.4.0-beta`.
+현재 버전: `1.4.4.1-beta`.
 
 ### 개발 및 안정성 안내
 
 FileTools는 취미 개발자가 개인적으로 관리하는 프로젝트이며, Codex를 활용해 제작 및 업데이트하고 있습니다. 따라서 일부 업데이트는 충분히 안정화되지 않았을 수 있고, 버그 테스트도 제한적으로 이루어질 수 있습니다. 중요한 파일에 적용하기 전에는 백업을 권장드리며, 문제가 발견되면 이슈로 알려주시면 가능한 범위에서 확인하겠습니다.
 
-`1.4.4.0`은 베타 릴리스로 배포됩니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 파일 비교 ContextMenu 노출, 로컬 이름변경 학습 기반, 릴리스 검증 흐름을 실제 사용 사례로 더 안정화한 뒤 같은 계열을 stable로 전환할 예정입니다.
+`1.4.4.1`은 베타 릴리스로 배포됩니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 파일 비교 ContextMenu 노출, 로컬 이름변경 학습 기반, 릴리스 검증 흐름을 실제 사용 사례로 더 안정화한 뒤 같은 계열을 stable로 전환할 예정입니다.
 
 ### 기능
 
@@ -53,7 +53,7 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
 - 파일/폴더를 수동으로 선택합니다.
 - 파일을 변경하기 전에 각 대상에 여러 계획 작업을 추가합니다.
 - 파일명 교정, 폴더 wrapping, 폴더 unwrapping, AutoRelocation 작업을 체인으로 연결합니다.
-- 메뉴 모음에서 파일, 작업, 설정 명령에 접근하고, 설정 하위 메뉴에서 동작 설정과 프로그램 정보를 엽니다. 자주 쓰는 작업 명령은 오른쪽 위 작업/로그 패널의 고정 도구 모음에 유지하며, 설정에서 아이콘 크기를 작게/중간/크게로 바꿀 수 있습니다.
+- 메뉴 모음에서 파일, 작업, 설정 명령에 접근하고, 설정 하위 메뉴에서 동작 설정과 프로그램 정보를 엽니다. 자주 쓰는 작업 명령은 오른쪽 위 작업/로그 패널의 고정 도구 모음에 유지하며, 설정에서 아이콘 크기를 작게/중간/크게로 바꿀 수 있습니다. 툴바 아이콘은 선택한 크기에 맞춰 다시 렌더링해 확대 흐림을 피합니다.
 - 파일 비교 전용 창에서 파일/폴더 대상을 모으고 이름/메타데이터/내용/압축 해제 옵션을 조정한 뒤, modeless 진행률 창과 결과 창에서 중복 후보, JSON 저장, 중복 삭제 step 추가를 처리합니다.
 - ZIP 압축 병합 작업은 `A 01.zip`, `A 02.zip` 같은 번호 붙은 압축 묶음을 `A.zip`으로 제안하고, 옵션 창 하단에서 압축 내부 엔트리의 원래 경로와 충돌 처리 후 대상 경로를 미리 보여줍니다.
 - 분할 버튼에서 폴더 unwrapping 변형을 선택합니다. 기본 설정, 같은 이름 폴더, 단일 파일 폴더 이름 불일치 처리 방식, 바로 아래 자식 파일 상위 이동을 포함합니다.
@@ -72,7 +72,7 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
 설정 창은 동작 기본값과 탐색기 ContextMenu 설치/제거를 관리합니다. 네이티브 ShellExt 등록은 하나의 FileTools 하위 메뉴를 사용하며, 개별 ContextMenu 작업은 켜거나 끌 수 있습니다.
 파일 비교, 압축 병합, 폴더 wrapping/unwrapping, AutoRelocation 명령은 탐색기 등록용으로 각각 선택할 수 있습니다. 설정 창에서 OK를 누르면 Install/Remove 버튼을 누르지 않았더라도 옵션을 저장하고 현재 사용자 ContextMenu 등록을 동기화합니다.
 설정 레이아웃 메모는 `docs/ux-settings-dialog-review.md`에서 추적합니다.
-앱 아이콘은 `src\FileTools.App\Resources` 아래에 투명 PNG와 다중 크기 ICO 자산으로 저장되어 있으며, EXE와 MSI 제품 메타데이터 모두 ICO를 사용합니다. Burn 설치 및 제거 UI는 `installer\FileTools.Bundle\Assets` 아래의 별도 파란색 설치 로고를 사용하고, MSI 마법사는 `installer\FileTools.Installer\Assets` 아래의 별도 파란색 대화상자/배너 비트맵을 사용합니다.
+앱 아이콘은 `src\FileTools.App\Resources` 아래에 투명 PNG와 다중 크기 ICO 자산으로 저장되어 있으며, EXE와 MSI 제품 메타데이터 모두 ICO를 사용합니다. 실행 중에는 같은 ICO를 임베디드 리소스에서 읽어 메인 창 아이콘에도 명시 적용하므로 제목 표시줄과 작업표시줄이 같은 앱 아이콘을 사용합니다. Burn 설치 및 제거 UI는 `installer\FileTools.Bundle\Assets` 아래의 별도 파란색 설치 로고를 사용하고, MSI 마법사는 `installer\FileTools.Installer\Assets` 아래의 별도 파란색 대화상자/배너 비트맵을 사용합니다.
 
 이름 바꾸기 검토 대화상자는 ContextMenu 이름 변경 명령과 독립 실행 계획 편집에서 사용됩니다.
 이름 바꾸기 검토는 변경 적용 전에 항상 열리도록 설정하거나, 생성 행에 검토가 필요하거나 충돌이 있을 때만 열리도록 설정할 수 있습니다. 이 대화상자는 읽기 전용 항목 목록과 선택 항목 편집기를 함께 사용하므로 긴 대상 이름을 그리드 밖에서 편집할 수 있으며, 추출된 제목, 회차, 작가, 태그, 확장자, 후보, 공통 문구, 규칙 추적 값은 입력 보조 정보로 계속 사용할 수 있습니다. 공통 문구는 기본적으로 한 행으로 접혀 있으며 같은 패널에서 펼치거나 접을 수 있습니다. 오른쪽 위에는 전체 변경 요약을 표시하고, 검토/충돌 행을 강조하며, 편집한 대상 이름을 매번 검증하고, 적용 전에 선택 행을 자동/원본으로 복원하거나 건너뛸 수 있습니다.
@@ -240,7 +240,7 @@ MSI는 네이티브 `FileTools.ShellExt.dll`을 현재 사용자 COM ExplorerCom
 
 GitHub Releases는 setup bootstrapper, MSI, sparse MSIX identity package를 빌드하고 서명하며, `checksums.txt`를 생성하고, 릴리스 자산에 대한 GitHub artifact attestation을 만드는 수동 workflow를 사용합니다.
 
-`1.4.4.0`은 GitHub prerelease/beta로 게시합니다. 위키 문서와 tag별 변경사항 문서를 먼저 업데이트하고, 릴리스 자산 검증 및 설치 smoke test가 끝난 뒤 draft를 게시합니다. 안정화 작업 후 stable 전환 릴리스를 별도로 게시합니다.
+`1.4.4.1`은 GitHub prerelease/beta로 게시합니다. 위키 문서와 tag별 변경사항 문서를 먼저 업데이트하고, 릴리스 자산 검증 및 설치 smoke test가 끝난 뒤 draft를 게시합니다. 안정화 작업 후 stable 전환 릴리스를 별도로 게시합니다.
 
 릴리스는 GitHub Secrets에 base64 PFX와 비밀번호로 저장된 self-signed FileTools 인증서를 사용합니다. 이는 무료 GitHub 배포와 CER 신뢰 후 MSIX identity 등록에는 적합하지만, 공개 CA 코드 서명 인증서는 아닙니다. Windows는 첫 사용 사용자에게 SmartScreen 또는 신뢰 경고를 계속 표시할 수 있습니다.
 
@@ -390,13 +390,13 @@ FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE` 또�
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
-Current version: `1.4.4.0-beta`.
+Current version: `1.4.4.1-beta`.
 
 ### Development and Stability Notice
 
 FileTools is maintained as a personal hobby project and is built and updated with the help of Codex. As a result, some updates may not be fully stable, and bug testing may be limited. Please consider backing up important files before using FileTools on them, and feel free to report issues so they can be reviewed as time permits.
 
-`1.4.4.0` is distributed as a beta release. The standalone planner work-plan display, folder-merge options flow, file-compare ContextMenu exposure, local rename-learning foundation, and release verification flow will move to stable after additional real-world stabilization.
+`1.4.4.1` is distributed as a beta release. The standalone planner work-plan display, folder-merge options flow, file-compare ContextMenu exposure, local rename-learning foundation, and release verification flow will move to stable after additional real-world stabilization.
 
 ### Features
 
@@ -439,7 +439,7 @@ The standalone window supports:
 - Manual file/folder selection.
 - Adding multiple planned actions to each target before changing files.
 - Chaining filename correction, folder wrapping, folder unwrapping, and AutoRelocation actions.
-- Accessing file, task, and settings commands from the menu bar. The settings submenu opens operational settings and program info, while common task commands stay on the fixed toolbar in the top-right task/log panel and can be scaled to small, medium, or large icon sizes.
+- Accessing file, task, and settings commands from the menu bar. The settings submenu opens operational settings and program info, while common task commands stay on the fixed toolbar in the top-right task/log panel and can be scaled to small, medium, or large icon sizes. Toolbar icons are rendered at the selected size to avoid blurred bitmap scaling.
 - Opening the dedicated file-compare dialog to collect files/folders, adjust name, metadata, content, and archive-extraction options, then use the modeless progress dialog and result dialog for duplicate candidates, JSON saving, and duplicate-delete step handoff.
 - Adding ZIP archive merge steps that suggest common logical output names such as `A.zip` for `A 01.zip` and `A 02.zip`, with an options-dialog detail grid showing each internal entry's original path and collision-resolved target path.
 - Selecting folder unwrapping variants from a split button, including the default setting, same-name folders, single-file folder name mismatch modes, and moving direct child files upward.
@@ -458,7 +458,7 @@ The standalone window supports:
 The settings window owns operational defaults and Explorer ContextMenu installation/removal. Native ShellExt registration uses one FileTools submenu, and individual ContextMenu actions can be enabled or disabled.
 File compare, archive merge, folder wrapping/unwrapping, and AutoRelocation commands can be selected independently for Explorer registration. Pressing OK in the settings window saves the options and synchronizes the current-user ContextMenu registration, even if the Install/Remove buttons are not pressed.
 The settings layout notes are tracked in `docs/ux-settings-dialog-review.md`.
-The app icon is stored as transparent PNG and multi-size ICO assets under `src\FileTools.App\Resources`; the EXE and MSI product metadata both use the ICO. The Burn setup and uninstall UI use a separate blue setup logo under `installer\FileTools.Bundle\Assets`, and the MSI wizard uses separate blue dialog/banner bitmaps under `installer\FileTools.Installer\Assets`.
+The app icon is stored as transparent PNG and multi-size ICO assets under `src\FileTools.App\Resources`; the EXE and MSI product metadata both use the ICO. At runtime, the same ICO is loaded from an embedded resource and assigned to the main window so the title bar and taskbar use the FileTools icon. The Burn setup and uninstall UI use a separate blue setup logo under `installer\FileTools.Bundle\Assets`, and the MSI wizard uses separate blue dialog/banner bitmaps under `installer\FileTools.Installer\Assets`.
 
 The rename review dialog is used by ContextMenu rename commands and by standalone plan editing.
 Rename review can be configured to always open before applying changes, or to open only when generated rows need review or have conflicts. The dialog uses a read-only item list plus a selected-item editor, so long target names can be edited outside the grid while extracted title, episode, author, tag, extension, candidate, common-phrase, and rule-trace values remain available as input aids. Common phrases stay collapsed to one row by default and can be expanded or collapsed from the same panel. It summarizes total changes in the upper-right corner, emphasizes review/conflict rows, validates edited target names after each edit, and lets the selected row be restored to auto/original or skipped before applying.
@@ -627,7 +627,7 @@ GitHub Releases use a manual workflow that builds and signs the setup
 bootstrapper, MSI, and sparse MSIX identity package, generates `checksums.txt`,
 and creates GitHub artifact attestations for the release assets.
 
-`1.4.4.0` is published as a GitHub prerelease/beta. Update the wiki and
+`1.4.4.1` is published as a GitHub prerelease/beta. Update the wiki and
 tag-specific change notes before tagging, then publish the draft only after
 release asset verification and install smoke testing. A stable release will
 follow after the beta stabilization pass.

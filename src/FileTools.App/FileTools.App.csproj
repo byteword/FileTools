@@ -7,7 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>FileTools</AssemblyName>
     <RootNamespace>FileTools</RootNamespace>
-    <FileToolsVersion Condition="'$(FileToolsVersion)' == ''">1.4.4.0</FileToolsVersion>
+    <FileToolsVersion Condition="'$(FileToolsVersion)' == ''">1.4.4.1</FileToolsVersion>
     <Version>$(FileToolsVersion)</Version>
     <AssemblyVersion>$(FileToolsVersion)</AssemblyVersion>
     <FileVersion>$(FileToolsVersion)</FileVersion>
@@ -22,6 +22,7 @@
   <ItemGroup>
     <EmbeddedResource Remove="Ui\MainForm.*.resx" />
     <EmbeddedResource Include="..\..\LICENSE" Link="LICENSE.txt" LogicalName="FileTools.LICENSE.txt" />
+    <EmbeddedResource Include="Resources\FileToolsIcon.ico" LogicalName="FileTools.Resources.FileToolsIcon.ico" />
     <Compile Update="Ui\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>

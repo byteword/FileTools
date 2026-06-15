@@ -79,13 +79,6 @@ internal sealed class FileCompareRequestDialog : Form
         root.Controls.Add(CreateTargetsGroup(), 0, 0);
         root.Controls.Add(CreateOptionsGroup(), 1, 0);
 
-        var buttonPanel = new FlowLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            FlowDirection = FlowDirection.RightToLeft,
-            WrapContents = false,
-            Padding = new Padding(0, 10, 0, 0)
-        };
         _runButton.Text = Localizer.Get("FileCompareDialogRun");
         _runButton.Width = 120;
         _runButton.Height = 30;
@@ -94,8 +87,7 @@ internal sealed class FileCompareRequestDialog : Form
         _cancelButton.Width = 96;
         _cancelButton.Height = 30;
         _cancelButton.DialogResult = DialogResult.Cancel;
-        buttonPanel.Controls.Add(_runButton);
-        buttonPanel.Controls.Add(_cancelButton);
+        var buttonPanel = DialogButtonPanelFactory.CreateRightAligned(_cancelButton, _runButton);
         root.Controls.Add(buttonPanel, 0, 1);
         root.SetColumnSpan(buttonPanel, 2);
 

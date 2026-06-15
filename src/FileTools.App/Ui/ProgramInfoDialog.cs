@@ -57,7 +57,7 @@ internal sealed class ProgramInfoDialog : Form
         {
             Dock = DockStyle.Fill,
             SizeMode = PictureBoxSizeMode.CenterImage,
-            Image = LoadApplicationIcon()
+            Image = ApplicationIconProvider.GetApplicationIconImage()
         };
         header.Controls.Add(iconBox, 0, 0);
         header.SetRowSpan(iconBox, 2);
@@ -148,21 +148,4 @@ internal sealed class ProgramInfoDialog : Form
         return reader.ReadToEnd();
     }
 
-    private static Image? LoadApplicationIcon()
-    {
-        var exePath = Environment.ProcessPath;
-        if (string.IsNullOrWhiteSpace(exePath) || !File.Exists(exePath))
-        {
-            return null;
-        }
-
-        try
-        {
-            return Icon.ExtractAssociatedIcon(exePath)?.ToBitmap();
-        }
-        catch
-        {
-            return null;
-        }
-    }
 }

@@ -12,6 +12,7 @@ partial class MainForm
     private ToolStripMenuItem _addFolderMenuItem = null!;
     private ToolStripMenuItem _removeTargetMenuItem = null!;
     private ToolStripMenuItem _clearTargetsMenuItem = null!;
+    private ToolStripMenuItem _exitMenuItem = null!;
     private ToolStripMenuItem _mergeSelectedMenuItem = null!;
     private ToolStripMenuItem _taskMenuItem = null!;
     private ToolStripMenuItem _addRenameMenuItem = null!;
@@ -113,6 +114,7 @@ partial class MainForm
         _addFolderMenuItem = new ToolStripMenuItem();
         _removeTargetMenuItem = new ToolStripMenuItem();
         _clearTargetsMenuItem = new ToolStripMenuItem();
+        _exitMenuItem = new ToolStripMenuItem();
         _mergeSelectedMenuItem = new ToolStripMenuItem();
         _taskMenuItem = new ToolStripMenuItem();
         _addRenameMenuItem = new ToolStripMenuItem();
@@ -232,7 +234,9 @@ partial class MainForm
             new ToolStripSeparator(),
             _removeTargetMenuItem,
             _mergeSelectedMenuItem,
-            _clearTargetsMenuItem
+            _clearTargetsMenuItem,
+            new ToolStripSeparator(),
+            _exitMenuItem
         });
         _fileMenuItem.Name = "_fileMenuItem";
         _fileMenuItem.Text = "File";
@@ -248,6 +252,9 @@ partial class MainForm
 
         _clearTargetsMenuItem.Name = "_clearTargetsMenuItem";
         _clearTargetsMenuItem.Text = "Clear";
+
+        _exitMenuItem.Name = "_exitMenuItem";
+        _exitMenuItem.Text = "Exit";
 
         _mergeSelectedMenuItem.Name = "_mergeSelectedMenuItem";
         _mergeSelectedMenuItem.Text = "Merge selected into folder";

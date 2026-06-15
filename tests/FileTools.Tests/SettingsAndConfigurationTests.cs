@@ -1,4 +1,6 @@
 using FileTools;
+using System.Reflection;
+using System.Windows.Forms;
 
 namespace FileTools.Tests;
 
@@ -72,6 +74,91 @@ public sealed class SettingsAndConfigurationTests
         Assert.Equal(expectedScale, MainForm.GetActionToolbarScale((ActionToolbarSize)size));
     }
 
+    [Theory]
+    [InlineData(20)]
+    [InlineData(40)]
+    [InlineData(80)]
+    public void UiIconFactory_GetIconCreatesNativeSizedToolbarImages(int imageSize)
+    {
+        var icon = UiIconFactory.GetIcon(UiIconKind.ArchiveMerge, imageSize);
+
+        Assert.Equal(imageSize, icon.Width);
+        Assert.Equal(imageSize, icon.Height);
+    }
+
+    [Fact]
+    public void ApplicationIconProvider_LoadsEmbeddedApplicationIcon()
+    {
+        using var icon = ApplicationIconProvider.GetApplicationIcon();
+
+        Assert.NotNull(icon);
+        Assert.True(icon.Width > 0);
+        Assert.True(icon.Height > 0);
+    }
+
+    [Fact]
+    public void MainForm_ConstructsWithApplicationIcon()
+    {
+        using var form = new MainForm();
+
+        Assert.NotNull(form.Icon);
+    }
+
+    [Fact]
+    public void MainForm_FileMenuIncludesExitCommand()
+    {
+        using var form = new MainForm();
+
+        var fileMenu = GetPrivateField<ToolStripMenuItem>(form, "_fileMenuItem");
+        var exitMenu = GetPrivateField<ToolStripMenuItem>(form, "_exitMenuItem");
+
+        Assert.Contains(exitMenu, fileMenu.DropDownItems.Cast<ToolStripItem>());
+        Assert.Equal(Localizer.Get("MenuExit"), exitMenu.Text);
+        Assert.NotNull(exitMenu.Image);
+    }
+
+    [Fact]
+    public void DialogButtonPanelFactory_CreateRightAlignedUsesStableBottomButtonColumns()
+    {
+        using var cancelButton = new Button
+        {
+            Width = 96,
+            Height = 30
+        };
+        using var hideButton = new Button
+        {
+            Width = 96,
+            Height = 30
+        };
+
+        using var panel = DialogButtonPanelFactory.CreateRightAligned(cancelButton, hideButton);
+
+        Assert.Equal(3, panel.ColumnCount);
+        Assert.Equal(SizeType.Percent, panel.ColumnStyles[0].SizeType);
+        Assert.Equal(100, panel.ColumnStyles[0].Width);
+        Assert.Equal(96, panel.ColumnStyles[1].Width);
+        Assert.Equal(104, panel.ColumnStyles[2].Width);
+        Assert.Equal(AnchorStyles.Top | AnchorStyles.Right, cancelButton.Anchor);
+        Assert.Equal(AnchorStyles.Top | AnchorStyles.Right, hideButton.Anchor);
+        Assert.Equal(new Padding(8, 0, 0, 0), hideButton.Margin);
+    }
+
+    [Fact]
+    public void MainForm_FinishFileCompareExecutionClearsExecutionUiState()
+    {
+        using var form = new MainForm();
+        var state = new FileCompareProgressState(2);
+        var cancellationField = GetPrivateFieldInfo(form, "_executionCancellation");
+        cancellationField.SetValue(form, state.Cancellation);
+
+        form.FinishFileCompareExecution(state, hideProgressDialog: false);
+
+        Assert.Null(cancellationField.GetValue(form));
+        Assert.Equal(Localizer.Get("ButtonRun"), GetPrivateField<Button>(form, "_runStopButton").Text);
+        Assert.Equal(ProgressBarStyle.Blocks, GetPrivateField<ProgressBar>(form, "_planProgressBar").Style);
+        Assert.Equal(0, GetPrivateField<ProgressBar>(form, "_planProgressBar").MarqueeAnimationSpeed);
+    }
+
     [Fact]
     public void IsAnyContextMenuFolderOperationEnabled_ConsidersFolderMergeSelectedTargets()
     {
@@ -87,6 +174,19 @@ public sealed class SettingsAndConfigurationTests
 
         settings.ContextMenuFolderMergeSelectedTargets = true;
         Assert.True(settings.IsAnyContextMenuFolderOperationEnabled);
+    }
+
+    private static T GetPrivateField<T>(object instance, string name)
+        where T : class
+    {
+        return Assert.IsType<T>(GetPrivateFieldInfo(instance, name).GetValue(instance));
+    }
+
+    private static FieldInfo GetPrivateFieldInfo(object instance, string name)
+    {
+        var field = instance.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.NotNull(field);
+        return field;
     }
 
     [Fact]

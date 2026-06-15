@@ -28,7 +28,7 @@ The dialog keeps settings scoped to repeatable defaults. One-off execution choic
 - Expanded group headers use group-specific colors; body content stays neutral and uses the group color as a border.
 - ContextMenu, Rename, Folder Structure, File Compare, Archive Merge, and AutoRelocation settings each have their own group.
 - The ContextMenu group now includes the Windows 11 native context menu section for explicit certificate trust and sparse package identity registration/removal.
-- The ContextMenu group also carries the top-right task toolbar size option because it is a global UI preference rather than a per-operation default.
+- The ContextMenu group also carries the top-right task toolbar size option because it is a global UI preference rather than a per-operation default; the visible choices are Small/Medium/Large without multiplier text.
 - Help text is placed under ambiguous rows such as menu layout, rename review mode, folder operation, mismatch handling, and default relocation template.
 - The bottom OK/Cancel row is fixed outside the scrollable settings body.
 

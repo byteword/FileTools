@@ -102,7 +102,14 @@ Scope reviewed:
 - Added the 2026-06-15 MainForm grid/toolbar follow-up:
   - Target and work-plan grids now keep fixed/user column widths and rely on
     horizontal scrolling for long paths.
-  - Settings gained a small/medium/large top-right task toolbar size option.
+  - Settings gained a small/medium/large top-right task toolbar size option;
+    toolbar icons are rendered at the selected size rather than bitmap-scaled.
+  - The main window now explicitly applies the embedded FileTools ICO for title
+    bar and taskbar icon consistency.
+  - File compare request/progress/result dialogs now share a stable bottom
+    button layout, completed comparisons hide the progress window, and the main
+    run/progress state returns to idle before the result dialog opens.
+  - The File menu now includes a program exit command.
   - `FileTools.ShellExt.dll` now receives the same file/product version as the
     app, and `build_msi.ps1` signs the ShellExt DLL before MSI packaging.
 

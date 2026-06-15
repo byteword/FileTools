@@ -11,11 +11,19 @@ the next release tag.
   before the dialog width is established.
 - MainForm target and work-plan grids now keep fixed/user column widths and use
   horizontal scrolling instead of proportional width recomputation.
-- Added a small/medium/large setting for the top-right task toolbar, mapping the
-  existing icon size to 1x, 2x, and 4x.
+- Added a small/medium/large setting for the top-right task toolbar. Toolbar
+  command icons are rendered at the selected size to avoid blurred upscaling.
+- The main window now loads the embedded multi-size ICO at runtime so the title
+  bar and taskbar use the FileTools icon consistently.
+- Added File > Exit to the standalone planner menu.
+- File compare request, progress, and result dialogs now use a shared
+  right-aligned bottom button row, and the progress dialog minimum height leaves
+  room for the Cancel/Hide buttons.
+- Completed file comparisons now hide the progress window and clear the main
+  execution progress/run-stop state before the result dialog opens.
 - The native ShellExt now embeds the same file/product version as the app and
   `build_msi.ps1` signs the ShellExt DLL before it is packaged.
-- Bumped the beta release line to `1.4.4.0`.
+- Bumped the beta release line to `1.4.4.1`.
 
 ## Support Scope
 
@@ -37,14 +45,16 @@ the next release tag.
 
 Latest local verification:
 
-- `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` passed 116/116 on
+- `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` passed 124/124 on
   2026-06-15.
 - `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj -c Release` passed
-  116/116 on 2026-06-15.
+  124/124 on 2026-06-15.
 - `MSBuild.exe FileTools.sln /p:Configuration=Release /p:Platform=x64` passed
-  with 0 warnings and 0 errors on 2026-06-15.
+  with 0 warnings and 0 errors on 2026-06-15 for the `v1.4.4.0` packaging
+  baseline; rerun it for `v1.4.4.1` before publishing the release assets.
 - `.\build_msi.ps1 -Version v1.4.4.0` completed on 2026-06-15. The generated
   `FileTools.ShellExt.dll` reports file/product version `1.4.4.0` and has an
   Authenticode signature from the temporary `CN=FileTools Self-Signed`
-  certificate. Local trust still reports an untrusted-root status until the CER
-  is trusted.
+  certificate. This remains the latest local package-build baseline; rerun it
+  with `v1.4.4.1` before publishing the release assets. Local trust still
+  reports an untrusted-root status until the CER is trusted.

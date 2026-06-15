@@ -86,18 +86,11 @@ internal sealed class FileCompareResultDialog : Form
         split.SizeChanged += (_, _) => ClampResultSplitter(split);
         root.Controls.Add(split, 0, 1);
 
-        var buttonPanel = new FlowLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            FlowDirection = FlowDirection.RightToLeft,
-            WrapContents = false,
-            Padding = new Padding(0, 8, 0, 0)
-        };
         _closeButton.Text = Localizer.Get("ButtonClose");
         _closeButton.Width = 96;
         _closeButton.Height = 30;
         _closeButton.DialogResult = DialogResult.OK;
-        buttonPanel.Controls.Add(_closeButton);
+        var buttonPanel = DialogButtonPanelFactory.CreateRightAligned(_closeButton);
         root.Controls.Add(buttonPanel, 0, 2);
 
         AcceptButton = _closeButton;
