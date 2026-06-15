@@ -1,7 +1,7 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-14
+Last updated: 2026-06-15
 
 Scope reviewed:
 
@@ -98,6 +98,13 @@ Scope reviewed:
   comments for core command definitions, COM lifecycle points, selection/visibility
   checks, and command launch/registration paths where non-trivial control flow
   is present.
+
+- Added the 2026-06-15 MainForm grid/toolbar follow-up:
+  - Target and work-plan grids now keep fixed/user column widths and rely on
+    horizontal scrolling for long paths.
+  - Settings gained a small/medium/large top-right task toolbar size option.
+  - `FileTools.ShellExt.dll` now receives the same file/product version as the
+    app, and `build_msi.ps1` signs the ShellExt DLL before MSI packaging.
 
 - Split 7Z input archive merge from #5 into #8 and closed #5 as ZIP input/ZIP output archive merge.
 - Split common-filename-based file merge from #4 into #9 and closed #4 as selected-target folder merge.
@@ -330,7 +337,8 @@ Scope reviewed:
 
 3. Continue UI validation for the 1.4 beta surfaces when manually exercised.
    - MainForm planner: validate small, default, and wide window sizes, then
-     revisit splitter constraints and grouped-row visual polish.
+     revisit splitter constraints, toolbar scale fit, and grouped-row visual
+     polish.
    - Rename review dialog: decide whether generated conflict suffixes should
      remain `Conflict` or become `Auto-resolved conflict`, then consider
      persisting the last dialog size if long filenames are common in real use.

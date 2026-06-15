@@ -18,6 +18,16 @@ public sealed partial class MainForm : Form
     private const string PlanOutputColumnName = "PlanOutput";
     private const int ExecutionPanelDefaultHeight = 96;
     private const int ExecutionPanelDecisionHeight = 220;
+    private const int ActionToolbarBaseImageSize = 20;
+    private const int ActionToolbarBasePadding = 2;
+    private const int TargetIconColumnWidth = 30;
+    private const int TargetNameColumnWidth = 220;
+    private const int TargetLocationColumnWidth = 360;
+    private const int TargetActionsColumnWidth = 64;
+    private const int PlanOrderColumnWidth = 44;
+    private const int PlanActionColumnWidth = 170;
+    private const int PlanInputColumnWidth = 340;
+    private const int PlanOutputColumnWidth = 460;
 
     private readonly string[] _initialPaths;
     private readonly MainFormStartupAction _startupAction;
@@ -70,6 +80,7 @@ public sealed partial class MainForm : Form
         ConfigureTargetGrid();
         ConfigurePlanGrid();
         ApplyCommandImages();
+        ApplyActionToolbarSize();
 
         _targetGrid.SelectionChanged += (_, _) =>
         {
@@ -360,6 +371,7 @@ public sealed partial class MainForm : Form
     private void LoadState()
     {
         _settings = SettingsStore.Load();
+        ApplyActionToolbarSize();
         AddPaths(_initialPaths);
         ClearLog();
         AppendLog(Localizer.Get("LogReady"));
@@ -679,6 +691,7 @@ public sealed partial class MainForm : Form
         {
             _settings = form.Settings;
             SettingsStore.Save(_settings);
+            ApplyActionToolbarSize();
             AppendLog(Localizer.Format("SettingsSavedFormat", SettingsStore.SettingsPath));
         }
     }
@@ -1546,30 +1559,35 @@ public sealed partial class MainForm : Form
     private void ConfigureTargetGrid()
     {
         _targetGrid.AutoGenerateColumns = false;
+        _targetGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
+        _targetGrid.ScrollBars = ScrollBars.Both;
         _targetGrid.Columns.Clear();
         _targetGrid.Columns.Add(new DataGridViewImageColumn
         {
             Name = TargetIconColumnName,
             HeaderText = "",
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
             ImageLayout = DataGridViewImageCellLayout.Normal,
             SortMode = DataGridViewColumnSortMode.NotSortable,
-            Width = 30,
+            Width = TargetIconColumnWidth,
             DefaultCellStyle = { Alignment = DataGridViewContentAlignment.MiddleCenter }
         });
         _targetGrid.Columns.Add(new DataGridViewTextBoxColumn
         {
             Name = TargetNameColumnName,
             HeaderText = "Name",
-            AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
-            FillWeight = 45,
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
+            MinimumWidth = 140,
+            Width = TargetNameColumnWidth,
             SortMode = DataGridViewColumnSortMode.NotSortable
         });
         _targetGrid.Columns.Add(new DataGridViewTextBoxColumn
         {
             Name = TargetLocationColumnName,
             HeaderText = "Location",
-            AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
-            FillWeight = 55,
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
+            MinimumWidth = 180,
+            Width = TargetLocationColumnWidth,
             SortMode = DataGridViewColumnSortMode.NotSortable
         });
         _targetGrid.Columns.Add(new DataGridViewTextBoxColumn
@@ -1578,7 +1596,8 @@ public sealed partial class MainForm : Form
             HeaderText = "Actions",
             AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
             SortMode = DataGridViewColumnSortMode.NotSortable,
-            Width = 58,
+            MinimumWidth = TargetActionsColumnWidth,
+            Width = TargetActionsColumnWidth,
             DefaultCellStyle = { Alignment = DataGridViewContentAlignment.MiddleCenter }
         });
         _targetGrid.DefaultCellStyle.SelectionBackColor = SystemColors.Highlight;
@@ -1596,6 +1615,8 @@ public sealed partial class MainForm : Form
     private void ConfigurePlanGrid()
     {
         _planGrid.AutoGenerateColumns = false;
+        _planGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
+        _planGrid.ScrollBars = ScrollBars.Both;
         _planGrid.Columns.Clear();
         _planGrid.Columns.Add(new DataGridViewTextBoxColumn
         {
@@ -1603,7 +1624,7 @@ public sealed partial class MainForm : Form
             HeaderText = "#",
             AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
             SortMode = DataGridViewColumnSortMode.NotSortable,
-            Width = 44,
+            Width = PlanOrderColumnWidth,
             DefaultCellStyle = { Alignment = DataGridViewContentAlignment.MiddleCenter }
         });
         _planGrid.Columns.Add(new DataGridViewTextBoxColumn
@@ -1612,28 +1633,57 @@ public sealed partial class MainForm : Form
             HeaderText = "Action",
             AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
             SortMode = DataGridViewColumnSortMode.NotSortable,
-            Width = 150
+            MinimumWidth = 120,
+            Width = PlanActionColumnWidth
         });
         _planGrid.Columns.Add(new DataGridViewTextBoxColumn
         {
             Name = PlanInputColumnName,
             HeaderText = "Input",
-            AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
-            FillWeight = 45F,
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
+            MinimumWidth = 200,
+            Width = PlanInputColumnWidth,
             SortMode = DataGridViewColumnSortMode.NotSortable
         });
         _planGrid.Columns.Add(new DataGridViewTextBoxColumn
         {
             Name = PlanOutputColumnName,
             HeaderText = "Output",
-            AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
-            FillWeight = 55F,
+            AutoSizeMode = DataGridViewAutoSizeColumnMode.None,
+            MinimumWidth = 240,
+            Width = PlanOutputColumnWidth,
             SortMode = DataGridViewColumnSortMode.NotSortable
         });
         _planGrid.DefaultCellStyle.SelectionBackColor = SystemColors.Highlight;
         _planGrid.DefaultCellStyle.SelectionForeColor = SystemColors.HighlightText;
         _planGrid.RowTemplate.Height = 26;
     }
+
+    private void ApplyActionToolbarSize()
+    {
+        var scale = GetActionToolbarScale(_settings.ActionToolbarSize);
+        var padding = ActionToolbarBasePadding * scale;
+        _actionToolStrip.ImageScalingSize = new Size(
+            ActionToolbarBaseImageSize * scale,
+            ActionToolbarBaseImageSize * scale);
+        _actionToolStrip.Padding = new Padding(padding);
+        foreach (ToolStripItem item in _actionToolStrip.Items)
+        {
+            item.AutoSize = true;
+            item.Margin = new Padding(Math.Max(1, scale), 1, Math.Max(1, scale), 2);
+        }
+
+        _actionToolStrip.PerformLayout();
+        _rightPanel.PerformLayout();
+    }
+
+    internal static int GetActionToolbarScale(ActionToolbarSize size) => size switch
+    {
+        ActionToolbarSize.Small => 1,
+        ActionToolbarSize.Medium => 2,
+        ActionToolbarSize.Large => 4,
+        _ => 1
+    };
 
     private void ApplyPlanGridLocalization()
     {

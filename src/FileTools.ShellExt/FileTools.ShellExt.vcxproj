@@ -16,6 +16,8 @@
     <ProjectGuid>{b671e50e-351a-4fb3-9b07-e1c5728c55db}</ProjectGuid>
     <RootNamespace>FileToolsShellExt</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <FileToolsVersion Condition="'$(FileToolsVersion)' == ''">1.4.4.0</FileToolsVersion>
+    <FileToolsVersionComma>$([System.String]::Copy('$(FileToolsVersion)').Replace('.', ','))</FileToolsVersionComma>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -55,6 +57,9 @@
       <ModuleDefinitionFile>FileTools.ShellExt.def</ModuleDefinitionFile>
       <AdditionalDependencies>ole32.lib;shell32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <ResourceCompile>
+      <PreprocessorDefinitions>FILETOOLS_VERSION_COMMA=$(FileToolsVersionComma);FILETOOLS_VERSION_STRING=\&quot;$(FileToolsVersion)\&quot;;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -75,12 +80,18 @@
       <ModuleDefinitionFile>FileTools.ShellExt.def</ModuleDefinitionFile>
       <AdditionalDependencies>ole32.lib;shell32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <ResourceCompile>
+      <PreprocessorDefinitions>FILETOOLS_VERSION_COMMA=$(FileToolsVersionComma);FILETOOLS_VERSION_STRING=\&quot;$(FileToolsVersion)\&quot;;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FileToolsShellExt.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FileTools.ShellExt.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="FileToolsShellExt.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

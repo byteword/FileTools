@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.4.4.0-beta - 2026-06-15
+
+### Added
+
+- Added horizontal scrolling for the MainForm target and work-plan grids so
+  user-resized column widths are preserved.
+- Added a small/medium/large setting for the top-right task toolbar.
+- Added a native ShellExt version resource and release-build signing step for
+  `FileTools.ShellExt.dll`.
+
+### Changed
+
+- Updated app, installer, bundle, ShellExt, README, release guide, and Program
+  info version metadata to `1.4.4.0`.
+
+### Fixed
+
+- Fixed ZIP archive merge launched from Explorer context menus so the progress
+  dialog no longer fails during initial splitter layout.
+
+### Verification
+
+- Debug managed tests passed 116/116 on 2026-06-15.
+- Release managed tests passed 116/116 on 2026-06-15.
+- Full `Release|x64` solution build passed with 0 warnings and 0 errors on
+  2026-06-15 after sandbox escalation for Windows SDK lookup.
+- `build_msi.ps1 -Version v1.4.4.0` produced the MSI, setup bootstrapper,
+  sparse MSIX identity, and CER with 0 warnings and 0 errors on 2026-06-15
+  using a temporary self-signed certificate.
+
 ## 1.4.3.0-beta - 2026-06-14
 
 ### Added

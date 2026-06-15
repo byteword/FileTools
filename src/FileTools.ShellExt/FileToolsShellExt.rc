@@ -1,0 +1,41 @@
+#include <winver.h>
+
+#ifndef FILETOOLS_VERSION_COMMA
+#define FILETOOLS_VERSION_COMMA 1,4,3,1
+#endif
+
+#ifndef FILETOOLS_VERSION_STRING
+#define FILETOOLS_VERSION_STRING "1.4.4.0"
+#endif
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION FILETOOLS_VERSION_COMMA
+ PRODUCTVERSION FILETOOLS_VERSION_COMMA
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "FileTools\0"
+            VALUE "FileDescription", "FileTools Shell Extension\0"
+            VALUE "FileVersion", FILETOOLS_VERSION_STRING "\0"
+            VALUE "InternalName", "FileTools.ShellExt.dll\0"
+            VALUE "OriginalFilename", "FileTools.ShellExt.dll\0"
+            VALUE "ProductName", "FileTools\0"
+            VALUE "ProductVersion", FILETOOLS_VERSION_STRING "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1200
+    END
+END

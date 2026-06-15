@@ -4,13 +4,13 @@
 
 Windows 탐색기 ContextMenu와 독립 실행형 WinForms 유틸리티를 제공하는 작은 파일 관리 도구입니다.
 
-현재 버전: `1.4.3.1-beta`.
+현재 버전: `1.4.4.0-beta`.
 
 ### 개발 및 안정성 안내
 
 FileTools는 취미 개발자가 개인적으로 관리하는 프로젝트이며, Codex를 활용해 제작 및 업데이트하고 있습니다. 따라서 일부 업데이트는 충분히 안정화되지 않았을 수 있고, 버그 테스트도 제한적으로 이루어질 수 있습니다. 중요한 파일에 적용하기 전에는 백업을 권장드리며, 문제가 발견되면 이슈로 알려주시면 가능한 범위에서 확인하겠습니다.
 
-`1.4.3.1`은 베타 릴리스로 배포됩니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 파일 비교 ContextMenu 노출, 로컬 이름변경 학습 기반, 릴리스 검증 흐름을 실제 사용 사례로 더 안정화한 뒤 같은 계열을 stable로 전환할 예정입니다.
+`1.4.4.0`은 베타 릴리스로 배포됩니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 파일 비교 ContextMenu 노출, 로컬 이름변경 학습 기반, 릴리스 검증 흐름을 실제 사용 사례로 더 안정화한 뒤 같은 계열을 stable로 전환할 예정입니다.
 
 ### 기능
 
@@ -47,26 +47,26 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
 독립 실행 창은 다음 기능을 지원합니다.
 
 - 대상 목록에 파일/폴더를 드래그 앤 드롭합니다.
-- 파일/폴더 아이콘, 상위 위치, 대상별 작업 개수를 포함한 그리드에서 대상을 검토합니다.
+- 파일/폴더 아이콘, 상위 위치, 대상별 작업 개수를 포함한 그리드에서 대상을 검토합니다. 열 폭을 사용자가 넓히면 현재 창 폭에 맞춰 다시 비율 조정하지 않고 가로 스크롤로 표시합니다.
 - 대상 도구 모음으로 대상을 추가/제거하고, 선택한 대상을 실행 순서에서 위나 아래로 이동합니다.
 - 드롭되거나 새로 추가된 대상은 자동으로 선택됩니다. 작업 버튼은 설정된 단계를 선택된 모든 대상에 추가하므로, 여러 폴더의 unwrap 작업 흐름을 한 번에 준비할 수 있습니다.
 - 파일/폴더를 수동으로 선택합니다.
 - 파일을 변경하기 전에 각 대상에 여러 계획 작업을 추가합니다.
 - 파일명 교정, 폴더 wrapping, 폴더 unwrapping, AutoRelocation 작업을 체인으로 연결합니다.
-- 메뉴 모음에서 파일, 작업, 설정 명령에 접근하고, 설정 하위 메뉴에서 동작 설정과 프로그램 정보를 엽니다. 자주 쓰는 작업 명령은 오른쪽 위 작업/로그 패널의 고정 도구 모음에 유지합니다.
+- 메뉴 모음에서 파일, 작업, 설정 명령에 접근하고, 설정 하위 메뉴에서 동작 설정과 프로그램 정보를 엽니다. 자주 쓰는 작업 명령은 오른쪽 위 작업/로그 패널의 고정 도구 모음에 유지하며, 설정에서 아이콘 크기를 작게/중간/크게로 바꿀 수 있습니다.
 - 파일 비교 전용 창에서 파일/폴더 대상을 모으고 이름/메타데이터/내용/압축 해제 옵션을 조정한 뒤, modeless 진행률 창과 결과 창에서 중복 후보, JSON 저장, 중복 삭제 step 추가를 처리합니다.
 - ZIP 압축 병합 작업은 `A 01.zip`, `A 02.zip` 같은 번호 붙은 압축 묶음을 `A.zip`으로 제안하고, 옵션 창 하단에서 압축 내부 엔트리의 원래 경로와 충돌 처리 후 대상 경로를 미리 보여줍니다.
 - 분할 버튼에서 폴더 unwrapping 변형을 선택합니다. 기본 설정, 같은 이름 폴더, 단일 파일 폴더 이름 불일치 처리 방식, 바로 아래 자식 파일 상위 이동을 포함합니다.
 - 아래쪽 작업 플랜 그리드에서 실행될 전체 작업, 선택 대상 관련 작업, 경고 작업을 필터로 전환해 검토합니다.
 - 작업 계획 위에 현재 필터, 대상 수, 계획 단계 수, 경고 수를 표시합니다.
 - 실행 완료 후 적용이 끝난 작업 단계는 플랜에서 제거하고, 이동/이름 변경으로 대상 경로가 바뀌면 대상 목록을 새 경로로 갱신하며, 삭제되어 더 이상 존재하지 않는 대상은 목록에서 제거합니다.
-- 작업 플랜 그리드는 순서, 아이콘이 붙은 작업 종류, 입력, 출력/예상 결과를 표시합니다. ZIP 병합 같은 공유 작업은 하나의 그룹 작업과 입력 행으로 표시됩니다.
+- 작업 플랜 그리드는 순서, 아이콘이 붙은 작업 종류, 입력, 출력/예상 결과를 표시합니다. ZIP 병합 같은 공유 작업은 하나의 그룹 작업과 입력 행으로 표시되며, 긴 입력/출력 경로는 가로 스크롤로 확인합니다.
 - 별도 설정 열을 두지 않고 그리드 행 툴팁으로 단계별 상세 옵션을 보여줍니다.
 - 아래쪽 계획 도구 모음에서 선택한 작업 여러 개를 제거하거나 전체 작업 플랜을 비울 수 있으며, 남은 단계 체인을 기준으로 미리보기가 다시 계산됩니다.
 - 계획 작업을 두 번 클릭하면 해당 작업 대화상자를 다시 엽니다. 이름 변경 단계는 파일별 후보, 수동 편집, 건너뛰기 컨트롤이 포함된 이름 바꾸기 검토 창을 다시 엽니다.
 - 아래쪽 작업 플랜 그룹 안의 실행/중지 버튼 하나로 모든 대상 계획을 순서대로 실행하고, 같은 그룹의 상태 라벨과 진행 막대에서 실행 상태를 확인합니다.
 - 오른쪽 위 로그 보기에서 실행 메시지와 요약을 검토합니다.
-- 탐색기 ContextMenu 등록, 이름 변경 기본값, 폴더 기본값, 파일 비교, 압축 병합, AutoRelocation 기본값을 위한 고정 상태 헤더와 접을 수 있는 옵션 그룹이 있는 크기 조절 가능한 설정 창을 엽니다.
+- 탐색기 ContextMenu 등록, 오른쪽 작업 툴바 크기, 이름 변경 기본값, 폴더 기본값, 파일 비교, 압축 병합, AutoRelocation 기본값을 위한 고정 상태 헤더와 접을 수 있는 옵션 그룹이 있는 크기 조절 가능한 설정 창을 엽니다.
 - 설정 하위 메뉴의 프로그램 정보 창에서 현재 앱 버전과 MIT 라이선스 전문을 확인할 수 있습니다.
 
 설정 창은 동작 기본값과 탐색기 ContextMenu 설치/제거를 관리합니다. 네이티브 ShellExt 등록은 하나의 FileTools 하위 메뉴를 사용하며, 개별 ContextMenu 작업은 켜거나 끌 수 있습니다.
@@ -188,7 +188,7 @@ dotnet test .\tests\FileTools.Tests\FileTools.Tests.csproj
 
 ### 설치 관리자 빌드
 
-설치 관리자는 WiX Toolset SDK 스타일 프로젝트 파일을 사용합니다. 빌드 스크립트는 먼저 Visual Studio MSBuild로 네이티브 ShellExt DLL을 빌드한 다음 WiX MSI와 Burn bundle 프로젝트를 복원/빌드합니다.
+설치 관리자는 WiX Toolset SDK 스타일 프로젝트 파일을 사용합니다. 빌드 스크립트는 먼저 Visual Studio MSBuild로 네이티브 ShellExt DLL을 동일한 `FileToolsVersion`으로 빌드하고 서명한 다음 WiX MSI와 Burn bundle 프로젝트를 복원/빌드합니다.
 
 ```powershell
 .\build_msi.ps1
@@ -232,7 +232,7 @@ MSI는 네이티브 `FileTools.ShellExt.dll`을 현재 사용자 COM ExplorerCom
 
 선택 사항인 Windows 11 네이티브 ContextMenu 경로는 서명된 sparse MSIX identity package를 등록합니다. 그러면 Windows가 `desktop4:FileExplorerContextMenus`와 `windows.comServer`를 통해 shell extension을 발견할 수 있습니다. 설치 프로그램은 지원 파일만 배치하며 인증서 가져오기와 identity 등록은 자동 실행하지 않습니다. 설치 후 FileTools 설정 창의 Windows 11 기본 메뉴 섹션에서 사용자가 명시적으로 실행하면, 공개 self-signed CER을 현재 사용자의 Trusted People 저장소로 가져오고 `PackageManager.AddPackageByUriAsync`로 sparse package identity를 등록합니다. 설치 또는 제거 후 메뉴가 즉시 갱신되지 않으면 Explorer를 다시 시작하세요.
 
-네이티브 ShellExt는 `FileTools.ShellExt.def`를 통해 `DllGetClassObject`, `DllCanUnloadNow`, `DllRegisterServer`, `DllUnregisterServer`를 명시적으로 내보내며, Explorer가 별도 VC runtime 의존성 없이 로드할 수 있도록 정적 C runtime으로 빌드됩니다.
+네이티브 ShellExt는 `FileTools.ShellExt.def`를 통해 `DllGetClassObject`, `DllCanUnloadNow`, `DllRegisterServer`, `DllUnregisterServer`를 명시적으로 내보내며, 앱과 같은 파일/제품 버전을 포함하고, Explorer가 별도 VC runtime 의존성 없이 로드할 수 있도록 정적 C runtime으로 빌드됩니다.
 
 앱 전용 빌드에는 `dotnet build src\FileTools.App\FileTools.App.csproj`를 사용하세요. `FileTools.sln`은 루트 혼합 x64 솔루션이며 네이티브 ShellExt 프로젝트를 포함하므로 전체 솔루션 빌드에는 C++ 워크로드가 포함된 Visual Studio MSBuild가 필요합니다. ShellExt 프로젝트는 `build_msi.ps1`과 `publish_and_install.ps1`에서 빌드됩니다. 설치 관리자 프로젝트는 `installer\FileTools.Installer.sln`에 분리되어 있으며, `build_msi.ps1`로 빌드하거나 HeatWave 같은 WiX v4 호환 확장이 있는 Visual Studio에서 해당 솔루션을 열 수 있습니다.
 
@@ -240,7 +240,7 @@ MSI는 네이티브 `FileTools.ShellExt.dll`을 현재 사용자 COM ExplorerCom
 
 GitHub Releases는 setup bootstrapper, MSI, sparse MSIX identity package를 빌드하고 서명하며, `checksums.txt`를 생성하고, 릴리스 자산에 대한 GitHub artifact attestation을 만드는 수동 workflow를 사용합니다.
 
-`1.4.3.0`은 GitHub prerelease/beta로 게시합니다. 위키 문서와 tag별 변경사항 문서를 먼저 업데이트하고, 릴리스 자산 검증 및 설치 smoke test가 끝난 뒤 draft를 게시합니다. 안정화 작업 후 stable 전환 릴리스를 별도로 게시합니다.
+`1.4.4.0`은 GitHub prerelease/beta로 게시합니다. 위키 문서와 tag별 변경사항 문서를 먼저 업데이트하고, 릴리스 자산 검증 및 설치 smoke test가 끝난 뒤 draft를 게시합니다. 안정화 작업 후 stable 전환 릴리스를 별도로 게시합니다.
 
 릴리스는 GitHub Secrets에 base64 PFX와 비밀번호로 저장된 self-signed FileTools 인증서를 사용합니다. 이는 무료 GitHub 배포와 CER 신뢰 후 MSIX identity 등록에는 적합하지만, 공개 CA 코드 서명 인증서는 아닙니다. Windows는 첫 사용 사용자에게 SmartScreen 또는 신뢰 경고를 계속 표시할 수 있습니다.
 
@@ -390,13 +390,13 @@ FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE` 또�
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
-Current version: `1.4.3.1-beta`.
+Current version: `1.4.4.0-beta`.
 
 ### Development and Stability Notice
 
 FileTools is maintained as a personal hobby project and is built and updated with the help of Codex. As a result, some updates may not be fully stable, and bug testing may be limited. Please consider backing up important files before using FileTools on them, and feel free to report issues so they can be reviewed as time permits.
 
-`1.4.3.1` is distributed as a beta release. The standalone planner work-plan display, folder-merge options flow, file-compare ContextMenu exposure, local rename-learning foundation, and release verification flow will move to stable after additional real-world stabilization.
+`1.4.4.0` is distributed as a beta release. The standalone planner work-plan display, folder-merge options flow, file-compare ContextMenu exposure, local rename-learning foundation, and release verification flow will move to stable after additional real-world stabilization.
 
 ### Features
 
@@ -433,26 +433,26 @@ Run `FileTools.exe` without arguments to open the drag-and-drop work plan window
 The standalone window supports:
 
 - Drag and drop files/folders into the target list.
-- Reviewing targets in a grid with file/folder icons, parent locations, and per-target action counts.
+- Reviewing targets in a grid with file/folder icons, parent locations, and per-target action counts. User-resized columns keep their width and expose horizontal scrolling instead of being proportionally squeezed into the current window width.
 - Using the target toolbar to add/remove targets and move selected targets up or down in execution order.
 - Dropped or newly added targets are selected automatically. Action buttons add the configured step to every selected target, so multi-folder unwrap workflows can be prepared in one pass.
 - Manual file/folder selection.
 - Adding multiple planned actions to each target before changing files.
 - Chaining filename correction, folder wrapping, folder unwrapping, and AutoRelocation actions.
-- Accessing file, task, and settings commands from the menu bar. The settings submenu opens operational settings and program info, while common task commands stay on the fixed toolbar in the top-right task/log panel.
+- Accessing file, task, and settings commands from the menu bar. The settings submenu opens operational settings and program info, while common task commands stay on the fixed toolbar in the top-right task/log panel and can be scaled to small, medium, or large icon sizes.
 - Opening the dedicated file-compare dialog to collect files/folders, adjust name, metadata, content, and archive-extraction options, then use the modeless progress dialog and result dialog for duplicate candidates, JSON saving, and duplicate-delete step handoff.
 - Adding ZIP archive merge steps that suggest common logical output names such as `A.zip` for `A 01.zip` and `A 02.zip`, with an options-dialog detail grid showing each internal entry's original path and collision-resolved target path.
 - Selecting folder unwrapping variants from a split button, including the default setting, same-name folders, single-file folder name mismatch modes, and moving direct child files upward.
 - Reviewing all planned operations, selected-target operations, or warning operations by switching filters in the bottom work-plan grid.
 - Showing the current filter, target count, planned step count, and warning count above the work plan.
 - After execution, applied steps are removed from the plan, moved or renamed targets are refreshed to their new paths, and deleted targets are removed from the target list.
-- Showing order, icon-labeled action kind, input, and output/expected result in the work-plan grid. Shared operations such as ZIP merge appear as one operation group with input rows.
+- Showing order, icon-labeled action kind, input, and output/expected result in the work-plan grid. Shared operations such as ZIP merge appear as one operation group with input rows, and long input/output paths are handled with horizontal scrolling.
 - Showing detailed per-step options in grid row tooltips instead of dedicating a separate settings column.
 - Removing multiple selected operations or clearing the entire work plan from the bottom plan toolbar; the preview is recalculated from the remaining step chain.
 - Double-clicking a planned action to reopen the matching action dialog; rename steps reopen the rename review dialog with per-file candidates, manual editing, and skip controls.
 - Running all target plans in order with one run/stop button inside the bottom work-plan group, with execution state shown by the neighboring status label and progress bar.
 - Reviewing execution messages and summaries in the top-right log view.
-- Opening a resizable settings window with a fixed status header and collapsible option groups for Explorer ContextMenu registration, rename defaults, folder defaults, file compare, archive merge, and AutoRelocation defaults.
+- Opening a resizable settings window with a fixed status header and collapsible option groups for Explorer ContextMenu registration, top-right task toolbar size, rename defaults, folder defaults, file compare, archive merge, and AutoRelocation defaults.
 - Opening program info from the settings submenu to check the current app version and the full MIT license text.
 
 The settings window owns operational defaults and Explorer ContextMenu installation/removal. Native ShellExt registration uses one FileTools submenu, and individual ContextMenu actions can be enabled or disabled.
@@ -573,7 +573,7 @@ dotnet test .\tests\FileTools.Tests\FileTools.Tests.csproj
 
 ### Build Installer
 
-The installer uses WiX Toolset SDK-style project files. The build script first builds the native ShellExt DLL with Visual Studio MSBuild, then restores/builds the WiX MSI and Burn bundle projects.
+The installer uses WiX Toolset SDK-style project files. The build script first builds and signs the native ShellExt DLL with the same `FileToolsVersion`, then restores/builds the WiX MSI and Burn bundle projects.
 
 ```powershell
 .\build_msi.ps1
@@ -617,7 +617,7 @@ The MSI installs the native `FileTools.ShellExt.dll` as a current-user COM Explo
 
 The optional Windows 11 native context menu path registers a signed sparse MSIX identity package, so Windows can discover the shell extension through `desktop4:FileExplorerContextMenus` and `windows.comServer`. Setup installs the support files only and does not import certificates or register the identity automatically. After installation, the Windows 11 native context menu section in FileTools settings lets the user explicitly import the public self-signed CER into the current user's Trusted People store and register the sparse package identity through `PackageManager.AddPackageByUriAsync`. Restart Explorer after registering or removing this option if the menu does not refresh immediately.
 
-The native ShellExt explicitly exports `DllGetClassObject`, `DllCanUnloadNow`, `DllRegisterServer`, and `DllUnregisterServer` through `FileTools.ShellExt.def`, and is built with the static C runtime so Explorer can load it without a separate VC runtime dependency.
+The native ShellExt explicitly exports `DllGetClassObject`, `DllCanUnloadNow`, `DllRegisterServer`, and `DllUnregisterServer` through `FileTools.ShellExt.def`, carries the same file/product version as the app, and is built with the static C runtime so Explorer can load it without a separate VC runtime dependency.
 
 Use `dotnet build src\FileTools.App\FileTools.App.csproj` for an app-only build. `FileTools.sln` is the root mixed x64 solution and includes the native ShellExt project, so building the full solution requires Visual Studio MSBuild with the C++ workload. The ShellExt project is built by `build_msi.ps1` and `publish_and_install.ps1`. The installer projects are isolated in `installer\FileTools.Installer.sln`; build them with `build_msi.ps1` or open that solution in Visual Studio with a WiX v4-compatible extension such as HeatWave.
 
@@ -627,7 +627,7 @@ GitHub Releases use a manual workflow that builds and signs the setup
 bootstrapper, MSI, and sparse MSIX identity package, generates `checksums.txt`,
 and creates GitHub artifact attestations for the release assets.
 
-`1.4.3.0` is published as a GitHub prerelease/beta. Update the wiki and
+`1.4.4.0` is published as a GitHub prerelease/beta. Update the wiki and
 tag-specific change notes before tagging, then publish the draft only after
 release asset verification and install smoke testing. A stable release will
 follow after the beta stabilization pass.

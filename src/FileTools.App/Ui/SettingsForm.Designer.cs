@@ -191,6 +191,10 @@ internal sealed partial class SettingsForm
             Localizer.Get("LabelContextMenuLayout"),
             _contextMenuLayoutCombo,
             Localizer.Get("SettingsContextMenuLayoutHelp")));
+        group.AddBodyControl(CreateComboRow(
+            Localizer.Get("LabelActionToolbarSize"),
+            _actionToolbarSizeCombo,
+            Localizer.Get("SettingsActionToolbarSizeHelp")));
         group.AddBodyControl(CreateSectionLabel(Localizer.Get("GroupContextMenuTasks")));
         group.AddBodyControl(_contextMenuRenameCheckBox);
         group.AddBodyControl(_contextMenuFileCompareCheckBox);

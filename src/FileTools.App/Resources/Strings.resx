@@ -77,6 +77,9 @@
   <data name="ContextCommandFolderMergeSelectedTargets" xml:space="preserve"><value>Merge selected targets</value></data>
   <data name="ContextMenuLayoutGrouped" xml:space="preserve"><value>Grouped: FileTools submenu</value></data>
   <data name="ContextMenuLayoutExpanded" xml:space="preserve"><value>Expanded: show each command directly</value></data>
+  <data name="ActionToolbarSizeSmall" xml:space="preserve"><value>Small (1x)</value></data>
+  <data name="ActionToolbarSizeMedium" xml:space="preserve"><value>Medium (2x)</value></data>
+  <data name="ActionToolbarSizeLarge" xml:space="preserve"><value>Large (4x)</value></data>
   <data name="MainFormTitle" xml:space="preserve"><value>FileTools settings and tasks</value></data>
   <data name="LabelTask" xml:space="preserve"><value>Task</value></data>
   <data name="ButtonRun" xml:space="preserve"><value>Run</value></data>
@@ -202,6 +205,7 @@
   <data name="Windows11ContextMenuUnregistered" xml:space="preserve"><value>Windows 11 native context menu removed. Restart Explorer if the menu does not refresh immediately.</value></data>
   <data name="Windows11ContextMenuFilesMissing" xml:space="preserve"><value>Windows 11 native context menu support files were not found:&#x0D;&#x0A;{0}</value></data>
   <data name="SettingsContextMenuLayoutHelp" xml:space="preserve"><value>Grouped keeps one FileTools submenu; expanded places commands directly in Explorer.</value></data>
+  <data name="SettingsActionToolbarSizeHelp" xml:space="preserve"><value>Scales the right task toolbar from the current icon size up to 4x.</value></data>
   <data name="SettingsRenameReviewHelp" xml:space="preserve"><value>The safer automated mode still stops for NeedsReview and Conflict rows.</value></data>
   <data name="RenamePatternLearningSectionTitle" xml:space="preserve"><value>Personal pattern learning</value></data>
   <data name="RenamePatternLearningSectionHelp" xml:space="preserve"><value>Stores confirmed rename pattern choices locally so future candidate ranking can match your preferred structure.</value></data>
@@ -230,6 +234,7 @@
   <data name="TabAutoRelocation" xml:space="preserve"><value>Auto Relocation</value></data>
   <data name="TabFolderStructure" xml:space="preserve"><value>Folder Structure</value></data>
   <data name="LabelContextMenuLayout" xml:space="preserve"><value>Menu layout</value></data>
+  <data name="LabelActionToolbarSize" xml:space="preserve"><value>Task toolbar size</value></data>
   <data name="GroupContextMenuTasks" xml:space="preserve"><value>Context menu tasks</value></data>
   <data name="GroupApplicationContextMenu" xml:space="preserve"><value>Application command</value></data>
   <data name="LabelRenameReviewMode" xml:space="preserve"><value>Review mode</value></data>

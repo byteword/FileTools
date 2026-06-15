@@ -20,6 +20,7 @@ internal sealed partial class SettingsForm : Form
     private readonly CheckBox _contextMenuArchiveMergeGroupByArchiveNameCheckBox = new();
     private readonly CheckBox _contextMenuArchiveMergePreserveInternalPathsCheckBox = new();
     private readonly ComboBox _contextMenuLayoutCombo = new();
+    private readonly ComboBox _actionToolbarSizeCombo = new();
     private readonly ComboBox _defaultFolderOperationCombo = new();
     private readonly ComboBox _folderMismatchCombo = new();
     private readonly ComboBox _defaultTemplateCombo = new();
@@ -149,6 +150,11 @@ internal sealed partial class SettingsForm : Form
             .ToArray());
         SelectComboValue(_contextMenuLayoutCombo, Settings.ContextMenuLayout);
 
+        ConfigureCombo(_actionToolbarSizeCombo, Enum.GetValues<ActionToolbarSize>()
+            .Select(size => new ComboOption<ActionToolbarSize>(ToolModeText.GetDisplayName(size), size))
+            .ToArray());
+        SelectComboValue(_actionToolbarSizeCombo, Settings.ActionToolbarSize);
+
         ConfigureCombo(_defaultFolderOperationCombo, Enum.GetValues<FolderStructureOperation>()
             .Select(operation => new ComboOption<FolderStructureOperation>(ToolModeText.GetDisplayName(operation), operation))
             .ToArray());
@@ -273,6 +279,7 @@ internal sealed partial class SettingsForm : Form
             _renameReviewModeCombo,
             _renamePluginLanguageCombo,
             _contextMenuLayoutCombo,
+            _actionToolbarSizeCombo,
             _defaultFolderOperationCombo,
             _folderMismatchCombo,
             _defaultTemplateCombo,
@@ -550,6 +557,11 @@ internal sealed partial class SettingsForm : Form
         if (_contextMenuLayoutCombo.SelectedItem is ComboOption<ContextMenuLayout> layout)
         {
             Settings.ContextMenuLayout = layout.Value;
+        }
+
+        if (_actionToolbarSizeCombo.SelectedItem is ComboOption<ActionToolbarSize> toolbarSize)
+        {
+            Settings.ActionToolbarSize = toolbarSize.Value;
         }
 
         if (_defaultFolderOperationCombo.SelectedItem is ComboOption<FolderStructureOperation> operation)

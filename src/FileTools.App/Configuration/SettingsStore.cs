@@ -32,6 +32,8 @@ internal sealed class FileToolsSettings
 
     public ContextMenuLayout ContextMenuLayout { get; set; } = ContextMenuLayout.Grouped;
 
+    public ActionToolbarSize ActionToolbarSize { get; set; } = ActionToolbarSize.Small;
+
     public bool ContextMenuOpenApp { get; set; } = true;
 
     public bool ContextMenuFileNameCorrection { get; set; } = true;
@@ -143,6 +145,7 @@ internal sealed class FileToolsSettings
                 .ToList(),
             RegisterContextMenu = RegisterContextMenu,
             ContextMenuLayout = ContextMenuLayout,
+            ActionToolbarSize = ActionToolbarSize,
             ContextMenuOpenApp = ContextMenuOpenApp,
             ContextMenuFileNameCorrection = ContextMenuFileNameCorrection,
             ContextMenuFileCompare = ContextMenuFileCompare,
@@ -246,6 +249,11 @@ internal static class SettingsStore
                 Extensions = rule.Extensions.ToList()
             })
             .ToList();
+        if (!Enum.IsDefined(settings.ActionToolbarSize))
+        {
+            settings.ActionToolbarSize = ActionToolbarSize.Small;
+        }
+
         settings.FileCompareOptions ??= new FileCompareOptions();
         settings.RenameCorrectionPlugins = RenameCorrectionPluginDefaults.Normalize(settings.RenameCorrectionPlugins);
         settings.RenamePatternFeedbackLimit = Math.Max(

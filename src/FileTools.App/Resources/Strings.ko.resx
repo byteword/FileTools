@@ -77,6 +77,9 @@
   <data name="ContextCommandFolderMergeSelectedTargets" xml:space="preserve"><value>폴더 병합</value></data>
   <data name="ContextMenuLayoutGrouped" xml:space="preserve"><value>묶음형: FileTools 하위 메뉴</value></data>
   <data name="ContextMenuLayoutExpanded" xml:space="preserve"><value>펼침형: 기능을 각각 표시</value></data>
+  <data name="ActionToolbarSizeSmall" xml:space="preserve"><value>작게 (1x)</value></data>
+  <data name="ActionToolbarSizeMedium" xml:space="preserve"><value>중간 (2x)</value></data>
+  <data name="ActionToolbarSizeLarge" xml:space="preserve"><value>크게 (4x)</value></data>
   <data name="MainFormTitle" xml:space="preserve"><value>FileTools 설정 및 작업</value></data>
   <data name="LabelTask" xml:space="preserve"><value>작업</value></data>
   <data name="ButtonRun" xml:space="preserve"><value>실행</value></data>
@@ -202,6 +205,7 @@
   <data name="Windows11ContextMenuUnregistered" xml:space="preserve"><value>Windows 11 기본 메뉴를 제거했습니다. 메뉴가 바로 갱신되지 않으면 Explorer를 다시 시작하세요.</value></data>
   <data name="Windows11ContextMenuFilesMissing" xml:space="preserve"><value>Windows 11 기본 메뉴 지원 파일을 찾을 수 없습니다:&#x0D;&#x0A;{0}</value></data>
   <data name="SettingsContextMenuLayoutHelp" xml:space="preserve"><value>묶음형은 FileTools 하위 메뉴 하나로 정리하고, 펼침형은 명령을 Explorer에 바로 표시합니다.</value></data>
+  <data name="SettingsActionToolbarSizeHelp" xml:space="preserve"><value>오른쪽 작업 툴바를 현재 아이콘 크기부터 최대 4배까지 확대합니다.</value></data>
   <data name="SettingsRenameReviewHelp" xml:space="preserve"><value>자동화 보조 모드에서도 검토 필요와 충돌 항목은 반드시 멈춰서 검토합니다.</value></data>
   <data name="RenamePatternLearningSectionTitle" xml:space="preserve"><value>개인 패턴 학습</value></data>
   <data name="RenamePatternLearningSectionHelp" xml:space="preserve"><value>확정한 이름변경 패턴 선택을 로컬에 저장해 이후 후보 순서가 선호 구조에 맞게 정렬되도록 준비합니다.</value></data>
@@ -230,6 +234,7 @@
   <data name="TabAutoRelocation" xml:space="preserve"><value>자동 재배치</value></data>
   <data name="TabFolderStructure" xml:space="preserve"><value>폴더 구조</value></data>
   <data name="LabelContextMenuLayout" xml:space="preserve"><value>메뉴 방식</value></data>
+  <data name="LabelActionToolbarSize" xml:space="preserve"><value>작업 툴바 크기</value></data>
   <data name="GroupContextMenuTasks" xml:space="preserve"><value>Context Menu 작업</value></data>
   <data name="GroupApplicationContextMenu" xml:space="preserve"><value>앱 실행 명령</value></data>
   <data name="LabelRenameReviewMode" xml:space="preserve"><value>검토 방식</value></data>

@@ -34,6 +34,7 @@ public sealed class SettingsAndConfigurationTests
             RenamePatternFeedbackLimit = 1234,
             ContextMenuFileCompare = false,
             ContextMenuFolderMergeSelectedTargets = false,
+            ActionToolbarSize = ActionToolbarSize.Large,
             FileKindExtensionRules =
             [
                 new FileKindExtensionRule
@@ -59,6 +60,16 @@ public sealed class SettingsAndConfigurationTests
         Assert.Equal(1234, clone.RenamePatternFeedbackLimit);
         Assert.False(clone.ContextMenuFileCompare);
         Assert.False(clone.ContextMenuFolderMergeSelectedTargets);
+        Assert.Equal(ActionToolbarSize.Large, clone.ActionToolbarSize);
+    }
+
+    [Theory]
+    [InlineData((int)ActionToolbarSize.Small, 1)]
+    [InlineData((int)ActionToolbarSize.Medium, 2)]
+    [InlineData((int)ActionToolbarSize.Large, 4)]
+    public void MainForm_GetActionToolbarScaleMapsSettingsToExpectedScale(int size, int expectedScale)
+    {
+        Assert.Equal(expectedScale, MainForm.GetActionToolbarScale((ActionToolbarSize)size));
     }
 
     [Fact]

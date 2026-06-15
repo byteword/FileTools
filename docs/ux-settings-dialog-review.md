@@ -14,7 +14,7 @@ Scope:
 
 ## Summary
 
-The settings dialog now uses a resizable single-panel layout with a fixed status header, a scrollable settings body, fixed OK/Cancel buttons, and collapsible option groups. It covers the current core defaults: Explorer ContextMenu registration, Windows 11 native context menu identity actions, rename dictionary behavior, rename review mode, personal rename pattern learning, file compare defaults, archive merge defaults, AutoRelocation default template and file-kind classification, and folder structure defaults.
+The settings dialog now uses a resizable single-panel layout with a fixed status header, a scrollable settings body, fixed OK/Cancel buttons, and collapsible option groups. It covers the current core defaults: Explorer ContextMenu registration, top-right task toolbar size, Windows 11 native context menu identity actions, rename dictionary behavior, rename review mode, personal rename pattern learning, file compare defaults, archive merge defaults, AutoRelocation default template and file-kind classification, and folder structure defaults.
 
 The dialog keeps settings scoped to repeatable defaults. One-off execution choices stay in action dialogs or the main planner.
 
@@ -28,6 +28,7 @@ The dialog keeps settings scoped to repeatable defaults. One-off execution choic
 - Expanded group headers use group-specific colors; body content stays neutral and uses the group color as a border.
 - ContextMenu, Rename, Folder Structure, File Compare, Archive Merge, and AutoRelocation settings each have their own group.
 - The ContextMenu group now includes the Windows 11 native context menu section for explicit certificate trust and sparse package identity registration/removal.
+- The ContextMenu group also carries the top-right task toolbar size option because it is a global UI preference rather than a per-operation default.
 - Help text is placed under ambiguous rows such as menu layout, rename review mode, folder operation, mismatch handling, and default relocation template.
 - The bottom OK/Cancel row is fixed outside the scrollable settings body.
 

@@ -23,9 +23,11 @@ The next layout proposal is tracked in `docs/mainform-plan-list-layout-proposal.
 ## Implemented Layout Changes
 
 - The left target area uses a read-only `DataGridView` with system icons, name, parent location, and action count.
+- The target and work-plan grids use fixed column widths with horizontal scrolling, so user-resized columns keep their width instead of being proportionally recomputed to the current window width.
 - File, task, and settings commands are available from a `MenuStrip`; the settings submenu now contains both operational settings and program information.
 - Target add/remove/reorder/clear commands sit near the target grid as icon toolbar commands.
 - Main task commands sit in a fixed `ToolStrip` in the top-right task/log pane.
+- The top-right task `ToolStrip` supports small, medium, and large scaling from settings; the scale maps to the current icon size, 2x, and 4x.
 - Folder unwrapping uses `ToolStripSplitButton` for default unwrap, same-name unwrap, single-file mismatch modes, and moving direct child files upward.
 - The work plan area sits in the bottom pane and uses a read-only `DataGridView` with order, icon-labeled action kind, input, and output/expected result columns.
 - The plan toolbar includes all-plan, selected-target, and warning filters backed by `WorkPlanDisplayBuilder`.
@@ -66,7 +68,7 @@ The top-right log now handles progress and summary feedback. It is not a structu
 
 ### 4. Layout proportions are not final
 
-The form still starts at `980 x 700` and now uses a top/bottom split plus a fixed top-left target split distance. This is reasonable while the plan/result model is still moving, but the next layout pass should revisit minimum size, splitter constraints, and how much vertical space the log should occupy.
+The form still starts at `980 x 700` and now uses a top/bottom split plus a fixed top-left target split distance. This is reasonable while the plan/result model is still moving, but the next layout pass should revisit minimum size, splitter constraints, toolbar scale fit, and how much vertical space the log should occupy.
 The folder-merge options dialog now uses client-size-based bounds and fixed radio-button rows after a localized layout issue was found during manual validation.
 
 ### 5. Preview coverage still has real-file limits

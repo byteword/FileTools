@@ -1,7 +1,7 @@
 param(
     [string] $Configuration = 'Release',
     [string] $SigningPublisher = 'CN=FileTools Self-Signed',
-    [string] $Version = '1.4.3.1'
+    [string] $Version = '1.4.4.0'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -15,7 +15,7 @@ function Resolve-FileToolsReleaseVersion {
     }
 
     if ($normalized -notmatch '^\d+\.\d+\.\d+\.\d+$') {
-        throw "Version '$InputVersion' must use four numeric parts, for example 1.4.3.1 or v1.4.3.1."
+        throw "Version '$InputVersion' must use four numeric parts, for example 1.4.4.0 or v1.4.4.0."
     }
 
     $parsed = $null
@@ -44,6 +44,7 @@ $bundleSigningDir = Join-Path $signingOutputDir 'bundle'
 $signingPfx = Join-Path $signingOutputDir 'FileTools.Signing.pfx'
 $msi = Join-Path $PSScriptRoot "installer\FileTools.Installer\bin\$Configuration\FileTools.msi"
 $setup = Join-Path $PSScriptRoot "installer\FileTools.Bundle\bin\$Configuration\FileToolsSetup.exe"
+$shellExt = Join-Path $PSScriptRoot "src\FileTools.ShellExt\x64\$Configuration\FileTools.ShellExt.dll"
 
 Write-Host "Building FileTools version: $releaseVersion"
 
@@ -246,10 +247,14 @@ Remove-Item $identityOutputDir -Recurse -Force -ErrorAction SilentlyContinue
 $signing = New-SigningMaterial -Publisher $SigningPublisher
 
 $msbuild = Find-MSBuild
-& $msbuild $shellExtProject /p:Configuration=$Configuration /p:Platform=x64 /m
+& $msbuild $shellExtProject /p:Configuration=$Configuration /p:Platform=x64 /p:FileToolsVersion="$releaseVersion" /m
 if ($LASTEXITCODE -ne 0) {
     throw "Shell extension build failed with exit code $LASTEXITCODE."
 }
+if (-not (Test-Path $shellExt)) {
+    throw "Shell extension DLL not found: $shellExt"
+}
+Invoke-CodeSigning -FilePath $shellExt -SigningMaterial $signing
 
 & $identityPackageScript -Version $releaseVersion -Publisher $signing.Publisher -OutputPath $identityMsix
 if ($LASTEXITCODE -ne 0) {

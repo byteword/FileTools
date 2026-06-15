@@ -34,6 +34,13 @@ internal enum ContextMenuLayout
     Expanded
 }
 
+internal enum ActionToolbarSize
+{
+    Small,
+    Medium,
+    Large
+}
+
 internal enum RenameReviewMode
 {
     Always,
@@ -116,6 +123,17 @@ internal static class ToolModeText
         ContextMenuLayout.Grouped => Localizer.Get("ContextMenuLayoutGrouped"),
         ContextMenuLayout.Expanded => Localizer.Get("ContextMenuLayoutExpanded"),
         _ => layout.ToString()
+    };
+
+    /// <summary>
+    /// 오른쪽 작업 툴바 크기 표시 문자열.
+    /// </summary>
+    public static string GetDisplayName(ActionToolbarSize size) => size switch
+    {
+        ActionToolbarSize.Small => Localizer.Get("ActionToolbarSizeSmall"),
+        ActionToolbarSize.Medium => Localizer.Get("ActionToolbarSizeMedium"),
+        ActionToolbarSize.Large => Localizer.Get("ActionToolbarSizeLarge"),
+        _ => size.ToString()
     };
 
     /// <summary>
