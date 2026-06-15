@@ -180,6 +180,18 @@ public sealed class SettingsAndConfigurationTests
     }
 
     [Fact]
+    public void ArchiveMergeProgressDialog_CanConstructBeforeLayoutCompletes()
+    {
+        using var dialog = new ArchiveMergeProgressDialog(new ArchiveMergeOptions
+        {
+            SourcePaths = [@"C:\Temp\a.zip", @"C:\Temp\b.zip"],
+            OutputPath = @"C:\Temp\merged.zip"
+        });
+
+        Assert.Equal(Localizer.Get("ArchiveMergeProgressDialogTitle"), dialog.Text);
+    }
+
+    [Fact]
     public void FileCompareText_ConvertsRangeUnitsWithCeiling()
     {
         var kib = FileCompareText.ConvertBytesToRangeValue(1536, FileCompareRangeUnit.KiB);

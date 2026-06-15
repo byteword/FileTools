@@ -6,7 +6,9 @@ the next release tag.
 
 ## Highlights
 
-- No post-`v1.4.3.0` changes yet.
+- Fixed ZIP archive merge launched from Explorer context menus so the progress
+  dialog no longer fails during initial layout when the splitter is created
+  before the dialog width is established.
 
 ## Support Scope
 
@@ -25,4 +27,7 @@ the next release tag.
 
 Latest local verification:
 
-- No post-`v1.4.3.0` verification yet.
+- `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` passed 113/113 on
+  2026-06-15.
+- `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj -c Release` passed
+  113/113 on 2026-06-15.

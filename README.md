@@ -4,13 +4,13 @@
 
 Windows 탐색기 ContextMenu와 독립 실행형 WinForms 유틸리티를 제공하는 작은 파일 관리 도구입니다.
 
-현재 버전: `1.4.3.0-beta`.
+현재 버전: `1.4.3.1-beta`.
 
 ### 개발 및 안정성 안내
 
 FileTools는 취미 개발자가 개인적으로 관리하는 프로젝트이며, Codex를 활용해 제작 및 업데이트하고 있습니다. 따라서 일부 업데이트는 충분히 안정화되지 않았을 수 있고, 버그 테스트도 제한적으로 이루어질 수 있습니다. 중요한 파일에 적용하기 전에는 백업을 권장드리며, 문제가 발견되면 이슈로 알려주시면 가능한 범위에서 확인하겠습니다.
 
-`1.4.3.0`은 베타 릴리스로 배포됩니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 파일 비교 ContextMenu 노출, 로컬 이름변경 학습 기반, 릴리스 검증 흐름을 실제 사용 사례로 더 안정화한 뒤 같은 계열을 stable로 전환할 예정입니다.
+`1.4.3.1`은 베타 릴리스로 배포됩니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 파일 비교 ContextMenu 노출, 로컬 이름변경 학습 기반, 릴리스 검증 흐름을 실제 사용 사례로 더 안정화한 뒤 같은 계열을 stable로 전환할 예정입니다.
 
 ### 기능
 
@@ -390,13 +390,13 @@ FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE` 또�
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
-Current version: `1.4.3.0-beta`.
+Current version: `1.4.3.1-beta`.
 
 ### Development and Stability Notice
 
 FileTools is maintained as a personal hobby project and is built and updated with the help of Codex. As a result, some updates may not be fully stable, and bug testing may be limited. Please consider backing up important files before using FileTools on them, and feel free to report issues so they can be reviewed as time permits.
 
-`1.4.3.0` is distributed as a beta release. The standalone planner work-plan display, folder-merge options flow, file-compare ContextMenu exposure, local rename-learning foundation, and release verification flow will move to stable after additional real-world stabilization.
+`1.4.3.1` is distributed as a beta release. The standalone planner work-plan display, folder-merge options flow, file-compare ContextMenu exposure, local rename-learning foundation, and release verification flow will move to stable after additional real-world stabilization.
 
 ### Features
 

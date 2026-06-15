@@ -95,10 +95,12 @@ internal sealed class ArchiveMergeProgressDialog : Form, IArchiveMergeQuestionSi
         {
             Dock = DockStyle.Fill,
             Orientation = Orientation.Vertical,
-            SplitterDistance = 430,
-            Panel1MinSize = 260,
-            Panel2MinSize = 240
+            FixedPanel = FixedPanel.Panel2,
+            SplitterWidth = 8,
+            Panel1MinSize = 0,
+            Panel2MinSize = 0
         };
+        contentSplit.SizeChanged += (_, _) => ClampProgressSplitter(contentSplit);
 
         _logBox.Dock = DockStyle.Fill;
         _logBox.BackColor = SystemColors.Window;
@@ -131,6 +133,31 @@ internal sealed class ArchiveMergeProgressDialog : Form, IArchiveMergeQuestionSi
         buttons.Controls.Add(_cancelCloseButton);
         root.Controls.Add(buttons, 0, 3);
         CancelButton = _cancelCloseButton;
+        Shown += (_, _) => ClampProgressSplitter(contentSplit);
+    }
+
+    private static void ClampProgressSplitter(SplitContainer split)
+    {
+        var availableWidth = split.ClientSize.Width - split.SplitterWidth;
+        if (availableWidth <= 2)
+        {
+            return;
+        }
+
+        const int desiredDecisionPanelWidth = 240;
+        const int desiredLogPanelMinimum = 260;
+        var minimumLogPanelWidth = Math.Min(desiredLogPanelMinimum, Math.Max(1, availableWidth / 2));
+        var minimumDecisionPanelWidth = Math.Min(220, Math.Max(1, availableWidth - minimumLogPanelWidth));
+        var minimumDistance = minimumLogPanelWidth;
+        var maximumDistance = Math.Max(minimumDistance, availableWidth - minimumDecisionPanelWidth);
+        var desiredDistance = Math.Clamp(
+            availableWidth - desiredDecisionPanelWidth,
+            minimumDistance,
+            maximumDistance);
+        if (split.SplitterDistance != desiredDistance)
+        {
+            split.SplitterDistance = desiredDistance;
+        }
     }
 
     private void StartMergeOnce()

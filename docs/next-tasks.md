@@ -263,6 +263,18 @@ Scope reviewed:
   - Ran `build_msi.ps1 -Version v1.4.3.0`; it produced the MSI, setup
     bootstrapper, sparse MSIX identity, and CER with 0 warnings and 0 errors
     using a temporary self-signed certificate.
+- Published `v1.4.3.0` as a public GitHub beta/prerelease on 2026-06-14:
+  - Release workflow run 27500465277 completed successfully.
+  - The release is public, not draft, and keeps `Prerelease=true`.
+  - Uploaded setup EXE, MSI, sparse MSIX identity, CER, and `checksums.txt`.
+- Completed the `v1.4.3.0` post-release asset/signature/install smoke
+  verification on 2026-06-15.
+- Fixed a post-`v1.4.3.0` ZIP context-menu merge launch issue on 2026-06-15:
+  - `ArchiveMergeProgressDialog` now clamps its splitter after layout instead
+    of assigning a fixed splitter distance before the dialog width is known.
+  - This avoids the WinForms `SplitterDistance` range exception seen when ZIP
+    merge is launched from Explorer context menus.
+  - Debug and Release managed tests passed 113/113.
 
 ## Deferred Follow-Up Tracks
 
@@ -289,44 +301,22 @@ Scope reviewed:
 
 ## Next Priority
 
-1. Finish the `v1.4.3.0` prerelease publish gate.
-   - Follow the maintainer checklist in `docs/release.md` before publishing the
-     draft GitHub Release.
-   - Verify release workflow assets, `checksums.txt`, local signatures, and
-     GitHub artifact attestations before the install smoke test.
-   - Run the install smoke test on a disposable Windows account, VM, or test
-     machine when possible. If any smoke-test scope is skipped, write that
-     explicitly in the release notes before publishing.
-   - Keep the archive merge support note explicit: ZIP input and ZIP output are
-     supported; 7Z input is not yet supported and is tracked by #8.
-   - Generated ZIP release-sample coverage now exercises legacy filename
-     encodings, comments, directory entries, external attributes,
-     local/central extra fields, collision auto-numbering, and same-content
-     duplicate skipping.
-   - ZIP caution notes only: very large ZIPs and third-party ZIPs from external
-     tools may still expose producer-specific behavior that is not represented
-     by the generated corpus. Treat those as beta caution items, not release
-     blockers, unless a concrete failure is found.
-   - Re-run the managed regression suite, Release build, and `build_msi.ps1`
-     only if code, build scripts, or release-facing metadata changes again
-     before publishing.
-   - `global.json` now pins SDK selection to .NET SDK 8.0.422 with
-     feature-band roll-forward so local verification and the release workflow
-     stay aligned on the .NET 8 SDK line.
-   - The local sandbox blocks Visual Studio/Windows SDK lookup under
-     `%LOCALAPPDATA%\Microsoft SDKs`; ShellExt or full `build_msi.ps1` checks may
-     need external permission locally even though GitHub Actions should not.
-
-2. Keep post-`v1.4.3.0` release notes current as new work starts.
+1. Keep post-`v1.4.3.0` release notes current as new work starts.
    - `docs/release-notes/next.md` is the draft for changes after `v1.4.3.0`
-     and is currently empty except for the standard release checklist.
+     and now tracks the ZIP context-menu merge splitter fix.
    - For the next tag, use `scripts/prepare_release.ps1 -Tag <tag> -Channel beta`
      to update release-facing README/wiki version references and create
      `docs/release-notes/<tag>.md` when it does not already exist.
    - Use `-WhatIf` for review and `-Force` only when the tag-specific notes
      should be regenerated from `docs/release-notes/next.md`.
+   - Keep the archive merge support note explicit: ZIP input and ZIP output are
+     supported; 7Z input is not yet supported and is tracked by #8.
+   - ZIP caution notes only: very large ZIPs and third-party ZIPs from external
+     tools may still expose producer-specific behavior that is not represented
+     by the generated corpus. Treat those as beta caution items unless a
+     concrete failure is found.
 
-3. Continue issue #6 file comparison validation and reload work after the
+2. Continue issue #6 file comparison validation and reload work after the
    release gate.
    - Use mixed files and folders to verify pair counts, status filtering, and
      criterion details.
@@ -338,14 +328,14 @@ Scope reviewed:
    - Continue Explorer and native ShellExt smoke testing for the exposed
      `/context FileCompare` route.
 
-4. Continue UI validation for the 1.4 beta surfaces when manually exercised.
+3. Continue UI validation for the 1.4 beta surfaces when manually exercised.
    - MainForm planner: validate small, default, and wide window sizes, then
      revisit splitter constraints and grouped-row visual polish.
    - Rename review dialog: decide whether generated conflict suffixes should
      remain `Conflict` or become `Auto-resolved conflict`, then consider
      persisting the last dialog size if long filenames are common in real use.
 
-5. Defer lower-priority feature tracks.
+4. Defer lower-priority feature tracks.
    - #3 external providers, #7, and #8 still carry explicit deferred status and
      resume conditions in GitHub.
    - #3 local pattern learning may continue independently because it stays local,
