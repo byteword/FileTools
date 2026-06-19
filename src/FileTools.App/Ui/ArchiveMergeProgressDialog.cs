@@ -144,10 +144,10 @@ internal sealed class ArchiveMergeProgressDialog : Form, IArchiveMergeQuestionSi
             return;
         }
 
-        const int desiredDecisionPanelWidth = 240;
+        const int desiredDecisionPanelWidth = 300;
         const int desiredLogPanelMinimum = 260;
         var minimumLogPanelWidth = Math.Min(desiredLogPanelMinimum, Math.Max(1, availableWidth / 2));
-        var minimumDecisionPanelWidth = Math.Min(220, Math.Max(1, availableWidth - minimumLogPanelWidth));
+        var minimumDecisionPanelWidth = Math.Min(280, Math.Max(1, availableWidth - minimumLogPanelWidth));
         var minimumDistance = minimumLogPanelWidth;
         var maximumDistance = Math.Max(minimumDistance, availableWidth - minimumDecisionPanelWidth);
         var desiredDistance = Math.Clamp(

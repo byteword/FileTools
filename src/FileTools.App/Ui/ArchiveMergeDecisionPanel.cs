@@ -1,14 +1,19 @@
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace FileTools;
 
 internal sealed class ArchiveMergeDecisionPanel : UserControl
 {
+    private const int DecisionButtonRowHeight = 34;
+
     private readonly ListBox _decisionList = new();
     private readonly TextBox _decisionDetailBox = new();
     private readonly Button _decisionPrimaryButton = new();
     private readonly Button _decisionSecondaryButton = new();
     private readonly Button _decisionAbortButton = new();
+    private readonly FlowLayoutPanel _decisionButtonPanel = new();
+    private readonly RowStyle _decisionButtonRowStyle = new(SizeType.Absolute, DecisionButtonRowHeight);
 
     public ArchiveMergeDecisionPanel()
     {
@@ -67,7 +72,7 @@ internal sealed class ArchiveMergeDecisionPanel : UserControl
         };
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 45));
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 55));
-        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
+        layout.RowStyles.Add(_decisionButtonRowStyle);
         group.Controls.Add(layout);
 
         _decisionList.Dock = DockStyle.Fill;
@@ -84,28 +89,28 @@ internal sealed class ArchiveMergeDecisionPanel : UserControl
         _decisionDetailBox.Text = Localizer.Get("ArchiveMergeDecisionNone");
         layout.Controls.Add(_decisionDetailBox, 0, 1);
 
-        var buttons = new FlowLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            FlowDirection = FlowDirection.LeftToRight,
-            WrapContents = false,
-            Margin = new Padding(0, 6, 0, 0)
-        };
+        _decisionButtonPanel.Dock = DockStyle.Fill;
+        _decisionButtonPanel.FlowDirection = FlowDirection.LeftToRight;
+        _decisionButtonPanel.WrapContents = false;
+        _decisionButtonPanel.Margin = new Padding(0, 6, 0, 0);
         ConfigureDecisionButton(_decisionPrimaryButton, ResolveSelectedDecisionPrimary);
         ConfigureDecisionButton(_decisionSecondaryButton, ResolveSelectedDecisionSecondary);
         ConfigureDecisionButton(_decisionAbortButton, ResolveSelectedDecisionAbort);
-        buttons.Controls.Add(_decisionPrimaryButton);
-        buttons.Controls.Add(_decisionSecondaryButton);
-        buttons.Controls.Add(_decisionAbortButton);
-        layout.Controls.Add(buttons, 0, 2);
+        _decisionButtonPanel.Controls.Add(_decisionPrimaryButton);
+        _decisionButtonPanel.Controls.Add(_decisionSecondaryButton);
+        _decisionButtonPanel.Controls.Add(_decisionAbortButton);
+        layout.Controls.Add(_decisionButtonPanel, 0, 2);
 
         UpdateDecisionDetails();
     }
 
     private void ConfigureDecisionButton(Button button, EventHandler handler)
     {
-        button.Width = 82;
+        button.AutoSize = true;
+        button.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        button.MinimumSize = new Size(64, 28);
         button.Height = 28;
+        button.Padding = new Padding(8, 0, 8, 0);
         button.Enabled = false;
         button.Click += handler;
     }
@@ -157,6 +162,7 @@ internal sealed class ArchiveMergeDecisionPanel : UserControl
             _decisionPrimaryButton.Text = "";
             _decisionSecondaryButton.Text = "";
             _decisionAbortButton.Text = "";
+            SetDecisionButtonsVisible(false);
             return;
         }
 
@@ -167,6 +173,14 @@ internal sealed class ArchiveMergeDecisionPanel : UserControl
         _decisionPrimaryButton.Enabled = true;
         _decisionSecondaryButton.Enabled = true;
         _decisionAbortButton.Enabled = true;
+        SetDecisionButtonsVisible(true);
+    }
+
+    private void SetDecisionButtonsVisible(bool visible)
+    {
+        _decisionButtonPanel.Visible = visible;
+        _decisionButtonRowStyle.Height = visible ? DecisionButtonRowHeight : 0;
+        _decisionButtonPanel.Parent?.PerformLayout();
     }
 
     private void ResolveSelectedDecisionPrimary(object? sender, EventArgs e)

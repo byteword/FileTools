@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.4.4.2 - 2026-06-19
+
+### Changed
+
+- Updated app, installer, bundle, ShellExt, README, release guide, and Program
+  info version metadata to `1.4.4.2`.
+- Archive merge decision buttons now size to their localized labels when a
+  pending decision is shown.
+
+### Fixed
+
+- Hid the archive merge decision button row while there are no pending merge
+  decisions so the progress dialog no longer shows three empty disabled button
+  slots.
+
+### Verification
+
+- Debug managed tests passed 124/124 on 2026-06-19.
+- Release managed tests passed 124/124 on 2026-06-19.
+
 ## 1.4.4.1 - 2026-06-16
 
 ### Added

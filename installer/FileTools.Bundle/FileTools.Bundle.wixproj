@@ -3,7 +3,7 @@
     <OutputName>FileToolsSetup</OutputName>
     <OutputType>Bundle</OutputType>
     <InstallerPlatform>x64</InstallerPlatform>
-    <FileToolsVersion Condition="'$(FileToolsVersion)' == ''">1.4.4.1</FileToolsVersion>
+    <FileToolsVersion Condition="'$(FileToolsVersion)' == ''">1.4.4.2</FileToolsVersion>
     <ProductVersion Condition="'$(ProductVersion)' == ''">$(FileToolsVersion)</ProductVersion>
     <MsiPath>$(MSBuildThisFileDirectory)..\FileTools.Installer\bin\$(Configuration)\FileTools.msi</MsiPath>
     <AppIconPath>$(MSBuildThisFileDirectory)..\..\src\FileTools.App\Resources\FileToolsIcon.ico</AppIconPath>

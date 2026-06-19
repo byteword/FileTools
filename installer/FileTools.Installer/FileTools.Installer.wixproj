@@ -3,7 +3,7 @@
     <OutputName>FileTools</OutputName>
     <OutputType>Package</OutputType>
     <InstallerPlatform>x64</InstallerPlatform>
-    <FileToolsVersion Condition="'$(FileToolsVersion)' == ''">1.4.4.1</FileToolsVersion>
+    <FileToolsVersion Condition="'$(FileToolsVersion)' == ''">1.4.4.2</FileToolsVersion>
     <ProductVersion Condition="'$(ProductVersion)' == ''">$(FileToolsVersion)</ProductVersion>
     <SuppressIces>ICE91</SuppressIces>
     <AppPublishDir>$(MSBuildThisFileDirectory)..\..\artifacts\publish\FileTools-win-x64\</AppPublishDir>

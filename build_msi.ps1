@@ -1,7 +1,7 @@
 param(
     [string] $Configuration = 'Release',
     [string] $SigningPublisher = 'CN=FileTools Self-Signed',
-    [string] $Version = '1.4.4.1'
+    [string] $Version = '1.4.4.2'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -15,7 +15,7 @@ function Resolve-FileToolsReleaseVersion {
     }
 
     if ($normalized -notmatch '^\d+\.\d+\.\d+\.\d+$') {
-        throw "Version '$InputVersion' must use four numeric parts, for example 1.4.4.1 or v1.4.4.1."
+        throw "Version '$InputVersion' must use four numeric parts, for example 1.4.4.2 or v1.4.4.2."
     }
 
     $parsed = $null
