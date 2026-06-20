@@ -1298,7 +1298,7 @@ internal static class ArchiveMergeOperations
         {
             ArchiveMergeOutputNamePolicy.ParentFolderName => Path.GetFileName(parent),
             ArchiveMergeOutputNamePolicy.Timestamp => "Merged-" + DateTime.Now.ToString("yyyyMMdd-HHmmss"),
-            _ => CreateCommonArchiveStem(sourcePaths.Select(Path.GetFileNameWithoutExtension).ToArray())
+            _ => MergeNameProposalBuilder.CreateForPaths(sourcePaths, settings).Stem
         };
 
         if (string.IsNullOrWhiteSpace(name))
@@ -1313,6 +1313,11 @@ internal static class ArchiveMergeOperations
 
         var context = new NameTemplateContext
         {
+            SourcePath = sourcePaths[0],
+            FileName = Path.GetFileName(sourcePaths[0]),
+            FileStem = Path.GetFileNameWithoutExtension(sourcePaths[0]),
+            Extension = Path.GetExtension(sourcePaths[0]),
+            ExtensionNoDot = Path.GetExtension(sourcePaths[0]).TrimStart('.'),
             CommonStem = name,
             FirstFileStem = Path.GetFileNameWithoutExtension(sourcePaths[0]),
             SelectedCount = sourcePaths.Count,
@@ -1388,110 +1393,11 @@ internal static class ArchiveMergeOperations
     /// 여러 소스 파일명에서 병합 출력 이름의 공통 stem을 계산한다.
     /// </summary>
     /// <remarks>
-    /// 먼저 연속된 시퀀스 표기를 제거해 논리적 공통값을 먼저 시도하고,
-    /// 실패하면 문자열 prefix 기반으로 폴백한다.
+    /// 공통 텍스트와 숫자/문자 구간값을 함께 분석한다.
     /// </remarks>
     internal static string CreateCommonArchiveStem(IReadOnlyList<string?> stems)
     {
-        var normalized = stems
-            .Where(static stem => !string.IsNullOrWhiteSpace(stem))
-            .Select(static stem => stem!)
-            .ToArray();
-        if (normalized.Length == 0)
-        {
-            return "";
-        }
-
-        var logicalStem = CreateCommonLogicalStem(normalized);
-        if (!string.IsNullOrWhiteSpace(logicalStem))
-        {
-            return logicalStem;
-        }
-
-        return CreateCommonPrefixStem(normalized);
-    }
-
-    /// <summary>
-    /// 동일한 베이스명(끝 시퀀스만 다름)을 가진 항목인지 판별해 공통 stem을 만든다.
-    /// </summary>
-    private static string CreateCommonLogicalStem(IReadOnlyList<string> stems)
-    {
-        if (stems.Count < 2)
-        {
-            return "";
-        }
-
-        var stripped = stems
-            .Select(StripTerminalSequenceMarker)
-            .ToArray();
-        if (stripped.Any(static stem => string.IsNullOrWhiteSpace(stem)))
-        {
-            return "";
-        }
-
-        var first = stripped[0];
-        return stripped.All(stem => string.Equals(first, stem, StringComparison.OrdinalIgnoreCase))
-            ? first
-            : "";
-    }
-
-    /// <summary>
-    /// 파일명 뒤쪽에 붙는 시퀀스 표기(예: " - 001")를 제거한다.
-    /// </summary>
-    private static string StripTerminalSequenceMarker(string stem)
-    {
-        var value = stem.Trim();
-        if (value.Length == 0)
-        {
-            return "";
-        }
-
-        var end = value.Length - 1;
-        while (end >= 0 && char.IsWhiteSpace(value[end]))
-        {
-            end--;
-        }
-
-        var digitEnd = end;
-        while (end >= 0 && char.IsDigit(value[end]))
-        {
-            end--;
-        }
-
-        if (digitEnd == end)
-        {
-            return "";
-        }
-
-        var prefix = value[..(end + 1)].TrimEnd(' ', '.', '-', '_', '[', '(', '{', '#');
-        return string.IsNullOrWhiteSpace(prefix)
-            ? ""
-            : WindowsFileNameSafety.MakeSafeFileName(prefix);
-    }
-
-    /// <summary>
-    /// 정규화된 이름 목록에서 대소문자 무시 prefix 공통부를 추출한다.
-    /// </summary>
-    private static string CreateCommonPrefixStem(IReadOnlyList<string> normalized)
-    {
-        var prefix = normalized[0];
-        foreach (var stem in normalized.Skip(1))
-        {
-            var length = 0;
-            var max = Math.Min(prefix.Length, stem.Length);
-            while (length < max && char.ToUpperInvariant(prefix[length]) == char.ToUpperInvariant(stem[length]))
-            {
-                length++;
-            }
-
-            prefix = prefix[..length];
-            if (prefix.Length == 0)
-            {
-                break;
-            }
-        }
-
-        return prefix.Trim().TrimEnd(' ', '.', '-', '_', '[', '(', '{');
+        return MergeNameProposalBuilder.CreateForStems(stems).Stem;
     }
 
     /// <summary>

@@ -165,17 +165,6 @@ internal static class RenameOperations
     /// </summary>
     private static KoreanFileNameCorrector CreateFileNameCorrector(FileToolsSettings settings)
     {
-        var dictionary = RenameDictionaryStore.Load();
-        var parserProfile = RenameParserProfileStore.Load();
-        var candidateProfile = RenameCandidateProfileStore.Load(dictionary.CommonPhrases);
-        var rules = RenameRuleStore.Load();
-        return new KoreanFileNameCorrector(new CorrectionOptions
-        {
-            ParserProfile = parserProfile,
-            RenameDictionary = settings.RenameUseDictionary ? dictionary.Replacements : [],
-            CommonPhrases = settings.RenameUseDictionary ? dictionary.CommonPhrases.ToArray() : [],
-            CandidateProfile = settings.RenameUseDictionary ? candidateProfile : RenameCandidateProfileStore.CreateDefaultDocument(),
-            Rules = rules.Rules
-        });
+        return NameCorrectionFactory.Create(settings);
     }
 }

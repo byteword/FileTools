@@ -110,7 +110,7 @@ public sealed partial class MainForm : Form
         _clearTargetsMenuItem.Click += (_, _) => ClearTargets();
         _exitMenuItem.Click += (_, _) => Close();
         _addRenameMenuItem.Click += (_, _) => AddRenameSteps();
-        _addWrapMenuItem.Click += (_, _) => AddStep(CreateWrapStep());
+        _addWrapMenuItem.Click += (_, _) => WrapSelectedTargets();
         _addDefaultUnwrapMenuItem.Click += (_, _) => AddStep(CreateDefaultUnwrapStep());
         _addSameNameUnwrapMenuItem.Click += (_, _) => AddStep(CreateUnwrapStep(
             FolderStructureOperation.UnwrapSameNameSingleFile,
@@ -167,7 +167,7 @@ public sealed partial class MainForm : Form
         _clearTargetsToolButton.Click += (_, _) => ClearTargets();
 
         _addRenameToolButton.Click += (_, _) => AddRenameSteps();
-        _addWrapToolButton.Click += (_, _) => AddStep(CreateWrapStep());
+        _addWrapToolButton.Click += (_, _) => WrapSelectedTargets();
         _addUnwrapToolButton.ButtonClick += (_, _) => AddStep(CreateDefaultUnwrapStep());
         _addDefaultUnwrapToolItem.Click += (_, _) => AddStep(CreateDefaultUnwrapStep());
         _addSameNameUnwrapToolItem.Click += (_, _) => AddStep(CreateUnwrapStep(
@@ -559,7 +559,7 @@ public sealed partial class MainForm : Form
             return;
         }
 
-        var allowFolderContentsMode = selectedTargets.Count(static target => Directory.Exists(target.Path)) >= 2;
+        var allowFolderContentsMode = selectedTargets.Any(static target => Directory.Exists(target.Path));
         var normalizedMode = allowFolderContentsMode && mode == FolderMergeMode.MergeFolderContentsOnly
             ? FolderMergeMode.MergeFolderContentsOnly
             : FolderMergeMode.MergeFolderUnits;
@@ -596,17 +596,6 @@ public sealed partial class MainForm : Form
                 FileToolsEnvironment.AppName,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
-            return;
-        }
-
-        var confirmation = MessageBox.Show(
-            BuildFolderMergeConfirmationMessage(preview, finalOptions),
-            FileToolsEnvironment.AppName,
-            MessageBoxButtons.OKCancel,
-            MessageBoxIcon.Question,
-            MessageBoxDefaultButton.Button2);
-        if (confirmation != DialogResult.OK)
-        {
             return;
         }
 
@@ -656,37 +645,6 @@ public sealed partial class MainForm : Form
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
-    }
-
-    private static string BuildFolderMergeConfirmationMessage(
-        FolderMergePlanPreview preview,
-        FolderMergeOptions options)
-    {
-        var message = new StringBuilder();
-        message.AppendLine(Localizer.Format("FolderMergeConfirmFormat", preview.SourcePaths.Count, preview.TargetFolderPath));
-        message.AppendLine(
-            Localizer.Format(
-                "FolderMergeModeLabelFormat",
-                options.Mode == FolderMergeMode.MergeFolderContentsOnly
-                    ? Localizer.Get("FolderMergeModeMergeContentsOnly")
-                    : Localizer.Get("FolderMergeModeMergeFolders")));
-        if (!string.IsNullOrWhiteSpace(preview.TargetParentPath))
-        {
-            message.AppendLine(Localizer.Format("FolderMergeTargetParentFormat", preview.TargetParentPath));
-        }
-
-        if (preview.HasMultipleParents)
-        {
-            message.AppendLine(Localizer.Get("FolderMergeMultiParentWarning"));
-        }
-
-        message.AppendLine(Localizer.Get("FolderMergeSelectedSourcesHeader"));
-        for (var i = 0; i < preview.SourcePaths.Count; i++)
-        {
-            message.AppendLine($"{i + 1}. {preview.SourcePaths[i]}");
-        }
-
-        return message.ToString().TrimEnd();
     }
 
     private void ClearTargets()
@@ -923,13 +881,70 @@ public sealed partial class MainForm : Form
         UpdateCommandStates();
     }
 
-    private static WorkPlanStep CreateWrapStep()
+    private void WrapSelectedTargets()
     {
-        return new WorkPlanStep
+        var targets = GetSelectedTargets()
+            .Where(static target => File.Exists(target.Path))
+            .ToArray();
+        if (targets.Length == 0)
         {
-            Kind = WorkPlanStepKind.FolderWrap,
-            FolderOperation = FolderStructureOperation.WrapFiles
-        };
+            MessageBox.Show(
+                Localizer.Get("NoSelectedTargetMessage"),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            return;
+        }
+
+        if (targets.Any(static target => target.Steps.Count > 0))
+        {
+            MessageBox.Show(
+                Localizer.Get("FolderWrapPlannedStepsMessage"),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            return;
+        }
+
+        var sourcePaths = targets.Select(static target => target.Path).ToArray();
+        using var dialog = new FolderWrapOptionsDialog(sourcePaths, _settings);
+        if (dialog.ShowDialog(this) != DialogResult.OK)
+        {
+            return;
+        }
+
+        var pathComparer = OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+        var targetFolders = sourcePaths
+            .Select(path => FolderWrapOperations.CreatePreview(path, _settings, dialog.ResultFolderNames[path]).TargetFolderPath)
+            .Where(static path => !string.IsNullOrWhiteSpace(path))
+            .Select(static path => path!)
+            .Distinct(pathComparer)
+            .ToArray();
+        var result = FolderWrapOperations.WrapFiles(sourcePaths, _settings, dialog.ResultFolderNames);
+        foreach (var message in result.Messages)
+        {
+            AppendLog(message);
+        }
+
+        foreach (var error in result.Errors)
+        {
+            AppendLog(Localizer.Format("LogErrorFormat", error));
+        }
+
+        foreach (var target in targets.Where(static target => !File.Exists(target.Path) && !Directory.Exists(target.Path)))
+        {
+            _targets.Remove(target);
+        }
+
+        AddPaths(targetFolders.Where(Directory.Exists));
+        if (result.HasErrors)
+        {
+            MessageBox.Show(
+                result.ToUserMessage(Localizer.Get("FolderOperationWrapFiles")),
+                FileToolsEnvironment.AppName,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
     }
 
     private WorkPlanStep CreateDefaultUnwrapStep()
@@ -1004,19 +1019,35 @@ public sealed partial class MainForm : Form
             return;
         }
 
-        var step = new WorkPlanStep
+        using var archiveMergeDialog = new ArchiveMergeOptionsDialog(options);
+        if (archiveMergeDialog.ShowDialog(this) != DialogResult.OK)
         {
-            Kind = WorkPlanStepKind.ArchiveMerge,
-            ArchiveMergeOptions = options
-        };
-        foreach (var target in targets)
+            return;
+        }
+
+        var result = ArchiveMergeProgressDialog.Run(this, archiveMergeDialog.Options);
+        if (result is null)
         {
-            target.Steps.Add(step);
+            return;
+        }
+
+        foreach (var message in result.Messages)
+        {
+            AppendLog(message);
+        }
+
+        foreach (var error in result.Errors)
+        {
+            AppendLog(Localizer.Format("LogErrorFormat", error));
+        }
+
+        foreach (var target in targets.Where(static target => !File.Exists(target.Path) && !Directory.Exists(target.Path)))
+        {
+            _targets.Remove(target);
         }
 
         RefreshTargetGridRows();
         RefreshPlanList();
-        SelectPlanStep(GetSelectedTarget(), step);
         UpdateCommandStates();
     }
 
@@ -1887,7 +1918,7 @@ public sealed partial class MainForm : Form
         var canWrap = canModify && hasSelectedTargets && selectedTargets.All(static target => File.Exists(target.Path));
         var canUnwrap = canModify && hasSelectedTargets && selectedTargets.All(static target => Directory.Exists(target.Path));
         var canRelocate = canModify && hasSelectedTargets && selectedTargets.All(IsExistingTarget);
-        var hasMultipleFolders = selectedTargets.Count(static target => Directory.Exists(target.Path)) >= 2;
+        var hasFolderTarget = selectedTargets.Any(static target => Directory.Exists(target.Path));
         var canArchiveMerge = canModify &&
                               selectedTargets.Length >= 2 &&
                               selectedTargets.All(static target => ArchiveMergeOperations.IsSupportedArchivePath(target.Path)) &&
@@ -1901,7 +1932,7 @@ public sealed partial class MainForm : Form
         var canEditStep = canModify && GetSelectedStep() is not null;
         var canRemoveStep = canModify && GetSelectedPlanSteps().Any();
         var canClearSteps = canModify && anyPlannedSteps;
-        if (!hasMultipleFolders && _folderMergeMode == FolderMergeMode.MergeFolderContentsOnly)
+        if (!hasFolderTarget && _folderMergeMode == FolderMergeMode.MergeFolderContentsOnly)
         {
             _folderMergeMode = FolderMergeMode.MergeFolderUnits;
         }
@@ -1917,7 +1948,7 @@ public sealed partial class MainForm : Form
         _targetContextAddFolderMenuItem.Enabled = canModify;
         _targetContextRemoveTargetMenuItem.Enabled = canModify && hasSelectedTargets;
         _targetContextMergeSelectedTargetsMenuItem.Enabled = canMerge;
-        _mergeSelectedFolderContentsMenuItem.Enabled = canMerge && hasMultipleFolders;
+        _mergeSelectedFolderContentsMenuItem.Enabled = canMerge && hasFolderTarget;
         _mergeSelectedFolderUnitsMenuItem.Enabled = canMerge;
         _targetContextClearTargetsMenuItem.Enabled = canModify && hasTargets;
         _addRenameMenuItem.Enabled = canRename;

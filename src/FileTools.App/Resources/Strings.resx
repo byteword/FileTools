@@ -93,7 +93,7 @@
   <data name="ButtonClear" xml:space="preserve"><value>Clear</value></data>
   <data name="ButtonMergeSelectedTargets" xml:space="preserve"><value>Merge selected into folder</value></data>
   <data name="ButtonMergeFoldersMode" xml:space="preserve"><value>Merge folders as folders</value></data>
-  <data name="ButtonMergeFolderContentsMode" xml:space="preserve"><value>Merge folder contents only</value></data>
+  <data name="ButtonMergeFolderContentsMode" xml:space="preserve"><value>Move folder contents only</value></data>
   <data name="GroupFolderStructure" xml:space="preserve"><value>Folder wrapping / unwrapping</value></data>
   <data name="GroupContextMenu" xml:space="preserve"><value>ContextMenu</value></data>
   <data name="CheckRegisterContextMenu" xml:space="preserve"><value>Register Explorer ContextMenu</value></data>
@@ -500,6 +500,12 @@
   <data name="NameTemplatePreviewConflictFormat" xml:space="preserve"><value>Conflict ({0}): Book.zip -> {1}</value></data>
   <data name="NameTemplateValidationFailedFormat" xml:space="preserve"><value>{0} is invalid: {1}</value></data>
   <data name="DefaultMergeFolderName" xml:space="preserve"><value>Merged</value></data>
+  <data name="FolderWrapOptionsDialogTitle" xml:space="preserve"><value>Folder wrap destination names</value></data>
+  <data name="FolderWrapDialogHeader" xml:space="preserve"><value>Review the destination folder names before wrapping files.</value></data>
+  <data name="FolderWrapTargetFolderName" xml:space="preserve"><value>Destination folder name</value></data>
+  <data name="FolderWrapTargetPath" xml:space="preserve"><value>Destination folder path</value></data>
+  <data name="FolderWrapPlannedStepsMessage" xml:space="preserve"><value>Wrap selected files only after clearing their planned steps.</value></data>
+  <data name="FolderWrapCanceled" xml:space="preserve"><value>Folder wrap was canceled by user.</value></data>
   <data name="FolderMergeNeedsMultipleTargets" xml:space="preserve"><value>Select two or more existing targets to merge.</value></data>
   <data name="FolderMergePlannedStepsMessage" xml:space="preserve"><value>Merge selected targets only after clearing their planned steps.</value></data>
   <data name="FolderMergeCanceled" xml:space="preserve"><value>Folder merge was canceled by user.</value></data>
@@ -508,9 +514,17 @@
   <data name="FolderMergeTargetName" xml:space="preserve"><value>Target folder name</value></data>
   <data name="FolderMergeTargetPath" xml:space="preserve"><value>Target folder path</value></data>
   <data name="FolderMergeModeGroup" xml:space="preserve"><value>Merge mode</value></data>
-  <data name="FolderMergeModeMergeFolders" xml:space="preserve"><value>Merge folders as folder units</value></data>
+  <data name="FolderMergeModeMergeFolders" xml:space="preserve"><value>Merge folders as folders</value></data>
   <data name="FolderMergeModeMergeContentsOnly" xml:space="preserve"><value>Move folder contents only</value></data>
   <data name="FolderMergeModeLabelFormat" xml:space="preserve"><value>Mode: {0}</value></data>
+  <data name="FolderMergeModeContentsHelp" xml:space="preserve"><value>Contents-only mode moves direct child items from selected folders into the destination.</value></data>
+  <data name="FolderMergeModeContentsDisabledHelp" xml:space="preserve"><value>Contents-only mode is available when the selection includes at least one folder.</value></data>
+  <data name="FolderMergeStatusReadyFormat" xml:space="preserve"><value>{0} selected items will be merged.</value></data>
+  <data name="FolderMergeColumnSourceName" xml:space="preserve"><value>Source name</value></data>
+  <data name="FolderMergeColumnKind" xml:space="preserve"><value>Kind</value></data>
+  <data name="FolderMergeColumnTargetName" xml:space="preserve"><value>Merged location</value></data>
+  <data name="FolderMergeSourceKindFile" xml:space="preserve"><value>File</value></data>
+  <data name="FolderMergeSourceKindFolder" xml:space="preserve"><value>Folder</value></data>
   <data name="FolderMergeConfirmFormat" xml:space="preserve"><value>Merge {0} selected targets into:&#x0D;&#x0A;{1}</value></data>
   <data name="FolderMergeTargetParentFormat" xml:space="preserve"><value>Target parent: {0}</value></data>
   <data name="FolderMergeMultiParentWarning" xml:space="preserve"><value>Selected targets are in different parents. All items will be merged into a folder under the first selected target's parent path.</value></data>
@@ -604,7 +618,7 @@
   <data name="ArchiveMergeCollisionHelp" xml:space="preserve"><value>Used when the selected layout produces the same internal ZIP path more than once.</value></data>
   <data name="ArchiveMergeDuplicateHelp" xml:space="preserve"><value>Same-content detection reads and hashes file entries before writing.</value></data>
   <data name="ArchiveMergeFailureHelp" xml:space="preserve"><value>Archive-open and entry-read failures can abort or produce a partial output.</value></data>
-  <data name="ArchiveMergeOutputNameHelp" xml:space="preserve"><value>Used for the default output ZIP path when a merge plan is created.</value></data>
+  <data name="ArchiveMergeOutputNameHelp" xml:space="preserve"><value>Used for the suggested output ZIP path before the final path is reviewed.</value></data>
   <data name="ArchiveMergeCompressionHelp" xml:space="preserve"><value>Small ZIP compression setting for newly written output archives.</value></data>
   <data name="ArchiveMergeOptionsDialogTitle" xml:space="preserve"><value>Archive merge options</value></data>
   <data name="ArchiveMergeOptionsHeader" xml:space="preserve"><value>Merge selected ZIP archives into one output ZIP.</value></data>

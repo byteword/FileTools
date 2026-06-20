@@ -54,7 +54,7 @@
   <path d="M64 376 L68 381 L75 369" fill="none" stroke="#2563eb" stroke-width="2"/>
   <text class="body" x="84" y="382">파일이름 자동 교정</text>
 
-  <text class="label" x="300" y="354">폴더 wrapping / unwrapping</text>
+  <text class="label" x="300" y="354">폴더 씌우기 / 벗기기</text>
   <rect x="300" y="370" width="12" height="12" fill="#ffffff" stroke="#7c8796"/>
   <path d="M302 376 L306 381 L313 369" fill="none" stroke="#2563eb" stroke-width="2"/>
   <text class="body" x="322" y="382">감싸기</text>
@@ -96,7 +96,7 @@
 
   <rect class="group" x="42" y="626" width="816" height="40" stroke="#d97706"/>
   <rect class="folderHeader" x="42" y="626" width="816" height="40"/>
-  <text class="label" x="60" y="651">&gt;  폴더 wrapping / unwrapping</text>
+  <text class="label" x="60" y="651">&gt;  폴더 씌우기 / 벗기기</text>
   <text class="muted" x="650" y="651" fill="#b45309">자동 · 파일명 유지</text>
 
   <rect class="group" x="42" y="670" width="520" height="34" stroke="#7c3aed"/>

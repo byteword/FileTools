@@ -7,8 +7,8 @@ namespace FileTools;
 
 internal sealed class FolderMergeOptionsDialog : Form
 {
-    private const int DialogClientWidth = 584;
-    private const int DialogClientHeight = 380;
+    private const int DialogClientWidth = 760;
+    private const int DialogClientHeight = 520;
 
     private readonly IReadOnlyList<string> _sourcePaths;
     private readonly FileToolsSettings _settings;
@@ -17,7 +17,10 @@ internal sealed class FolderMergeOptionsDialog : Form
     private readonly Label _targetFolderPathLabel = new();
     private readonly RadioButton _mergeFolderUnitsRadio = new();
     private readonly RadioButton _mergeFolderContentsRadio = new();
-    private readonly Label _messageLabel = new();
+    private readonly Label _modeHelpLabel = new();
+    private readonly Label _statusLabel = new();
+    private readonly ListView _sourceListView = new();
+    private readonly ToolTip _toolTip = new();
     private readonly Button _okButton = new();
     private FolderMergePlanPreview _preview;
 
@@ -38,9 +41,9 @@ internal sealed class FolderMergeOptionsDialog : Form
         Text = Localizer.Get("FolderMergeOptionsDialogTitle");
         StartPosition = FormStartPosition.CenterParent;
         ClientSize = new Size(DialogClientWidth, DialogClientHeight);
-        MinimumSize = new Size(600, 420);
-        FormBorderStyle = FormBorderStyle.FixedDialog;
-        MaximizeBox = false;
+        MinimumSize = new Size(700, 480);
+        FormBorderStyle = FormBorderStyle.Sizable;
+        MaximizeBox = true;
         MinimizeBox = false;
         ShowInTaskbar = false;
         AcceptButton = _okButton;
@@ -60,13 +63,13 @@ internal sealed class FolderMergeOptionsDialog : Form
             Dock = DockStyle.Fill,
             ColumnCount = 1,
             RowCount = 5,
-            Padding = new Padding(12)
+            Padding = new Padding(14)
         };
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 82));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 78));
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 104));
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
 
         root.Controls.Add(new Label
         {
@@ -78,14 +81,130 @@ internal sealed class FolderMergeOptionsDialog : Form
 
         root.Controls.Add(CreateTargetNamePanel(options.TargetFolderName), 0, 1);
         root.Controls.Add(CreateModePanel(options.Mode), 0, 2);
-        root.Controls.Add(CreateMessagePanel(), 0, 3);
+        root.Controls.Add(CreateSourceListPanel(), 0, 3);
+        root.Controls.Add(CreateButtonPanel(), 0, 4);
+        Controls.Add(root);
+    }
 
+    private Control CreateTargetNamePanel(string? initialName)
+    {
+        var panel = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 2,
+            RowCount = 3,
+            Margin = new Padding(0, 2, 0, 6)
+        };
+        panel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 124));
+        panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 20));
+
+        panel.Controls.Add(CreateRowLabel(Localizer.Get("FolderMergeTargetName")), 0, 0);
+
+        _targetFolderNameBox.Dock = DockStyle.Fill;
+        _targetFolderNameBox.Margin = new Padding(0, 2, 0, 0);
+        _targetFolderNameBox.Text = initialName ?? string.Empty;
+        panel.Controls.Add(_targetFolderNameBox, 1, 0);
+
+        panel.Controls.Add(CreateRowLabel(Localizer.Get("FolderMergeTargetPath")), 0, 1);
+
+        _targetFolderPathLabel.Dock = DockStyle.Fill;
+        _targetFolderPathLabel.ForeColor = Color.FromArgb(71, 85, 105);
+        _targetFolderPathLabel.TextAlign = ContentAlignment.MiddleLeft;
+        _targetFolderPathLabel.AutoEllipsis = true;
+        panel.Controls.Add(_targetFolderPathLabel, 1, 1);
+
+        _statusLabel.Dock = DockStyle.Fill;
+        _statusLabel.AutoEllipsis = true;
+        _statusLabel.TextAlign = ContentAlignment.MiddleLeft;
+        panel.Controls.Add(_statusLabel, 1, 2);
+
+        return panel;
+    }
+
+    private Control CreateModePanel(FolderMergeMode mode)
+    {
+        var group = new GroupBox
+        {
+            Dock = DockStyle.Fill,
+            Text = Localizer.Get("FolderMergeModeGroup"),
+            Padding = new Padding(10, 20, 10, 8),
+            Margin = new Padding(0, 0, 0, 8)
+        };
+        var panel = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 3
+        };
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
+        panel.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+
+        _mergeFolderUnitsRadio.Text = Localizer.Get("FolderMergeModeMergeFolders");
+        _mergeFolderUnitsRadio.Dock = DockStyle.Fill;
+        _mergeFolderUnitsRadio.Margin = new Padding(0);
+        _mergeFolderUnitsRadio.TextAlign = ContentAlignment.MiddleLeft;
+        _mergeFolderUnitsRadio.Checked = mode == FolderMergeMode.MergeFolderUnits;
+        panel.Controls.Add(_mergeFolderUnitsRadio, 0, 0);
+
+        _mergeFolderContentsRadio.Text = Localizer.Get("FolderMergeModeMergeContentsOnly");
+        _mergeFolderContentsRadio.Dock = DockStyle.Fill;
+        _mergeFolderContentsRadio.Margin = new Padding(0);
+        _mergeFolderContentsRadio.TextAlign = ContentAlignment.MiddleLeft;
+        _mergeFolderContentsRadio.Enabled = _allowFolderContentsMode;
+        _mergeFolderContentsRadio.Checked =
+            _allowFolderContentsMode && mode == FolderMergeMode.MergeFolderContentsOnly;
+        panel.Controls.Add(_mergeFolderContentsRadio, 0, 1);
+
+        _modeHelpLabel.Dock = DockStyle.Fill;
+        _modeHelpLabel.ForeColor = Color.FromArgb(71, 85, 105);
+        _modeHelpLabel.AutoEllipsis = true;
+        _modeHelpLabel.TextAlign = ContentAlignment.MiddleLeft;
+        _modeHelpLabel.Text = _allowFolderContentsMode
+            ? Localizer.Get("FolderMergeModeContentsHelp")
+            : Localizer.Get("FolderMergeModeContentsDisabledHelp");
+        panel.Controls.Add(_modeHelpLabel, 0, 2);
+
+        group.Controls.Add(panel);
+        return group;
+    }
+
+    private Control CreateSourceListPanel()
+    {
+        var group = new GroupBox
+        {
+            Dock = DockStyle.Fill,
+            Text = Localizer.Get("FolderMergeSelectedSourcesHeader"),
+            Padding = new Padding(8, 20, 8, 8),
+            Margin = new Padding(0)
+        };
+
+        _sourceListView.Dock = DockStyle.Fill;
+        _sourceListView.View = View.Details;
+        _sourceListView.FullRowSelect = true;
+        _sourceListView.GridLines = true;
+        _sourceListView.HideSelection = false;
+        _sourceListView.HeaderStyle = ColumnHeaderStyle.Nonclickable;
+        _sourceListView.ShowItemToolTips = true;
+        _sourceListView.Columns.Add(Localizer.Get("FolderMergeColumnSourceName"), 260);
+        _sourceListView.Columns.Add(Localizer.Get("FolderMergeColumnKind"), 92);
+        _sourceListView.Columns.Add(Localizer.Get("FolderMergeColumnTargetName"), 330);
+        _sourceListView.Resize += (_, _) => AdjustListColumns();
+        group.Controls.Add(_sourceListView);
+        return group;
+    }
+
+    private Control CreateButtonPanel()
+    {
         var buttons = new FlowLayoutPanel
         {
             Dock = DockStyle.Fill,
             FlowDirection = FlowDirection.RightToLeft,
             WrapContents = false,
-            Padding = new Padding(0, 6, 0, 0)
+            Padding = new Padding(0, 8, 0, 0)
         };
 
         var cancelButton = new Button
@@ -105,105 +224,17 @@ internal sealed class FolderMergeOptionsDialog : Form
 
         _okButton.Click += (_, _) => SaveAndClose();
         CancelButton = cancelButton;
-        root.Controls.Add(buttons, 0, 4);
-        root.SetColumnSpan(buttons, 1);
-        Controls.Add(root);
+        return buttons;
     }
 
-    private Control CreateTargetNamePanel(string? initialName)
+    private static Label CreateRowLabel(string text)
     {
-        var panel = new TableLayoutPanel
+        return new Label
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 2,
-            RowCount = 2,
-            Margin = new Padding(0, 4, 0, 8)
-        };
-        panel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 128));
-        panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
-        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
-
-        panel.Controls.Add(new Label
-        {
-            Dock = DockStyle.Fill,
-            Text = Localizer.Get("FolderMergeTargetName"),
+            Text = text,
             TextAlign = ContentAlignment.MiddleLeft
-        }, 0, 0);
-
-        _targetFolderNameBox.Dock = DockStyle.Fill;
-        _targetFolderNameBox.Margin = new Padding(0, 2, 0, 0);
-        _targetFolderNameBox.Text = initialName ?? string.Empty;
-        panel.Controls.Add(_targetFolderNameBox, 1, 0);
-
-        panel.Controls.Add(new Label
-        {
-            Dock = DockStyle.Fill,
-            Text = Localizer.Get("FolderMergeTargetPath"),
-            TextAlign = ContentAlignment.MiddleLeft
-        }, 0, 1);
-
-        _targetFolderPathLabel.Dock = DockStyle.Fill;
-        _targetFolderPathLabel.ForeColor = Color.FromArgb(71, 85, 105);
-        _targetFolderPathLabel.TextAlign = ContentAlignment.MiddleLeft;
-        _targetFolderPathLabel.AutoEllipsis = true;
-        panel.Controls.Add(_targetFolderPathLabel, 1, 1);
-
-        return panel;
-    }
-
-    private Control CreateModePanel(FolderMergeMode mode)
-    {
-        var group = new GroupBox
-        {
-            Dock = DockStyle.Fill,
-            Text = Localizer.Get("FolderMergeModeGroup"),
-            Padding = new Padding(8, 20, 8, 8)
         };
-        var panel = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            ColumnCount = 1,
-            RowCount = 2
-        };
-        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
-        panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
-
-        _mergeFolderUnitsRadio.Text = Localizer.Get("FolderMergeModeMergeFolders");
-        _mergeFolderUnitsRadio.Dock = DockStyle.Fill;
-        _mergeFolderUnitsRadio.Margin = new Padding(0);
-        _mergeFolderUnitsRadio.TextAlign = ContentAlignment.MiddleLeft;
-        _mergeFolderUnitsRadio.Checked = mode == FolderMergeMode.MergeFolderUnits;
-        panel.Controls.Add(_mergeFolderUnitsRadio, 0, 0);
-
-        _mergeFolderContentsRadio.Text = Localizer.Get("FolderMergeModeMergeContentsOnly");
-        _mergeFolderContentsRadio.Dock = DockStyle.Fill;
-        _mergeFolderContentsRadio.Margin = new Padding(0);
-        _mergeFolderContentsRadio.TextAlign = ContentAlignment.MiddleLeft;
-        _mergeFolderContentsRadio.Enabled = _allowFolderContentsMode;
-        _mergeFolderContentsRadio.Visible = _allowFolderContentsMode;
-        _mergeFolderContentsRadio.Checked =
-            _allowFolderContentsMode && mode == FolderMergeMode.MergeFolderContentsOnly;
-        panel.Controls.Add(_mergeFolderContentsRadio, 0, 1);
-
-        group.Controls.Add(panel);
-        return group;
-    }
-
-    private Control CreateMessagePanel()
-    {
-        var panel = new Panel
-        {
-            Dock = DockStyle.Fill,
-            BorderStyle = BorderStyle.FixedSingle
-        };
-        _messageLabel.Dock = DockStyle.Fill;
-        _messageLabel.Padding = new Padding(8);
-        _messageLabel.TextAlign = ContentAlignment.TopLeft;
-        _messageLabel.AutoSize = false;
-        _messageLabel.AutoEllipsis = true;
-        panel.Controls.Add(_messageLabel);
-        return panel;
     }
 
     private void WireEvents()
@@ -222,30 +253,99 @@ internal sealed class FolderMergeOptionsDialog : Form
 
         if (!_preview.IsReady || string.IsNullOrWhiteSpace(_preview.TargetFolderPath))
         {
-            _messageLabel.ForeColor = Color.Firebrick;
-            _messageLabel.Text = _preview.FailureReason ?? Localizer.Get("PlanPreviewUnavailable");
+            _statusLabel.ForeColor = Color.Firebrick;
+            _statusLabel.Text = _preview.FailureReason ?? Localizer.Get("PlanPreviewUnavailable");
             _okButton.Enabled = false;
             _targetFolderPathLabel.Text = string.Empty;
+            _toolTip.SetToolTip(_targetFolderPathLabel, null);
+            LoadSourceList();
             return;
         }
 
         _okButton.Enabled = true;
         _targetFolderPathLabel.Text = _preview.TargetFolderPath;
+        _toolTip.SetToolTip(_targetFolderPathLabel, _preview.TargetFolderPath);
 
-        var messageParts = new List<string>
+        var statusParts = new List<string>
         {
-            Localizer.Format("FolderMergeConfirmFormat", _sourcePaths.Count, _preview.TargetFolderPath),
-            _preview.TargetParentPath is not null ? Localizer.Format("FolderMergeTargetParentFormat", _preview.TargetParentPath) : string.Empty
+            Localizer.Format("FolderMergeStatusReadyFormat", _sourcePaths.Count)
         };
         if (_preview.HasMultipleParents)
         {
-            messageParts.Add(Localizer.Get("FolderMergeMultiParentWarning"));
+            statusParts.Add(Localizer.Get("FolderMergeMultiParentWarning"));
         }
 
-        _messageLabel.ForeColor = Color.FromArgb(55, 65, 81);
-        _messageLabel.Text = string.Join(
-            Environment.NewLine,
-            messageParts.Where(static text => !string.IsNullOrWhiteSpace(text)));
+        _statusLabel.ForeColor = _preview.HasMultipleParents
+            ? Color.FromArgb(146, 64, 14)
+            : Color.FromArgb(55, 65, 81);
+        _statusLabel.Text = string.Join(" ", statusParts);
+        _toolTip.SetToolTip(_statusLabel, _statusLabel.Text);
+        LoadSourceList();
+    }
+
+    private void LoadSourceList()
+    {
+        _sourceListView.BeginUpdate();
+        _sourceListView.Items.Clear();
+        var mode = BuildModeFromInputs();
+        foreach (var sourcePath in _sourcePaths)
+        {
+            var sourceName = Path.GetFileName(sourcePath);
+            var isFolder = Directory.Exists(sourcePath);
+            var item = new ListViewItem(string.IsNullOrWhiteSpace(sourceName) ? sourcePath : sourceName);
+            item.SubItems.Add(isFolder
+                ? Localizer.Get("FolderMergeSourceKindFolder")
+                : Localizer.Get("FolderMergeSourceKindFile"));
+            item.SubItems.Add(CreateTargetDisplay(sourcePath, mode));
+            item.ToolTipText = CreateItemToolTip(sourcePath, mode);
+            _sourceListView.Items.Add(item);
+        }
+
+        _sourceListView.EndUpdate();
+        AdjustListColumns();
+    }
+
+    private string CreateTargetDisplay(string sourcePath, FolderMergeMode mode)
+    {
+        if (string.IsNullOrWhiteSpace(_preview.TargetFolderPath))
+        {
+            return "";
+        }
+
+        var targetFolderName = Path.GetFileName(_preview.TargetFolderPath);
+        var sourceName = Path.GetFileName(sourcePath);
+        if (Directory.Exists(sourcePath))
+        {
+            return mode == FolderMergeMode.MergeFolderContentsOnly
+                ? targetFolderName + @"\*"
+                : targetFolderName + @"\" + sourceName + @"\";
+        }
+
+        return targetFolderName + @"\" + sourceName;
+    }
+
+    private string CreateItemToolTip(string sourcePath, FolderMergeMode mode)
+    {
+        if (string.IsNullOrWhiteSpace(_preview.TargetFolderPath))
+        {
+            return sourcePath;
+        }
+
+        var targetDisplay = CreateTargetDisplay(sourcePath, mode);
+        return sourcePath + Environment.NewLine + _preview.TargetFolderPath + Environment.NewLine + targetDisplay;
+    }
+
+    private void AdjustListColumns()
+    {
+        if (_sourceListView.Columns.Count < 3 || _sourceListView.ClientSize.Width <= 0)
+        {
+            return;
+        }
+
+        var width = Math.Max(360, _sourceListView.ClientSize.Width - SystemInformation.VerticalScrollBarWidth - 8);
+        _sourceListView.Columns[1].Width = 92;
+        _sourceListView.Columns[0].Width = Math.Max(180, width / 3);
+        _sourceListView.Columns[2].Width = Math.Max(180, width - _sourceListView.Columns[0].Width - _sourceListView.Columns[1].Width);
     }
 
     private FolderMergeOptions BuildOptionsFromInputs()

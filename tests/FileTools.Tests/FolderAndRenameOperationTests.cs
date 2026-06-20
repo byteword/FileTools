@@ -49,13 +49,30 @@ public sealed class FolderAndRenameOperationTests
 
         var result = FolderMergeOperations.MergeIntoFolder([first, second], new FileToolsSettings());
 
-        var targetFolder = temp.GetPath("Series");
+        var targetFolder = temp.GetPath("Series 01~02");
         Assert.Equal(targetFolder, result.TargetFolderPath);
         Assert.Equal(2, result.OperationResult.AppliedCount);
         Assert.False(File.Exists(first));
         Assert.False(File.Exists(second));
         Assert.Equal("one", File.ReadAllText(Path.Combine(targetFolder, "Series 01.txt")));
         Assert.Equal("two", File.ReadAllText(Path.Combine(targetFolder, "Series 02.txt")));
+    }
+
+    [Fact]
+    public void FolderWrapOperations_WrapFilesUsesCustomTargetFolderName()
+    {
+        using var temp = TempDirectory.Create();
+        var source = temp.GetPath("Book 01.txt");
+        File.WriteAllText(source, "book");
+
+        var result = FolderWrapOperations.WrapFiles(
+            [source],
+            new FileToolsSettings(),
+            new Dictionary<string, string> { [Path.GetFullPath(source)] = "Custom Folder" });
+
+        Assert.Equal(1, result.AppliedCount);
+        Assert.False(File.Exists(source));
+        Assert.Equal("book", File.ReadAllText(Path.Combine(temp.Root, "Custom Folder", "Book 01.txt")));
     }
 
     [Fact]
@@ -72,7 +89,7 @@ public sealed class FolderAndRenameOperationTests
         Assert.True(preview.IsReady);
         Assert.Null(preview.FailureReason);
         Assert.Equal(2, preview.SourcePaths.Count);
-        Assert.Equal(temp.GetPath("Series"), preview.TargetFolderPath);
+        Assert.Equal(temp.GetPath("Series 01~02"), preview.TargetFolderPath);
     }
 
     [Fact]
@@ -95,7 +112,7 @@ public sealed class FolderAndRenameOperationTests
 
         var targetFolder = result.TargetFolderPath;
         Assert.NotNull(targetFolder);
-        Assert.Equal(Path.Combine(temp.Root, "Episode"), targetFolder);
+        Assert.Equal(Path.Combine(temp.Root, "Episode 01~02"), targetFolder);
         Assert.True(Directory.Exists(Path.Combine(targetFolder, "Chapter01")));
         Assert.True(Directory.Exists(Path.Combine(targetFolder, "Chapter02")));
         Assert.False(Directory.Exists(Path.Combine(targetFolder, "Episode 01")));
@@ -163,7 +180,7 @@ public sealed class FolderAndRenameOperationTests
         Assert.True(preview.IsReady);
         Assert.True(preview.HasMultipleParents);
         Assert.Equal(firstParent, preview.TargetParentPath);
-        Assert.Equal(Path.Combine(firstParent, "Series"), preview.TargetFolderPath);
+        Assert.Equal(Path.Combine(firstParent, "Series 01~02"), preview.TargetFolderPath);
     }
 
     [Fact]
@@ -191,13 +208,13 @@ public sealed class FolderAndRenameOperationTests
         using var temp = TempDirectory.Create();
         var first = temp.GetPath("Series 01.txt");
         var second = temp.GetPath("Series 02.txt");
-        Directory.CreateDirectory(temp.GetPath("Series"));
+        Directory.CreateDirectory(temp.GetPath("Series 01~02"));
         File.WriteAllText(first, "one");
         File.WriteAllText(second, "two");
 
         var target = FolderMergeOperations.PreviewTargetFolderPath([first, second], new FileToolsSettings());
 
-        Assert.Equal(temp.GetPath("Series (2)"), target);
+        Assert.Equal(temp.GetPath("Series 01~02 (2)"), target);
     }
 
     private static RenamePreview CreateRenamePreview(string sourcePath, string targetPath, RenamePreviewStatus status)

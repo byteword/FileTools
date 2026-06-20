@@ -14,6 +14,8 @@ entry point with the safer application flow.
 
 ![In-app context menu and folder merge flow](images/in-app-context-menu-folder-merge-design.svg)
 
+![Folder merge options dialog](images/folder-merge-options-dialog.svg)
+
 ## Current State
 
 `MainForm` exposes commands through the menu bar and toolbars only. The target
@@ -153,6 +155,21 @@ For Explorer `/context FolderMergeSelectedTargets`, the confirmation can be a
 simple message box in the first slice. If the user cancels, return a skipped
 result rather than an error.
 
+### 1.4.5.0 Options Dialog Update
+
+`FolderMergeOptionsDialog` now uses the same final-name review surface for app
+and Explorer entry points, but the layout is optimized for long generated names:
+
+- the window is wider and resizable;
+- target folder name and target path are separated, with tooltips for long
+  paths;
+- both merge modes are always visible, and contents-only mode is disabled with
+  an explanation only when no folder is selected;
+- the lower explanatory message box is replaced by a selected-item list showing
+  source name, item kind, and the top-level merged location.
+- Korean mode labels are aligned across the split button and options dialog:
+  `폴더 단위로 병합` and `폴더 내용만 이동`.
+
 ### Target Parent Policy
 
 The current behavior uses the first selected source's parent directory. Keep
@@ -166,22 +183,24 @@ if real-world use shows that cross-parent selection is common.
 
 ### Folder Name Policy
 
-Replace the simple common-prefix-only naming with a logical common stem helper:
+Replace the simple common-prefix-only naming with a logical merge-name analyzer:
 
 1. Take selected file stems or folder names in selection order.
 2. Normalize whitespace and trim trailing separators.
-3. Strip terminal sequence markers such as ` 01`, `-01`, `_001`, and similar
-   numeric suffixes when all selected names share the stripped base.
-4. If every source shares that stripped base, use it.
-5. Otherwise fall back to the current common-prefix helper.
+3. Extract numeric or text range tokens when the surrounding text is stable.
+4. Merge contiguous or overlapping ranges and preserve disjoint range groups.
+5. If the full structure is unreliable, use the strongest common text token
+   found anywhere in the names.
 6. If the result is empty, use the localized default merge folder name.
 
 Examples:
 
 ```text
-Series 01.txt + Series 02.txt -> Series
-A-001.jpg + A-002.jpg         -> A
-Folder A + Folder B           -> Folder
+Series 01.txt + Series 02.txt -> Series 01~02
+A-001.jpg + A-002.jpg         -> A 001~002
+A 01~03.txt + A 05~08.txt     -> A 01~03, 05~08
+test이름 tt.txt + 이름abc.txt -> 이름
+Folder A + Folder B           -> Folder A~B
 cat.txt + dog.txt             -> Merged
 ```
 
@@ -189,16 +208,16 @@ The existing collision policy should still apply after the target folder name is
 chosen:
 
 ```text
-Series
-Series (2)
-Series (3)
+Series 01~02
+Series 01~02 (2)
+Series 01~02 (3)
 ```
 
 ## Regression Tests
 
 Add managed tests before or with the implementation:
 
-- `FolderMergeOperations` produces `Series` for `Series 01.txt` and
+- `FolderMergeOperations` produces `Series 01~02` for `Series 01.txt` and
   `Series 02.txt`.
 - Existing target folders still auto-number.
 - Mixed files and folders move into the generated folder without flattening

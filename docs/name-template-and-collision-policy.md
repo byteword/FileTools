@@ -1,10 +1,15 @@
 # Name Template and Collision Policy
 
-This document records the naming design used by folder wrap/unwrap and the extension points reserved for future merge operations.
+This document records the naming design used by folder wrapping, folder merge,
+and archive merge.
 
 ## Scope
 
-The current implementation adds a shared naming foundation and applies it to folder wrap/unwrap execution, work-plan prediction, work-plan preview, and selected-target folder merge. Folder name templates and collision policy can be edited from the folder-structure settings group.
+The current implementation adds a shared naming foundation and applies it to
+folder wrap/unwrap execution, work-plan prediction, work-plan preview,
+selected-target folder merge, and archive merge output naming. Folder name
+templates and collision policy can be edited from the folder-structure settings
+group.
 
 ## Template Evaluation
 
@@ -51,11 +56,27 @@ Literal braces can be escaped with doubled braces:
 
 ## Folder Wrap/Unwrap Defaults
 
+The user-facing Korean name for folder wrapping is `폴더 씌우기`. It means
+wrapping each selected file in its own same-name folder:
+
+```text
+Book 01.zip -> Book 01\Book 01.zip
+Book 02.zip -> Book 02\Book 02.zip
+```
+
+This operation is separate from `폴더 합치기`, which moves multiple selected
+targets into one generated folder.
+
 Folder wrap now resolves the target folder name through the shared template helper:
 
 ```text
-{FileStem}
+{CorrectedFileStem}
 ```
+
+If correction is unavailable or requires review, the folder wrap fallback is the
+safe original file stem. This keeps context-menu execution deterministic while
+still allowing safe automatic correction to participate in generated folder
+names.
 
 Single-file folder unwrap still keeps the original file name when the folder name and file stem match. When they differ, the existing mismatch presets map to templates:
 
@@ -134,6 +155,58 @@ Correction-derived tokens must carry review state. If the correction preview req
 
 In the current implementation, correction-derived tokens are unavailable when the correction preview is `NeedsReview`, `Conflict`, or `Skipped`. A template that depends on those tokens then falls back to the operation's safe default name.
 
+## Common Merge Name Analysis
+
+Folder merge and archive merge use `MergeNameProposalBuilder` before template
+evaluation. It first asks the rename-correction pipeline for safe corrected
+stems, falls back when correction requires review or fails, and then runs the
+logical-name analyzer. The analyzer does not only compare the leading prefix.
+It tokenizes selected stems, looks for stable text tokens anywhere in the name,
+extracts numeric or text ranges, and builds a merged stem from the most useful
+shared structure.
+
+Examples:
+
+```text
+A 01.zip + A 02.zip                    -> A 01~02.zip
+A 01~03.zip + A 04~06.zip              -> A 01~06.zip
+A 01~03.zip + A 05~08.zip              -> A 01~03, 05~08.zip
+test이름 tt.zip + 이름abc.zip          -> 이름.zip
+이름 a태그.zip + 이름 b태그.zip        -> 이름 a~b 태그.zip
+```
+
+The analyzer keeps numeric padding from the selected names. Contiguous or
+overlapping ranges are merged. Disjoint ranges are kept as a comma-separated
+range summary. When a stable common token exists in the middle of the names but
+the surrounding tokens do not form a reliable template, that token can still be
+used as the logical common stem.
+
+Correction-derived candidates can participate only when they are safe for
+automatic execution. If automatic name correction reports `NeedsReview`,
+`Conflict`, or `Skipped`, merge-name proposal falls back to the original stems
+instead of silently applying an uncertain generated name.
+
+## Final Name Review Flow
+
+Operations that create a new destination name should consistently pass through a
+final destination-name review surface before execution:
+
+```text
+Select targets -> analyze name -> edit final destination name -> OK -> execute
+```
+
+The review surface differs by operation shape:
+
+```text
+Folder wrapping: one editable destination folder name per selected file
+Folder merge: one editable destination folder name for the merged folder
+Archive merge: one editable output ZIP path
+```
+
+After the user confirms the final name, the operation executes immediately. A
+separate confirmation prompt is avoided unless the operation needs a destructive
+or irreversible decision not already represented in the review surface.
+
 ## Folder Merge
 
 Selected-target folder merge moves two or more selected files and folders into one generated folder. It is an immediate target-list command rather than a per-target work-plan step, because it operates across multiple targets at once.
@@ -167,12 +240,21 @@ Output is always ZIP in the first implementation. Metadata preservation keeps th
 Reserved default templates:
 
 ```text
+FolderWrapFolderNameTemplate       = {CorrectedFileStem}
 MultiFileMergeFolderNameTemplate   = {CommonStem}
 MultiFolderMergeFolderNameTemplate = {CommonStem}
 ArchiveMergeFileNameTemplate       = {CommonStem}{TargetExtension}
 ```
 
-The default output filename uses `ArchiveMergeFileNameTemplate` with `{TargetExtension}` set to `.zip`. `{CommonStem}` is resolved as a common logical archive-family name first, so numbered sources such as `A 01.zip` and `A 02.zip` produce `A.zip` rather than a raw common prefix like `A 0.zip`. If `{CommonStem}` cannot produce a useful name, the parent folder name is used; if that is unavailable, a timestamped `Merged-yyyyMMdd-HHmmss.zip` fallback is used. When the output filename policy is `Manual`, context-menu archive merge opens a save dialog before the progress window and uses the selected path as the final ZIP path.
+The default output filename uses `ArchiveMergeFileNameTemplate` with
+`{TargetExtension}` set to `.zip`. `{CommonStem}` is resolved as a common
+logical archive-family name first, so numbered sources such as `A 01.zip` and
+`A 02.zip` produce `A 01~02.zip` rather than a raw common prefix like
+`A 0.zip`. If `{CommonStem}` cannot produce a useful name, the parent folder
+name is used; if that is unavailable, a timestamped
+`Merged-yyyyMMdd-HHmmss.zip` fallback is used. When the output filename policy
+is `Manual`, the final-name review dialog starts from the suggested path and the
+user chooses the final ZIP path before execution.
 
 ### Archive Merge Layout
 
@@ -311,11 +393,10 @@ When an `Ask` policy produces a question, the active execution UI adds it to a p
 
 Common-filename-based archive merge is tracked by issue #9 and documented in
 `docs/common-file-merge-design.md`. Its primary scenario is merging archives
-such as `A 01.zip` and `A 02.zip` into `A.zip`, not renaming every selected file
-to the same base name. It reuses the archive merge output template
-`{CommonStem}{TargetExtension}` with a logical-family calculation that strips
-trailing sequence markers before falling back to the existing common-prefix
-helper. General file-content merge, such as
+such as `A 01.zip` and `A 02.zip` into `A 01~02.zip`, not renaming every
+selected file to the same base name. It reuses the archive merge output template
+`{CommonStem}{TargetExtension}` with the shared merge-name analyzer described
+above. General file-content merge, such as
 `b.txt + b02.txt -> b.txt`, remains a deferred operation because it needs
 duplicate or overlapping content policy.
 

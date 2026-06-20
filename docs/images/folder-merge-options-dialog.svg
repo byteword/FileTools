@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="560" viewBox="0 0 820 560" role="img" aria-labelledby="title desc">
+  <title id="title">Folder merge options dialog</title>
+  <desc id="desc">Updated folder merge options dialog with destination fields, visible merge modes, and a selected item list.</desc>
+  <style>
+    .bg { fill: #f3f4f6; }
+    .panel { fill: #ffffff; stroke: #9ca3af; }
+    .header { fill: #e5e7eb; stroke: #9ca3af; }
+    .text { font-family: "Segoe UI", Arial, sans-serif; fill: #111827; }
+    .muted { font-family: "Segoe UI", Arial, sans-serif; fill: #475569; }
+    .label { font-family: "Segoe UI", Arial, sans-serif; fill: #111827; font-size: 13px; }
+    .input { fill: #ffffff; stroke: #9ca3af; }
+    .group { fill: #f9fafb; stroke: #cbd5e1; }
+    .button { fill: #2563eb; }
+    .button2 { fill: #e5e7eb; stroke: #cbd5e1; }
+    .gridhead { fill: #e5e7eb; stroke: #cbd5e1; }
+    .row { fill: #ffffff; stroke: #e5e7eb; }
+  </style>
+  <rect class="bg" width="820" height="560"/>
+  <rect class="panel" x="40" y="32" width="740" height="496" rx="6"/>
+  <rect class="header" x="40" y="32" width="740" height="34" rx="6"/>
+  <text class="text" x="58" y="54" font-size="14" font-weight="600">폴더 병합 옵션</text>
+  <text class="text" x="58" y="94" font-size="14" font-weight="600">병합 대상 경로 설정</text>
+
+  <text class="label" x="58" y="130">병합 대상 폴더명</text>
+  <rect class="input" x="180" y="112" width="565" height="28"/>
+  <text class="muted" x="190" y="131" font-size="13">S로맨스의 악역 공주지만 날 싫어하는 왕자오r oro|를</text>
+  <text class="label" x="58" y="166">병합 대상 경로</text>
+  <text class="muted" x="180" y="166" font-size="13">E:\Download\tmp\S로맨스의 악역 공주지만 날 싫어하는 왕자오r oro|를</text>
+  <text class="muted" x="180" y="193" font-size="12">선택 항목 2개를 병합합니다.</text>
+
+  <rect class="group" x="58" y="216" width="687" height="94"/>
+  <text class="label" x="72" y="235">병합 방식</text>
+  <circle cx="78" cy="260" r="6" fill="#2563eb"/>
+  <text class="text" x="94" y="265" font-size="13">폴더 단위를 통째로 병합</text>
+  <circle cx="78" cy="288" r="6" fill="#ffffff" stroke="#64748b"/>
+  <text class="text" x="94" y="293" font-size="13">폴더 내용만 이동</text>
+  <text class="muted" x="236" y="293" font-size="12">선택 폴더의 바로 아래 항목을 병합 대상 폴더로 이동</text>
+
+  <rect class="group" x="58" y="326" width="687" height="132"/>
+  <text class="label" x="72" y="345">선택 항목</text>
+  <rect class="gridhead" x="72" y="360" width="648" height="26"/>
+  <text class="label" x="84" y="378">원본 이름</text>
+  <text class="label" x="342" y="378">종류</text>
+  <text class="label" x="430" y="378">병합 후 위치</text>
+  <rect class="row" x="72" y="386" width="648" height="28"/>
+  <text class="muted" x="84" y="405" font-size="13">병합 대상 부</text>
+  <text class="muted" x="342" y="405" font-size="13">폴더</text>
+  <text class="muted" x="430" y="405" font-size="13">S로맨스...\병합 대상 부\</text>
+  <rect class="row" x="72" y="414" width="648" height="28"/>
+  <text class="muted" x="84" y="433" font-size="13">단어의 설정</text>
+  <text class="muted" x="342" y="433" font-size="13">폴더</text>
+  <text class="muted" x="430" y="433" font-size="13">S로맨스...\단어의 설정\</text>
+
+  <rect class="button2" x="555" y="478" width="88" height="30" rx="3"/>
+  <text class="text" x="599" y="498" text-anchor="middle" font-size="13">취소</text>
+  <rect class="button" x="656" y="478" width="88" height="30" rx="3"/>
+  <text x="700" y="498" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#ffffff">확인</text>
+</svg>

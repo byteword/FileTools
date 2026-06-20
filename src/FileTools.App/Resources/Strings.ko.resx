@@ -61,12 +61,12 @@
   <data name="AppName" xml:space="preserve"><value>FileTools</value></data>
   <data name="ToolOpenApp" xml:space="preserve"><value>FileTools 열기</value></data>
   <data name="ToolFileNameCorrection" xml:space="preserve"><value>파일이름 자동 교정</value></data>
-  <data name="ToolFolderStructure" xml:space="preserve"><value>폴더 wrapping / unwrapping</value></data>
+  <data name="ToolFolderStructure" xml:space="preserve"><value>폴더 씌우기 / 벗기기</value></data>
   <data name="ToolAutoRelocation" xml:space="preserve"><value>폴더 자동 재배치</value></data>
-  <data name="FolderOperationAuto" xml:space="preserve"><value>자동: 파일은 wrapping, 폴더는 unwrapping</value></data>
-  <data name="FolderOperationWrapFiles" xml:space="preserve"><value>파일 폴더로 모으기</value></data>
-  <data name="FolderOperationUnwrapSameName" xml:space="preserve"><value>같은 이름 단일 파일 폴더 unwrapping</value></data>
-  <data name="FolderOperationUnwrapSingleFile" xml:space="preserve"><value>단일 파일 폴더 unwrapping</value></data>
+  <data name="FolderOperationAuto" xml:space="preserve"><value>자동: 파일은 폴더 씌우기, 폴더는 벗기기</value></data>
+  <data name="FolderOperationWrapFiles" xml:space="preserve"><value>폴더 씌우기</value></data>
+  <data name="FolderOperationUnwrapSameName" xml:space="preserve"><value>같은 이름 단일 파일 폴더 벗기기</value></data>
+  <data name="FolderOperationUnwrapSingleFile" xml:space="preserve"><value>단일 파일 폴더 벗기기</value></data>
   <data name="FolderOperationMoveInnerFilesUp" xml:space="preserve"><value>폴더 내부 파일 상위로 이동</value></data>
   <data name="FolderUnwrapMismatchKeepFileName" xml:space="preserve"><value>파일명 유지</value></data>
   <data name="FolderUnwrapMismatchUseFolderName" xml:space="preserve"><value>폴더명으로 변경</value></data>
@@ -93,8 +93,8 @@
   <data name="ButtonClear" xml:space="preserve"><value>비우기</value></data>
   <data name="ButtonMergeSelectedTargets" xml:space="preserve"><value>선택 항목을 폴더로 병합</value></data>
   <data name="ButtonMergeFoldersMode" xml:space="preserve"><value>폴더 단위로 병합</value></data>
-  <data name="ButtonMergeFolderContentsMode" xml:space="preserve"><value>폴더 내용만 병합</value></data>
-  <data name="GroupFolderStructure" xml:space="preserve"><value>폴더 wrapping / unwrapping</value></data>
+  <data name="ButtonMergeFolderContentsMode" xml:space="preserve"><value>폴더 내용만 이동</value></data>
+  <data name="GroupFolderStructure" xml:space="preserve"><value>폴더 씌우기 / 벗기기</value></data>
   <data name="GroupContextMenu" xml:space="preserve"><value>ContextMenu</value></data>
   <data name="CheckRegisterContextMenu" xml:space="preserve"><value>Explorer ContextMenu 등록</value></data>
   <data name="GroupAutoRelocationTemplates" xml:space="preserve"><value>자동 재배치 템플릿</value></data>
@@ -150,7 +150,7 @@
   <data name="ProgramInfoLicenseUnavailable" xml:space="preserve"><value>라이선스 정보를 표시할 수 없습니다.</value></data>
   <data name="ProgramInfoUnknownVersion" xml:space="preserve"><value>알 수 없음</value></data>
   <data name="ButtonAddRenameStep" xml:space="preserve"><value>이름변경 추가</value></data>
-  <data name="ButtonAddWrapStep" xml:space="preserve"><value>감싸기 추가</value></data>
+  <data name="ButtonAddWrapStep" xml:space="preserve"><value>씌우기 추가</value></data>
   <data name="ButtonAddUnwrapStep" xml:space="preserve"><value>벗기기 추가</value></data>
   <data name="ButtonAddRelocationStep" xml:space="preserve"><value>재배치 추가</value></data>
   <data name="ButtonEditStep" xml:space="preserve"><value>단계 수정</value></data>
@@ -167,7 +167,7 @@
   <data name="PlanScopeWarningsFormat" xml:space="preserve"><value>경고 표시 중 · 경고 작업 {0}개 · 계획 단계 {1}개</value></data>
   <data name="PlanExecutionTitle" xml:space="preserve"><value>플랜 실행</value></data>
   <data name="DialogRenameTitle" xml:space="preserve"><value>이름변경 작업</value></data>
-  <data name="DialogFolderWrapTitle" xml:space="preserve"><value>폴더 감싸기 작업</value></data>
+  <data name="DialogFolderWrapTitle" xml:space="preserve"><value>폴더 씌우기 작업</value></data>
   <data name="DialogFolderUnwrapTitle" xml:space="preserve"><value>폴더 벗기기 작업</value></data>
   <data name="DialogAutoRelocationTitle" xml:space="preserve"><value>자동 재배치 작업</value></data>
   <data name="LabelFolderOperation" xml:space="preserve"><value>폴더 작업</value></data>
@@ -175,7 +175,7 @@
   <data name="ButtonBrowse" xml:space="preserve"><value>찾아보기...</value></data>
   <data name="ButtonCancel" xml:space="preserve"><value>취소</value></data>
   <data name="RenameStepDescription" xml:space="preserve"><value>플랜 실행 전에 바뀔 파일명을 확인하고 수정합니다.</value></data>
-  <data name="FolderWrapStepDescription" xml:space="preserve"><value>파일을 같은 이름의 폴더로 감싸는 작업을 만듭니다.</value></data>
+  <data name="FolderWrapStepDescription" xml:space="preserve"><value>파일을 같은 이름의 폴더로 씌우는 작업을 만듭니다.</value></data>
   <data name="FolderUnwrapStepDescription" xml:space="preserve"><value>폴더 내부 항목을 상위로 이동하는 방식을 선택합니다.</value></data>
   <data name="AutoRelocationStepDescription" xml:space="preserve"><value>이 작업에 사용할 재배치 템플릿과 선택적 대상 루트를 선택합니다.</value></data>
   <data name="ManualTargetRootDialogDescription" xml:space="preserve"><value>수동 대상 루트 폴더 선택</value></data>
@@ -363,7 +363,7 @@
   <data name="ColumnPlanOutput" xml:space="preserve"><value>출력 / 예상 결과</value></data>
   <data name="ColumnPlanPreview" xml:space="preserve"><value>예상 결과</value></data>
   <data name="PlanActionRename" xml:space="preserve"><value>이름변경</value></data>
-  <data name="PlanActionWrap" xml:space="preserve"><value>감싸기</value></data>
+  <data name="PlanActionWrap" xml:space="preserve"><value>씌우기</value></data>
   <data name="PlanActionUnwrap" xml:space="preserve"><value>벗기기</value></data>
   <data name="PlanActionRelocate" xml:space="preserve"><value>재배치</value></data>
   <data name="ColumnOriginalName" xml:space="preserve"><value>원래 이름</value></data>
@@ -424,7 +424,7 @@
   <data name="ToolTipMoveTargetDown" xml:space="preserve"><value>선택한 대상을 아래로 이동합니다.</value></data>
   <data name="ToolTipMergeSelectedTargets" xml:space="preserve"><value>선택한 파일과 폴더를 생성된 하나의 폴더로 이동합니다.</value></data>
   <data name="ToolTipAddRename" xml:space="preserve"><value>선택한 대상에 이름변경 작업을 추가합니다.</value></data>
-  <data name="ToolTipAddWrap" xml:space="preserve"><value>선택한 파일 대상에 폴더 감싸기 작업을 추가합니다.</value></data>
+  <data name="ToolTipAddWrap" xml:space="preserve"><value>선택한 파일 대상에 폴더 씌우기 작업을 추가합니다.</value></data>
   <data name="ToolTipAddUnwrap" xml:space="preserve"><value>선택한 폴더 대상에 폴더 벗기기 작업을 추가합니다.</value></data>
   <data name="ToolTipAddRelocation" xml:space="preserve"><value>선택한 대상에 자동 재배치 작업을 추가합니다.</value></data>
   <data name="ToolTipEditStep" xml:space="preserve"><value>선택한 플랜 단계를 수정합니다.</value></data>
@@ -472,13 +472,13 @@
   <data name="PlanTooltipOutputFormat" xml:space="preserve"><value>출력: {0}</value></data>
   <data name="PlanTooltipWarningFormat" xml:space="preserve"><value>경고: {0}</value></data>
   <data name="PlanOptionManualRenameFormat" xml:space="preserve"><value>수동 파일명: {0}</value></data>
-  <data name="FolderOptionsFutureMessage" xml:space="preserve"><value>폴더 감싸기/벗기기 옵션은 향후 확장을 위해 이 탭에 유지합니다.</value></data>
+  <data name="FolderOptionsFutureMessage" xml:space="preserve"><value>폴더 씌우기/벗기기 옵션은 향후 확장을 위해 이 탭에 유지합니다.</value></data>
   <data name="DialogNameTemplateSettingsTitle" xml:space="preserve"><value>폴더 이름 템플릿</value></data>
-  <data name="GroupFolderNameTemplates" xml:space="preserve"><value>폴더 wrapping/unwrapping 템플릿</value></data>
+  <data name="GroupFolderNameTemplates" xml:space="preserve"><value>폴더 씌우기/벗기기 템플릿</value></data>
   <data name="GroupNameCollisionPolicy" xml:space="preserve"><value>이름 충돌 정책</value></data>
   <data name="GroupNameTemplatePreview" xml:space="preserve"><value>미리보기</value></data>
-  <data name="LabelFolderWrapTemplate" xml:space="preserve"><value>wrap 폴더 템플릿</value></data>
-  <data name="LabelFolderUnwrapTemplate" xml:space="preserve"><value>unwrap 불일치 템플릿</value></data>
+  <data name="LabelFolderWrapTemplate" xml:space="preserve"><value>씌우기 폴더 템플릿</value></data>
+  <data name="LabelFolderUnwrapTemplate" xml:space="preserve"><value>벗기기 불일치 템플릿</value></data>
   <data name="LabelNameCollisionPolicy" xml:space="preserve"><value>충돌 정책</value></data>
   <data name="LabelConflictNameTemplate" xml:space="preserve"><value>충돌 이름 템플릿</value></data>
   <data name="LabelConflictIndexStyle" xml:space="preserve"><value>번호 라벨 형식</value></data>
@@ -495,11 +495,17 @@
   <data name="ConflictIndexStyleAlphabet" xml:space="preserve"><value>B, C, D</value></data>
   <data name="NameTemplateTokensHelp" xml:space="preserve"><value>{FileName}, {FileStem}, {Extension}, {FolderName}, {CorrectedFileStem}, {Title}, {EpisodeRange} 등을 사용할 수 있습니다.</value></data>
   <data name="ConflictTemplateTokensHelp" xml:space="preserve"><value>{Stem}, {Extension}, {Index}, {IndexLabel}을 사용합니다. 예: {Stem} ({Index}){Extension}</value></data>
-  <data name="NameTemplatePreviewWrapFormat" xml:space="preserve"><value>wrap: Book 01.zip -> {0}\</value></data>
-  <data name="NameTemplatePreviewUnwrapFormat" xml:space="preserve"><value>unwrap 불일치: FolderA\Image01.jpg -> {0}</value></data>
+  <data name="NameTemplatePreviewWrapFormat" xml:space="preserve"><value>씌우기: Book 01.zip -> {0}\</value></data>
+  <data name="NameTemplatePreviewUnwrapFormat" xml:space="preserve"><value>벗기기 불일치: FolderA\Image01.jpg -> {0}</value></data>
   <data name="NameTemplatePreviewConflictFormat" xml:space="preserve"><value>충돌({0}): Book.zip -> {1}</value></data>
   <data name="NameTemplateValidationFailedFormat" xml:space="preserve"><value>{0}이(가) 올바르지 않습니다: {1}</value></data>
   <data name="DefaultMergeFolderName" xml:space="preserve"><value>Merged</value></data>
+  <data name="FolderWrapOptionsDialogTitle" xml:space="preserve"><value>폴더 씌우기 대상 이름</value></data>
+  <data name="FolderWrapDialogHeader" xml:space="preserve"><value>파일을 씌우기 전에 대상 폴더명을 확인하세요.</value></data>
+  <data name="FolderWrapTargetFolderName" xml:space="preserve"><value>대상 폴더명</value></data>
+  <data name="FolderWrapTargetPath" xml:space="preserve"><value>대상 폴더 경로</value></data>
+  <data name="FolderWrapPlannedStepsMessage" xml:space="preserve"><value>선택 파일의 플랜 단계를 먼저 비운 뒤 폴더 씌우기를 실행하세요.</value></data>
+  <data name="FolderWrapCanceled" xml:space="preserve"><value>폴더 씌우기를 사용자가 취소했습니다.</value></data>
   <data name="FolderMergeNeedsMultipleTargets" xml:space="preserve"><value>병합할 기존 대상 2개 이상을 선택하세요.</value></data>
   <data name="FolderMergePlannedStepsMessage" xml:space="preserve"><value>선택 대상의 플랜 단계를 먼저 비운 뒤 병합하세요.</value></data>
   <data name="FolderMergeCanceled" xml:space="preserve"><value>폴더 병합이 사용자가 취소했습니다.</value></data>
@@ -508,9 +514,17 @@
   <data name="FolderMergeTargetName" xml:space="preserve"><value>병합 대상 폴더명</value></data>
   <data name="FolderMergeTargetPath" xml:space="preserve"><value>병합 대상 경로</value></data>
   <data name="FolderMergeModeGroup" xml:space="preserve"><value>병합 방식</value></data>
-  <data name="FolderMergeModeMergeFolders" xml:space="preserve"><value>폴더 단위를 통째로 병합</value></data>
+  <data name="FolderMergeModeMergeFolders" xml:space="preserve"><value>폴더 단위로 병합</value></data>
   <data name="FolderMergeModeMergeContentsOnly" xml:space="preserve"><value>폴더 내용만 이동</value></data>
   <data name="FolderMergeModeLabelFormat" xml:space="preserve"><value>모드: {0}</value></data>
+  <data name="FolderMergeModeContentsHelp" xml:space="preserve"><value>내용만 이동은 선택 폴더의 바로 아래 항목을 병합 대상 폴더로 이동합니다.</value></data>
+  <data name="FolderMergeModeContentsDisabledHelp" xml:space="preserve"><value>내용만 이동은 선택 항목에 폴더가 하나 이상 있을 때 사용할 수 있습니다.</value></data>
+  <data name="FolderMergeStatusReadyFormat" xml:space="preserve"><value>선택 항목 {0}개를 병합합니다.</value></data>
+  <data name="FolderMergeColumnSourceName" xml:space="preserve"><value>원본 이름</value></data>
+  <data name="FolderMergeColumnKind" xml:space="preserve"><value>종류</value></data>
+  <data name="FolderMergeColumnTargetName" xml:space="preserve"><value>병합 후 위치</value></data>
+  <data name="FolderMergeSourceKindFile" xml:space="preserve"><value>파일</value></data>
+  <data name="FolderMergeSourceKindFolder" xml:space="preserve"><value>폴더</value></data>
   <data name="FolderMergeConfirmFormat" xml:space="preserve"><value>선택 항목 {0}개를 다음 폴더로 병합합니다:&#x0D;&#x0A;{1}</value></data>
   <data name="FolderMergeTargetParentFormat" xml:space="preserve"><value>병합 대상 부모: {0}</value></data>
   <data name="FolderMergeMultiParentWarning" xml:space="preserve"><value>선택 항목의 상위 폴더가 다릅니다. 첫 번째 항목의 부모 경로 아래로 모두 병합합니다.</value></data>
@@ -604,7 +618,7 @@
   <data name="ArchiveMergeCollisionHelp" xml:space="preserve"><value>선택한 병합 방식에서 같은 내부 ZIP 경로가 둘 이상 생길 때 사용합니다.</value></data>
   <data name="ArchiveMergeDuplicateHelp" xml:space="preserve"><value>동일 내용 감지는 쓰기 전에 파일 엔트리를 읽고 해시합니다.</value></data>
   <data name="ArchiveMergeFailureHelp" xml:space="preserve"><value>압축파일 열기 실패와 엔트리 읽기 실패를 전체 중단 또는 부분 출력으로 처리합니다.</value></data>
-  <data name="ArchiveMergeOutputNameHelp" xml:space="preserve"><value>병합 계획 생성 시 기본 출력 ZIP 경로를 정하는 데 사용합니다.</value></data>
+  <data name="ArchiveMergeOutputNameHelp" xml:space="preserve"><value>최종 출력 경로를 확인하기 전 추천 ZIP 경로를 정하는 데 사용합니다.</value></data>
   <data name="ArchiveMergeCompressionHelp" xml:space="preserve"><value>새로 작성하는 출력 ZIP의 작은 압축률 설정입니다.</value></data>
   <data name="ArchiveMergeOptionsDialogTitle" xml:space="preserve"><value>압축 병합 옵션</value></data>
   <data name="ArchiveMergeOptionsHeader" xml:space="preserve"><value>선택한 ZIP 압축파일을 하나의 출력 ZIP으로 병합합니다.</value></data>

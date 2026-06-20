@@ -1,7 +1,7 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-15
+Last updated: 2026-06-20
 
 Scope reviewed:
 
@@ -73,6 +73,13 @@ Scope reviewed:
   - Added in-app folder-merge options flow (`FolderMergeOptionsDialog`) supporting target folder name edit and split-button mode selection (`Merge folders` / `Move folder contents only`).
   - Moved the main action split button for merge from the target toolbar to the action toolbar.
   - Linked merge option dialog into `/context FolderMergeSelectedTargets` as well.
+- 2026-06-20 follow-up on the folder merge options flow:
+  - Reworked `FolderMergeOptionsDialog` into a wider resizable final-name review
+    dialog with a selected item list instead of the old explanatory message box.
+  - Changed folder contents-only mode so it is visible consistently and enabled
+    whenever the selection includes at least one folder.
+  - Added `MergeNameProposalBuilder` so safe rename correction can participate
+    before common-stem and range analysis for merge destination names.
 - Added regression coverage on 2026-06-11 for folder-merge naming/preview behaviors in
   `tests/FileTools.Tests/FolderAndRenameOperationTests.cs`:
   - Numeric suffix stripping for sequence naming,
@@ -162,7 +169,7 @@ Scope reviewed:
   passed.
 - Added `docs/common-file-merge-design.md` and
   `docs/images/common-file-merge-flow.svg` for the archive-first issue #9
-  design, centered on `A 01.zip + A 02.zip -> A.zip`.
+  design, centered on `A 01.zip + A 02.zip -> A 01~02.zip`.
 - Implemented the archive-first #9 slice: numbered archive families now produce
   common logical output names, and the archive merge options dialog previews
   internal entry target names including collision auto-numbering.

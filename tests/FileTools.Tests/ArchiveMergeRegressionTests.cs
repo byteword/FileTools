@@ -6,7 +6,7 @@ namespace FileTools.Tests;
 public sealed class ArchiveMergeRegressionTests
 {
     [Fact]
-    public void CreateDefaultOptions_UsesCommonLogicalStemForNumberedArchiveFamily()
+    public void CreateDefaultOptions_UsesRangeStemForNumberedArchiveFamily()
     {
         using var temp = TempDirectory.Create();
         var sourceA = temp.GetPath("A 01.zip");
@@ -20,7 +20,25 @@ public sealed class ArchiveMergeRegressionTests
             ArchiveMergeLayout.PreserveInternalPaths);
 
         Assert.NotNull(options);
-        Assert.Equal(temp.GetPath("A.zip"), options.OutputPath);
+        Assert.Equal(temp.GetPath("A 01~02.zip"), options.OutputPath);
+    }
+
+    [Fact]
+    public void CreateDefaultOptions_FallsBackToParentFolderNameWhenNoCommonStem()
+    {
+        using var temp = TempDirectory.Create();
+        var sourceA = temp.GetPath("cat.zip");
+        var sourceB = temp.GetPath("dog.zip");
+        ZipTestData.CreateStoredZip(sourceA, new TestZipEntry("one.txt", "one"));
+        ZipTestData.CreateStoredZip(sourceB, new TestZipEntry("two.txt", "two"));
+
+        var options = ArchiveMergeOperations.CreateDefaultOptions(
+            [sourceA, sourceB],
+            new FileToolsSettings(),
+            ArchiveMergeLayout.PreserveInternalPaths);
+
+        Assert.NotNull(options);
+        Assert.Equal(temp.GetPath(Path.GetFileName(temp.Root) + ".zip"), options.OutputPath);
     }
 
     [Fact]

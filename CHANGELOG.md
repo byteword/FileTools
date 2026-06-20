@@ -1,5 +1,52 @@
 # Changelog
 
+## 1.4.5.0 - 2026-06-20
+
+### Added
+
+- Added a shared merge-name proposal builder that applies safe rename
+  correction before common-stem and range analysis for merge destination names.
+- Added a folder merge options item list that previews the selected files and
+  folders and their merged top-level locations.
+
+### Changed
+
+- Reworked the folder merge options dialog to use a wider resizable layout,
+  remove the low-value message box, and keep long destination paths readable.
+- Folder contents-only merge mode is now shown consistently and is available
+  whenever at least one selected item is a folder.
+- Aligned folder merge mode labels to `폴더 단위로 병합` and `폴더 내용만 이동`.
+- Updated app, installer, bundle, ShellExt, build script, README, release
+  guide, release notes, and Program info version metadata to `1.4.5.0`.
+
+### Verification
+
+- Managed tests passed 135/135 on 2026-06-20.
+- Release tests passed 135/135 on 2026-06-20.
+- `MSBuild.exe FileTools.sln /p:Configuration=Release /p:Platform=x64 /m`
+  passed with 0 warnings and 0 errors on 2026-06-20 using VS 18 MSBuild.
+
+## 1.4.4.3 - 2026-06-20
+
+### Added
+
+- Added shared merge-name generation for folder merge, folder wrapping, and
+  archive merge so final destination names can include compact numeric or text
+  ranges such as `01~06`.
+- Added final destination-name review for folder wrapping and archive/folder
+  merge flows before execution.
+
+### Changed
+
+- Aligned Korean folder wrapping/unwrapping menu labels to `폴더 씌우기` and
+  `폴더 벗기기` across the app, ShellExt, installer fallback menus, and docs.
+- Updated app, installer, bundle, ShellExt, build script, README, release
+  guide, release notes, and Program info version metadata to `1.4.4.3`.
+
+### Verification
+
+- Managed tests passed 134/134 on 2026-06-20.
+
 ## 1.4.4.2 - 2026-06-19
 
 ### Changed

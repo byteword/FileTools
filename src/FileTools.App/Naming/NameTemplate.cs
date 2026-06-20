@@ -424,7 +424,7 @@ internal sealed class RenameCorrectionNameTemplateTokenProvider : INameTemplateT
         {
             try
             {
-                _corrector ??= CreateFileNameCorrector(_settings);
+                _corrector ??= NameCorrectionFactory.Create(_settings);
                 cached = _corrector.CreatePreview(sourcePath);
             }
             catch
@@ -437,19 +437,6 @@ internal sealed class RenameCorrectionNameTemplateTokenProvider : INameTemplateT
 
         preview = cached!;
         return preview is not null;
-    }
-
-    /// <summary>교정 토큰 계산용 KorenaNameCorrector를 설정으로 생성한다.</summary>
-    private static KoreanFileNameCorrector CreateFileNameCorrector(FileToolsSettings settings)
-    {
-        var dictionary = RenameDictionaryStore.Load();
-        var rules = RenameRuleStore.Load();
-        return new KoreanFileNameCorrector(new CorrectionOptions
-        {
-            RenameDictionary = settings.RenameUseDictionary ? dictionary.Replacements : [],
-            CommonPhrases = settings.RenameUseDictionary ? dictionary.CommonPhrases.ToArray() : [],
-            Rules = rules.Rules
-        });
     }
 
     private static bool TryResolveText(string? text, out string value)
@@ -741,7 +728,7 @@ internal static class ConflictIndexFormatter
 
 internal static class NameTemplateDefaults
 {
-    public const string FolderWrapFolderNameTemplate = "{FileStem}";
+    public const string FolderWrapFolderNameTemplate = "{CorrectedFileStem}";
     public const string FolderUnwrapKeepFileNameTemplate = "{FileName}";
     public const string FolderUnwrapUseFolderNameTemplate = "{FolderName}{Extension}";
     public const string FolderUnwrapPrefixFolderNameTemplate = "{FolderName}-{FileStem}{Extension}";
@@ -756,11 +743,21 @@ internal static class FolderStructureNameTemplates
     /// <summary>래핑/언래핑 결과 이름을 템플릿으로 일관되게 계산한다.</summary>
     public static string ResolveWrapFolderName(string filePath, FileToolsSettings? settings = null)
     {
-        var context = NameTemplateContext.FromFile(filePath);
+        var fallback = Path.GetFileNameWithoutExtension(filePath);
+        if (settings is not null)
+        {
+            var proposal = MergeNameProposalBuilder.CreateForPaths([filePath], settings, fallback);
+            fallback = string.IsNullOrWhiteSpace(proposal.Stem) ? fallback : proposal.Stem;
+        }
+
+        var context = NameTemplateContext.FromFile(filePath) with
+        {
+            CommonStem = fallback
+        };
         return ResolveSafeName(
             settings?.FolderWrapFolderNameTemplate ?? NameTemplateDefaults.FolderWrapFolderNameTemplate,
             context,
-            Path.GetFileNameWithoutExtension(filePath),
+            fallback,
             settings);
     }
 

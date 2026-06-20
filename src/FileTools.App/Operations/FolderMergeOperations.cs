@@ -1,5 +1,3 @@
-using System.Text.RegularExpressions;
-
 namespace FileTools;
 
 /// <summary>
@@ -59,10 +57,6 @@ internal static class FolderMergeOperations
     private static readonly StringComparer PathComparer = OperatingSystem.IsWindows()
         ? StringComparer.OrdinalIgnoreCase
         : StringComparer.Ordinal;
-
-    private static readonly Regex SequenceSuffixRegex = new(
-        @"^(?<base>.+?)(?:[\s._-]+\d+|[\[\(\{]\d+[\]\)\}])$",
-        RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     /// <summary>
     /// 입력 기반으로 병합 대상 폴더를 계산한다(실제 이동 없음).
@@ -343,24 +337,20 @@ internal static class FolderMergeOperations
             return WindowsFileNameSafety.MakeSafeFileName(overrideFolderName);
         }
 
-        var stems = paths
-            .Select(GetPathStem)
-            .Where(static stem => !string.IsNullOrWhiteSpace(stem))
-            .Select(static stem => stem.Trim())
-            .ToArray();
-
-        var commonStem = ResolveNumericSuffixStem(stems)
-            ?? CreateCommonStem(stems);
-
-        if (string.IsNullOrWhiteSpace(commonStem))
-        {
-            commonStem = Localizer.Get("DefaultMergeFolderName");
-        }
-
+        var proposal = MergeNameProposalBuilder.CreateForPaths(paths, settings, Localizer.Get("DefaultMergeFolderName"));
+        var commonStem = proposal.Stem;
+        var firstPath = paths[0];
+        var firstFileName = Path.GetFileName(firstPath);
+        var firstExtension = Directory.Exists(firstPath) ? "" : Path.GetExtension(firstFileName);
         var context = new NameTemplateContext
         {
+            SourcePath = firstPath,
+            FileName = firstFileName,
+            FileStem = Directory.Exists(firstPath) ? firstFileName : Path.GetFileNameWithoutExtension(firstFileName),
+            Extension = firstExtension,
+            ExtensionNoDot = firstExtension.TrimStart('.'),
             CommonStem = commonStem,
-            FirstFileStem = stems.FirstOrDefault(),
+            FirstFileStem = proposal.OriginalStems.FirstOrDefault(),
             SelectedCount = paths.Count
         };
         var template = paths.All(File.Exists)
@@ -368,77 +358,6 @@ internal static class FolderMergeOperations
             : NameTemplateDefaults.MultiFolderMergeFolderNameTemplate;
         var evaluation = NameTemplateResolver.CreateDefault(settings).Evaluate(template, context);
         return WindowsFileNameSafety.MakeSafeFileName(evaluation.IsReady ? evaluation.Value : commonStem);
-    }
-
-    /// <summary>
-    /// 모든 stem에 공통으로 붙는 숫자 계열 접미사를 제거해 기본 이름을 계산한다.
-    /// </summary>
-    private static string? ResolveNumericSuffixStem(IReadOnlyList<string> stems)
-    {
-        if (stems.Count == 0)
-        {
-            return null;
-        }
-
-        var first = NormalizeForSequenceStem(stems[0]);
-        if (string.IsNullOrWhiteSpace(first))
-        {
-            return null;
-        }
-
-        foreach (var stem in stems.Skip(1))
-        {
-            if (!string.Equals(first, NormalizeForSequenceStem(stem), StringComparison.Ordinal))
-            {
-                return null;
-            }
-        }
-
-        return first;
-    }
-
-    /// <summary>
-    /// 끝의 숫자 계열 마커를 공통적으로 제거한 뒤 마감 구분자를 정리한다.
-    /// </summary>
-    private static string NormalizeForSequenceStem(string stem)
-    {
-        var match = SequenceSuffixRegex.Match(stem.Trim());
-        if (!match.Success)
-        {
-            return stem.Trim();
-        }
-
-        return match.Groups["base"].Value.Trim().TrimEnd(' ', '.', '-', '_', '[', '(', '{', ']', ')', '}');
-    }
-
-    /// <summary>
-    /// 다중 경로의 시작 공통 접두사를 계산한다.
-    /// </summary>
-    private static string CreateCommonStem(IReadOnlyList<string> stems)
-    {
-        if (stems.Count == 0)
-        {
-            return "";
-        }
-
-        var prefix = stems[0];
-        foreach (var stem in stems.Skip(1))
-        {
-            var length = 0;
-            var max = Math.Min(prefix.Length, stem.Length);
-            while (length < max && char.ToUpperInvariant(prefix[length]) == char.ToUpperInvariant(stem[length]))
-            {
-                length++;
-            }
-
-            prefix = prefix[..length];
-            if (prefix.Length == 0)
-            {
-                break;
-            }
-        }
-
-        return prefix.Trim().TrimEnd(' ', '.', '-', '_', '[', '(', '{');
     }
 
     /// <summary>

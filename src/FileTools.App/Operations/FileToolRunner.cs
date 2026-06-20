@@ -80,7 +80,7 @@ internal sealed class FileToolRunner
                 {
                     if (_settings.FolderStructureOperation is FolderStructureOperation.Auto or FolderStructureOperation.WrapFiles)
                     {
-                        WrapFile(path, result);
+                        result.Merge(FolderWrapOperations.WrapFiles([path], _settings));
                     }
                     else
                     {
@@ -137,58 +137,9 @@ internal sealed class FileToolRunner
                 return;
             case FolderStructureOperation.WrapFiles:
                 result.AddCandidate();
-                result.AddSkipped(Path.GetFileName(folderPath) + " 폴더는 파일 wrapping 대상이 아님");
+                result.AddSkipped(Path.GetFileName(folderPath) + " 폴더는 폴더 씌우기 대상이 아님");
                 return;
         }
-    }
-
-    /// <summary>
-    /// 파일을 랩 모드 대상 폴더로 이동한다.
-    /// </summary>
-    /// <param name="filePath">랩 대상 파일 경로</param>
-    /// <param name="result">결과 집계</param>
-    private void WrapFile(string filePath, OperationResult result)
-    {
-        result.AddCandidate();
-        var parent = Path.GetDirectoryName(filePath);
-        if (string.IsNullOrWhiteSpace(parent))
-        {
-            result.AddSkipped(filePath + " 부모 폴더 없음");
-            return;
-        }
-
-        var folderName = FolderStructureNameTemplates.ResolveWrapFolderName(filePath, _settings);
-        var targetFolder = Path.Combine(parent, folderName);
-        if (!Directory.Exists(targetFolder))
-        {
-            var folderCollision = NameCollisionResolver.Resolve(
-                parent,
-                folderName,
-                FolderStructureCollisionOptions.Create(_settings, NameCollisionTargetKind.Folder));
-            if (!folderCollision.IsReady)
-            {
-                result.AddSkipped(Path.GetFileName(filePath) + " wrapping 대상 폴더명과 같은 파일 존재");
-                return;
-            }
-
-            targetFolder = folderCollision.TargetPath;
-        }
-
-        var fileCollision = NameCollisionResolver.Resolve(
-            targetFolder,
-            Path.GetFileName(filePath),
-            FolderStructureCollisionOptions.Create(_settings, NameCollisionTargetKind.File));
-        if (!fileCollision.IsReady)
-        {
-            result.AddSkipped(Path.GetFileName(filePath) + " 대상 파일 이미 존재");
-            return;
-        }
-
-        Directory.CreateDirectory(targetFolder);
-        var targetPath = fileCollision.TargetPath;
-        File.Move(filePath, targetPath);
-        result.AddApplied(Path.GetFileName(filePath) + " -> " + Path.GetFileName(targetFolder) + "\\");
-        FileToolsEnvironment.Log("WRAP", filePath + " -> " + targetPath);
     }
 
     /// <summary>

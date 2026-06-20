@@ -10,7 +10,7 @@ Example:
 ```text
 A 01.zip
 A 02.zip
--> A.zip
+-> A 01~02.zip
 ```
 
 The selected source archives are merged into one output archive. The common
@@ -74,25 +74,36 @@ not only common prefix.
 Examples:
 
 ```text
-A 01.zip + A 02.zip       -> A.zip
-A-01.zip + A-02.zip       -> A.zip
-A_001.zip + A_002.zip     -> A.zip
-Series 01.zip + Series 02.zip -> Series.zip
+A 01.zip + A 02.zip       -> A 01~02.zip
+A-01.zip + A-02.zip       -> A 01~02.zip
+A_001.zip + A_002.zip     -> A 001~002.zip
+Series 01.zip + Series 02.zip -> Series 01~02.zip
+A 01~03.zip + A 04~06.zip -> A 01~06.zip
+A 01~03.zip + A 05~08.zip -> A 01~03, 05~08.zip
+test이름 tt.zip + 이름abc.zip -> 이름.zip
+이름 a태그.zip + 이름 b태그.zip -> 이름 a~b 태그.zip
 ```
 
 The algorithm should run in stages:
 
 1. Take selected archive stems in target-list order.
-2. Normalize whitespace and trailing separators.
-3. Strip terminal sequence markers such as ` 01`, `-01`, `_001`, and similar
-   numeric suffixes when at least two selected stems share the stripped base.
-4. If stripping produces a shared base for every selected archive, use that
-   base.
-5. Otherwise fall back to the existing common-prefix helper.
-6. If the result is empty, use `Merged`.
+2. Ask the shared rename-correction pipeline for safe automatic corrected stems.
+3. Fall back to original stems if correction requires review, conflicts, or
+   fails.
+4. Normalize whitespace and trailing separators.
+5. Tokenize each stem into text and variable/range tokens.
+6. Merge contiguous or overlapping numeric ranges while preserving padding.
+7. Keep disjoint ranges as comma-separated range summaries.
+8. Prefer a full shared template such as `{CommonText} {Range}` or
+   `{CommonText} {Range} {SuffixText}` when the stable text tokens line up.
+9. If the full template is not reliable, use the best stable text token found
+   anywhere in the selected names, not only at the beginning.
+10. If the result is empty, leave the common stem unavailable so the output
+   policy can fall back to the parent folder name or timestamped `Merged` name.
 
-This avoids the current simple-prefix problem where `A 01` and `A 02` can
-produce `A 0` instead of `A`.
+This avoids the old simple-prefix problem where `A 01` and `A 02` can produce
+`A 0`, and it also preserves useful episode/range information in the output
+name.
 
 Manual override should remain available in the dialog. The field is the output
 stem, not a per-source rename template.
@@ -205,7 +216,7 @@ Keep this as a deferred follow-up after common-name archive merge is stable.
 
 Automated coverage should include:
 
-- `A 01.zip + A 02.zip -> A.zip` common logical stem;
+- `A 01.zip + A 02.zip -> A 01~02.zip` common logical stem with range summary;
 - separator variants: space, hyphen, underscore;
 - existing output collision auto-numbering;
 - unsupported non-archive source blocking;
@@ -217,7 +228,7 @@ Automated coverage should include:
 
 Implemented on 2026-06-07:
 
-- common logical stem regression for `A 01.zip + A 02.zip -> A.zip`;
+- common logical stem regression for `A 01.zip + A 02.zip -> A 01~02.zip`;
 - archive entry preview regression for internal auto-number collisions such as
   `page/001.jpg -> page/001 (2).jpg`;
 - managed regression pass with 57 tests.
