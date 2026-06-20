@@ -170,6 +170,16 @@ and Explorer entry points, but the layout is optimized for long generated names:
 - Korean mode labels are aligned across the split button and options dialog:
   `폴더 단위로 병합` and `폴더 내용만 이동`.
 
+### 1.4.5.1 Options Dialog and Name Extraction Fix
+
+The options dialog footer now uses a fixed button row so localized `확인` and
+`취소` buttons remain visible at the bottom-right under resize and DPI scaling.
+
+Folder merge naming also treats unit-bearing ranges such as `01권 - 20권` and
+`21권 - 38권` as the primary merge structure. This prevents a repeated suffix
+like `권[총 38권][완결]` from being selected as the destination name when the
+real common family is the title plus merged volume range.
+
 ### Target Parent Policy
 
 The current behavior uses the first selected source's parent directory. Keep
@@ -188,10 +198,11 @@ Replace the simple common-prefix-only naming with a logical merge-name analyzer:
 1. Take selected file stems or folder names in selection order.
 2. Normalize whitespace and trim trailing separators.
 3. Extract numeric or text range tokens when the surrounding text is stable.
-4. Merge contiguous or overlapping ranges and preserve disjoint range groups.
-5. If the full structure is unreliable, use the strongest common text token
-   found anywhere in the names.
-6. If the result is empty, use the localized default merge folder name.
+4. Recognize unit-bearing numeric ranges such as `01권 - 20권`.
+5. Merge contiguous or overlapping ranges and preserve disjoint range groups.
+6. If the full structure is unreliable, prefer a useful common prefix before
+   using the strongest common text token found anywhere in the names.
+7. If the result is empty, use the localized default merge folder name.
 
 Examples:
 
@@ -199,6 +210,7 @@ Examples:
 Series 01.txt + Series 02.txt -> Series 01~02
 A-001.jpg + A-002.jpg         -> A 001~002
 A 01~03.txt + A 05~08.txt     -> A 01~03, 05~08
+마법선생 네기마 01권 - 20권 + 마법선생 네기마 21권 - 38권 -> 마법선생 네기마 01권 - 38권
 test이름 tt.txt + 이름abc.txt -> 이름
 Folder A + Folder B           -> Folder A~B
 cat.txt + dog.txt             -> Merged

@@ -69,7 +69,7 @@ internal sealed class FolderMergeOptionsDialog : Form
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 78));
         root.RowStyles.Add(new RowStyle(SizeType.Absolute, 104));
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
+        root.RowStyles.Add(new RowStyle(SizeType.Absolute, 54));
 
         root.Controls.Add(new Label
         {
@@ -199,28 +199,33 @@ internal sealed class FolderMergeOptionsDialog : Form
 
     private Control CreateButtonPanel()
     {
-        var buttons = new FlowLayoutPanel
+        var buttons = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
-            FlowDirection = FlowDirection.RightToLeft,
-            WrapContents = false,
-            Padding = new Padding(0, 8, 0, 0)
+            ColumnCount = 3,
+            RowCount = 1,
+            Padding = new Padding(0, 10, 0, 0),
+            Margin = new Padding(0)
         };
+        buttons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        buttons.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
+        buttons.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
+        buttons.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
 
         var cancelButton = new Button
         {
             Text = Localizer.Get("ButtonCancel"),
             DialogResult = DialogResult.Cancel,
-            Width = 95,
-            Height = 30
+            Dock = DockStyle.Fill,
+            Margin = new Padding(0)
         };
 
         _okButton.Text = Localizer.Get("ButtonOK");
-        _okButton.Width = 95;
-        _okButton.Height = 30;
+        _okButton.Dock = DockStyle.Fill;
+        _okButton.Margin = new Padding(0, 0, 8, 0);
 
-        buttons.Controls.Add(cancelButton);
-        buttons.Controls.Add(_okButton);
+        buttons.Controls.Add(_okButton, 1, 0);
+        buttons.Controls.Add(cancelButton, 2, 0);
 
         _okButton.Click += (_, _) => SaveAndClose();
         CancelButton = cancelButton;

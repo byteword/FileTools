@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.4.5.1 - 2026-06-20
+
+### Fixed
+
+- Fixed the folder merge options dialog footer so localized `확인` and `취소`
+  buttons keep a stable bottom-right layout under resize and DPI scaling.
+- Fixed merge destination name extraction for unit-bearing numeric ranges such
+  as `01권 - 20권` plus `21권 - 38권`, preventing repeated suffixes like
+  `권[총 38권][완결]` from being chosen as the common folder name.
+
+### Changed
+
+- Common-name fallback now prefers a useful common prefix before using a
+  middle common token.
+- Updated app, installer, bundle, ShellExt, build script, README, release
+  guide, release notes, and Program info version metadata to `1.4.5.1`.
+
+### Verification
+
+- Managed tests passed 136/136 on 2026-06-20.
+- Release tests passed 136/136 on 2026-06-20.
+
 ## 1.4.5.0 - 2026-06-20
 
 ### Added

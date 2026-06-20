@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="820" height="560" viewBox="0 0 820 560" role="img" aria-labelledby="title desc">
   <title id="title">Folder merge options dialog</title>
-  <desc id="desc">Updated folder merge options dialog with destination fields, visible merge modes, and a selected item list.</desc>
+  <desc id="desc">Updated folder merge options dialog with destination fields, visible merge modes, a selected item list, and a stable footer button row.</desc>
   <style>
     .bg { fill: #f3f4f6; }
     .panel { fill: #ffffff; stroke: #9ca3af; }
@@ -31,7 +31,7 @@
   <rect class="group" x="58" y="216" width="687" height="94"/>
   <text class="label" x="72" y="235">병합 방식</text>
   <circle cx="78" cy="260" r="6" fill="#2563eb"/>
-  <text class="text" x="94" y="265" font-size="13">폴더 단위를 통째로 병합</text>
+  <text class="text" x="94" y="265" font-size="13">폴더 단위로 병합</text>
   <circle cx="78" cy="288" r="6" fill="#ffffff" stroke="#64748b"/>
   <text class="text" x="94" y="293" font-size="13">폴더 내용만 이동</text>
   <text class="muted" x="236" y="293" font-size="12">선택 폴더의 바로 아래 항목을 병합 대상 폴더로 이동</text>
@@ -51,8 +51,8 @@
   <text class="muted" x="342" y="433" font-size="13">폴더</text>
   <text class="muted" x="430" y="433" font-size="13">S로맨스...\단어의 설정\</text>
 
-  <rect class="button2" x="555" y="478" width="88" height="30" rx="3"/>
-  <text class="text" x="599" y="498" text-anchor="middle" font-size="13">취소</text>
-  <rect class="button" x="656" y="478" width="88" height="30" rx="3"/>
-  <text x="700" y="498" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#ffffff">확인</text>
+  <rect class="button" x="555" y="478" width="88" height="30" rx="3"/>
+  <text x="599" y="498" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#ffffff">확인</text>
+  <rect class="button2" x="656" y="478" width="88" height="30" rx="3"/>
+  <text class="text" x="700" y="498" text-anchor="middle" font-size="13">취소</text>
 </svg>

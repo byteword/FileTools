@@ -80,6 +80,7 @@ A_001.zip + A_002.zip     -> A 001~002.zip
 Series 01.zip + Series 02.zip -> Series 01~02.zip
 A 01~03.zip + A 04~06.zip -> A 01~06.zip
 A 01~03.zip + A 05~08.zip -> A 01~03, 05~08.zip
+마법선생 네기마 01권 - 20권.zip + 마법선생 네기마 21권 - 38권.zip -> 마법선생 네기마 01권 - 38권.zip
 test이름 tt.zip + 이름abc.zip -> 이름.zip
 이름 a태그.zip + 이름 b태그.zip -> 이름 a~b 태그.zip
 ```
@@ -92,12 +93,14 @@ The algorithm should run in stages:
    fails.
 4. Normalize whitespace and trailing separators.
 5. Tokenize each stem into text and variable/range tokens.
-6. Merge contiguous or overlapping numeric ranges while preserving padding.
+6. Merge contiguous or overlapping numeric ranges while preserving padding and
+   unit suffixes such as `권`.
 7. Keep disjoint ranges as comma-separated range summaries.
 8. Prefer a full shared template such as `{CommonText} {Range}` or
    `{CommonText} {Range} {SuffixText}` when the stable text tokens line up.
-9. If the full template is not reliable, use the best stable text token found
-   anywhere in the selected names, not only at the beginning.
+9. If the full template is not reliable, prefer a useful common prefix before
+   falling back to the best stable text token found anywhere in the selected
+   names.
 10. If the result is empty, leave the common stem unavailable so the output
    policy can fall back to the parent folder name or timestamped `Merged` name.
 

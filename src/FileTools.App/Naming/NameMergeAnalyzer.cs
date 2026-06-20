@@ -28,8 +28,12 @@ internal static class NameMergeAnalyzer
 {
     private static readonly Regex WhitespaceRegex = new(@"\s+", RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
-    private static readonly Regex NumericRangeRegex = new(
-        @"(?<!\d)(?<start>\d{1,8})(?:\s*(?:~|-|–|—|to)\s*(?<end>\d{1,8}))?(?!\d)",
+    private static readonly Regex ExplicitNumericRangeRegex = new(
+        @"(?<!\d)(?<start>\d{1,8})(?<startUnit>[\p{L}]{0,8})\s*(?:~|-|–|—|to)\s*(?<end>\d{1,8})(?<endUnit>[\p{L}]{0,8})(?!\d)",
+        RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    private static readonly Regex SingleNumericTokenRegex = new(
+        @"(?<!\d)(?<start>\d{1,8})(?<startUnit>[\p{L}]{0,8})(?!\d)",
         RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     public static string CreateCommonStem(IEnumerable<string?> stems, string fallback = "")
@@ -79,15 +83,6 @@ internal static class NameMergeAnalyzer
                 ["Merged variable text token between shared text parts."]);
         }
 
-        if (TryCreateCommonTokenStem(normalized, out var tokenStem))
-        {
-            return new NameMergeAnalysis(
-                tokenStem,
-                NameMergeAnalysisKind.CommonToken,
-                [tokenStem],
-                ["Used the strongest common text token found anywhere in selected names."]);
-        }
-
         var prefixStem = CreateCommonPrefixStem(normalized);
         if (!string.IsNullOrWhiteSpace(prefixStem))
         {
@@ -96,6 +91,15 @@ internal static class NameMergeAnalyzer
                 NameMergeAnalysisKind.Prefix,
                 [prefixStem],
                 ["Used common prefix as fallback."]);
+        }
+
+        if (TryCreateCommonTokenStem(normalized, out var tokenStem))
+        {
+            return new NameMergeAnalysis(
+                tokenStem,
+                NameMergeAnalysisKind.CommonToken,
+                [tokenStem],
+                ["Used the strongest common text token found anywhere in selected names."]);
         }
 
         return CreateFallback(fallback);
@@ -117,54 +121,85 @@ internal static class NameMergeAnalyzer
     private static bool TryCreateNumericRangeStem(IReadOnlyList<string> stems, out string value)
     {
         value = "";
-        var parts = new List<NumericRangeNamePart>();
-        foreach (var stem in stems)
+        var candidatesByStem = stems
+            .Select(CreateNumericRangeCandidates)
+            .ToArray();
+        if (candidatesByStem.Any(static candidates => candidates.Count == 0))
         {
-            var matches = NumericRangeRegex.Matches(stem);
-            if (matches.Count == 0)
+            return false;
+        }
+
+        foreach (var first in candidatesByStem[0])
+        {
+            var selected = new List<NumericRangeNamePart> { first };
+            for (var index = 1; index < candidatesByStem.Length; index++)
             {
-                return false;
+                var matching = candidatesByStem[index].FirstOrDefault(part => IsSameNumericRangeShape(first, part));
+                if (matching is null)
+                {
+                    selected.Clear();
+                    break;
+                }
+
+                selected.Add(matching);
             }
 
-            var match = matches[matches.Count - 1];
-            if (!TryCreateRange(match, out var range))
+            if (selected.Count != candidatesByStem.Length)
             {
-                return false;
+                continue;
             }
 
-            parts.Add(new NumericRangeNamePart(
-                CleanPrefix(stem[..match.Index]),
-                CleanSuffix(stem[(match.Index + match.Length)..]),
-                range));
+            var summary = FormatRangeSummary(selected.Select(static part => part.Range).ToArray(), first.Unit);
+            if (string.IsNullOrWhiteSpace(summary))
+            {
+                continue;
+            }
+
+            var rawValue = JoinNameParts(first.Prefix, summary, first.Suffix);
+            if (string.IsNullOrWhiteSpace(rawValue))
+            {
+                continue;
+            }
+
+            value = WindowsFileNameSafety.MakeSafeFileName(rawValue);
+            return !string.IsNullOrWhiteSpace(value);
         }
 
-        var first = parts[0];
-        if (parts.Any(part =>
-                !string.Equals(part.Prefix, first.Prefix, StringComparison.OrdinalIgnoreCase) ||
-                !string.Equals(part.Suffix, first.Suffix, StringComparison.OrdinalIgnoreCase)))
-        {
-            return false;
-        }
-
-        var summary = FormatRangeSummary(parts.Select(static part => part.Range).ToArray());
-        if (string.IsNullOrWhiteSpace(summary))
-        {
-            return false;
-        }
-
-        var rawValue = JoinNameParts(first.Prefix, summary, first.Suffix);
-        if (string.IsNullOrWhiteSpace(rawValue))
-        {
-            return false;
-        }
-
-        value = WindowsFileNameSafety.MakeSafeFileName(rawValue);
-        return !string.IsNullOrWhiteSpace(value);
+        return false;
     }
 
-    private static bool TryCreateRange(Match match, out MergeRange range)
+    private static IReadOnlyList<NumericRangeNamePart> CreateNumericRangeCandidates(string stem)
+    {
+        var candidates = new List<NumericRangeNamePart>();
+        AddNumericRangeCandidates(stem, ExplicitNumericRangeRegex, candidates);
+        AddNumericRangeCandidates(stem, SingleNumericTokenRegex, candidates);
+        return candidates;
+    }
+
+    private static void AddNumericRangeCandidates(
+        string stem,
+        Regex regex,
+        List<NumericRangeNamePart> candidates)
+    {
+        foreach (Match match in regex.Matches(stem))
+        {
+            if (!TryCreateRange(match, out var range, out var unit))
+            {
+                continue;
+            }
+
+            candidates.Add(new NumericRangeNamePart(
+                CleanPrefix(stem[..match.Index]),
+                CleanSuffix(stem[(match.Index + match.Length)..]),
+                unit,
+                range));
+        }
+    }
+
+    private static bool TryCreateRange(Match match, out MergeRange range, out string unit)
     {
         range = default;
+        unit = "";
         if (!int.TryParse(match.Groups["start"].Value, out var start))
         {
             return false;
@@ -176,6 +211,17 @@ internal static class NameMergeAnalyzer
             return false;
         }
 
+        var startUnit = match.Groups["startUnit"].Success ? match.Groups["startUnit"].Value : "";
+        var endUnit = match.Groups["endUnit"].Success ? match.Groups["endUnit"].Value : "";
+        if (!string.IsNullOrWhiteSpace(startUnit) &&
+            !string.IsNullOrWhiteSpace(endUnit) &&
+            !string.Equals(startUnit, endUnit, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        unit = string.IsNullOrWhiteSpace(startUnit) ? endUnit : startUnit;
+
         if (end < start)
         {
             (start, end) = (end, start);
@@ -186,7 +232,14 @@ internal static class NameMergeAnalyzer
         return true;
     }
 
-    private static string FormatRangeSummary(IReadOnlyList<MergeRange> ranges)
+    private static bool IsSameNumericRangeShape(NumericRangeNamePart first, NumericRangeNamePart next)
+    {
+        return string.Equals(next.Prefix, first.Prefix, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(next.Suffix, first.Suffix, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(next.Unit, first.Unit, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string FormatRangeSummary(IReadOnlyList<MergeRange> ranges, string unit)
     {
         if (ranges.Count == 0)
         {
@@ -221,12 +274,23 @@ internal static class NameMergeAnalyzer
             merged.Add(range);
         }
 
-        return string.Join(", ", merged.Select(range => FormatRange(range, width)));
+        return string.Join(", ", merged.Select(range => FormatRange(range, width, unit)));
     }
 
-    private static string FormatRange(MergeRange range, int width)
+    private static string FormatRange(MergeRange range, int width, string unit)
     {
         var start = range.Start.ToString(new string('0', width));
+        if (!string.IsNullOrWhiteSpace(unit))
+        {
+            if (range.Start == range.End)
+            {
+                return start + unit;
+            }
+
+            var endWithUnit = range.End.ToString(new string('0', width)) + unit;
+            return start + unit + " - " + endWithUnit;
+        }
+
         if (range.Start == range.End)
         {
             return start;
@@ -423,7 +487,24 @@ internal static class NameMergeAnalyzer
 
     private static string JoinNameParts(params string[] parts)
     {
-        return string.Join(" ", parts.Where(static part => !string.IsNullOrWhiteSpace(part))).Trim();
+        var result = "";
+        foreach (var part in parts.Where(static part => !string.IsNullOrWhiteSpace(part)).Select(static part => part.Trim()))
+        {
+            if (result.Length == 0)
+            {
+                result = part;
+                continue;
+            }
+
+            result += ShouldAttachWithoutSpace(part) ? part : " " + part;
+        }
+
+        return result.Trim();
+    }
+
+    private static bool ShouldAttachWithoutSpace(string value)
+    {
+        return value.Length > 0 && (value[0] == '[' || value[0] == '(' || value[0] == '{');
     }
 
     private static bool ContainsUsefulLetter(string value)
@@ -431,7 +512,7 @@ internal static class NameMergeAnalyzer
         return value.Any(char.IsLetter);
     }
 
-    private sealed record NumericRangeNamePart(string Prefix, string Suffix, MergeRange Range);
+    private sealed record NumericRangeNamePart(string Prefix, string Suffix, string Unit, MergeRange Range);
 
     private readonly record struct MergeRange(int Start, int End, int Width);
 }

@@ -32,6 +32,17 @@ public sealed class NameMergeAnalyzerTests
     }
 
     [Fact]
+    public void Analyze_MergesKoreanVolumeRangesBeforeCommonSuffixToken()
+    {
+        var stem = NameMergeAnalyzer.CreateCommonStem([
+            "마법선생 네기마 21권 - 38권[총 38권][완결]",
+            "마법선생 네기마 01권 - 20권[총 38권][완결]"
+        ]);
+
+        Assert.Equal("마법선생 네기마 01권 - 38권[총 38권][완결]", stem);
+    }
+
+    [Fact]
     public void Analyze_UsesMiddleCommonTokenWhenPrefixDoesNotMatch()
     {
         var stem = NameMergeAnalyzer.CreateCommonStem(["test이름 tt", "이름abc"]);
