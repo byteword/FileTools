@@ -285,38 +285,40 @@ bool SelectionAnyFileSystemItem(const std::vector<std::wstring>& paths)
     });
 }
 
-bool SelectionSingleFileFolderState(
+bool SelectionHasSingleFileFolderState(
     const std::vector<std::wstring>& paths,
     SingleFileFolderState expected)
 {
     // 선택한 모든 경로가 디렉토리인지 선행 검사 후,
-    // 각 폴더의 상태가 expected로 일치하는지 확인한다.
-    // 최소 하나는 expected 상태여야 true다.
+    // expected 상태인 단일 파일 폴더가 하나라도 있는지 확인한다.
     if (!SelectionAllDirectories(paths))
     {
         return false;
     }
 
-    bool sawExpected = false;
     for (const auto& path : paths)
     {
-        const SingleFileFolderState state = GetSingleFileFolderState(path);
-        if (state == SingleFileFolderState::NotSingleFileFolder)
+        if (GetSingleFileFolderState(path) == expected)
         {
-            return false;
-        }
-
-        if (state == expected)
-        {
-            sawExpected = true;
-        }
-        else if (state != expected)
-        {
-            return false;
+            return true;
         }
     }
 
-    return sawExpected;
+    return false;
+}
+
+bool SelectionHasSingleFileFolder(const std::vector<std::wstring>& paths)
+{
+    // 파일명 유지/폴더명 변경 벗기기는 같은 이름/다른 이름 단일 파일 폴더를 모두 대상으로 한다.
+    if (!SelectionAllDirectories(paths))
+    {
+        return false;
+    }
+
+    return std::any_of(paths.begin(), paths.end(), [](const std::wstring& path)
+    {
+        return GetSingleFileFolderState(path) != SingleFileFolderState::NotSingleFileFolder;
+    });
 }
 
 bool IsCommandVisible(CommandKind kind, const std::vector<std::wstring>& paths)
@@ -338,11 +340,12 @@ bool IsCommandVisible(CommandKind kind, const std::vector<std::wstring>& paths)
     case CommandKind::FolderWrapFiles:
         return SelectionAllFiles(paths);
     case CommandKind::FolderUnwrapSameName:
-        return SelectionSingleFileFolderState(paths, SingleFileFolderState::SameName);
+        return SelectionHasSingleFileFolderState(paths, SingleFileFolderState::SameName);
     case CommandKind::FolderUnwrapUseFolderName:
     case CommandKind::FolderUnwrapKeepFileName:
+        return SelectionHasSingleFileFolder(paths);
     case CommandKind::FolderUnwrapPrefixFolderName:
-        return SelectionSingleFileFolderState(paths, SingleFileFolderState::DifferentName);
+        return SelectionHasSingleFileFolderState(paths, SingleFileFolderState::DifferentName);
     case CommandKind::FolderMoveInnerFilesUp:
         return SelectionAllDirectories(paths);
     case CommandKind::FolderMergeSelectedTargets:

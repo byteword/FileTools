@@ -4,13 +4,13 @@
 
 Windows 탐색기 ContextMenu와 독립 실행형 WinForms 유틸리티를 제공하는 작은 파일 관리 도구입니다.
 
-현재 버전: `1.4.5.1`.
+현재 버전: `1.4.5.2`.
 
 ### 개발 및 안정성 안내
 
 FileTools는 취미 개발자가 개인적으로 관리하는 프로젝트이며, Codex를 활용해 제작 및 업데이트하고 있습니다. 따라서 일부 업데이트는 충분히 안정화되지 않았을 수 있고, 버그 테스트도 제한적으로 이루어질 수 있습니다. 중요한 파일에 적용하기 전에는 백업을 권장드리며, 문제가 발견되면 이슈로 알려주시면 가능한 범위에서 확인하겠습니다.
 
-`1.4.5.1`은 베타 안정화와 릴리스 검증을 거친 정식 릴리스 라인입니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 파일 비교 ContextMenu 노출, 로컬 이름변경 학습 기반, 릴리스 검증 흐름, 압축 병합 결정 패널 표시 정리, 최종 이름 확인 기반 병합/폴더 씌우기 흐름, 병합 이름 자동 교정, 폴더 병합 옵션 UI 정리를 포함합니다.
+`1.4.5.2`은 베타 안정화와 릴리스 검증을 거친 정식 릴리스 라인입니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 파일 비교 ContextMenu 노출, 로컬 이름변경 학습 기반, 릴리스 검증 흐름, 압축 병합 결정 패널 표시 정리, 최종 이름 확인 기반 병합/폴더 씌우기 흐름, 병합 이름 자동 교정, 폴더 병합 옵션 UI 정리, 다중 폴더 선택 시 조건부 단일 파일 폴더 벗기기 표시/실행 필터링을 포함합니다.
 
 ### 기능
 
@@ -240,7 +240,7 @@ MSI는 네이티브 `FileTools.ShellExt.dll`을 현재 사용자 COM ExplorerCom
 
 GitHub Releases는 setup bootstrapper, MSI, sparse MSIX identity package를 빌드하고 서명하며, `checksums.txt`를 생성하고, 릴리스 자산에 대한 GitHub artifact attestation을 만드는 수동 workflow를 사용합니다.
 
-`1.4.5.1`은 GitHub 정식 릴리스로 게시합니다. 위키 문서와 tag별 변경사항 문서를 먼저 업데이트하고, 릴리스 자산 검증 및 설치 smoke test가 끝난 뒤 draft를 게시합니다.
+`1.4.5.2`은 GitHub 정식 릴리스로 게시합니다. 위키 문서와 tag별 변경사항 문서를 먼저 업데이트하고, 릴리스 자산 검증 및 설치 smoke test가 끝난 뒤 draft를 게시합니다.
 
 릴리스는 GitHub Secrets에 base64 PFX와 비밀번호로 저장된 self-signed FileTools 인증서를 사용합니다. 이는 무료 GitHub 배포와 CER 신뢰 후 MSIX identity 등록에는 적합하지만, 공개 CA 코드 서명 인증서는 아닙니다. Windows는 첫 사용 사용자에게 SmartScreen 또는 신뢰 경고를 계속 표시할 수 있습니다.
 
@@ -356,7 +356,7 @@ FileTools.exe /context ArchiveMergePreserveInternalPaths "%1"
 FileTools.exe /context FileCompare "%1"
 ```
 
-처음 세 `/context` 명령은 하위 호환성을 위해 유지됩니다. 네이티브 ShellExt는 선택 항목 종류에 따라 표시할 하위 메뉴 항목을 결정합니다. 단일 파일 폴더의 경우 단일 파일 stem이 폴더 이름과 일치하는지도 확인하고, 단순 unwrap 명령 또는 명시적인 폴더 이름/파일 이름/폴더명-파일명 unwrap 명령을 노출합니다. 파일 비교 명령은 선택한 파일/폴더를 독립 실행 UI에 전달하고 파일 비교 설정 창을 미리 엽니다.
+처음 세 `/context` 명령은 하위 호환성을 위해 유지됩니다. 네이티브 ShellExt는 선택 항목 종류에 따라 표시할 하위 메뉴 항목을 결정합니다. 여러 폴더 선택 시 같은 이름 단일 파일 폴더가 하나라도 있으면 같은 이름 벗기기 명령을 표시하고, 단일 파일 폴더가 하나라도 있으면 파일명 유지/폴더명 변경 벗기기 명령을 표시합니다. 컨텍스트 메뉴 실행은 선택 항목 전체를 큐에 모은 뒤 해당 명령 조건에 맞는 폴더만 처리합니다. 파일 비교 명령은 선택한 파일/폴더를 독립 실행 UI에 전달하고 파일 비교 설정 창을 미리 엽니다.
 
 Explorer는 선택 항목마다 프로세스를 하나씩 시작하는 경우가 많습니다. FileTools는 잠시 기다린 뒤 임시 큐를 통해 선택 경로를 병합하고, 선택된 작업을 실행한 다음 비대화형 명령에서는 자동으로 종료합니다. Open FileTools 명령도 선택한 모든 경로를 받아 큐에 넣기 때문에 독립 실행형 플래너가 전체 선택 항목으로 시작됩니다. 파일명 교정은 구성된 검토 모드에 따라 적용 전에 이름 바꾸기 검토 창을 엽니다. 예외가 발생하면 오류 요약이 표시됩니다.
 파일 비교 명령은 선택 경로를 큐로 병합한 뒤 FileTools를 열고 파일 비교 설정창을 미리 채워서 표시합니다.
@@ -390,13 +390,13 @@ FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE` 또�
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
-Current version: `1.4.5.1`.
+Current version: `1.4.5.2`.
 
 ### Development and Stability Notice
 
 FileTools is maintained as a personal hobby project and is built and updated with the help of Codex. As a result, some updates may not be fully stable, and bug testing may be limited. Please consider backing up important files before using FileTools on them, and feel free to report issues so they can be reviewed as time permits.
 
-`1.4.5.1` is distributed on the stable release line after the beta stabilization and release verification pass. It includes the standalone planner work-plan display, folder-merge options flow, file-compare ContextMenu exposure, local rename-learning foundation, release verification flow, archive-merge decision panel display cleanup, final-name review flows for merge and folder wrapping operations, merge-name correction, and the revised folder merge options UI.
+`1.4.5.2` is distributed on the stable release line after the beta stabilization and release verification pass. It includes the standalone planner work-plan display, folder-merge options flow, file-compare ContextMenu exposure, local rename-learning foundation, release verification flow, archive-merge decision panel display cleanup, final-name review flows for merge and folder wrapping operations, merge-name correction, the revised folder merge options UI, and filtered single-file folder unwrap visibility/execution for multi-folder selections.
 
 ### Features
 
@@ -627,7 +627,7 @@ GitHub Releases use a manual workflow that builds and signs the setup
 bootstrapper, MSI, and sparse MSIX identity package, generates `checksums.txt`,
 and creates GitHub artifact attestations for the release assets.
 
-`1.4.5.1` is published as a stable GitHub Release. Update the wiki and
+`1.4.5.2` is published as a stable GitHub Release. Update the wiki and
 tag-specific change notes before tagging, then publish the draft only after
 release asset verification and install smoke testing.
 
@@ -749,7 +749,7 @@ FileTools.exe /context ArchiveMergePreserveInternalPaths "%1"
 FileTools.exe /context FileCompare "%1"
 ```
 
-The first three `/context` commands are kept for backward compatibility. Native ShellExt decides which submenu items are visible from the selected item type. For single-file folders, it also checks whether the single file stem matches the folder name and exposes either the simple unwrap command or explicit folder-name/file-name/folder-file-name unwrap commands. File compare queues the selected files/folders into the standalone UI and preloads the file compare settings dialog.
+The first three `/context` commands are kept for backward compatibility. Native ShellExt decides which submenu items are visible from the selected item type. For multi-folder selections, it shows the same-name single-file unwrap command when at least one selected folder matches that condition, and shows the keep-file-name/rename-to-folder-name unwrap commands when at least one selected folder is a single-file folder. Context-menu execution queues the full selection, then applies the selected unwrap command only to folders that match that command's condition. File compare queues the selected files/folders into the standalone UI and preloads the file compare settings dialog.
 
 Explorer often starts one process per selected item. FileTools waits briefly, merges those selected paths through a temporary queue, runs the selected operation, and exits automatically for non-interactive commands. The Open FileTools command also accepts and queues every selected path so the standalone planner starts with the full selection. File name correction opens the rename review dialog according to the configured review mode before applying changes. If any exception occurs, an error summary is shown.
 

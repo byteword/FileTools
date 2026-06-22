@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.4.5.2 - 2026-06-22
+
+### Fixed
+
+- Fixed native Explorer ContextMenu visibility for mixed multi-folder
+  selections so unwrap commands appear when at least one selected folder
+  matches the command condition.
+- Fixed ContextMenu unwrap execution so queued multi-folder selections process
+  only folders that match the selected unwrap command.
+
+### Changed
+
+- Updated app, installer, bundle, ShellExt, build script, README, release
+  guide, release notes, and Program info version metadata to `1.4.5.2`.
+
+### Verification
+
+- Managed tests passed 137/137 on 2026-06-22.
+- Debug x64 mixed solution build passed with 0 warnings and 0 errors on
+  2026-06-22 using VS 18 MSBuild.
+
 ## 1.4.5.1 - 2026-06-20
 
 ### Fixed

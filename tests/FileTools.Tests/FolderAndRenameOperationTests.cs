@@ -76,6 +76,43 @@ public sealed class FolderAndRenameOperationTests
     }
 
     [Fact]
+    public void Program_FilterContextCommandPaths_FolderUnwrapCommandsKeepMatchingSingleFileFoldersOnly()
+    {
+        using var temp = TempDirectory.Create();
+        var sameName = temp.GetPath("Same");
+        var differentName = temp.GetPath("Different");
+        var multipleFiles = temp.GetPath("Multiple");
+        var nested = temp.GetPath("Nested");
+        Directory.CreateDirectory(sameName);
+        Directory.CreateDirectory(differentName);
+        Directory.CreateDirectory(multipleFiles);
+        Directory.CreateDirectory(nested);
+        Directory.CreateDirectory(Path.Combine(nested, "Child"));
+        File.WriteAllText(Path.Combine(sameName, "Same.txt"), "same");
+        File.WriteAllText(Path.Combine(differentName, "Child.txt"), "different");
+        File.WriteAllText(Path.Combine(multipleFiles, "One.txt"), "one");
+        File.WriteAllText(Path.Combine(multipleFiles, "Two.txt"), "two");
+        File.WriteAllText(Path.Combine(nested, "Nested.txt"), "nested");
+        var looseFile = temp.GetPath("Loose.txt");
+        File.WriteAllText(looseFile, "loose");
+
+        var paths = new[] { sameName, multipleFiles, differentName, nested, looseFile };
+
+        Assert.Equal(
+            [sameName],
+            Program.FilterContextCommandPaths(ContextMenuCommand.FolderUnwrapSameNameSingleFile, paths));
+        Assert.Equal(
+            [sameName, differentName],
+            Program.FilterContextCommandPaths(ContextMenuCommand.FolderUnwrapKeepFileName, paths));
+        Assert.Equal(
+            [sameName, differentName],
+            Program.FilterContextCommandPaths(ContextMenuCommand.FolderUnwrapUseFolderName, paths));
+        Assert.Equal(
+            [differentName],
+            Program.FilterContextCommandPaths(ContextMenuCommand.FolderUnwrapPrefixFolderName, paths));
+    }
+
+    [Fact]
     public void FolderMergeOperations_CreateMergePlanPreviewStripsNumericSuffixes()
     {
         using var temp = TempDirectory.Create();

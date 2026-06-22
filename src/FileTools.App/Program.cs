@@ -300,7 +300,57 @@ internal static class Program
                 break;
         }
 
-        return new FileToolRunner(settings).Run(mode, paths);
+        return new FileToolRunner(settings).Run(mode, FilterContextCommandPaths(command, paths));
+    }
+
+    internal static string[] FilterContextCommandPaths(ContextMenuCommand command, IReadOnlyList<string> paths)
+    {
+        return command switch
+        {
+            ContextMenuCommand.FolderUnwrapSameNameSingleFile =>
+                paths.Where(static path => IsSingleFileFolder(path, SingleFileFolderMatch.SameName)).ToArray(),
+            ContextMenuCommand.FolderUnwrapSingleFile or
+            ContextMenuCommand.FolderUnwrapUseFolderName or
+            ContextMenuCommand.FolderUnwrapKeepFileName =>
+                paths.Where(static path => IsSingleFileFolder(path, SingleFileFolderMatch.Any)).ToArray(),
+            ContextMenuCommand.FolderUnwrapPrefixFolderName =>
+                paths.Where(static path => IsSingleFileFolder(path, SingleFileFolderMatch.DifferentName)).ToArray(),
+            _ => paths.ToArray()
+        };
+    }
+
+    private static bool IsSingleFileFolder(string path, SingleFileFolderMatch match)
+    {
+        var dir = new DirectoryInfo(path);
+        if (!dir.Exists)
+        {
+            return false;
+        }
+
+        var files = dir.GetFiles("*", SearchOption.TopDirectoryOnly);
+        if (files.Length != 1 || dir.GetDirectories("*", SearchOption.TopDirectoryOnly).Length != 0)
+        {
+            return false;
+        }
+
+        var sameName = string.Equals(
+            dir.Name,
+            Path.GetFileNameWithoutExtension(files[0].Name),
+            StringComparison.OrdinalIgnoreCase);
+        return match switch
+        {
+            SingleFileFolderMatch.Any => true,
+            SingleFileFolderMatch.SameName => sameName,
+            SingleFileFolderMatch.DifferentName => !sameName,
+            _ => false
+        };
+    }
+
+    private enum SingleFileFolderMatch
+    {
+        Any,
+        SameName,
+        DifferentName
     }
 
     private static OperationResult ExecuteArchiveMergeContextCommand(
