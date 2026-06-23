@@ -15,6 +15,7 @@ internal sealed class FolderMergeOptionsDialog : Form
     private readonly bool _allowFolderContentsMode;
     private readonly TextBox _targetFolderNameBox = new();
     private readonly Label _targetFolderPathLabel = new();
+    private readonly Button _advancedNameButton = new();
     private readonly RadioButton _mergeFolderUnitsRadio = new();
     private readonly RadioButton _mergeFolderContentsRadio = new();
     private readonly Label _modeHelpLabel = new();
@@ -91,12 +92,13 @@ internal sealed class FolderMergeOptionsDialog : Form
         var panel = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 2,
+            ColumnCount = 3,
             RowCount = 3,
             Margin = new Padding(0, 2, 0, 6)
         };
         panel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 124));
         panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        panel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 20));
@@ -108,6 +110,12 @@ internal sealed class FolderMergeOptionsDialog : Form
         _targetFolderNameBox.Text = initialName ?? string.Empty;
         panel.Controls.Add(_targetFolderNameBox, 1, 0);
 
+        _advancedNameButton.Dock = DockStyle.Fill;
+        _advancedNameButton.Margin = new Padding(8, 0, 0, 0);
+        _advancedNameButton.Text = Localizer.Get("ButtonAdvanced");
+        _advancedNameButton.Click += (_, _) => OpenAdvancedNameEditor();
+        panel.Controls.Add(_advancedNameButton, 2, 0);
+
         panel.Controls.Add(CreateRowLabel(Localizer.Get("FolderMergeTargetPath")), 0, 1);
 
         _targetFolderPathLabel.Dock = DockStyle.Fill;
@@ -115,11 +123,13 @@ internal sealed class FolderMergeOptionsDialog : Form
         _targetFolderPathLabel.TextAlign = ContentAlignment.MiddleLeft;
         _targetFolderPathLabel.AutoEllipsis = true;
         panel.Controls.Add(_targetFolderPathLabel, 1, 1);
+        panel.SetColumnSpan(_targetFolderPathLabel, 2);
 
         _statusLabel.Dock = DockStyle.Fill;
         _statusLabel.AutoEllipsis = true;
         _statusLabel.TextAlign = ContentAlignment.MiddleLeft;
         panel.Controls.Add(_statusLabel, 1, 2);
+        panel.SetColumnSpan(_statusLabel, 2);
 
         return panel;
     }
@@ -247,6 +257,45 @@ internal sealed class FolderMergeOptionsDialog : Form
         _targetFolderNameBox.TextChanged += (_, _) => RefreshStatus();
         _mergeFolderUnitsRadio.CheckedChanged += (_, _) => RefreshStatus();
         _mergeFolderContentsRadio.CheckedChanged += (_, _) => RefreshStatus();
+    }
+
+    private void OpenAdvancedNameEditor()
+    {
+        RefreshStatus();
+        var automaticName = GetAutomaticTargetFolderName();
+        var currentName = string.IsNullOrWhiteSpace(_targetFolderNameBox.Text)
+            ? automaticName
+            : _targetFolderNameBox.Text.Trim();
+        var edited = AdvancedNameEditDialog.EditName(
+            this,
+            Localizer.Get("AdvancedNameDialogTitle"),
+            Localizer.Get("AdvancedNameFolderMergeHeader"),
+            new NameEditRequest(
+                OriginalName: automaticName,
+                SuggestedName: currentName,
+                AutomaticName: automaticName,
+                Recommendations: BuildRecommendations(automaticName)));
+        if (edited is not null)
+        {
+            _targetFolderNameBox.Text = edited;
+            RefreshStatus();
+        }
+    }
+
+    private string GetAutomaticTargetFolderName()
+    {
+        return FolderMergeOperations.CreateMergePlanPreview(
+            _sourcePaths,
+            _settings,
+            new FolderMergeOptions(null, BuildModeFromInputs())).TargetFolderName;
+    }
+
+    private IReadOnlyList<string> BuildRecommendations(string automaticName)
+    {
+        var recommendations = new List<string> { automaticName };
+        recommendations.AddRange(_sourcePaths.Select(static path => Path.GetFileNameWithoutExtension(path)));
+        recommendations.AddRange(_sourcePaths.Select(static path => Path.GetFileName(path)));
+        return recommendations;
     }
 
     private void RefreshStatus()

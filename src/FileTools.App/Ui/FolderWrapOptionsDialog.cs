@@ -127,8 +127,17 @@ internal sealed class FolderWrapOptionsDialog : Form
         _okButton.Width = 92;
         _okButton.Height = 30;
         _okButton.Click += (_, _) => SaveAndClose();
+        var advancedButton = new Button
+        {
+            Text = Localizer.Get("ButtonAdvanced"),
+            Width = 92,
+            Height = 30,
+            Margin = new Padding(8, 0, 0, 0)
+        };
+        advancedButton.Click += (_, _) => OpenAdvancedNameEditor();
         buttons.Controls.Add(cancelButton);
         buttons.Controls.Add(_okButton);
+        buttons.Controls.Add(advancedButton);
         root.Controls.Add(buttons, 0, 2);
         AcceptButton = _okButton;
         CancelButton = cancelButton;
@@ -169,6 +178,44 @@ internal sealed class FolderWrapOptionsDialog : Form
         }
 
         _okButton.Enabled = allReady;
+    }
+
+    private void OpenAdvancedNameEditor()
+    {
+        RefreshRows();
+        var row = _grid.CurrentRow ?? _grid.Rows.Cast<DataGridViewRow>().FirstOrDefault();
+        if (row is null)
+        {
+            return;
+        }
+
+        var sourcePath = GetSourcePath(row);
+        var automaticName = FolderWrapOperations.CreatePreview(sourcePath, _settings).TargetFolderName;
+        var edited = AdvancedNameEditDialog.EditName(
+            this,
+            Localizer.Get("AdvancedNameDialogTitle"),
+            Localizer.Get("AdvancedNameFolderWrapHeader"),
+            new NameEditRequest(
+                OriginalName: Path.GetFileName(sourcePath),
+                SuggestedName: Convert.ToString(row.Cells[TargetFolderColumnName].Value) ?? "",
+                AutomaticName: automaticName,
+                Recommendations: BuildRecommendations(sourcePath, automaticName)));
+        if (edited is null)
+        {
+            return;
+        }
+
+        row.Cells[TargetFolderColumnName].Value = edited;
+        RefreshRows();
+    }
+
+    private static IReadOnlyList<string> BuildRecommendations(string sourcePath, string automaticName)
+    {
+        return
+        [
+            Path.GetFileNameWithoutExtension(sourcePath),
+            automaticName
+        ];
     }
 
     private void SaveAndClose()

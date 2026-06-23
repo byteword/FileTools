@@ -106,6 +106,7 @@
   <data name="ButtonDelete" xml:space="preserve"><value>Delete</value></data>
   <data name="ButtonClose" xml:space="preserve"><value>Close</value></data>
   <data name="ButtonOK" xml:space="preserve"><value>OK</value></data>
+  <data name="ButtonAdvanced" xml:space="preserve"><value>Advanced</value></data>
   <data name="LabelId" xml:space="preserve"><value>ID</value></data>
   <data name="LabelName" xml:space="preserve"><value>Name</value></data>
   <data name="LabelDescription" xml:space="preserve"><value>Description</value></data>
@@ -506,6 +507,18 @@
   <data name="FolderWrapTargetPath" xml:space="preserve"><value>Destination folder path</value></data>
   <data name="FolderWrapPlannedStepsMessage" xml:space="preserve"><value>Wrap selected files only after clearing their planned steps.</value></data>
   <data name="FolderWrapCanceled" xml:space="preserve"><value>Folder wrap was canceled by user.</value></data>
+  <data name="SimpleRenameHeader" xml:space="preserve"><value>Review the current name and enter the new name.</value></data>
+  <data name="AdvancedNameDialogTitle" xml:space="preserve"><value>Advanced name editor</value></data>
+  <data name="AdvancedNameOriginal" xml:space="preserve"><value>Original name</value></data>
+  <data name="AdvancedNameSuggested" xml:space="preserve"><value>New name</value></data>
+  <data name="AdvancedNameRecommendations" xml:space="preserve"><value>Recommended text</value></data>
+  <data name="AdvancedNameNoRecommendations" xml:space="preserve"><value>No recommended text is available.</value></data>
+  <data name="AdvancedNameRenameHeader" xml:space="preserve"><value>Edit this file name with recommendations.</value></data>
+  <data name="AdvancedNameFolderWrapHeader" xml:space="preserve"><value>Edit the selected destination folder name.</value></data>
+  <data name="AdvancedNameFolderMergeHeader" xml:space="preserve"><value>Edit the final merge folder name.</value></data>
+  <data name="AdvancedNameArchiveMergeHeader" xml:space="preserve"><value>Edit the final output ZIP filename.</value></data>
+  <data name="ButtonRestoreOriginalName" xml:space="preserve"><value>Restore original</value></data>
+  <data name="ButtonUseAutomaticCorrection" xml:space="preserve"><value>Auto correction</value></data>
   <data name="FolderMergeNeedsMultipleTargets" xml:space="preserve"><value>Select two or more existing targets to merge.</value></data>
   <data name="FolderMergePlannedStepsMessage" xml:space="preserve"><value>Merge selected targets only after clearing their planned steps.</value></data>
   <data name="FolderMergeCanceled" xml:space="preserve"><value>Folder merge was canceled by user.</value></data>

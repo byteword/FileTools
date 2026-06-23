@@ -63,32 +63,28 @@ internal sealed partial class RenameReviewDialog : Form
             return RenameOperations.Apply(previews);
         }
 
-        using var dialog = new RenameReviewDialog(previews, applyOnOk: true);
+        using var dialog = new SimpleRenameReviewDialog(previews, applyOnOk: true);
         return dialog.ShowDialog() == DialogResult.OK ? dialog.Result : new OperationResult();
     }
 
     public static bool EditPlanStep(IWin32Window owner, string path, WorkPlanStep step, FileToolsSettings settings)
     {
-        using var dialog = new RenameReviewDialog(RenameOperations.CreatePlan([path], settings), applyOnOk: false);
-        if (!string.IsNullOrWhiteSpace(step.ManualRenameFileName) && dialog._rows.Count > 0)
+        var previews = RenameOperations.CreatePlan([path], settings);
+        if (!string.IsNullOrWhiteSpace(step.ManualRenameFileName) && previews.Count > 0)
         {
-            var row = dialog._rows[0];
-            row.SuggestedName = step.ManualRenameFileName;
-            row.UserEdited = true;
-            dialog.NormalizeEditedRow(row);
-            dialog.ValidateRows();
-            dialog.SelectRow(row);
+            previews = [RenameOperations.CreateManualPreview(path, step.ManualRenameFileName, settings)];
         }
 
-        if (dialog.ShowDialog(owner) != DialogResult.OK || dialog._rows.Count == 0)
+        using var dialog = new SimpleRenameReviewDialog(previews, applyOnOk: false);
+        if (dialog.ShowDialog(owner) != DialogResult.OK || dialog.EditedPreviews.Count == 0)
         {
             return false;
         }
 
-        var editedRow = dialog._rows[0];
-        step.ManualRenameFileName = editedRow.IsSkipped
-            ? editedRow.OriginalName
-            : WindowsFileNameSafety.MakeSafeFileName(editedRow.SuggestedName.Trim());
+        var editedPreview = dialog.EditedPreviews[0];
+        step.ManualRenameFileName = editedPreview.Status == RenamePreviewStatus.Skipped
+            ? editedPreview.OriginalFileName
+            : WindowsFileNameSafety.MakeSafeFileName(editedPreview.SuggestedFileName.Trim());
         return true;
     }
 
@@ -97,18 +93,18 @@ internal sealed partial class RenameReviewDialog : Form
         IEnumerable<string> paths,
         FileToolsSettings settings)
     {
-        using var dialog = new RenameReviewDialog(RenameOperations.CreatePlan(paths, settings), applyOnOk: false);
+        using var dialog = new SimpleRenameReviewDialog(RenameOperations.CreatePlan(paths, settings), applyOnOk: false);
         if (dialog.ShowDialog(owner) != DialogResult.OK)
         {
             return null;
         }
 
-        return dialog._rows
-            .Where(static row => !row.IsSkipped)
-            .Where(static row => !PathComparer.Equals(row.Preview.OriginalPath, row.TargetPath))
+        return dialog.EditedPreviews
+            .Where(static preview => preview.Status != RenamePreviewStatus.Skipped)
+            .Where(static preview => !PathComparer.Equals(preview.OriginalPath, preview.SuggestedPath))
             .ToDictionary(
-                static row => row.Preview.OriginalPath,
-                static row => WindowsFileNameSafety.MakeSafeFileName(row.SuggestedName.Trim()),
+                static preview => preview.OriginalPath,
+                static preview => WindowsFileNameSafety.MakeSafeFileName(preview.SuggestedFileName.Trim()),
                 PathComparer);
     }
 

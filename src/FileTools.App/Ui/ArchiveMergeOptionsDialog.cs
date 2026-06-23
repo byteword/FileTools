@@ -78,12 +78,13 @@ internal sealed class ArchiveMergeOptionsDialog : Form
         var panel = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 3,
+            ColumnCount = 4,
             RowCount = 2,
             Margin = new Padding(0, 4, 0, 8)
         };
         panel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
         panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        panel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 104));
         panel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 104));
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
         panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
@@ -107,6 +108,15 @@ internal sealed class ArchiveMergeOptionsDialog : Form
         };
         browseButton.Click += (_, _) => BrowseOutputPath();
         panel.Controls.Add(browseButton, 2, 0);
+
+        var advancedButton = new Button
+        {
+            Text = Localizer.Get("ButtonAdvanced"),
+            Dock = DockStyle.Fill,
+            Margin = new Padding(8, 0, 0, 2)
+        };
+        advancedButton.Click += (_, _) => OpenAdvancedOutputNameEditor();
+        panel.Controls.Add(advancedButton, 3, 0);
 
         var help = new Label
         {
@@ -432,6 +442,47 @@ internal sealed class ArchiveMergeOptionsDialog : Form
         {
             _outputPathBox.Text = dialog.FileName;
         }
+    }
+
+    private void OpenAdvancedOutputNameEditor()
+    {
+        var outputPath = _outputPathBox.Text.Trim().Trim('"');
+        if (string.IsNullOrWhiteSpace(outputPath))
+        {
+            outputPath = Options.OutputPath;
+        }
+
+        var directory = Path.GetDirectoryName(outputPath);
+        if (string.IsNullOrWhiteSpace(directory))
+        {
+            directory = Environment.CurrentDirectory;
+        }
+
+        var fileName = Path.GetFileName(outputPath);
+        var automaticName = Path.GetFileName(Options.OutputPath);
+        var edited = AdvancedNameEditDialog.EditName(
+            this,
+            Localizer.Get("AdvancedNameDialogTitle"),
+            Localizer.Get("AdvancedNameArchiveMergeHeader"),
+            new NameEditRequest(
+                OriginalName: automaticName,
+                SuggestedName: fileName,
+                AutomaticName: automaticName,
+                RequiredExtension: ".zip",
+                Recommendations: BuildNameRecommendations()));
+        if (edited is not null)
+        {
+            _outputPathBox.Text = Path.Combine(directory, edited);
+            RefreshEntryPreview();
+        }
+    }
+
+    private IReadOnlyList<string> BuildNameRecommendations()
+    {
+        var recommendations = new List<string>();
+        recommendations.AddRange(Options.SourcePaths.Select(static path => Path.GetFileNameWithoutExtension(path)));
+        recommendations.AddRange(Options.SourcePaths.Select(static path => Path.GetFileName(path)));
+        return recommendations;
     }
 
     private void SaveAndClose()

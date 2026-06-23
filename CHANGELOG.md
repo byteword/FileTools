@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.4.6.0 - 2026-06-23
+
+### Added
+
+- Added a simple name confirmation dialog for file rename operations with
+  original name, new name, Advanced, OK, and Cancel controls.
+- Added a single-name advanced editor with original-name restore, automatic
+  correction, and recommended text chips for file rename, folder wrap, folder
+  merge, and ZIP archive merge output names.
+
+### Changed
+
+- The Advanced button now edits only the currently selected final name instead
+  of opening a multi-item rename review surface.
+- Folder wrap, folder merge, and ZIP archive merge option dialogs now expose an
+  Advanced name editing button at their name confirmation points.
+- Updated app, installer, bundle, ShellExt, build script, README, release
+  guide, release notes, and Program info version metadata to `1.4.6.0`.
+
+### Verification
+
+- `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` passed 137/137 on
+  2026-06-23.
+- `MSBuild.exe FileTools.sln /p:Configuration=Debug /p:Platform=x64 /m` passed
+  with 0 warnings and 0 errors on 2026-06-23 using VS 18 MSBuild.
+
 ## 1.4.5.2 - 2026-06-22
 
 ### Fixed

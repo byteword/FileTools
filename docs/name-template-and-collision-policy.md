@@ -195,13 +195,25 @@ final destination-name review surface before execution:
 Select targets -> analyze name -> edit final destination name -> OK -> execute
 ```
 
+For file rename operations, the first confirmation surface is intentionally
+simple: it shows the original name, one editable new-name field, and
+`Advanced`/`OK`/`Cancel` buttons. `Advanced` opens a single-name editor for the
+currently selected final name. The editor shows the original name, editable new
+name, original restore and automatic-correction actions, recommended text, and
+`OK`/`Cancel`.
+
 The review surface differs by operation shape:
 
 ```text
-Folder wrapping: one editable destination folder name per selected file
-Folder merge: one editable destination folder name for the merged folder
-Archive merge: one editable output ZIP path
+Folder wrapping: one editable destination folder name per selected file, plus Advanced
+Folder merge: one editable destination folder name for the merged folder, plus Advanced
+Archive merge: one editable output ZIP path, plus Advanced filename editing
 ```
+
+The shared advanced name editor is used by file rename, folder wrap, folder
+merge, and archive merge without adding a global setting. It edits only one
+final name at a time, validates file-name safety, and applies required output
+extensions such as `.zip`.
 
 After the user confirms the final name, the operation executes immediately. A
 separate confirmation prompt is avoided unless the operation needs a destructive

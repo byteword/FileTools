@@ -4,13 +4,13 @@
 
 Windows 탐색기 ContextMenu와 독립 실행형 WinForms 유틸리티를 제공하는 작은 파일 관리 도구입니다.
 
-현재 버전: `1.4.5.2`.
+현재 버전: `1.4.6.0`.
 
 ### 개발 및 안정성 안내
 
 FileTools는 취미 개발자가 개인적으로 관리하는 프로젝트이며, Codex를 활용해 제작 및 업데이트하고 있습니다. 따라서 일부 업데이트는 충분히 안정화되지 않았을 수 있고, 버그 테스트도 제한적으로 이루어질 수 있습니다. 중요한 파일에 적용하기 전에는 백업을 권장드리며, 문제가 발견되면 이슈로 알려주시면 가능한 범위에서 확인하겠습니다.
 
-`1.4.5.2`은 베타 안정화와 릴리스 검증을 거친 정식 릴리스 라인입니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 파일 비교 ContextMenu 노출, 로컬 이름변경 학습 기반, 릴리스 검증 흐름, 압축 병합 결정 패널 표시 정리, 최종 이름 확인 기반 병합/폴더 씌우기 흐름, 병합 이름 자동 교정, 폴더 병합 옵션 UI 정리, 다중 폴더 선택 시 조건부 단일 파일 폴더 벗기기 표시/실행 필터링을 포함합니다.
+`1.4.6.0`은 베타 안정화와 릴리스 검증을 거친 정식 릴리스 라인입니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 파일 비교 ContextMenu 노출, 로컬 이름변경 학습 기반, 릴리스 검증 흐름, 압축 병합 결정 패널 표시 정리, 최종 이름 확인 기반 병합/폴더 씌우기 흐름, 병합 이름 자동 교정, 폴더 병합 옵션 UI 정리, 다중 폴더 선택 시 조건부 단일 파일 폴더 벗기기 표시/실행 필터링, 간단 이름 확인과 고급 이름 편집 흐름을 포함합니다.
 
 ### 기능
 
@@ -74,10 +74,11 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
 설정 레이아웃 메모는 `docs/ux-settings-dialog-review.md`에서 추적합니다.
 앱 아이콘은 `src\FileTools.App\Resources` 아래에 투명 PNG와 다중 크기 ICO 자산으로 저장되어 있으며, EXE와 MSI 제품 메타데이터 모두 ICO를 사용합니다. 실행 중에는 같은 ICO를 임베디드 리소스에서 읽어 메인 창 아이콘에도 명시 적용하므로 제목 표시줄과 작업표시줄이 같은 앱 아이콘을 사용합니다. Burn 설치 및 제거 UI는 `installer\FileTools.Bundle\Assets` 아래의 별도 파란색 설치 로고를 사용하고, MSI 마법사는 `installer\FileTools.Installer\Assets` 아래의 별도 파란색 대화상자/배너 비트맵을 사용합니다.
 
-이름 바꾸기 검토 대화상자는 ContextMenu 이름 변경 명령과 독립 실행 계획 편집에서 사용됩니다.
-이름 바꾸기 검토는 변경 적용 전에 항상 열리도록 설정하거나, 생성 행에 검토가 필요하거나 충돌이 있을 때만 열리도록 설정할 수 있습니다. 이 대화상자는 읽기 전용 항목 목록과 선택 항목 편집기를 함께 사용하므로 긴 대상 이름을 그리드 밖에서 편집할 수 있으며, 추출된 제목, 회차, 작가, 태그, 확장자, 후보, 공통 문구, 규칙 추적 값은 입력 보조 정보로 계속 사용할 수 있습니다. 공통 문구는 기본적으로 한 행으로 접혀 있으며 같은 패널에서 펼치거나 접을 수 있습니다. 오른쪽 위에는 전체 변경 요약을 표시하고, 검토/충돌 행을 강조하며, 편집한 대상 이름을 매번 검증하고, 적용 전에 선택 행을 자동/원본으로 복원하거나 건너뛸 수 있습니다.
+이름 바꾸기 확인 대화상자는 ContextMenu 이름 변경 명령과 독립 실행 계획 편집에서 사용됩니다.
+기본 확인 화면은 기존 이름 한 줄과 새 이름 입력 한 줄만 보여주며 `고급`/`확인`/`취소` 버튼을 제공합니다. `고급`은 현재 선택한 이름 하나만 대상으로 원본 되돌리기, 자동교정, 추천 문자열 삽입을 제공하는 단일 이름 편집기를 엽니다. 여러 항목을 처리할 때도 고급 편집은 현재 선택 항목의 최종 이름에만 반영됩니다.
 
 ![FileTools 이름 바꾸기 대화상자](docs/images/rename-editor-dialog-concept.svg)
+![FileTools 간단/고급 이름 편집 흐름](docs/images/simple-advanced-name-flow.svg)
 
 현재 이름 바꾸기 대화상자의 UX 검토 메모는 `docs/ux-rename-dialog-review.md`에서 추적합니다.
 
@@ -240,7 +241,7 @@ MSI는 네이티브 `FileTools.ShellExt.dll`을 현재 사용자 COM ExplorerCom
 
 GitHub Releases는 setup bootstrapper, MSI, sparse MSIX identity package를 빌드하고 서명하며, `checksums.txt`를 생성하고, 릴리스 자산에 대한 GitHub artifact attestation을 만드는 수동 workflow를 사용합니다.
 
-`1.4.5.2`은 GitHub 정식 릴리스로 게시합니다. 위키 문서와 tag별 변경사항 문서를 먼저 업데이트하고, 릴리스 자산 검증 및 설치 smoke test가 끝난 뒤 draft를 게시합니다.
+`1.4.6.0`은 GitHub 정식 릴리스로 게시합니다. 위키 문서와 tag별 변경사항 문서를 먼저 업데이트하고, 릴리스 자산 검증 및 설치 smoke test가 끝난 뒤 draft를 게시합니다.
 
 릴리스는 GitHub Secrets에 base64 PFX와 비밀번호로 저장된 self-signed FileTools 인증서를 사용합니다. 이는 무료 GitHub 배포와 CER 신뢰 후 MSIX identity 등록에는 적합하지만, 공개 CA 코드 서명 인증서는 아닙니다. Windows는 첫 사용 사용자에게 SmartScreen 또는 신뢰 경고를 계속 표시할 수 있습니다.
 
@@ -390,13 +391,13 @@ FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE` 또�
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
-Current version: `1.4.5.2`.
+Current version: `1.4.6.0`.
 
 ### Development and Stability Notice
 
 FileTools is maintained as a personal hobby project and is built and updated with the help of Codex. As a result, some updates may not be fully stable, and bug testing may be limited. Please consider backing up important files before using FileTools on them, and feel free to report issues so they can be reviewed as time permits.
 
-`1.4.5.2` is distributed on the stable release line after the beta stabilization and release verification pass. It includes the standalone planner work-plan display, folder-merge options flow, file-compare ContextMenu exposure, local rename-learning foundation, release verification flow, archive-merge decision panel display cleanup, final-name review flows for merge and folder wrapping operations, merge-name correction, the revised folder merge options UI, and filtered single-file folder unwrap visibility/execution for multi-folder selections.
+`1.4.6.0` is distributed on the stable release line after the beta stabilization and release verification pass. It includes the standalone planner work-plan display, folder-merge options flow, file-compare ContextMenu exposure, local rename-learning foundation, release verification flow, archive-merge decision panel display cleanup, final-name review flows for merge and folder wrapping operations, merge-name correction, the revised folder merge options UI, filtered single-file folder unwrap visibility/execution for multi-folder selections, and simple/advanced name editing flows.
 
 ### Features
 
@@ -460,10 +461,11 @@ File compare, archive merge, folder wrapping/unwrapping, and AutoRelocation comm
 The settings layout notes are tracked in `docs/ux-settings-dialog-review.md`.
 The app icon is stored as transparent PNG and multi-size ICO assets under `src\FileTools.App\Resources`; the EXE and MSI product metadata both use the ICO. At runtime, the same ICO is loaded from an embedded resource and assigned to the main window so the title bar and taskbar use the FileTools icon. The Burn setup and uninstall UI use a separate blue setup logo under `installer\FileTools.Bundle\Assets`, and the MSI wizard uses separate blue dialog/banner bitmaps under `installer\FileTools.Installer\Assets`.
 
-The rename review dialog is used by ContextMenu rename commands and by standalone plan editing.
-Rename review can be configured to always open before applying changes, or to open only when generated rows need review or have conflicts. The dialog uses a read-only item list plus a selected-item editor, so long target names can be edited outside the grid while extracted title, episode, author, tag, extension, candidate, common-phrase, and rule-trace values remain available as input aids. Common phrases stay collapsed to one row by default and can be expanded or collapsed from the same panel. It summarizes total changes in the upper-right corner, emphasizes review/conflict rows, validates edited target names after each edit, and lets the selected row be restored to auto/original or skipped before applying.
+The rename confirmation dialog is used by ContextMenu rename commands and by standalone plan editing.
+The default confirmation surface shows one original-name row, one new-name input, and Advanced/OK/Cancel buttons. Advanced opens a single-name editor for the currently selected final name only, with original restore, automatic correction, and recommended text insertion. When multiple items are being processed, the advanced editor still updates only the current selected item.
 
 ![FileTools rename dialog](docs/images/rename-editor-dialog-concept.svg)
+![FileTools simple and advanced name editing flow](docs/images/simple-advanced-name-flow.svg)
 
 UX review notes for the current rename dialog are tracked in `docs/ux-rename-dialog-review.md`.
 
@@ -627,7 +629,7 @@ GitHub Releases use a manual workflow that builds and signs the setup
 bootstrapper, MSI, and sparse MSIX identity package, generates `checksums.txt`,
 and creates GitHub artifact attestations for the release assets.
 
-`1.4.5.2` is published as a stable GitHub Release. Update the wiki and
+`1.4.6.0` is published as a stable GitHub Release. Update the wiki and
 tag-specific change notes before tagging, then publish the draft only after
 release asset verification and install smoke testing.
 

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="360" viewBox="0 0 920 360" role="img" aria-labelledby="title desc">
+  <title id="title">Simple confirmation and single-name advanced editing flow</title>
+  <desc id="desc">Wireframe showing a simple rename confirmation dialog opening a single-name advanced editor.</desc>
+  <rect width="920" height="360" fill="#f8fafc"/>
+  <rect x="38" y="44" width="360" height="252" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+  <rect x="38" y="44" width="360" height="42" rx="8" fill="#e2e8f0"/>
+  <text x="58" y="71" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#0f172a">Simple rename confirmation</text>
+  <text x="58" y="122" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#334155">Original name</text>
+  <rect x="154" y="102" width="214" height="32" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="166" y="123" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#64748b">readonly-original.zip</text>
+  <text x="58" y="172" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#334155">New name</text>
+  <rect x="154" y="152" width="214" height="32" fill="#ffffff" stroke="#64748b"/>
+  <text x="166" y="173" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#0f172a">edited-name.zip</text>
+  <rect x="60" y="236" width="86" height="32" fill="#ffffff" stroke="#64748b"/>
+  <text x="84" y="257" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#0f172a">Advanced</text>
+  <rect x="174" y="236" width="74" height="32" fill="#2563eb" stroke="#1d4ed8"/>
+  <text x="198" y="257" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#ffffff">OK</text>
+  <rect x="268" y="236" width="86" height="32" fill="#ffffff" stroke="#64748b"/>
+  <text x="290" y="257" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#0f172a">Cancel</text>
+  <path d="M420 170h82" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="427" y="150" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#334155">Advanced</text>
+  <rect x="522" y="44" width="360" height="252" rx="8" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+  <rect x="522" y="44" width="360" height="42" rx="8" fill="#e2e8f0"/>
+  <text x="542" y="71" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#0f172a">Single-name advanced editor</text>
+  <text x="544" y="122" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#334155">Original name</text>
+  <rect x="646" y="102" width="210" height="30" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="658" y="122" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#64748b">readonly-original.zip</text>
+  <text x="544" y="166" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#334155">New name</text>
+  <rect x="646" y="146" width="210" height="30" fill="#ffffff" stroke="#64748b"/>
+  <text x="658" y="166" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#0f172a">edited-name.zip</text>
+  <rect x="646" y="184" width="106" height="30" fill="#ffffff" stroke="#64748b"/>
+  <text x="665" y="204" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#0f172a">Restore original</text>
+  <rect x="762" y="184" width="94" height="30" fill="#ffffff" stroke="#64748b"/>
+  <text x="779" y="204" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#0f172a">Auto correct</text>
+  <text x="544" y="236" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#334155">Recommended text</text>
+  <rect x="646" y="220" width="64" height="28" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="662" y="239" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#334155">title</text>
+  <rect x="720" y="220" width="70" height="28" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="736" y="239" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#334155">author</text>
+  <rect x="800" y="220" width="56" height="28" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="817" y="239" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#334155">tag</text>
+  <rect x="698" y="258" width="74" height="30" fill="#2563eb" stroke="#1d4ed8"/>
+  <text x="722" y="278" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#ffffff">OK</text>
+  <rect x="782" y="258" width="74" height="30" fill="#ffffff" stroke="#64748b"/>
+  <text x="802" y="278" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#0f172a">Cancel</text>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#475569"/>
+    </marker>
+  </defs>
+</svg>

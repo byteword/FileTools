@@ -4,7 +4,9 @@ Design date: 2026-06-02
 
 Scope:
 
-- Current review surface: `src/FileTools.App/Ui/RenameReviewDialog.cs`
+- Current simple confirmation surface: `src/FileTools.App/Ui/SimpleRenameReviewDialog.cs`
+- Current advanced single-name surface: `src/FileTools.App/Ui/AdvancedNameEditDialog.cs`
+- Legacy detailed review surface: `src/FileTools.App/Ui/RenameReviewDialog.cs`
 - Rename parsing model: `src/FileTools.App/Naming/NamingCore.cs`
 - Standalone plan editing entry points: `RenameReviewDialog.EditPlanStep` and `EditPlanSteps`
 - ContextMenu apply entry point: `RenameReviewDialog.ShowAndApply`
@@ -13,11 +15,25 @@ Concept reference:
 
 ![Rename editor dialog concept](images/rename-editor-dialog-concept.svg)
 
+Simple-to-advanced flow reference:
+
+![Simple and advanced name editing flow](images/simple-advanced-name-flow.svg)
+
 ## Implementation Status
 
 Implemented on 2026-06-02 in `src/FileTools.App/Ui/RenameReviewDialog.cs`.
+Updated on 2026-06-23 for `1.4.6.0`: `SimpleRenameReviewDialog` is now the
+first file-rename confirmation surface, and `AdvancedNameEditDialog` opens from
+the `Advanced` button to edit the currently selected final name only.
 
-The first pass keeps the existing rename operation semantics and replaces the grid-cell editor with a selected-item editor:
+Current `1.4.6.0` flow:
+
+- Simple confirmation shows the original name and one new-name input first.
+- `Advanced` opens a single-name editor for the current final name only.
+- The advanced editor offers original restore, automatic correction, recommended text chips, validation, OK, and Cancel.
+- Folder wrap, folder merge, and ZIP archive merge use the same single-name advanced editor at their final-name fields.
+
+Earlier detailed review design notes:
 
 - Read-only left grid for item selection and status.
 - Selected-item editor for original name, final new name, extracted title, episode, author, tags, and extension.
