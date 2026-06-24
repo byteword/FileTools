@@ -31,10 +31,7 @@ internal sealed class SimpleRenameReviewDialog : Form
 
         BuildLayout();
         ValidateItems();
-        if (_items.Count > 0)
-        {
-            _itemList.SelectedIndex = 0;
-        }
+        SelectInitialItem();
     }
 
     public OperationResult Result { get; private set; } = new();
@@ -82,7 +79,7 @@ internal sealed class SimpleRenameReviewDialog : Form
         _itemList.Dock = DockStyle.Fill;
         _itemList.IntegralHeight = false;
         _itemList.DisplayMember = nameof(RenameItem.DisplayText);
-        _itemList.DataSource = _items;
+        _itemList.Items.AddRange(_items.Cast<object>().ToArray());
         _itemList.SelectedIndexChanged += (_, _) => SyncEditorFromSelection();
         body.Controls.Add(_itemList, 0, 0);
         _itemList.Visible = _items.Count > 1;
@@ -117,6 +114,17 @@ internal sealed class SimpleRenameReviewDialog : Form
         fields.Controls.Add(_validationLabel, 1, 2);
         body.Controls.Add(fields, 1, 0);
         return body;
+    }
+
+    private void SelectInitialItem()
+    {
+        if (_itemList.Items.Count > 0 && _itemList.SelectedIndex < 0)
+        {
+            _itemList.SelectedIndex = 0;
+            return;
+        }
+
+        SyncEditorFromSelection();
     }
 
     private Control CreateButtons()

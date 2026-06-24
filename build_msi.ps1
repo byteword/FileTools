@@ -1,7 +1,7 @@
 param(
     [string] $Configuration = 'Release',
     [string] $SigningPublisher = 'CN=FileTools Self-Signed',
-    [string] $Version = '1.4.6.1'
+    [string] $Version = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -15,7 +15,7 @@ function Resolve-FileToolsReleaseVersion {
     }
 
     if ($normalized -notmatch '^\d+\.\d+\.\d+\.\d+$') {
-        throw "Version '$InputVersion' must use four numeric parts, for example 1.4.6.1 or v1.4.6.1."
+        throw "Version '$InputVersion' must use four numeric parts, for example 1.4.6.2 or v1.4.6.2."
     }
 
     $parsed = $null
@@ -30,7 +30,7 @@ function Resolve-FileToolsReleaseVersion {
     return $normalized
 }
 
-$releaseVersion = Resolve-FileToolsReleaseVersion -InputVersion $Version
+$appProject = Join-Path $PSScriptRoot 'src\FileTools.App\FileTools.App.csproj'
 $solution = Join-Path $PSScriptRoot 'installer\FileTools.Installer.sln'
 $installerProject = Join-Path $PSScriptRoot 'installer\FileTools.Installer\FileTools.Installer.wixproj'
 $bundleProject = Join-Path $PSScriptRoot 'installer\FileTools.Bundle\FileTools.Bundle.wixproj'
@@ -45,6 +45,74 @@ $signingPfx = Join-Path $signingOutputDir 'FileTools.Signing.pfx'
 $msi = Join-Path $PSScriptRoot "installer\FileTools.Installer\bin\$Configuration\FileTools.msi"
 $setup = Join-Path $PSScriptRoot "installer\FileTools.Bundle\bin\$Configuration\FileToolsSetup.exe"
 $shellExt = Join-Path $PSScriptRoot "src\FileTools.ShellExt\x64\$Configuration\FileTools.ShellExt.dll"
+
+function Get-FileToolsProjectVersion {
+    param(
+        [Parameter(Mandatory = $true)][string] $Name,
+        [Parameter(Mandatory = $true)][string] $ProjectPath
+    )
+
+    if (-not (Test-Path $ProjectPath)) {
+        throw "Version source '$Name' was not found: $ProjectPath"
+    }
+
+    $project = [xml](Get-Content -Raw -LiteralPath $ProjectPath)
+    $nodes = $project.SelectNodes("/*[local-name()='Project']/*[local-name()='PropertyGroup']/*[local-name()='FileToolsVersion']")
+    $versions = @($nodes |
+        ForEach-Object { $_.InnerText.Trim() } |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+        Select-Object -Unique)
+
+    if ($versions.Count -eq 0) {
+        throw "FileToolsVersion was not found in '$Name': $ProjectPath"
+    }
+
+    if ($versions.Count -gt 1) {
+        throw "Multiple FileToolsVersion values were found in '$Name': $($versions -join ', ')"
+    }
+
+    return $versions[0]
+}
+
+function Resolve-FileToolsBuildVersion {
+    param(
+        [string] $InputVersion,
+        [Parameter(Mandatory = $true)][object[]] $VersionSources
+    )
+
+    $sourceVersions = @($VersionSources | ForEach-Object {
+        [pscustomobject]@{
+            Name = $_.Name
+            Path = $_.Path
+            Version = Get-FileToolsProjectVersion -Name $_.Name -ProjectPath $_.Path
+        }
+    })
+
+    $distinctSourceVersions = @($sourceVersions.Version | Select-Object -Unique)
+    if ($distinctSourceVersions.Count -gt 1) {
+        $details = ($sourceVersions | ForEach-Object { "$($_.Name)=$($_.Version)" }) -join ', '
+        throw "FileToolsVersion mismatch across project files: $details"
+    }
+
+    $projectVersion = Resolve-FileToolsReleaseVersion -InputVersion $distinctSourceVersions[0]
+    if ([string]::IsNullOrWhiteSpace($InputVersion)) {
+        return $projectVersion
+    }
+
+    $requestedVersion = Resolve-FileToolsReleaseVersion -InputVersion $InputVersion
+    if ($requestedVersion -ne $projectVersion) {
+        throw "Requested version '$requestedVersion' does not match project FileToolsVersion '$projectVersion'. Update project version metadata or omit -Version."
+    }
+
+    return $requestedVersion
+}
+
+$releaseVersion = Resolve-FileToolsBuildVersion -InputVersion $Version -VersionSources @(
+    [pscustomobject]@{ Name = 'App'; Path = $appProject },
+    [pscustomobject]@{ Name = 'Installer'; Path = $installerProject },
+    [pscustomobject]@{ Name = 'Bundle'; Path = $bundleProject },
+    [pscustomobject]@{ Name = 'ShellExt'; Path = $shellExtProject }
+)
 
 Write-Host "Building FileTools version: $releaseVersion"
 

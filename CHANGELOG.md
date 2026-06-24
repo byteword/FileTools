@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.4.6.2 - 2026-06-24
+
+### Fixed
+
+- Fixed the simple rename review dialog so single and multi-file filename
+  correction no longer fails with a `SelectedIndex` out-of-range exception while
+  the dialog is being constructed.
+
+### Changed
+
+- Updated app, installer, bundle, ShellExt, README, release guide, release
+  notes, UX documentation, and Program info version metadata to `1.4.6.2`.
+- `build_msi.ps1` now reads `FileToolsVersion` from project files when
+  `-Version` is omitted and stops before building if app, installer, bundle,
+  and ShellExt version metadata disagree.
+
+### Verification
+
+- `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` passed 140/140 on
+  2026-06-24.
+- `MSBuild.exe FileTools.sln /p:Configuration=Debug /p:Platform=x64 /m` passed
+  with 0 warnings and 0 errors on 2026-06-24 using VS 18 MSBuild.
+
 ## 1.4.6.1 - 2026-06-24
 
 ### Fixed

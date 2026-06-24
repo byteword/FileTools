@@ -83,6 +83,21 @@ public sealed class NamingRegressionTests
         Assert.Equal("[S로맨스] 임시 결혼 시작했습니다나 1권 - 3권 06.23", corrected);
     }
 
+    [Fact]
+    public void SimpleRenameReviewDialog_ConstructsWithSinglePreview()
+    {
+        RunInStaThread(() =>
+        {
+            using var dialog = new SimpleRenameReviewDialog(
+                [
+                    CreatePreview(
+                        Path.Combine(Path.GetTempPath(), "source-" + Guid.NewGuid().ToString("N") + ".txt"),
+                        Path.Combine(Path.GetTempPath(), "target-" + Guid.NewGuid().ToString("N") + ".txt"))
+                ],
+                applyOnOk: false);
+        });
+    }
+
     [Theory]
     [InlineData("CON.txt", "CON_.txt")]
     [InlineData("a<b>|c?.txt", "a b c.txt")]
@@ -135,5 +150,30 @@ public sealed class NamingRegressionTests
             SuggestedPath = suggestedPath,
             Status = RenamePreviewStatus.Ready
         };
+    }
+
+    private static void RunInStaThread(Action action)
+    {
+        Exception? exception = null;
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+        });
+
+        thread.SetApartmentState(ApartmentState.STA);
+        thread.Start();
+        thread.Join();
+
+        if (exception is not null)
+        {
+            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(exception).Throw();
+        }
     }
 }
