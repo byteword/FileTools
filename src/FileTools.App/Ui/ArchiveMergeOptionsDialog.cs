@@ -468,21 +468,12 @@ internal sealed class ArchiveMergeOptionsDialog : Form
                 OriginalName: automaticName,
                 SuggestedName: fileName,
                 AutomaticName: automaticName,
-                RequiredExtension: ".zip",
-                Recommendations: BuildNameRecommendations()));
+                RequiredExtension: ".zip"));
         if (edited is not null)
         {
             _outputPathBox.Text = Path.Combine(directory, edited);
             RefreshEntryPreview();
         }
-    }
-
-    private IReadOnlyList<string> BuildNameRecommendations()
-    {
-        var recommendations = new List<string>();
-        recommendations.AddRange(Options.SourcePaths.Select(static path => Path.GetFileNameWithoutExtension(path)));
-        recommendations.AddRange(Options.SourcePaths.Select(static path => Path.GetFileName(path)));
-        return recommendations;
     }
 
     private void SaveAndClose()

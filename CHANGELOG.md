@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.4.6.1 - 2026-06-24
+
+### Fixed
+
+- Fixed advanced name editor recommendations so they are generated from tokens
+  in the current original name only, rather than from every referenced source
+  file name.
+- Fixed the advanced name editor automatic correction button so it applies
+  obfuscated Hangul/Yaminjeongeum restoration candidates before falling back to
+  the stored automatic name.
+
+### Changed
+
+- Updated app, installer, bundle, ShellExt, build script, README, release
+  guide, release notes, and Program info version metadata to `1.4.6.1`.
+
+### Verification
+
+- `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` passed 139/139 on
+  2026-06-24.
+- `MSBuild.exe FileTools.sln /p:Configuration=Debug /p:Platform=x64 /m` passed
+  with 0 warnings and 0 errors on 2026-06-24 using VS 18 MSBuild.
+
 ## 1.4.6.0 - 2026-06-23
 
 ### Added

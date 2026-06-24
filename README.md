@@ -4,13 +4,13 @@
 
 Windows 탐색기 ContextMenu와 독립 실행형 WinForms 유틸리티를 제공하는 작은 파일 관리 도구입니다.
 
-현재 버전: `1.4.6.0`.
+현재 버전: `1.4.6.1`.
 
 ### 개발 및 안정성 안내
 
 FileTools는 취미 개발자가 개인적으로 관리하는 프로젝트이며, Codex를 활용해 제작 및 업데이트하고 있습니다. 따라서 일부 업데이트는 충분히 안정화되지 않았을 수 있고, 버그 테스트도 제한적으로 이루어질 수 있습니다. 중요한 파일에 적용하기 전에는 백업을 권장드리며, 문제가 발견되면 이슈로 알려주시면 가능한 범위에서 확인하겠습니다.
 
-`1.4.6.0`은 베타 안정화와 릴리스 검증을 거친 정식 릴리스 라인입니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 파일 비교 ContextMenu 노출, 로컬 이름변경 학습 기반, 릴리스 검증 흐름, 압축 병합 결정 패널 표시 정리, 최종 이름 확인 기반 병합/폴더 씌우기 흐름, 병합 이름 자동 교정, 폴더 병합 옵션 UI 정리, 다중 폴더 선택 시 조건부 단일 파일 폴더 벗기기 표시/실행 필터링, 간단 이름 확인과 고급 이름 편집 흐름을 포함합니다.
+`1.4.6.1`은 베타 안정화와 릴리스 검증을 거친 정식 릴리스 라인입니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 파일 비교 ContextMenu 노출, 로컬 이름변경 학습 기반, 릴리스 검증 흐름, 압축 병합 결정 패널 표시 정리, 최종 이름 확인 기반 병합/폴더 씌우기 흐름, 병합 이름 자동 교정, 폴더 병합 옵션 UI 정리, 다중 폴더 선택 시 조건부 단일 파일 폴더 벗기기 표시/실행 필터링, 간단 이름 확인과 고급 이름 편집 흐름, 고급 이름 편집의 기존 이름 토큰 추천 및 야민정음 자동교정 복원을 포함합니다.
 
 ### 기능
 
@@ -241,7 +241,7 @@ MSI는 네이티브 `FileTools.ShellExt.dll`을 현재 사용자 COM ExplorerCom
 
 GitHub Releases는 setup bootstrapper, MSI, sparse MSIX identity package를 빌드하고 서명하며, `checksums.txt`를 생성하고, 릴리스 자산에 대한 GitHub artifact attestation을 만드는 수동 workflow를 사용합니다.
 
-`1.4.6.0`은 GitHub 정식 릴리스로 게시합니다. 위키 문서와 tag별 변경사항 문서를 먼저 업데이트하고, 릴리스 자산 검증 및 설치 smoke test가 끝난 뒤 draft를 게시합니다.
+`1.4.6.1`은 GitHub 정식 릴리스로 게시합니다. 위키 문서와 tag별 변경사항 문서를 먼저 업데이트하고, 릴리스 자산 검증 및 설치 smoke test가 끝난 뒤 draft를 게시합니다.
 
 릴리스는 GitHub Secrets에 base64 PFX와 비밀번호로 저장된 self-signed FileTools 인증서를 사용합니다. 이는 무료 GitHub 배포와 CER 신뢰 후 MSIX identity 등록에는 적합하지만, 공개 CA 코드 서명 인증서는 아닙니다. Windows는 첫 사용 사용자에게 SmartScreen 또는 신뢰 경고를 계속 표시할 수 있습니다.
 
@@ -391,13 +391,13 @@ FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE` 또�
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
-Current version: `1.4.6.0`.
+Current version: `1.4.6.1`.
 
 ### Development and Stability Notice
 
 FileTools is maintained as a personal hobby project and is built and updated with the help of Codex. As a result, some updates may not be fully stable, and bug testing may be limited. Please consider backing up important files before using FileTools on them, and feel free to report issues so they can be reviewed as time permits.
 
-`1.4.6.0` is distributed on the stable release line after the beta stabilization and release verification pass. It includes the standalone planner work-plan display, folder-merge options flow, file-compare ContextMenu exposure, local rename-learning foundation, release verification flow, archive-merge decision panel display cleanup, final-name review flows for merge and folder wrapping operations, merge-name correction, the revised folder merge options UI, filtered single-file folder unwrap visibility/execution for multi-folder selections, and simple/advanced name editing flows.
+`1.4.6.1` is distributed on the stable release line after the beta stabilization and release verification pass. It includes the standalone planner work-plan display, folder-merge options flow, file-compare ContextMenu exposure, local rename-learning foundation, release verification flow, archive-merge decision panel display cleanup, final-name review flows for merge and folder wrapping operations, merge-name correction, the revised folder merge options UI, filtered single-file folder unwrap visibility/execution for multi-folder selections, simple/advanced name editing flows, original-name token recommendations in the advanced editor, and Yaminjeongeum automatic-correction restoration.
 
 ### Features
 
@@ -629,7 +629,7 @@ GitHub Releases use a manual workflow that builds and signs the setup
 bootstrapper, MSI, and sparse MSIX identity package, generates `checksums.txt`,
 and creates GitHub artifact attestations for the release assets.
 
-`1.4.6.0` is published as a stable GitHub Release. Update the wiki and
+`1.4.6.1` is published as a stable GitHub Release. Update the wiki and
 tag-specific change notes before tagging, then publish the draft only after
 release asset verification and install smoke testing.
 

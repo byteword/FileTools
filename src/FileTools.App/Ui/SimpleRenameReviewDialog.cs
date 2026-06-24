@@ -212,8 +212,7 @@ internal sealed class SimpleRenameReviewDialog : Form
             new NameEditRequest(
                 OriginalName: item.OriginalName,
                 SuggestedName: item.SuggestedName,
-                AutomaticName: item.AutomaticName,
-                Recommendations: BuildRecommendations(item.Preview)));
+                AutomaticName: item.AutomaticName));
         if (editedName is null)
         {
             return;
@@ -350,35 +349,6 @@ internal sealed class SimpleRenameReviewDialog : Form
     }
 
     private RenameItem? SelectedItem => _itemList.SelectedItem as RenameItem;
-
-    private static IReadOnlyList<string> BuildRecommendations(RenamePreview preview)
-    {
-        var values = new List<string>();
-        AddIfNotBlank(Path.GetFileNameWithoutExtension(preview.OriginalFileName));
-        AddIfNotBlank(preview.Parts.Title);
-        AddIfNotBlank(preview.Parts.EpisodeRange);
-        AddIfNotBlank(preview.Parts.Author);
-        foreach (var tag in preview.Parts.Tags)
-        {
-            AddIfNotBlank(tag);
-        }
-
-        foreach (var candidate in preview.Candidates)
-        {
-            AddIfNotBlank(candidate.Value);
-            AddIfNotBlank(Path.GetFileNameWithoutExtension(candidate.Value));
-        }
-
-        return values;
-
-        void AddIfNotBlank(string? value)
-        {
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                values.Add(value);
-            }
-        }
-    }
 
     private sealed class RenameItem
     {

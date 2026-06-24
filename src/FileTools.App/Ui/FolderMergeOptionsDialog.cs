@@ -273,8 +273,7 @@ internal sealed class FolderMergeOptionsDialog : Form
             new NameEditRequest(
                 OriginalName: automaticName,
                 SuggestedName: currentName,
-                AutomaticName: automaticName,
-                Recommendations: BuildRecommendations(automaticName)));
+                AutomaticName: automaticName));
         if (edited is not null)
         {
             _targetFolderNameBox.Text = edited;
@@ -288,14 +287,6 @@ internal sealed class FolderMergeOptionsDialog : Form
             _sourcePaths,
             _settings,
             new FolderMergeOptions(null, BuildModeFromInputs())).TargetFolderName;
-    }
-
-    private IReadOnlyList<string> BuildRecommendations(string automaticName)
-    {
-        var recommendations = new List<string> { automaticName };
-        recommendations.AddRange(_sourcePaths.Select(static path => Path.GetFileNameWithoutExtension(path)));
-        recommendations.AddRange(_sourcePaths.Select(static path => Path.GetFileName(path)));
-        return recommendations;
     }
 
     private void RefreshStatus()

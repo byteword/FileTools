@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace FileTools;
@@ -7,8 +8,7 @@ internal sealed record NameEditRequest(
     string OriginalName,
     string SuggestedName,
     string AutomaticName,
-    string? RequiredExtension = null,
-    IReadOnlyList<string>? Recommendations = null);
+    string? RequiredExtension = null);
 
 internal sealed class AdvancedNameEditDialog : Form
 {
@@ -24,7 +24,7 @@ internal sealed class AdvancedNameEditDialog : Form
     private AdvancedNameEditDialog(string title, string header, NameEditRequest request)
     {
         _request = request;
-        _recommendations = BuildRecommendations(request).ToArray();
+        _recommendations = BuildRecommendationsForName(request.OriginalName, request.RequiredExtension);
 
         Text = title;
         StartPosition = FormStartPosition.CenterParent;
@@ -253,7 +253,10 @@ internal sealed class AdvancedNameEditDialog : Form
 
     private void UseAutomaticName()
     {
-        _suggestedNameBox.Text = _request.AutomaticName;
+        var correctedName = CreateAutomaticCorrectionForName(_suggestedNameBox.Text, _request.RequiredExtension)
+            ?? CreateAutomaticCorrectionForName(_request.OriginalName, _request.RequiredExtension)
+            ?? _request.AutomaticName;
+        _suggestedNameBox.Text = correctedName;
         _suggestedNameBox.SelectAll();
         _suggestedNameBox.Focus();
     }
@@ -312,56 +315,98 @@ internal sealed class AdvancedNameEditDialog : Form
         return safeName;
     }
 
-    private static IEnumerable<string> BuildRecommendations(NameEditRequest request)
+    internal static IReadOnlyList<string> BuildRecommendationsForName(string originalName, string? requiredExtension = null)
     {
+        var sourceName = StripRequiredExtension(originalName.Trim(), requiredExtension);
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var value in EnumerateRecommendationCandidates(request))
+        var recommendations = new List<string>();
+
+        void Add(string? value)
         {
-            var normalized = value.Trim();
-            if (normalized.Length == 0 || !seen.Add(normalized))
+            var normalized = value?.Trim();
+            if (string.IsNullOrWhiteSpace(normalized) || !seen.Add(normalized))
             {
-                continue;
+                return;
             }
 
-            yield return normalized;
+            recommendations.Add(normalized);
         }
+
+        foreach (Match match in BracketTokenRegex.Matches(sourceName))
+        {
+            Add(match.Value);
+            Add(match.Value.Trim('[', ']', '(', ')', '{', '}'));
+        }
+
+        foreach (Match match in EpisodeRangeTokenRegex.Matches(sourceName))
+        {
+            Add(match.Value);
+        }
+
+        foreach (Match match in DateTokenRegex.Matches(sourceName))
+        {
+            Add(match.Value);
+        }
+
+        foreach (var token in sourceName.Split(
+            [' ', '\t', '\r', '\n', '_', '-', ',', ';', '[', ']', '(', ')', '{', '}', '~', '.'],
+            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            Add(token);
+        }
+
+        if (recommendations.Count == 0)
+        {
+            Add(sourceName);
+        }
+
+        return recommendations;
     }
 
-    private static IEnumerable<string> EnumerateRecommendationCandidates(NameEditRequest request)
+    internal static string? CreateAutomaticCorrectionForName(string name, string? requiredExtension = null)
     {
-        yield return Path.GetFileNameWithoutExtension(request.OriginalName);
-        yield return Path.GetFileNameWithoutExtension(request.AutomaticName);
-        yield return request.AutomaticName;
-
-        if (request.Recommendations is not null)
+        var sourceName = name.Trim();
+        if (sourceName.Length == 0)
         {
-            foreach (var recommendation in request.Recommendations)
-            {
-                yield return recommendation;
-            }
+            return null;
         }
 
-        foreach (var phrase in LoadCommonPhrases())
+        var suffix = GetRequiredExtensionSuffix(sourceName, requiredExtension);
+        var nameWithoutSuffix = suffix.Length == 0
+            ? sourceName
+            : sourceName[..^suffix.Length];
+        var normalized = KoreanJamoNormalizer.Normalize(nameWithoutSuffix);
+        var yaminCandidate = new ObfuscatedHangulCandidateGenerator()
+            .Generate(normalized)
+            .FirstOrDefault()?.Value;
+        var corrected = yaminCandidate ?? normalized;
+        if (string.Equals(corrected, nameWithoutSuffix, StringComparison.Ordinal))
         {
-            yield return phrase;
+            return null;
         }
+
+        return corrected + suffix;
     }
 
-    private static string[] LoadCommonPhrases()
+    private static string StripRequiredExtension(string name, string? requiredExtension)
     {
-        try
-        {
-            return File.Exists(RenameDictionaryStore.DictionaryPath)
-                ? RenameDictionaryStore.Load().CommonPhrases
-                    .Where(static phrase => !string.IsNullOrWhiteSpace(phrase))
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .ToArray()
-                : [];
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            FileToolsEnvironment.Log("ADVANCED-NAME-COMMON-PHRASES", ex.Message);
-            return [];
-        }
+        var suffix = GetRequiredExtensionSuffix(name, requiredExtension);
+        return suffix.Length == 0 ? name : name[..^suffix.Length];
     }
+
+    private static string GetRequiredExtensionSuffix(string name, string? requiredExtension)
+    {
+        return !string.IsNullOrWhiteSpace(requiredExtension) &&
+            name.EndsWith(requiredExtension, StringComparison.OrdinalIgnoreCase)
+            ? name[^requiredExtension.Length..]
+            : "";
+    }
+
+    private static readonly Regex BracketTokenRegex = new(@"(\[[^\]]+\]|\([^)]+\)|\{[^}]+\})", RegexOptions.Compiled);
+
+    private static readonly Regex EpisodeRangeTokenRegex = new(
+        @"\b\d+\s*(?:권|화|회)\s*[-~]\s*\d+\s*(?:권|화|회)\b",
+        RegexOptions.Compiled);
+
+    private static readonly Regex DateTokenRegex = new(@"\b\d{1,4}[.]\d{1,2}(?:[.]\d{1,2})?\b", RegexOptions.Compiled);
 }

@@ -196,10 +196,9 @@ internal sealed class FolderWrapOptionsDialog : Form
             Localizer.Get("AdvancedNameDialogTitle"),
             Localizer.Get("AdvancedNameFolderWrapHeader"),
             new NameEditRequest(
-                OriginalName: Path.GetFileName(sourcePath),
+                OriginalName: automaticName,
                 SuggestedName: Convert.ToString(row.Cells[TargetFolderColumnName].Value) ?? "",
-                AutomaticName: automaticName,
-                Recommendations: BuildRecommendations(sourcePath, automaticName)));
+                AutomaticName: automaticName));
         if (edited is null)
         {
             return;
@@ -207,15 +206,6 @@ internal sealed class FolderWrapOptionsDialog : Form
 
         row.Cells[TargetFolderColumnName].Value = edited;
         RefreshRows();
-    }
-
-    private static IReadOnlyList<string> BuildRecommendations(string sourcePath, string automaticName)
-    {
-        return
-        [
-            Path.GetFileNameWithoutExtension(sourcePath),
-            automaticName
-        ];
     }
 
     private void SaveAndClose()

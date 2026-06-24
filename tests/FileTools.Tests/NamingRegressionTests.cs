@@ -57,6 +57,32 @@ public sealed class NamingRegressionTests
         Assert.Equal(RenamePreviewStatus.NeedsReview, preview.Status);
     }
 
+    [Fact]
+    public void AdvancedNameEditDialog_BuildsRecommendationsFromOriginalNameTokensOnly()
+    {
+        var recommendations = AdvancedNameEditDialog.BuildRecommendationsForName(
+            "[S로맨스] 임시 결혼 시작했습니다ㄴr 1권 - 3권 06.23");
+
+        Assert.Contains("[S로맨스]", recommendations);
+        Assert.Contains("S로맨스", recommendations);
+        Assert.Contains("임시", recommendations);
+        Assert.Contains("결혼", recommendations);
+        Assert.Contains("시작했습니다ㄴr", recommendations);
+        Assert.Contains("1권", recommendations);
+        Assert.Contains("3권", recommendations);
+        Assert.Contains("06.23", recommendations);
+        Assert.DoesNotContain("[S로맨스] 임시 결혼 시작했습니다ㄴr 1권", recommendations);
+    }
+
+    [Fact]
+    public void AdvancedNameEditDialog_AutomaticCorrectionRestoresYaminJungeum()
+    {
+        var corrected = AdvancedNameEditDialog.CreateAutomaticCorrectionForName(
+            "[S로맨스] 임시 결혼 시작했습니다ㄴr 1권 - 3권 06.23");
+
+        Assert.Equal("[S로맨스] 임시 결혼 시작했습니다나 1권 - 3권 06.23", corrected);
+    }
+
     [Theory]
     [InlineData("CON.txt", "CON_.txt")]
     [InlineData("a<b>|c?.txt", "a b c.txt")]

@@ -213,7 +213,9 @@ Archive merge: one editable output ZIP path, plus Advanced filename editing
 The shared advanced name editor is used by file rename, folder wrap, folder
 merge, and archive merge without adding a global setting. It edits only one
 final name at a time, validates file-name safety, and applies required output
-extensions such as `.zip`.
+extensions such as `.zip`. Recommended text is derived by tokenizing the
+current original name only, and automatic correction applies obfuscated Hangul
+restoration candidates before falling back to the stored automatic name.
 
 After the user confirms the final name, the operation executes immediately. A
 separate confirmation prompt is avoided unless the operation needs a destructive
