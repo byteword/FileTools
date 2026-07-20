@@ -63,7 +63,7 @@
   <text class="body" x="322" y="406">같은 이름 단일 파일 폴더 벗기기</text>
   <rect x="300" y="418" width="12" height="12" fill="#ffffff" stroke="#7c8796"/>
   <path d="M302 424 L306 429 L313 417" fill="none" stroke="#2563eb" stroke-width="2"/>
-  <text class="body" x="322" y="430">바로 아래 자식 파일 상위 이동</text>
+  <text class="body" x="322" y="430">바로 아래 자식 항목 상위 이동</text>
 
   <text class="label" x="560" y="354">자동 재배치</text>
   <rect x="560" y="370" width="12" height="12" fill="#ffffff" stroke="#7c8796"/>

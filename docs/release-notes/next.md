@@ -1,6 +1,6 @@
 # FileTools Next Release Notes Draft
 
-This draft is for changes after `v1.4.6.2`. Add future changes here during
+This draft is for changes after `v1.4.6.4`. Add future changes here during
 development, then copy or regenerate it into `docs/release-notes/<tag>.md` for
 the next release tag.
 
@@ -10,7 +10,7 @@ the next release tag.
 
 ## Support Scope
 
-- No runtime support scope change after `v1.4.6.2` yet.
+- No runtime support scope change after `v1.4.6.4` yet.
 
 ## Verification Before Publishing
 
@@ -28,13 +28,13 @@ the next release tag.
 
 Latest release baseline:
 
-- `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj` passed 140/140 on
-  2026-06-24 after the `1.4.6.2` simple rename review initial-selection fix.
+- `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj -c Release`
+  passed 144/144 on 2026-07-20 after the `1.4.6.4` simple rename
+  automatic-correction addition.
 - `MSBuild.exe FileTools.sln /p:Configuration=Debug /p:Platform=x64 /m`
   passed with 0 warnings and 0 errors on 2026-06-24 using VS 18 MSBuild.
-- `.\build_msi.ps1 -Version v1.4.4.0` completed on 2026-06-15. The generated
-  `FileTools.ShellExt.dll` reports file/product version `1.4.4.0` and has an
-  Authenticode signature from the temporary `CN=FileTools Self-Signed`
-  certificate. This remains the latest local package-build baseline; rerun it
-  with `v1.4.6.2` before publishing the release assets. Local trust still
-  reports an untrusted-root status until the CER is trusted.
+- `.\build_msi.ps1 -Configuration Release` completed on 2026-07-20. The
+  generated `FileTools.exe` and `FileTools.ShellExt.dll` report file/product
+  version `1.4.6.4`; MSI and MSIX use the temporary `CN=FileTools Self-Signed`
+  certificate. Local trust reports an untrusted-root status until the CER is
+  trusted, and the setup EXE is not signed.

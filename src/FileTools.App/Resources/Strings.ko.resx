@@ -67,7 +67,7 @@
   <data name="FolderOperationWrapFiles" xml:space="preserve"><value>폴더 씌우기</value></data>
   <data name="FolderOperationUnwrapSameName" xml:space="preserve"><value>같은 이름 단일 파일 폴더 벗기기</value></data>
   <data name="FolderOperationUnwrapSingleFile" xml:space="preserve"><value>단일 파일 폴더 벗기기</value></data>
-  <data name="FolderOperationMoveInnerFilesUp" xml:space="preserve"><value>폴더 내부 파일 상위로 이동</value></data>
+  <data name="FolderOperationMoveInnerFilesUp" xml:space="preserve"><value>폴더 내부 항목 상위로 이동</value></data>
   <data name="FolderUnwrapMismatchKeepFileName" xml:space="preserve"><value>파일명 유지</value></data>
   <data name="FolderUnwrapMismatchUseFolderName" xml:space="preserve"><value>폴더명으로 변경</value></data>
   <data name="FolderUnwrapMismatchPrefixFolderName" xml:space="preserve"><value>폴더명-파일명으로 변경</value></data>
@@ -463,7 +463,7 @@
   <data name="PlanPreviewNotFolder" xml:space="preserve"><value>현재 입력이 폴더가 아닙니다.</value></data>
   <data name="PlanPreviewNoParent" xml:space="preserve"><value>부모 폴더를 확인할 수 없습니다.</value></data>
   <data name="PlanPreviewTargetExistsFormat" xml:space="preserve"><value>대상 경로가 이미 존재합니다: {0}</value></data>
-  <data name="PlanPreviewMoveUpUnavailable" xml:space="preserve"><value>상위로 이동할 직접 하위 파일을 확인할 수 없습니다.</value></data>
+  <data name="PlanPreviewMoveUpUnavailable" xml:space="preserve"><value>상위로 이동할 직접 하위 항목을 확인할 수 없습니다.</value></data>
   <data name="PlanPreviewSingleFileUnavailable" xml:space="preserve"><value>단일 파일 폴더인지 확인할 수 없습니다.</value></data>
   <data name="PlanPreviewSameNameMismatchFormat" xml:space="preserve"><value>폴더명/파일명 불일치: {0}</value></data>
   <data name="PlanPreviewRelocationExcluded" xml:space="preserve"><value>재배치 템플릿에서 이 항목을 제외합니다.</value></data>

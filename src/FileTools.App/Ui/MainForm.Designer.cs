@@ -307,7 +307,7 @@ partial class MainForm
         _addPrefixFolderNameUnwrapMenuItem.Text = "Unwrap single-file folders - folder-file name";
 
         _addMoveInnerFilesUpMenuItem.Name = "_addMoveInnerFilesUpMenuItem";
-        _addMoveInnerFilesUpMenuItem.Text = "Move inner files up";
+        _addMoveInnerFilesUpMenuItem.Text = "Move inner items up";
 
         _addArchiveMergeGroupMenuItem.Name = "_addArchiveMergeGroupMenuItem";
         _addArchiveMergeGroupMenuItem.Text = "Merge ZIPs by archive name";
@@ -554,7 +554,7 @@ partial class MainForm
         _addPrefixFolderNameUnwrapToolItem.Text = "Unwrap single-file folders - folder-file name";
 
         _addMoveInnerFilesUpToolItem.Name = "_addMoveInnerFilesUpToolItem";
-        _addMoveInnerFilesUpToolItem.Text = "Move inner files up";
+        _addMoveInnerFilesUpToolItem.Text = "Move inner items up";
 
         _addArchiveMergeToolButton.DisplayStyle = ToolStripItemDisplayStyle.Image;
         _addArchiveMergeToolButton.DropDownItems.AddRange(new ToolStripItem[]

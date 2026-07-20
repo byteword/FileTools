@@ -67,7 +67,7 @@
   <data name="FolderOperationWrapFiles" xml:space="preserve"><value>Wrap files</value></data>
   <data name="FolderOperationUnwrapSameName" xml:space="preserve"><value>Unwrap same-name single-file folders</value></data>
   <data name="FolderOperationUnwrapSingleFile" xml:space="preserve"><value>Unwrap single-file folders</value></data>
-  <data name="FolderOperationMoveInnerFilesUp" xml:space="preserve"><value>Move inner files up</value></data>
+  <data name="FolderOperationMoveInnerFilesUp" xml:space="preserve"><value>Move inner items up</value></data>
   <data name="FolderUnwrapMismatchKeepFileName" xml:space="preserve"><value>Keep file name</value></data>
   <data name="FolderUnwrapMismatchUseFolderName" xml:space="preserve"><value>Rename to folder name</value></data>
   <data name="FolderUnwrapMismatchPrefixFolderName" xml:space="preserve"><value>Rename to folder-file name</value></data>
@@ -463,7 +463,7 @@
   <data name="PlanPreviewNotFolder" xml:space="preserve"><value>The current input is not a folder.</value></data>
   <data name="PlanPreviewNoParent" xml:space="preserve"><value>Cannot resolve the parent folder.</value></data>
   <data name="PlanPreviewTargetExistsFormat" xml:space="preserve"><value>Target already exists: {0}</value></data>
-  <data name="PlanPreviewMoveUpUnavailable" xml:space="preserve"><value>Cannot confirm direct child files for move-up.</value></data>
+  <data name="PlanPreviewMoveUpUnavailable" xml:space="preserve"><value>Cannot confirm direct child items for move-up.</value></data>
   <data name="PlanPreviewSingleFileUnavailable" xml:space="preserve"><value>Cannot confirm a single-file folder.</value></data>
   <data name="PlanPreviewSameNameMismatchFormat" xml:space="preserve"><value>Folder/file name mismatch: {0}</value></data>
   <data name="PlanPreviewRelocationExcluded" xml:space="preserve"><value>Relocation template excludes this item.</value></data>

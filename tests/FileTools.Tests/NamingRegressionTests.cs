@@ -84,6 +84,19 @@ public sealed class NamingRegressionTests
     }
 
     [Fact]
+    public void AdvancedNameEditDialog_AutomaticCorrectionUsesTheSharedFallbackOrder()
+    {
+        var corrected = AdvancedNameEditDialog.GetAutomaticCorrection(
+            new NameEditRequest(
+                OriginalName: "시작했습니다ㄴr.txt",
+                SuggestedName: "suggested-name.txt",
+                AutomaticName: "automatic-name.txt"),
+            "suggested-name.txt");
+
+        Assert.Equal("시작했습니다나.txt", corrected);
+    }
+
+    [Fact]
     public void SimpleRenameReviewDialog_ConstructsWithSinglePreview()
     {
         RunInStaThread(() =>

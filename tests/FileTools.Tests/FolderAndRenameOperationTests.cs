@@ -76,6 +76,53 @@ public sealed class FolderAndRenameOperationTests
     }
 
     [Fact]
+    public void FileToolRunner_MoveInnerFilesUpMovesSingleChildFolder()
+    {
+        using var temp = TempDirectory.Create();
+        var outer = temp.GetPath("Outer");
+        var child = Path.Combine(outer, "Child");
+        Directory.CreateDirectory(child);
+        File.WriteAllText(Path.Combine(child, "Leaf.txt"), "leaf");
+
+        var result = new FileToolRunner(new FileToolsSettings
+        {
+            FolderStructureOperation = FolderStructureOperation.MoveInnerFilesUp
+        }).Run(ToolMode.FolderStructure, [outer]);
+
+        Assert.Equal(1, result.CandidateCount);
+        Assert.Equal(1, result.AppliedCount);
+        Assert.Equal(0, result.SkippedCount);
+        Assert.Empty(result.Errors);
+        Assert.False(Directory.Exists(outer));
+        Assert.Equal("leaf", File.ReadAllText(Path.Combine(temp.Root, "Child", "Leaf.txt")));
+    }
+
+    [Fact]
+    public void FileToolRunner_MoveInnerFilesUpPromotesSameNameNestedFolder()
+    {
+        using var temp = TempDirectory.Create();
+        var outer = temp.GetPath("A");
+        var inner = Path.Combine(outer, "A");
+        var leafFolder = Path.Combine(inner, "B");
+        Directory.CreateDirectory(leafFolder);
+        File.WriteAllText(Path.Combine(leafFolder, "Leaf.txt"), "leaf");
+
+        var result = new FileToolRunner(new FileToolsSettings
+        {
+            FolderStructureOperation = FolderStructureOperation.MoveInnerFilesUp
+        }).Run(ToolMode.FolderStructure, [outer]);
+
+        Assert.Equal(1, result.CandidateCount);
+        Assert.Equal(1, result.AppliedCount);
+        Assert.Equal(0, result.SkippedCount);
+        Assert.Empty(result.Errors);
+        Assert.True(Directory.Exists(outer));
+        Assert.False(Directory.Exists(Path.Combine(outer, "A")));
+        Assert.Equal("leaf", File.ReadAllText(Path.Combine(outer, "B", "Leaf.txt")));
+        Assert.Empty(Directory.GetDirectories(temp.Root, ".FileTools.MoveUp.*"));
+    }
+
+    [Fact]
     public void Program_FilterContextCommandPaths_FolderUnwrapCommandsKeepMatchingSingleFileFoldersOnly()
     {
         using var temp = TempDirectory.Create();

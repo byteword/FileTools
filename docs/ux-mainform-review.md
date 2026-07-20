@@ -29,7 +29,7 @@ The next layout proposal is tracked in `docs/mainform-plan-list-layout-proposal.
 - Main task commands sit in a fixed `ToolStrip` in the top-right task/log pane.
 - The top-right task `ToolStrip` supports small, medium, and large sizing from settings and renders native-sized command icons for each option instead of scaling up a small bitmap.
 - The main window explicitly loads the embedded multi-size ICO at runtime so the title bar and taskbar use the FileTools application icon.
-- Folder unwrapping uses `ToolStripSplitButton` for default unwrap, same-name unwrap, single-file mismatch modes, and moving direct child files upward.
+- Folder unwrapping uses `ToolStripSplitButton` for default unwrap, same-name unwrap, single-file mismatch modes, and moving direct child items upward.
 - The work plan area sits in the bottom pane and uses a read-only `DataGridView` with order, icon-labeled action kind, input, and output/expected result columns.
 - The plan toolbar includes all-plan, selected-target, and warning filters backed by `WorkPlanDisplayBuilder`.
 - Shared archive-merge steps are displayed once per plan ID with input rows for source archives.

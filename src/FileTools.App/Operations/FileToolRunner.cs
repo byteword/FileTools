@@ -227,7 +227,7 @@ internal sealed class FileToolRunner
     }
 
     /// <summary>
-    /// 하위 직접 파일을 상위 폴더로 승격시키는 작업이다.
+    /// 하위 직접 항목을 상위 폴더로 승격시키는 작업이다.
     /// </summary>
     /// <param name="folderPath">처리 대상 폴더</param>
     /// <param name="result">결과 집계</param>
@@ -241,29 +241,79 @@ internal sealed class FileToolRunner
             return;
         }
 
-        var files = dir.GetFiles("*", SearchOption.TopDirectoryOnly);
-        if (files.Length == 0)
+        var entries = dir.GetFileSystemInfos("*", SearchOption.TopDirectoryOnly);
+        if (entries.Length == 0)
         {
-            result.AddSkipped(dir.Name + " 이동할 직접 하위 파일 없음");
+            result.AddSkipped(dir.Name + " 이동할 직접 하위 항목 없음");
             return;
         }
 
-        var moved = 0;
-        foreach (var file in files)
+        var selectedFolderPath = Path.GetFullPath(dir.FullName);
+        var parentPath = dir.Parent.FullName;
+        var moves = new List<MoveUpEntry>();
+        MoveUpEntry? sameNameDirectoryMove = null;
+        var hasBlockingSkip = false;
+
+        foreach (var entry in entries)
         {
-            var targetPath = Path.Combine(dir.Parent.FullName, file.Name);
-            if (File.Exists(targetPath) || Directory.Exists(targetPath))
+            var sourcePath = Path.GetFullPath(entry.FullName);
+            var targetPath = Path.GetFullPath(Path.Combine(parentPath, entry.Name));
+            var isDirectory = entry is DirectoryInfo;
+
+            if (PathComparer.Equals(sourcePath, targetPath))
             {
-                result.AddSkipped(file.Name + " 대상 경로 이미 존재");
+                result.AddSkipped(entry.Name + " 대상 경로 동일");
+                hasBlockingSkip = true;
                 continue;
             }
 
-            File.Move(file.FullName, targetPath);
-            moved++;
-            FileToolsEnvironment.Log("MOVE-UP", file.FullName + " -> " + targetPath);
+            if (PathComparer.Equals(selectedFolderPath, targetPath))
+            {
+                if (!isDirectory)
+                {
+                    result.AddSkipped(entry.Name + " 대상 경로가 선택 폴더와 동일");
+                    hasBlockingSkip = true;
+                    continue;
+                }
+
+                sameNameDirectoryMove = new MoveUpEntry(entry.Name, sourcePath, targetPath, IsDirectory: true);
+                continue;
+            }
+
+            if (File.Exists(targetPath) || Directory.Exists(targetPath))
+            {
+                result.AddSkipped(entry.Name + " 대상 경로 이미 존재");
+                hasBlockingSkip = true;
+                continue;
+            }
+
+            moves.Add(new MoveUpEntry(entry.Name, sourcePath, targetPath, isDirectory));
         }
 
-        if (Directory.Exists(dir.FullName) && !Directory.EnumerateFileSystemEntries(dir.FullName).Any())
+        var moved = 0;
+        foreach (var move in moves)
+        {
+            MoveFileSystemEntry(move);
+            moved++;
+        }
+
+        var promotedSameNameDirectory = false;
+        if (sameNameDirectoryMove is not null)
+        {
+            if (hasBlockingSkip)
+            {
+                result.AddSkipped(sameNameDirectoryMove.Name + " 선택 폴더에 남은 항목이 있어 이동 불가");
+            }
+            else if (MoveSameNameDirectoryUp(sameNameDirectoryMove, dir, result))
+            {
+                moved++;
+                promotedSameNameDirectory = true;
+            }
+        }
+
+        if (!promotedSameNameDirectory &&
+            Directory.Exists(dir.FullName) &&
+            !Directory.EnumerateFileSystemEntries(dir.FullName).Any())
         {
             Directory.Delete(dir.FullName, recursive: false);
         }
@@ -274,8 +324,91 @@ internal sealed class FileToolRunner
             return;
         }
 
-        result.AddApplied($"{dir.Name} 직접 하위 파일 {moved}개 상위 이동");
+        result.AddApplied($"{dir.Name} 직접 하위 항목 {moved}개 상위 이동");
     }
+
+    private static void MoveFileSystemEntry(MoveUpEntry entry)
+    {
+        if (entry.IsDirectory)
+        {
+            Directory.Move(entry.SourcePath, entry.TargetPath);
+        }
+        else
+        {
+            File.Move(entry.SourcePath, entry.TargetPath);
+        }
+
+        FileToolsEnvironment.Log("MOVE-UP", entry.SourcePath + " -> " + entry.TargetPath);
+    }
+
+    private static bool MoveSameNameDirectoryUp(MoveUpEntry entry, DirectoryInfo dir, OperationResult result)
+    {
+        var stagePath = CreateMoveUpStagingPath(dir.Parent!.FullName);
+        Directory.Move(entry.SourcePath, stagePath);
+        FileToolsEnvironment.Log("MOVE-UP-STAGE", entry.SourcePath + " -> " + stagePath);
+
+        try
+        {
+            if (Directory.Exists(dir.FullName))
+            {
+                if (Directory.EnumerateFileSystemEntries(dir.FullName).Any())
+                {
+                    Directory.Move(stagePath, entry.SourcePath);
+                    result.AddSkipped(entry.Name + " 선택 폴더에 남은 항목이 있어 이동 불가");
+                    return false;
+                }
+
+                Directory.Delete(dir.FullName, recursive: false);
+            }
+
+            Directory.Move(stagePath, entry.TargetPath);
+            FileToolsEnvironment.Log("MOVE-UP", entry.SourcePath + " -> " + entry.TargetPath);
+            return true;
+        }
+        catch
+        {
+            RestoreStagedMoveUpDirectory(stagePath, entry.SourcePath, dir.FullName);
+            throw;
+        }
+    }
+
+    private static string CreateMoveUpStagingPath(string parentPath)
+    {
+        for (var attempt = 0; attempt < 100; attempt++)
+        {
+            var candidate = Path.Combine(parentPath, ".FileTools.MoveUp." + Guid.NewGuid().ToString("N"));
+            if (!File.Exists(candidate) && !Directory.Exists(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        throw new IOException("임시 이동 경로를 만들 수 없습니다.");
+    }
+
+    private static void RestoreStagedMoveUpDirectory(string stagePath, string sourcePath, string selectedFolderPath)
+    {
+        try
+        {
+            if (!Directory.Exists(stagePath) || Directory.Exists(sourcePath))
+            {
+                return;
+            }
+
+            if (!Directory.Exists(selectedFolderPath))
+            {
+                Directory.CreateDirectory(selectedFolderPath);
+            }
+
+            Directory.Move(stagePath, sourcePath);
+        }
+        catch (Exception ex)
+        {
+            FileToolsEnvironment.Log("ERROR", "MOVE-UP restore failed: " + ex.Message);
+        }
+    }
+
+    private sealed record MoveUpEntry(string Name, string SourcePath, string TargetPath, bool IsDirectory);
 
     /// <summary>
     /// 자동 재배치 실행 엔트리.

@@ -253,10 +253,7 @@ internal sealed class AdvancedNameEditDialog : Form
 
     private void UseAutomaticName()
     {
-        var correctedName = CreateAutomaticCorrectionForName(_suggestedNameBox.Text, _request.RequiredExtension)
-            ?? CreateAutomaticCorrectionForName(_request.OriginalName, _request.RequiredExtension)
-            ?? _request.AutomaticName;
-        _suggestedNameBox.Text = correctedName;
+        _suggestedNameBox.Text = GetAutomaticCorrection(_request, _suggestedNameBox.Text);
         _suggestedNameBox.SelectAll();
         _suggestedNameBox.Focus();
     }
@@ -386,6 +383,13 @@ internal sealed class AdvancedNameEditDialog : Form
         }
 
         return corrected + suffix;
+    }
+
+    internal static string GetAutomaticCorrection(NameEditRequest request, string currentName)
+    {
+        return CreateAutomaticCorrectionForName(currentName, request.RequiredExtension)
+            ?? CreateAutomaticCorrectionForName(request.OriginalName, request.RequiredExtension)
+            ?? request.AutomaticName;
     }
 
     private static string StripRequiredExtension(string name, string? requiredExtension)

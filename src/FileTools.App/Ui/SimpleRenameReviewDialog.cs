@@ -159,9 +159,19 @@ internal sealed class SimpleRenameReviewDialog : Form
         };
         advancedButton.Click += (_, _) => OpenAdvancedEditor();
 
+        var automaticCorrectionButton = new Button
+        {
+            Text = Localizer.Get("ButtonUseAutomaticCorrection"),
+            Width = 104,
+            Height = 30,
+            Margin = new Padding(8, 0, 0, 0)
+        };
+        automaticCorrectionButton.Click += (_, _) => UseAutomaticCorrection();
+
         buttons.Controls.Add(cancelButton);
         buttons.Controls.Add(_okButton);
         buttons.Controls.Add(advancedButton);
+        buttons.Controls.Add(automaticCorrectionButton);
         CancelButton = cancelButton;
         return buttons;
     }
@@ -229,6 +239,20 @@ internal sealed class SimpleRenameReviewDialog : Form
         item.SuggestedName = editedName;
         item.IsSkipped = false;
         ValidateItems();
+    }
+
+    private void UseAutomaticCorrection()
+    {
+        if (SelectedItem is not { } item)
+        {
+            return;
+        }
+
+        _suggestedNameBox.Text = AdvancedNameEditDialog.GetAutomaticCorrection(
+            new NameEditRequest(item.OriginalName, item.SuggestedName, item.AutomaticName),
+            item.SuggestedName);
+        _suggestedNameBox.SelectAll();
+        _suggestedNameBox.Focus();
     }
 
     private void Confirm()

@@ -506,7 +506,7 @@ internal sealed class WorkPlanPreviewBuilder
     }
 
     /// <summary>
-    /// 언랩 미리보기에서 ‘직접 하위 파일 이동’이 가능한지 판단한다.
+    /// 언랩 미리보기에서 ‘직접 하위 항목 이동’이 가능한지 판단한다.
     /// </summary>
     private static bool CanPreviewMoveInnerFilesUp(PreviewPathState state)
     {
@@ -516,7 +516,7 @@ internal sealed class WorkPlanPreviewBuilder
         }
 
         return Directory.Exists(state.Path) &&
-               Directory.EnumerateFiles(state.Path, "*", SearchOption.TopDirectoryOnly).Any();
+               Directory.EnumerateFileSystemEntries(state.Path, "*", SearchOption.TopDirectoryOnly).Any();
     }
 
     /// <summary>

@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.4.6.4 - Unreleased
+
+### Fixed
+
+- Fixed folder move-up so direct child folders move upward with files, including
+  same-name nested folder layouts such as `A\A\B`.
+- Added an `자동교정` button beside `고급` in the simple rename confirmation;
+  it shares the advanced editor's correction fallback order.
+
+### Changed
+
+- Updated app, installer, bundle, ShellExt, README, release guide, release
+  notes, UX documentation, and Program info version metadata to `1.4.6.4`.
+
+### Verification
+
+- `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj -c Release`
+  passed 144/144 on 2026-07-20.
+- `build_msi.ps1 -Configuration Release` completed for `1.4.6.4` on
+  2026-07-20; local installer verification is pending.
+
 ## 1.4.6.2 - 2026-06-24
 
 ### Fixed

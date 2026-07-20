@@ -48,6 +48,26 @@ public sealed class WorkPlanPreviewBuilderTests
     }
 
     [Fact]
+    public void Build_FolderMoveInnerFilesUpPreviewsFolderWithSingleChildFolder()
+    {
+        using var temp = TempDirectory.Create();
+        var folder = temp.GetPath("Outer");
+        Directory.CreateDirectory(Path.Combine(folder, "Child"));
+        var target = new WorkTargetPlan(folder);
+        target.Steps.Add(new WorkPlanStep
+        {
+            Kind = WorkPlanStepKind.FolderUnwrap,
+            FolderOperation = FolderStructureOperation.MoveInnerFilesUp
+        });
+
+        var previews = new WorkPlanPreviewBuilder(new FileToolsSettings()).Build(target);
+
+        var preview = Assert.Single(previews);
+        Assert.False(preview.HasWarning);
+        Assert.Contains(temp.Root, preview.ToolTipText, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Build_DuplicateDeleteStepShowsDeleteCandidate()
     {
         using var temp = TempDirectory.Create();

@@ -63,7 +63,7 @@ constexpr CommandDefinition SubCommands[] =
     { CommandKind::FolderUnwrapUseFolderName, L"폴더명으로 벗기기", L"FolderUnwrapUseFolderName", L"ContextMenuFolderUnwrapSingleFile" },
     { CommandKind::FolderUnwrapKeepFileName, L"파일명으로 벗기기", L"FolderUnwrapKeepFileName", L"ContextMenuFolderUnwrapSingleFile" },
     { CommandKind::FolderUnwrapPrefixFolderName, L"폴더명-파일명으로 벗기기", L"FolderUnwrapPrefixFolderName", L"ContextMenuFolderUnwrapSingleFile" },
-    { CommandKind::FolderMoveInnerFilesUp, L"폴더 내부 파일 상위로 이동", L"FolderMoveInnerFilesUp", L"ContextMenuFolderMoveInnerFilesUp" },
+    { CommandKind::FolderMoveInnerFilesUp, L"폴더 내부 항목 상위로 이동", L"FolderMoveInnerFilesUp", L"ContextMenuFolderMoveInnerFilesUp" },
     { CommandKind::FolderMergeSelectedTargets, L"폴더 병합", L"FolderMergeSelectedTargets", L"ContextMenuFolderMergeSelectedTargets" },
     { CommandKind::AutoRelocationCurrentFolder, L"현재 폴더에서 자동 재배치", L"AutoRelocationCurrentFolder", L"ContextMenuAutoRelocationCurrentFolder" },
     { CommandKind::AutoRelocationChooseTarget, L"선택한 폴더로 자동 재배치", L"AutoRelocationChooseTarget", L"ContextMenuAutoRelocationChooseTarget" },
