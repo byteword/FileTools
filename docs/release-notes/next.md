@@ -1,7 +1,7 @@
 # FileTools Next Release Notes Draft
 
-This draft tracks changes after v1.4.7.0. The current test build is documented in
-[v1.4.7.0 release notes](v1.4.7.0.md).
+This draft tracks changes after v1.4.7.1. The current test build is documented in
+[v1.4.7.1 release notes](v1.4.7.1.md).
 
 ## Highlights
 

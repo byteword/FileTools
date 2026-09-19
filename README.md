@@ -4,13 +4,13 @@
 
 Windows 탐색기 ContextMenu와 독립 실행형 WinForms 유틸리티를 제공하는 작은 파일 관리 도구입니다.
 
-현재 버전: `1.4.7.0`.
+현재 버전: `1.4.7.1`.
 
 ### 개발 및 안정성 안내
 
 FileTools는 취미 개발자가 개인적으로 관리하는 프로젝트이며, Codex를 활용해 제작 및 업데이트하고 있습니다. 따라서 일부 업데이트는 충분히 안정화되지 않았을 수 있고, 버그 테스트도 제한적으로 이루어질 수 있습니다. 중요한 파일에 적용하기 전에는 백업을 권장드리며, 문제가 발견되면 이슈로 알려주시면 가능한 범위에서 확인하겠습니다.
 
-`1.4.7.0`는 설치 확인 후 GitHub 릴리즈 여부를 결정할 예정입니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 파일 비교 ContextMenu 노출, 로컬 이름변경 학습 기반, 릴리스 검증 흐름, 압축 병합 결정 패널 표시 정리, 최종 이름 확인 기반 병합/폴더 씌우기 흐름, 병합 이름 자동 교정, 폴더 병합 옵션 UI 정리, 다중 폴더 선택 시 조건부 단일 파일 폴더 벗기기 표시/실행 필터링, 간단 이름 확인과 고급 이름 편집 흐름, 고급 이름 편집의 기존 이름 토큰 추천 및 야민정음 자동교정 복원, 단일/다중 파일 자동교정 검토창 초기 선택 오류 수정, 폴더 내부 항목 상위 이동의 하위 폴더 승격, 간단 이름 확인의 자동교정 버튼을 포함합니다.
+`1.4.7.1`는 설치 확인 후 GitHub 릴리즈 여부를 결정할 예정입니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 파일 비교 ContextMenu 노출, 로컬 이름변경 학습 기반, 릴리스 검증 흐름, 압축 병합 결정 패널 표시 정리, 최종 이름 확인 기반 병합/폴더 씌우기 흐름, 병합 이름 자동 교정, 폴더 병합 옵션 UI 정리, 다중 폴더 선택 시 조건부 단일 파일 폴더 벗기기 표시/실행 필터링, 간단 이름 확인과 고급 이름 편집 흐름, 고급 이름 편집의 기존 이름 토큰 추천 및 야민정음 자동교정 복원, 단일/다중 파일 자동교정 검토창 초기 선택 오류 수정, 폴더 내부 항목 상위 이동의 하위 폴더 승격, 간단 이름 확인의 자동교정 버튼을 포함합니다.
 
 ### 기능
 
@@ -245,7 +245,7 @@ MSI는 네이티브 `FileTools.ShellExt.dll`을 현재 사용자 COM ExplorerCom
 
 GitHub Releases는 setup bootstrapper, MSI, sparse MSIX identity package를 빌드하고 서명하며, `checksums.txt`를 생성하고, 릴리스 자산에 대한 GitHub artifact attestation을 만드는 수동 workflow를 사용합니다.
 
-`1.4.7.0`는 설치 검증이 끝난 뒤 GitHub 릴리즈 여부를 결정합니다. 현재는 tag나 draft release를 만들지 않고 로컬 설치 확인만 진행합니다.
+`1.4.7.1`는 설치 검증이 끝난 뒤 GitHub 릴리즈 여부를 결정합니다. 현재는 tag나 draft release를 만들지 않고 로컬 설치 확인만 진행합니다.
 
 릴리스는 GitHub Secrets에 base64 PFX와 비밀번호로 저장된 self-signed FileTools 인증서를 사용합니다. 이는 무료 GitHub 배포와 CER 신뢰 후 MSIX identity 등록에는 적합하지만, 공개 CA 코드 서명 인증서는 아닙니다. Windows는 첫 사용 사용자에게 SmartScreen 또는 신뢰 경고를 계속 표시할 수 있습니다.
 
@@ -361,7 +361,7 @@ FileTools.exe /context ArchiveMergePreserveInternalPaths "%1"
 FileTools.exe /context FileCompare "%1"
 ```
 
-처음 세 `/context` 명령은 하위 호환성을 위해 유지됩니다. 네이티브 ShellExt는 선택 항목 종류에 따라 표시할 하위 메뉴 항목을 결정합니다. 벗기기는 실제 처리 대상·이름·충돌 정책이 같은 활성 명령을 하나로 줄입니다. 모든 폴더가 같은 이름의 단일 파일이고 충돌 정책이 건너뛰기라면 같은 이름 명령 하나가 남습니다. 자동 번호 설정에서는 전체 내용 명령을 별도로 유지합니다. 빠른 메뉴 호출은 파일시스템을 검사하지 않으며, 느린 분석 결과를 여러 명령이 공유합니다. 읽기 실패나 제한 초과 시에는 명령을 보수적으로 유지합니다. 자세한 조건표와 성능 제한은 [벗기기 메뉴 규칙](docs/unwrap-command-visibility-review.md)을 참고하세요.
+처음 세 `/context` 명령은 하위 호환성을 위해 유지됩니다. 네이티브 ShellExt는 선택 항목 종류에 따라 표시할 하위 메뉴 항목을 결정합니다. 벗기기는 실제 처리 대상·이름·충돌 정책이 같은 활성 명령을 하나로 줄입니다. 모든 폴더가 같은 이름의 단일 파일이고 충돌 정책이 건너뛰기라면 같은 이름 명령 하나가 남습니다. 자동 번호 설정에서는 전체 내용 명령을 별도로 유지합니다. 빠른 메뉴 호출은 파일시스템을 검사하지 않으며, 느린 분석 결과를 여러 명령이 공유합니다. 읽기 실패나 제한 초과 시에는 명령을 보수적으로 유지합니다. 1.4.7.1부터 후속 상세 검사 호출이 없어도 기본 메뉴는 활성화되며, 이 경우 중복 항목이 남을 수 있습니다. 자세한 조건표와 성능 제한은 [벗기기 메뉴 규칙](docs/unwrap-command-visibility-review.md)을 참고하세요.
 
 컨텍스트 메뉴 실행은 선택 항목 전체를 큐에 모은 뒤 현재 명령 조건에 맞는 폴더만 처리합니다. 파일 비교 명령은 선택한 파일/폴더를 독립 실행 UI에 전달하고 파일 비교 설정 창을 미리 엽니다.
 
@@ -398,13 +398,13 @@ FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE` 또�
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
-Current version: `1.4.7.0`.
+Current version: `1.4.7.1`.
 
 ### Development and Stability Notice
 
 FileTools is maintained as a personal hobby project and is built and updated with the help of Codex. As a result, some updates may not be fully stable, and bug testing may be limited. Please consider backing up important files before using FileTools on them, and feel free to report issues so they can be reviewed as time permits.
 
-`1.4.7.0` is awaiting local installation verification before deciding whether to publish a GitHub release. It includes the standalone planner work-plan display, folder-merge options flow, file-compare ContextMenu exposure, local rename-learning foundation, release verification flow, archive-merge decision panel display cleanup, final-name review flows for merge and folder wrapping operations, merge-name correction, the revised folder merge options UI, filtered single-file folder unwrap visibility/execution for multi-folder selections, simple/advanced name editing flows, original-name token recommendations in the advanced editor, Yaminjeongeum automatic-correction restoration, the rename review initial-selection fix for single and multi-file correction, child-folder promotion for moving folder contents upward, and an automatic-correction button in the simple rename confirmation.
+`1.4.7.1` is awaiting local installation verification before deciding whether to publish a GitHub release. It includes the standalone planner work-plan display, folder-merge options flow, file-compare ContextMenu exposure, local rename-learning foundation, release verification flow, archive-merge decision panel display cleanup, final-name review flows for merge and folder wrapping operations, merge-name correction, the revised folder merge options UI, filtered single-file folder unwrap visibility/execution for multi-folder selections, simple/advanced name editing flows, original-name token recommendations in the advanced editor, Yaminjeongeum automatic-correction restoration, the rename review initial-selection fix for single and multi-file correction, child-folder promotion for moving folder contents upward, and an automatic-correction button in the simple rename confirmation.
 
 ### Features
 
@@ -640,7 +640,7 @@ GitHub Releases use a manual workflow that builds and signs the setup
 bootstrapper, MSI, and sparse MSIX identity package, generates `checksums.txt`,
 and creates GitHub artifact attestations for the release assets.
 
-`1.4.7.0` is awaiting local installation verification. Do not create a tag or
+`1.4.7.1` is awaiting local installation verification. Do not create a tag or
 draft release until the release decision, release asset verification, and
 install smoke testing are complete.
 

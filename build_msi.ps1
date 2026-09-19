@@ -15,7 +15,7 @@ function Resolve-FileToolsReleaseVersion {
     }
 
     if ($normalized -notmatch '^\d+\.\d+\.\d+\.\d+$') {
-        throw "Version '$InputVersion' must use four numeric parts, for example 1.4.7.0 or v1.4.7.0."
+        throw "Version '$InputVersion' must use four numeric parts, for example 1.4.7.1 or v1.4.7.1."
     }
 
     $parsed = $null

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.4.7.1 - Context menu hotfix (2026-09-19)
+
+- Fix all Explorer subcommands remaining disabled when no slow state callback arrives.
+  Fast callbacks now return usable conservative states from settings and Shell selection
+  attributes without directory enumeration or waiting for the analysis mutex.
+- Preserve detailed deduplication when a slow analysis is supplied. Without it, extra
+  applicable commands may remain visible; invocation still validates the actual selection.
+- Cover repeated fast-only calls, file selections, disabled settings and busy analysis.
+  See [hotfix notes](docs/release-notes/v1.4.7.1.md).
+
 ## 1.4.7.0 - Test build (2026-09-19)
 
 ### Fixed

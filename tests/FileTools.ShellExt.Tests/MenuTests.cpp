@@ -154,7 +154,37 @@ void TestFilesAndCache()
     auto cache = std::make_shared<MenuSelectionCache>(analyzer);
     ExplorerCommand command(CommandKind::FolderUnwrapSameName, cache);
     EXPCMDSTATE state{};
-    Check(command.GetState(selection.Get(), FALSE, &state) == E_PENDING && analyses == 0, "Fast path performs no analysis");
+    for (unsigned pass = 0; pass < 3; ++pass)
+    {
+        Check(command.GetState(selection.Get(), FALSE, &state) == S_OK && state == ECS_ENABLED && analyses == 0,
+            "Repeated fast-only calls must remain usable without analysis");
+        for (const auto& definition : SubCommands)
+        {
+            ExplorerCommand sibling(definition.Kind, cache);
+            Check(sibling.GetState(selection.Get(), FALSE, &state) == S_OK && state != ECS_DISABLED && analyses == 0,
+                "No subcommand may depend on a later slow callback");
+        }
+    }
+    auto fileSelection = Selection(different / L"Other.txt");
+    Check(command.GetState(fileSelection.Get(), FALSE, &state) == S_OK && state == ECS_HIDDEN && analyses == 0,
+        "Fast fallback hides folder commands for files");
+    ExplorerCommand open(CommandKind::OpenApp, cache);
+    Check(open.GetState(fileSelection.Get(), FALSE, &state) == S_OK && state == ECS_ENABLED && analyses == 0,
+        "Open app does not require directory analysis");
+    auto zipPath = fixture.root / L"Archive.zip";
+    {
+        std::ofstream zip(zipPath, std::ios::binary);
+        const char emptyZip[22]{'P', 'K', 5, 6};
+        zip.write(emptyZip, sizeof(emptyZip));
+    }
+    auto zipSelection = Selection(zipPath);
+    Check(command.GetState(zipSelection.Get(), FALSE, &state) == S_OK && state == ECS_HIDDEN && analyses == 0,
+        "ZIP shell folder must not be treated as a filesystem directory");
+    MenuSettings disabled;
+    disabled.Enabled.fill(false);
+    MenuSelectionCache disabledCache(analyzer, disabled);
+    Check(disabledCache.GetState(CommandKind::OpenApp, selection.Get(), FALSE, &state) == S_OK && state == ECS_HIDDEN,
+        "Fast fallback respects disabled settings");
     Check(command.GetState(selection.Get(), TRUE, &state) == S_OK && state == ECS_ENABLED && analyses == 1, "Slow path analyzes once");
     for (const auto& definition : SubCommands)
     {
@@ -162,7 +192,8 @@ void TestFilesAndCache()
         Check(sibling.GetState(selection.Get(), FALSE, &state) == S_OK && analyses == 1, "Siblings share cache");
     }
     auto clone = Selection(same);
-    Check(command.GetState(clone.Get(), FALSE, &state) == E_PENDING, "Unknown COM identity defers path extraction");
+    Check(command.GetState(clone.Get(), FALSE, &state) == S_OK && state == ECS_ENABLED && analyses == 1,
+        "New selection identity remains usable without path extraction");
     Check(command.GetState(clone.Get(), TRUE, &state) == S_OK && analyses == 1, "Same paths reuse snapshot");
     Check(command.GetState(other.Get(), TRUE, &state) == S_OK && state == ECS_HIDDEN && analyses == 2, "Changed selection invalidates cache");
     std::ofstream(same / L"Added.txt") << "changed";
@@ -186,7 +217,7 @@ void TestFilesAndCache()
     const auto fastResult = busy.GetState(CommandKind::OpenApp, selection.Get(), FALSE, &state);
     release.set_value();
     worker.join();
-    Check(fastResult == E_PENDING, "Fast path does not wait for slow analysis mutex");
+    Check(fastResult == S_OK && state == ECS_ENABLED, "Fast path remains usable while slow analysis owns mutex");
     std::cout << "1000-file folder: attributes=" << large.Statistics.AttributeReads << ", opens=" << large.Statistics.FolderOpens
         << ", entry reads=" << large.Statistics.EntryReads << "; cache analyses=1 per selection.\n";
 }
