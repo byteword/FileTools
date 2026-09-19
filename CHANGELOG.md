@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.1.0 - Test Build (2026-09-19)
+
+- Fix all unwrap commands remaining visible on fast-only Explorer state callbacks.
+- Share selection analysis by paths, classify on background workers with one bounded
+  wait per selection, and refresh when a new menu opens.
+- Add exact visibility, selection identity, timeout, and worker-lifetime regression checks.
+- Increment the patch version from 1.5.0.1 to 1.5.1.0 and produce a local test installer.
+
 ## 1.5.0.1 - Unreleased (2026-09-19)
 
 - Add CSV/TXT file-list export and conditional file collection into the target list.

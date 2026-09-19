@@ -20,7 +20,7 @@ validation are tracked in [folder operations](folder-operations.md).
 Installer installation and live Explorer verification remain release checks.
 
 Implemented selection-based unwrap deduplication in the native Explorer menu,
-with shared analysis, deferred fast calls, bounded enumeration, and conservative
+with shared background analysis from the first state request, bounded enumeration, and conservative
 fallbacks. Cross-checked 1,024 native policy combinations against 960 actual
 command executions. See [unwrap menu rules](unwrap-command-visibility-review.md).
 Live Explorer latency/installation checks and planner-specific deduplication remain open.
@@ -33,7 +33,7 @@ the initial review. The user has now requested preparation for the sequence belo
 
 Branch: `codex/1.5.0.0`, based on `master` commit `15296b3` (`1.4.7.0`).
 App, ShellExt, installer, bundle and related version sources are synchronized
-to `1.5.0.1` for the new catalog/comparison checkpoint commit. The earlier minor-version commit used `1.5.0.0`. The release remains unpublished.
+to `1.5.1.0` for the Explorer visibility fix and test installer. The catalog/comparison checkpoint used `1.5.0.1`. The earlier minor-version commit used `1.5.0.0`. The release remains unpublished.
 
 Implement and validate one feature at a time in the user-requested order:
 
@@ -369,6 +369,15 @@ Work-plan presets and general undo remain outside this sequence.
   is defined.
 
 ## Existing Release and Maintenance Priorities
+
+Completed the Explorer unwrap visibility fix after checkpoint `4619ab5`
+(`1.5.0.1`). Version `1.5.1.0` starts bounded background analysis on the first
+state request and shares results by selected paths. Fast-only calls, new selection
+objects and fresh enumerators now match the existing policy on normal local folders.
+The signed local test installer includes the fix. Installation and live Explorer
+interaction remain user testing; the current installed copy was not replaced.
+See the [fix and package verification](context-menu-visibility-fix-2026-09-19.md)
+and the earlier [installed-DLL diagnosis](context-menu-visibility-diagnosis-2026-09-19.md).
 
 New 1.5.0.0 feature work follows the ordered preparation track above.
 The following items retain the existing release and maintenance checks.

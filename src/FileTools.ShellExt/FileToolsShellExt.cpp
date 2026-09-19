@@ -13,6 +13,8 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <atomic>
+#include <condition_variable>
 #include <wrl/client.h>
 #include "UnwrapMenuPolicy.h"
 
@@ -238,7 +240,7 @@ bool SelectionAnyFileSystemItem(const std::vector<std::wstring>& paths)
     });
 }
 
-// 메뉴 수명에만 보관한다. 설정은 열거자 생성 시 읽고 빠른 상태 호출에서 폴더를 열거하지 않는다.
+// 메뉴 수명에만 보관한다. 설정은 열거자 생성 시 읽고 폴더 검사는 작업 스레드에서 수행한다.
 constexpr size_t CommandCount = static_cast<size_t>(CommandKind::OpenApp) + 1;
 struct MenuSettings
 {
@@ -386,7 +388,8 @@ MenuSnapshot AnalyzeSelection(const std::vector<std::wstring>& paths, const Menu
         else if (attributes & FILE_ATTRIBUTE_DIRECTORY)
         {
             allZipFiles = false;
-            if (attributes & FILE_ATTRIBUTE_REPARSE_POINT) kinds |= FileToolsMenu::Unknown;
+            if (attributes & (FILE_ATTRIBUTE_REPARSE_POINT | FILE_ATTRIBUTE_OFFLINE |
+                FILE_ATTRIBUTE_RECALL_ON_OPEN | FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS)) kinds |= FileToolsMenu::Unknown;
             else folders.push_back(path);
         }
         else
@@ -430,11 +433,79 @@ MenuSnapshot AnalyzeSelection(const std::vector<std::wstring>& paths, const Menu
     return snapshot;
 }
 
-/// <summary>형제 명령이 같은 선택 스냅샷을 공유한다. 빠른 호출은 검사나 잠금 대기를 하지 않는다.</summary>
+// Workers own paths/settings, never apartment-bound Shell interfaces or the menu object.
+// A blocked filesystem call cannot accumulate unbounded background work across menu opens.
+using MenuAnalyzer = std::function<MenuSnapshot(const std::vector<std::wstring>&)>;
+std::atomic<unsigned> g_menuAnalysisWorkers{0};
+constexpr unsigned MaxMenuAnalysisWorkers = 2;
+struct MenuAnalysisJob
+{
+    std::mutex Mutex;
+    std::condition_variable Completed;
+    MenuSnapshot Snapshot;
+    bool Ready = false, Failed = false, WaitUsed = false;
+};
+struct MenuAnalysisWork
+{
+    std::shared_ptr<MenuAnalysisJob> Job;
+    std::vector<std::wstring> Paths;
+    MenuAnalyzer Analyze;
+    HMODULE Module = nullptr;
+};
+
+void CALLBACK AnalyzeMenuInBackground(PTP_CALLBACK_INSTANCE instance, void* context)
+{
+    const std::unique_ptr<MenuAnalysisWork> work(static_cast<MenuAnalysisWork*>(context));
+    // Keep the DLL mapped until this callback (including its C++ destructors) has returned.
+    FreeLibraryWhenCallbackReturns(instance, work->Module);
+    MenuSnapshot snapshot;
+    bool failed = false;
+    try { snapshot = work->Analyze(work->Paths); }
+    catch (...) { failed = true; }
+    {
+        std::lock_guard<std::mutex> lock(work->Job->Mutex);
+        work->Job->Snapshot = std::move(snapshot);
+        work->Job->Failed = failed;
+        work->Job->Ready = true;
+    }
+    work->Job->Completed.notify_all();
+    --g_menuAnalysisWorkers;
+    InterlockedDecrement(&g_objectCount);
+}
+
+std::shared_ptr<MenuAnalysisJob> StartMenuAnalysis(const std::vector<std::wstring>& paths, const MenuAnalyzer& analyzer)
+{
+    auto job = std::make_shared<MenuAnalysisJob>();
+    auto work = std::make_unique<MenuAnalysisWork>();
+    work->Job = job;
+    work->Paths = paths;
+    work->Analyze = analyzer;
+    auto workers = g_menuAnalysisWorkers.load();
+    do { if (workers >= MaxMenuAnalysisWorkers) return {}; }
+    while (!g_menuAnalysisWorkers.compare_exchange_weak(workers, workers + 1));
+    if (!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
+        reinterpret_cast<LPCWSTR>(&AnalyzeMenuInBackground), &work->Module))
+    {
+        --g_menuAnalysisWorkers;
+        return {};
+    }
+    InterlockedIncrement(&g_objectCount);
+    if (!TrySubmitThreadpoolCallback(AnalyzeMenuInBackground, work.get(), nullptr))
+    {
+        InterlockedDecrement(&g_objectCount);
+        --g_menuAnalysisWorkers;
+        FreeLibrary(work->Module);
+        return {};
+    }
+    work.release();
+    return job;
+}
+
+/// <summary>첫 호출부터 분석을 시작한다. 경로로 공유하고 선택당 최초 대기만 50ms로 제한한다.</summary>
 class MenuSelectionCache
 {
 public:
-    using Analyzer = std::function<MenuSnapshot(const std::vector<std::wstring>&)>;
+    using Analyzer = MenuAnalyzer;
     explicit MenuSelectionCache(Analyzer analyzer = {}, MenuSettings settings = ReadMenuSettings())
         : _settings(settings), _analyzer(analyzer ? std::move(analyzer) :
             Analyzer([settings](const auto& paths) { return AnalyzeSelection(paths, settings); })) {}
@@ -442,37 +513,40 @@ public:
     HRESULT GetState(CommandKind kind, IShellItemArray* selection, BOOL okToBeSlow, EXPCMDSTATE* state)
     {
         *state = ECS_HIDDEN;
-        if (!selection) { *state = ECS_HIDDEN; return S_OK; }
-        Microsoft::WRL::ComPtr<IUnknown> identity;
-        const auto identityResult = selection->QueryInterface(IID_PPV_ARGS(&identity));
-        if (FAILED(identityResult)) return identityResult;
-        std::unique_lock<std::mutex> lock(_mutex, std::defer_lock);
-        if (!okToBeSlow)
+        if (!selection || !_settings.Enabled[static_cast<size_t>(kind)]) return S_OK;
+        // TRUE is optional in Explorer submenus; both call paths prepare the same result.
+        (void)okToBeSlow;
+        DWORD count = 0;
+        if (FAILED(selection->GetCount(&count)) || count == 0) return S_OK;
+        if (count > 256) return GetFallbackState(kind, selection, state);
+        const auto paths = GetSelectionPaths(selection);
+        if (paths.size() != count) return GetFallbackState(kind, selection, state);
+        std::shared_ptr<MenuAnalysisJob> job;
         {
-            if (!lock.try_lock() || !_ready || identity.Get() != _identity.Get())
-                return GetFallbackState(kind, selection, state);
-        }
-        else
-        {
-            lock.lock();
-            if (!_ready || identity.Get() != _identity.Get())
+            std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
+            if (!lock.owns_lock()) return GetFallbackState(kind, selection, state);
+            if (!_job || _paths.size() != paths.size() ||
+                !std::equal(paths.begin(), paths.end(), _paths.begin(), EqualsIgnoreCase))
             {
-                auto paths = GetSelectionPaths(selection);
-                if (!_ready || paths != _paths)
-                {
-                    _snapshot = _analyzer(paths);
-                    _paths = std::move(paths);
-                    _ready = true;
-                }
-                _identity = std::move(identity);
+                _job = StartMenuAnalysis(paths, _analyzer);
+                _paths = paths;
             }
+            job = _job;
         }
-        *state = _snapshot.Visible[static_cast<size_t>(kind)] ? ECS_ENABLED : ECS_HIDDEN;
+        if (!job) return GetFallbackState(kind, selection, state);
+        std::unique_lock<std::mutex> lock(job->Mutex);
+        if (!job->Ready && !job->WaitUsed)
+        {
+            job->WaitUsed = true;
+            job->Completed.wait_for(lock, std::chrono::milliseconds(50), [&] { return job->Ready; });
+        }
+        if (!job->Ready || job->Failed) return GetFallbackState(kind, selection, state);
+        *state = job->Snapshot.Visible[static_cast<size_t>(kind)] ? ECS_ENABLED : ECS_HIDDEN;
         return S_OK;
     }
 private:
     // Explorer 하위 메뉴가 TRUE로 재호출하지 않아도 사용할 수 있는 기본 상태.
-    // 셸 선택의 집계 속성만 사용하고 경로 추출/파일 읽기/폴더 열거는 하지 않는다.
+    // 시간 초과/접근 오류 시 셸 집계 속성으로 보수적으로 결정한다.
     HRESULT GetFallbackState(CommandKind kind, IShellItemArray* selection, EXPCMDSTATE* state) const
     {
         if (!_settings.Enabled[static_cast<size_t>(kind)]) return S_OK;
@@ -512,10 +586,8 @@ private:
 
     const MenuSettings _settings;
     std::mutex _mutex;
-    Microsoft::WRL::ComPtr<IUnknown> _identity;
     std::vector<std::wstring> _paths;
-    MenuSnapshot _snapshot;
-    bool _ready = false;
+    std::shared_ptr<MenuAnalysisJob> _job;
     Analyzer _analyzer;
 };
 

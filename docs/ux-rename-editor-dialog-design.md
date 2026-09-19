@@ -33,7 +33,7 @@ Updated on 2026-06-24 for `1.4.6.2`: the simple review dialog now initializes
 its item list before selecting the first row, preventing single and multi-file
 rename correction from failing during dialog construction.
 
-Current `1.5.0.1` flow:
+Current `1.5.1.0` flow:
 
 - Simple confirmation shows the original name and one new-name input first.
 - The first generated rename row is selected safely after the list items are

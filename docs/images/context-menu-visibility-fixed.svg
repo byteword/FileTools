@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="380" viewBox="0 0 960 380">
+<style>text{font-family:'Malgun Gothic','Segoe UI',sans-serif;fill:#24364a;font-size:18px}.title{font-size:25px;font-weight:700}.small{font-size:14px;fill:#617489}.head{font-size:16px;font-weight:700}.count{font-size:22px;font-weight:700;fill:#17664e}</style>
+<rect width="960" height="380" rx="12" fill="#edf3f9"/>
+<text x="28" y="42" class="title">1.5.1.0 · 첫 메뉴 요청부터 폴더 조건 적용</text>
+<text x="28" y="70" class="small">설치 패키지 DLL의 진단 결과 · 실제 탐색기 캡처 아님 · 모든 명령 켜짐 / 충돌 시 건너뛰기</text>
+<rect x="24" y="92" width="912" height="236" rx="8" fill="#fff" stroke="#d5e0eb"/>
+<path d="M24 136H936 M24 184H936 M24 232H936 M24 280H936" stroke="#e4ebf2"/>
+<text x="44" y="121" class="head">선택한 폴더의 내용</text><text x="611" y="121" class="head">이전 빠른 호출</text><text x="785" y="121" class="head">수정 후</text>
+<text x="44" y="167">같은 이름의 파일 하나 · 사진/사진.jpg</text><text x="650" y="168">5개</text><text x="800" y="168" class="count">1개</text>
+<text x="44" y="215">다른 이름의 파일 하나 · 사진/풍경.jpg</text><text x="650" y="216">5개</text><text x="800" y="216" class="count">3개</text>
+<text x="44" y="263">파일 여러 개</text><text x="650" y="264">5개</text><text x="800" y="264" class="count">1개</text>
+<text x="44" y="311">빈 폴더</text><text x="650" y="312">5개</text><text x="800" y="312" class="count">0개</text>
+<text x="28" y="358" class="small">새 선택 객체·메뉴 다시 열기도 동일 · 느린 저장소/읽기 실패는 보수적으로 표시</text>
+</svg>

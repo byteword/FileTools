@@ -4,7 +4,7 @@
 
 Windows 탐색기 ContextMenu와 독립 실행형 WinForms 유틸리티를 제공하는 작은 파일 관리 도구입니다.
 
-현재 버전: `1.5.0.1` (개발 중, 미배포).
+현재 버전: `1.5.1.0` (테스트용 빌드).
 
 마이너 버전 `1.5.0.0`은 빈 폴더 정리, 일괄 이름 편집, 중복파일 확인 고도화,
 파일 목록 작성, 조건별 파일 모으기를 계획했으며, 후속 요청에 따라 4·5번을 우선 구현했습니다.
@@ -369,7 +369,7 @@ FileTools.exe /context ArchiveMergePreserveInternalPaths "%1"
 FileTools.exe /context FileCompare "%1"
 ```
 
-처음 세 `/context` 명령은 하위 호환성을 위해 유지됩니다. 네이티브 ShellExt는 선택 항목 종류에 따라 표시할 하위 메뉴 항목을 결정합니다. 벗기기는 실제 처리 대상·이름·충돌 정책이 같은 활성 명령을 하나로 줄입니다. 모든 폴더가 같은 이름의 단일 파일이고 충돌 정책이 건너뛰기라면 같은 이름 명령 하나가 남습니다. 자동 번호 설정에서는 전체 내용 명령을 별도로 유지합니다. 빠른 메뉴 호출은 파일시스템을 검사하지 않으며, 느린 분석 결과를 여러 명령이 공유합니다. 읽기 실패나 제한 초과 시에는 명령을 보수적으로 유지합니다. 1.4.7.1부터 후속 상세 검사 호출이 없어도 기본 메뉴는 활성화되며, 이 경우 중복 항목이 남을 수 있습니다. 자세한 조건표와 성능 제한은 [벗기기 메뉴 규칙](docs/unwrap-command-visibility-review.md)을 참고하세요.
+처음 세 `/context` 명령은 하위 호환성을 위해 유지됩니다. 네이티브 ShellExt는 선택 항목 종류에 따라 표시할 하위 메뉴 항목을 결정합니다. 벗기기는 실제 처리 대상·이름·충돌 정책이 같은 활성 명령을 하나로 줄입니다. 모든 폴더가 같은 이름의 단일 파일이고 충돌 정책이 건너뛰기라면 같은 이름 명령 하나가 남습니다. 자동 번호 설정에서는 전체 내용 명령을 별도로 유지합니다. 1.5.1.0부터 첫 메뉴 요청에서 작업 스레드가 폴더를 검사하고, 경로가 같은 선택은 결과를 공유합니다. 후속 상세 검사 호출이 없어도 정상 로컬 폴더의 표시 조건이 적용됩니다. 결과 대기는 선택당 한 번, 최대 50ms이며 읽기 실패나 제한 초과 시에는 명령을 보수적으로 유지합니다. 자세한 조건표와 성능 제한은 [벗기기 메뉴 규칙](docs/unwrap-command-visibility-review.md)을 참고하세요.
 
 컨텍스트 메뉴 실행은 선택 항목 전체를 큐에 모은 뒤 현재 명령 조건에 맞는 폴더만 처리합니다. 파일 비교 명령은 선택한 파일/폴더를 독립 실행 UI에 전달하고 파일 비교 설정 창을 미리 엽니다.
 
@@ -406,7 +406,7 @@ FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE` 또�
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
-Current version: `1.5.0.1` (development, unreleased).
+Current version: `1.5.1.0` (test build).
 
 Work for minor version `1.5.0.0` follows this order: empty-folder cleanup,
 batch filename editing, duplicate-file inspection improvements, file-list export,

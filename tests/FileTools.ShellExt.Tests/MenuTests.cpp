@@ -148,78 +148,156 @@ void TestFilesAndCache()
     Check(bounded.Statistics.AttributeReads <= 256 && bounded.Statistics.FolderOpens <= 128 && UnwrapMask(bounded) == 31,
         "Large selection is bounded and conservative");
 
-    auto selection = Selection(same), other = Selection(different);
-    unsigned analyses = 0;
-    auto analyzer = [&](const auto& paths) { ++analyses; return AnalyzeSelection(paths, settings); };
-    auto cache = std::make_shared<MenuSelectionCache>(analyzer);
-    ExplorerCommand command(CommandKind::FolderUnwrapSameName, cache);
-    EXPCMDSTATE state{};
-    for (unsigned pass = 0; pass < 3; ++pass)
+    auto fastMask = [](MenuSelectionCache& cache, IShellItemArray* selection, BOOL slow = FALSE)
     {
-        Check(command.GetState(selection.Get(), FALSE, &state) == S_OK && state == ECS_ENABLED && analyses == 0,
-            "Repeated fast-only calls must remain usable without analysis");
+        unsigned mask = 0;
         for (const auto& definition : SubCommands)
         {
-            ExplorerCommand sibling(definition.Kind, cache);
-            Check(sibling.GetState(selection.Get(), FALSE, &state) == S_OK && state != ECS_DISABLED && analyses == 0,
-                "No subcommand may depend on a later slow callback");
+            EXPCMDSTATE state{};
+            Check(cache.GetState(definition.Kind, selection, slow, &state) == S_OK && state != ECS_DISABLED,
+                "All menu states must complete without a required slow callback");
+            if (state == ECS_ENABLED) mask |= GetUnwrapBit(definition.Kind);
         }
-    }
-    auto fileSelection = Selection(different / L"Other.txt");
-    Check(command.GetState(fileSelection.Get(), FALSE, &state) == S_OK && state == ECS_HIDDEN && analyses == 0,
-        "Fast fallback hides folder commands for files");
-    ExplorerCommand open(CommandKind::OpenApp, cache);
-    Check(open.GetState(fileSelection.Get(), FALSE, &state) == S_OK && state == ECS_ENABLED && analyses == 0,
-        "Open app does not require directory analysis");
-    auto zipPath = fixture.root / L"Archive.zip";
+        return mask;
+    };
+    auto analysisCount = std::make_shared<std::atomic<unsigned>>(0);
+    auto& analyses = *analysisCount;
+    const auto callerThread = GetCurrentThreadId();
+    auto callerFlag = std::make_shared<std::atomic<bool>>(false);
+    auto analyzer = [analysisCount, callerFlag, callerThread, settings](const auto& paths)
     {
-        std::ofstream zip(zipPath, std::ios::binary);
-        const char emptyZip[22]{'P', 'K', 5, 6};
-        zip.write(emptyZip, sizeof(emptyZip));
+        ++*analysisCount;
+        if (GetCurrentThreadId() == callerThread) *callerFlag = true;
+        return AnalyzeSelection(paths, settings);
+    };
+    const unsigned folderMasks[]{SameName, KeepName | UseFolderName | PrefixName, AllContents, 0};
+    for (size_t index = 0; index < folders.size(); ++index)
+    {
+        auto selection = Selection(folders[index]);
+        MenuSelectionCache cache(analyzer, settings);
+        const auto before = analyses.load();
+        Check(fastMask(cache, selection.Get()) == folderMasks[index], "First fast-only menu must match folder contents");
+        Check(fastMask(cache, selection.Get()) == folderMasks[index], "Repeated fast calls keep the exact mask");
+        Check(analyses == before + 1, "Sibling commands share one analysis");
+        auto clone = Selection(folders[index]);
+        Check(fastMask(cache, clone.Get()) == folderMasks[index] && analyses == before + 1,
+            "New selection identity with the same path reuses exact visibility");
+        Check(fastMask(cache, clone.Get(), TRUE) == folderMasks[index] && analyses == before + 1,
+            "Optional slow call does not alter correct visibility");
+        MenuSelectionCache reopened(analyzer, settings);
+        Check(fastMask(reopened, clone.Get()) == folderMasks[index] && analyses == before + 2,
+            "New menu computes correct visibility without a slow callback");
     }
+    Check(!*callerFlag, "Folder analysis must not run on the Shell caller thread");
+    auto selection = Selection(same), other = Selection(different);
+    MenuSelectionCache changing(analyzer, settings);
+    Check(fastMask(changing, selection.Get()) == SameName, "Initial selected folder");
+    Check(fastMask(changing, other.Get()) == 14, "Changed path invalidates the snapshot on fast calls");
+    std::ofstream(same / L"Added.txt") << "changed";
+    MenuSelectionCache fresh(analyzer, settings);
+    Check(fastMask(fresh, selection.Get()) == AllContents, "Reopening refreshes changed folder contents");
+
+    auto fileSelection = Selection(different / L"Other.txt");
+    Check(fastMask(changing, fileSelection.Get()) == 0, "File selection hides every unwrap command");
+    auto zipPath = fixture.root / L"Archive.zip";
+    { std::ofstream zip(zipPath, std::ios::binary); const char emptyZip[22]{'P','K',5,6}; zip.write(emptyZip, sizeof(emptyZip)); }
     auto zipSelection = Selection(zipPath);
-    Check(command.GetState(zipSelection.Get(), FALSE, &state) == S_OK && state == ECS_HIDDEN && analyses == 0,
-        "ZIP shell folder must not be treated as a filesystem directory");
+    Check(fastMask(changing, zipSelection.Get()) == 0, "ZIP shell folders are not filesystem directories");
     MenuSettings disabled;
     disabled.Enabled.fill(false);
     MenuSelectionCache disabledCache(analyzer, disabled);
-    Check(disabledCache.GetState(CommandKind::OpenApp, selection.Get(), FALSE, &state) == S_OK && state == ECS_HIDDEN,
-        "Fast fallback respects disabled settings");
-    Check(command.GetState(selection.Get(), TRUE, &state) == S_OK && state == ECS_ENABLED && analyses == 1, "Slow path analyzes once");
-    for (const auto& definition : SubCommands)
-    {
-        ExplorerCommand sibling(definition.Kind, cache);
-        Check(sibling.GetState(selection.Get(), FALSE, &state) == S_OK && analyses == 1, "Siblings share cache");
-    }
-    auto clone = Selection(same);
-    Check(command.GetState(clone.Get(), FALSE, &state) == S_OK && state == ECS_ENABLED && analyses == 1,
-        "New selection identity remains usable without path extraction");
-    Check(command.GetState(clone.Get(), TRUE, &state) == S_OK && analyses == 1, "Same paths reuse snapshot");
-    Check(command.GetState(other.Get(), TRUE, &state) == S_OK && state == ECS_HIDDEN && analyses == 2, "Changed selection invalidates cache");
-    std::ofstream(same / L"Added.txt") << "changed";
-    MenuSelectionCache fresh(analyzer);
-    Check(fresh.GetState(CommandKind::FolderUnwrapSameName, selection.Get(), TRUE, &state) == S_OK && state == ECS_HIDDEN && analyses == 3,
-        "New menu refreshes changed folder contents");
+    const auto beforeDisabled = analyses.load();
+    EXPCMDSTATE state{};
+    Check(disabledCache.GetState(CommandKind::OpenApp, selection.Get(), FALSE, &state) == S_OK && state == ECS_HIDDEN &&
+        analyses == beforeDisabled, "Disabled commands do not schedule analysis");
 
-    // A fast callback must never wait on an in-flight slow analysis.
-    std::promise<void> entered, release;
+    // Block the worker on purpose: only the first callback may spend the 50ms wait budget.
+    auto entered = std::make_shared<std::promise<void>>();
+    std::promise<void> release;
     auto released = release.get_future().share();
-    MenuSelectionCache busy([&](const auto&) { entered.set_value(); released.wait(); return MenuSnapshot{}; });
-    auto ready = entered.get_future();
-    std::thread worker([&]
-    {
-        CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-        EXPCMDSTATE unused{};
-        busy.GetState(CommandKind::OpenApp, selection.Get(), TRUE, &unused);
-        CoUninitialize();
-    });
-    ready.wait();
-    const auto fastResult = busy.GetState(CommandKind::OpenApp, selection.Get(), FALSE, &state);
+    MenuSelectionCache busy([entered, released](const auto&)
+    { entered->set_value(); released.wait(); return MenuSnapshot{}; }, settings);
+    auto ready = entered->get_future();
+    auto started = AnalysisClock::now();
+    const auto first = busy.GetState(CommandKind::OpenApp, selection.Get(), FALSE, &state);
+    const auto firstElapsed = AnalysisClock::now() - started;
+    Check(first == S_OK && state == ECS_ENABLED, "Slow storage retains a usable fallback");
+    Check(firstElapsed < std::chrono::milliseconds(250), "First callback wait is bounded");
+    Check(ready.wait_for(std::chrono::seconds(2)) == std::future_status::ready, "Background analysis started");
+    started = AnalysisClock::now();
+    Check(fastMask(busy, selection.Get()) == 31, "Unfinished analysis uses conservative states");
+    Check(AnalysisClock::now() - started < std::chrono::milliseconds(150), "Sibling callbacks must not each wait 50ms");
     release.set_value();
-    worker.join();
-    Check(fastResult == S_OK && state == ECS_ENABLED, "Fast path remains usable while slow analysis owns mutex");
+    const auto until = AnalysisClock::now() + std::chrono::seconds(2);
+    do { busy.GetState(CommandKind::OpenApp, selection.Get(), FALSE, &state); std::this_thread::yield(); }
+    while (state != ECS_HIDDEN && AnalysisClock::now() < until);
+    Check(state == ECS_HIDDEN, "Completed background result is consumed on subsequent fast calls");
+    std::cout << "Blocked analysis first callback wait: "
+        << std::chrono::duration_cast<std::chrono::milliseconds>(firstElapsed).count() << "ms.\n";
     std::cout << "1000-file folder: attributes=" << large.Statistics.AttributeReads << ", opens=" << large.Statistics.FolderOpens
         << ", entry reads=" << large.Statistics.EntryReads << "; cache analyses=1 per selection.\n";
+}
+
+void TestWorkerLifetime()
+{
+    auto waitForIdle = []
+    {
+        const auto until = AnalysisClock::now() + std::chrono::seconds(3);
+        while (g_menuAnalysisWorkers != 0 && AnalysisClock::now() < until) std::this_thread::yield();
+        Check(g_menuAnalysisWorkers == 0, "Workers finish without retaining a menu object");
+    };
+    waitForIdle();
+    Fixture fixture;
+    const auto same = fixture.Folder(L"Same");
+    std::ofstream(same / L"Same.txt") << "same";
+    auto selection = Selection(same);
+    MenuSettings settings;
+    settings.SingleFileSkipsCollisions = true;
+    std::promise<void> release;
+    auto released = release.get_future().share();
+    std::atomic<unsigned> unexpected{0};
+    {
+        MenuSelectionCache first([released](const auto&) { released.wait(); return MenuSnapshot{}; }, settings);
+        MenuSelectionCache second([released](const auto&) { released.wait(); return MenuSnapshot{}; }, settings);
+        EXPCMDSTATE state{};
+        first.GetState(CommandKind::OpenApp, selection.Get(), FALSE, &state);
+        second.GetState(CommandKind::OpenApp, selection.Get(), FALSE, &state);
+        Check(g_menuAnalysisWorkers == MaxMenuAnalysisWorkers, "Only two analyses may be outstanding");
+        Check(DllCanUnloadNow() == S_FALSE, "Outstanding workers retain DLL lifetime");
+        MenuSelectionCache third([&](const auto&) { ++unexpected; return MenuSnapshot{}; }, settings);
+        const auto start = AnalysisClock::now();
+        Check(third.GetState(CommandKind::OpenApp, selection.Get(), FALSE, &state) == S_OK && state == ECS_ENABLED,
+            "Worker saturation preserves usable commands");
+        Check(unexpected == 0 && AnalysisClock::now() - start < std::chrono::milliseconds(100),
+            "Worker saturation neither queues more work nor waits");
+    }
+    // Both owning menus have been destroyed; workers must only access their own input.
+    release.set_value();
+    waitForIdle();
+    MenuSelectionCache failed([](const auto&) -> MenuSnapshot { throw std::runtime_error("I/O failed"); }, settings);
+    EXPCMDSTATE state{};
+    Check(failed.GetState(CommandKind::OpenApp, selection.Get(), FALSE, &state) == S_OK && state == ECS_ENABLED,
+        "Analyzer exception produces conservative fallback, not disabled commands");
+    waitForIdle();
+
+    // An older selection can finish after a new one; it must not overwrite the new result.
+    const auto other = fixture.Folder(L"Different");
+    std::ofstream(other / L"Other.txt") << "different";
+    auto otherSelection = Selection(other);
+    std::promise<void> oldRelease;
+    auto oldReleased = oldRelease.get_future().share();
+    MenuSelectionCache switched([oldReleased, path = same.wstring(), settings](const auto& paths)
+    {
+        if (paths[0] == path) oldReleased.wait();
+        return AnalyzeSelection(paths, settings);
+    }, settings);
+    switched.GetState(CommandKind::FolderUnwrapSameName, selection.Get(), FALSE, &state);
+    Check(switched.GetState(CommandKind::FolderUnwrapSameName, otherSelection.Get(), FALSE, &state) == S_OK && state == ECS_HIDDEN,
+        "New selection is not blocked by an older outstanding analysis");
+    oldRelease.set_value();
+    waitForIdle();
+    Check(switched.GetState(CommandKind::FolderUnwrapSameName, otherSelection.Get(), FALSE, &state) == S_OK && state == ECS_HIDDEN,
+        "Late old result cannot overwrite current selection");
 }
 
 int wmain(int argc, wchar_t** argv)
@@ -229,6 +307,7 @@ int wmain(int argc, wchar_t** argv)
     {
         TestPolicy();
         TestFilesAndCache();
+        TestWorkerLifetime();
         if (argc == 2)
         {
             std::ofstream matrix{fs::path(argv[1])};

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="470" viewBox="0 0 1040 470">
+<style>text{font-family:'Malgun Gothic','Segoe UI',sans-serif;fill:#24364a;font-size:17px}.title{font-size:25px;font-weight:700}.small{font-size:14px;fill:#617489}.heading{font-size:19px;font-weight:700}</style>
+<rect width="1040" height="470" fill="#edf3f9"/>
+<text x="28" y="42" class="title">같은 폴더인데, 호출 흐름에 따라 달라지는 표시</text>
+<text x="28" y="72" class="small">진단 호출 결과 · 실제 Explorer 화면 캡처 아님 · 예: 사진/사진.jpg · 충돌 시 건너뛰기</text>
+<rect x="24" y="94" width="484" height="298" rx="9" fill="#fff" stroke="#d5e0eb"/>
+<rect x="532" y="94" width="484" height="298" rx="9" fill="#fff" stroke="#d5e0eb"/>
+<text x="44" y="132" class="heading">빠른 확인만 호출: 5개 표시</text>
+<text x="552" y="132" class="heading">상세 확인까지 호출: 1개 표시</text>
+<text x="44" y="176">같은 이름 단일 파일 폴더 벗기기</text>
+<text x="44" y="217">폴더명으로 벗기기</text>
+<text x="44" y="258">파일명으로 벗기기</text>
+<text x="44" y="299">폴더명-파일명으로 벗기기</text>
+<text x="44" y="340">폴더 벗기기 — 전체 내용</text>
+<rect x="546" y="149" width="456" height="46" rx="5" fill="#e6f3e9"/>
+<text x="560" y="179">같은 이름 단일 파일 폴더 벗기기</text>
+<text x="552" y="246" class="small">같은 결과를 내는 항목과 적용 대상 없는 항목은 숨김</text>
+<text x="552" y="287" class="small">판정 규칙 자체는 정상 동작</text>
+<text x="28" y="427">새 선택 객체 또는 새 메뉴 열거자로 바뀌면 다시 왼쪽의 5개 표시로 돌아갑니다.</text>
+<text x="28" y="454" class="small">설치 DLL 1.4.7.1 / 현재 DLL 1.5.0.1에서 동일하게 재현</text>
+</svg>
