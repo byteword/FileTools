@@ -10,7 +10,9 @@ internal enum WorkPlanStepKind
     FolderUnwrap,
     AutoRelocation,
     ArchiveMerge,
-    DuplicateDelete
+    DuplicateDelete,
+    EmptyFolderCleanup,
+    BatchRename
 }
 
 /// <summary>
@@ -101,6 +103,10 @@ internal sealed class WorkPlanStep
     /// </summary>
     public IReadOnlyList<string> DuplicateDeleteGroupPaths { get; set; } = [];
 
+    public EmptyFolderCleanupPlan? EmptyFolderCleanupPlan { get; set; }
+    public BatchRenamePlan? BatchRenamePlan { get; set; }
+    public BatchRenamePreview? BatchRenameItem { get; set; }
+
     /// <summary>
     /// UI/로그에서 표시할 단계 이름.
     /// </summary>
@@ -112,6 +118,8 @@ internal sealed class WorkPlanStep
         WorkPlanStepKind.AutoRelocation => FormatAutoRelocationName(),
         WorkPlanStepKind.ArchiveMerge => FormatArchiveMergeName(),
         WorkPlanStepKind.DuplicateDelete => Localizer.Get("PlanActionDuplicateDelete"),
+        WorkPlanStepKind.EmptyFolderCleanup => Localizer.Get("EmptyFolderTitle"),
+        WorkPlanStepKind.BatchRename => Localizer.Get("BatchRenameTitle"),
         _ => Kind.ToString()
     };
 
@@ -129,7 +137,10 @@ internal sealed class WorkPlanStep
             AutoRelocationTemplateId = AutoRelocationTemplateId,
             ManualTargetRootPath = ManualTargetRootPath,
             ArchiveMergeOptions = ArchiveMergeOptions?.Clone(),
-            DuplicateDeleteGroupPaths = DuplicateDeleteGroupPaths.ToArray()
+            DuplicateDeleteGroupPaths = DuplicateDeleteGroupPaths.ToArray(),
+            EmptyFolderCleanupPlan = EmptyFolderCleanupPlan?.Clone(),
+            BatchRenamePlan = BatchRenamePlan,
+            BatchRenameItem = BatchRenameItem
         };
     }
 

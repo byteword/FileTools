@@ -61,6 +61,7 @@ public sealed partial class MainForm : Form
         _initialPaths = initialPaths?.ToArray() ?? [];
         _startupAction = startupAction;
         InitializeComponent();
+        InitializeFileOrganizationCommands();
         ApplyApplicationIcon();
         InitializeRuntimeBindings();
         ApplyLocalization();
@@ -68,6 +69,7 @@ public sealed partial class MainForm : Form
 
     private void InitializeRuntimeBindings()
     {
+        BindFileOrganizationCommands();
         Load += (_, _) =>
         {
             if (!IsDesignerHosted())
@@ -200,6 +202,7 @@ public sealed partial class MainForm : Form
 
     private void ApplyLocalization()
     {
+        LocalizeFileOrganizationCommands();
         Text = Localizer.Get("MainFormTitle");
         _targetsGroup.Text = Localizer.Get("GroupDropTargets");
         _planGroup.Text = Localizer.Get("GroupWorkPlan");
@@ -814,6 +817,7 @@ public sealed partial class MainForm : Form
 
         foreach (var target in targets)
         {
+            if (HasBatchRename(target)) continue;
             target.Steps.Add(ReferenceEquals(target, targets[0]) ? step : step.Clone());
         }
 
@@ -1053,6 +1057,12 @@ public sealed partial class MainForm : Form
             return;
         }
 
+        if (step.Kind == WorkPlanStepKind.BatchRename)
+        {
+            EditBatchRenameSteps(step);
+            return;
+        }
+
         if (step.Kind == WorkPlanStepKind.DuplicateDelete)
         {
             EditDuplicateDeleteSteps(step);
@@ -1103,6 +1113,7 @@ public sealed partial class MainForm : Form
 
     private bool EditStep(WorkPlanStep step, WorkTargetPlan? target)
     {
+        if (step.Kind == WorkPlanStepKind.EmptyFolderCleanup) return EditEmptyFolderCleanupStep(step);
         if (step.Kind == WorkPlanStepKind.FileNameCorrection && target is not null)
         {
             return RenameReviewDialog.EditPlanStep(this, target.Path, step, _settings);
@@ -1290,7 +1301,7 @@ public sealed partial class MainForm : Form
                 continue;
             }
 
-            if (!PathComparer.Equals(target.Path, targetResult.FinalPath) &&
+            if (!string.Equals(target.Path, targetResult.FinalPath, StringComparison.Ordinal) &&
                 PathExists(targetResult.FinalPath))
             {
                 target.UpdatePath(targetResult.FinalPath);
@@ -1727,6 +1738,8 @@ public sealed partial class MainForm : Form
 
     private void ApplyActionToolbarImages(int imageSize)
     {
+        _emptyFolderToolButton.Image = UiIconFactory.GetIcon(UiIconKind.Clear, imageSize);
+        _batchRenameToolButton.Image = UiIconFactory.GetIcon(UiIconKind.Rename, imageSize);
         _mergeSelectedToolButton.Image = UiIconFactory.GetIcon(UiIconKind.FolderAdd, imageSize);
         _addRenameToolButton.Image = UiIconFactory.GetIcon(UiIconKind.Rename, imageSize);
         _addWrapToolButton.Image = UiIconFactory.GetIcon(UiIconKind.Wrap, imageSize);
@@ -1907,11 +1920,12 @@ public sealed partial class MainForm : Form
         var hasTargets = _targets.Count > 0;
         var anyPlannedSteps = _targets.Any(static target => target.Steps.Count > 0);
         var canModify = !isExecuting;
-        var canRename = canModify && hasSelectedTargets && selectedTargets.All(IsExistingTarget);
+        UpdateFileOrganizationCommands(canModify, selectedTargets);
+        var canRename = canModify && hasSelectedTargets && selectedTargets.All(IsExistingTarget) && !selectedTargets.Any(HasBatchRename);
         var canWrap = canModify && hasSelectedTargets && selectedTargets.All(IsExistingTarget) &&
                       selectedTargets.All(static target => target.Steps.Count == 0);
         var canUnwrap = canModify && hasSelectedTargets && selectedTargets.All(static target => Directory.Exists(target.Path));
-        var canRelocate = canModify && hasSelectedTargets && selectedTargets.All(IsExistingTarget);
+        var canRelocate = canModify && hasSelectedTargets && selectedTargets.All(IsExistingTarget) && !selectedTargets.Any(HasBatchRename);
         var canArchiveMerge = canModify &&
                               selectedTargets.Length >= 2 &&
                               selectedTargets.All(static target => ArchiveMergeOperations.IsSupportedArchivePath(target.Path)) &&

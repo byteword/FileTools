@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="860" viewBox="0 0 1100 860" role="img" aria-labelledby="title desc">
+  <title id="title">FileTools 1.5 기능 연결 개념도</title>
+  <desc id="desc">구현 전 구상. 기존 대상 목록과 작업 계획에 빈 폴더 정리, 일괄 이름 편집, 중복 확인, 파일 목록 작성, 조건별 수집을 순서대로 연결한다.</desc>
+  <defs>
+    <style>
+      text { font-family: 'Malgun Gothic', 'Segoe UI', sans-serif; fill: #233348; }
+      .title { font-size: 28px; font-weight: 700; }
+      .section { font-size: 17px; font-weight: 700; }
+      .body { font-size: 15px; }
+      .small { font-size: 13px; fill: #596a7e; }
+      .label { font-size: 14px; font-weight: 700; }
+      .number { font-size: 15px; font-weight: 700; fill: white; text-anchor: middle; }
+      .line { stroke: #dce3eb; stroke-width: 1; }
+    </style>
+  </defs>
+  <rect width="1100" height="860" fill="#eef3f8"/>
+  <text x="34" y="52" class="title">FileTools 1.5</text>
+  <text x="243" y="51" class="section" fill="#64748b">기존 작업 흐름에 다섯 기능 연결</text>
+  <text x="35" y="80" class="small">구현 전 개념도 · 번호는 요청한 구현 순서 · 세부 배치는 각 기능 구현 시 확정</text>
+
+  <rect x="28" y="103" width="1044" height="724" rx="10" fill="white" stroke="#bcc9d8"/>
+  <path d="M29 147H1071" class="line"/>
+  <text x="50" y="131" class="body">파일</text>
+  <text x="108" y="131" class="body">작업</text>
+  <text x="166" y="131" class="body">설정</text>
+  <text x="898" y="131" class="small">독립 실행 플래너</text>
+
+  <text x="50" y="178" class="section">작업 대상</text>
+  <rect x="50" y="192" width="474" height="256" rx="5" fill="#ffffff" stroke="#d4dee9"/>
+  <path d="M51 228H523" class="line"/>
+  <rect x="51" y="193" width="472" height="34" rx="4" fill="#f2f6fa"/>
+  <text x="67" y="216" class="small">이름</text>
+  <text x="287" y="216" class="small">위치</text>
+  <text x="466" y="216" class="small">작업</text>
+  <rect x="51" y="229" width="472" height="40" fill="#eaf2ff"/>
+  <text x="67" y="255" class="body">정리할 자료</text>
+  <text x="287" y="255" class="small">D:\자료</text>
+  <text x="478" y="255" class="body">1</text>
+  <path d="M51 269H523M51 309H523M51 349H523M51 389H523" class="line"/>
+  <text x="67" y="295" class="body">스캔1.jpg</text>
+  <text x="287" y="295" class="small">D:\자료\스캔</text>
+  <text x="478" y="295" class="body">0</text>
+  <text x="67" y="335" class="body">스캔2.jpg</text>
+  <text x="287" y="335" class="small">D:\자료\스캔</text>
+  <text x="478" y="335" class="body">0</text>
+  <text x="67" y="375" class="body">회의록.pdf</text>
+  <text x="287" y="375" class="small">D:\문서</text>
+  <text x="478" y="375" class="body">0</text>
+  <text x="67" y="421" class="small">드래그 앤 드롭 또는 파일·폴더 추가</text>
+
+  <rect x="50" y="464" width="474" height="101" rx="6" fill="#f3f7fc"/>
+  <text x="67" y="491" class="label">조건 수집 결과도 같은 목록으로</text>
+  <text x="67" y="519" class="small">종류 · 이름 · 수정일 · 생성일 · 크기</text>
+  <text x="67" y="544" class="small">확정한 파일에 기존 이름 변경·재배치 등을 적용</text>
+
+  <text x="550" y="178" class="section">작업 명령</text>
+  <rect x="550" y="192" width="498" height="64" rx="6" fill="#f3f7ff" stroke="#c3d5f1"/>
+  <circle cx="577" cy="223" r="16" fill="#2f65b8"/>
+  <text x="577" y="229" class="number">1</text>
+  <text x="607" y="219" class="label">빈 폴더 정리</text>
+  <text x="607" y="243" class="small">빈 폴더 후보 검토 → 작업 계획</text>
+
+  <rect x="550" y="267" width="498" height="64" rx="6" fill="#f8fafc" stroke="#d4dee9"/>
+  <circle cx="577" cy="298" r="16" fill="#526e95"/>
+  <text x="577" y="304" class="number">2</text>
+  <text x="607" y="294" class="label">일괄 이름 편집</text>
+  <text x="607" y="318" class="small">문구 · 치환 · 연속 번호 → 변경 결과 검토</text>
+
+  <rect x="550" y="342" width="498" height="64" rx="6" fill="#f8fafc" stroke="#d4dee9"/>
+  <circle cx="577" cy="373" r="16" fill="#526e95"/>
+  <text x="577" y="379" class="number">3</text>
+  <text x="607" y="369" class="label">중복파일 확인</text>
+  <text x="607" y="393" class="small">전체 내용 확인 → 보존·삭제 후보 검토</text>
+
+  <rect x="550" y="417" width="498" height="64" rx="6" fill="#f4faf7" stroke="#cddfd4"/>
+  <circle cx="577" cy="448" r="16" fill="#43765e"/>
+  <text x="577" y="454" class="number">4</text>
+  <text x="607" y="444" class="label">파일 목록 작성</text>
+  <text x="607" y="468" class="small">포함할 열과 정렬 선택 → CSV · TXT 저장</text>
+
+  <rect x="550" y="492" width="498" height="73" rx="6" fill="#f4faf7" stroke="#cddfd4"/>
+  <circle cx="577" cy="527" r="16" fill="#43765e"/>
+  <text x="577" y="533" class="number">5</text>
+  <text x="607" y="519" class="label">조건별 파일 모으기</text>
+  <text x="607" y="544" class="small">조건 검색 → 수집 결과 확인 → 작업 대상에 추가</text>
+
+  <text x="50" y="603" class="section">작업 계획</text>
+  <rect x="50" y="618" width="998" height="121" rx="5" fill="white" stroke="#d4dee9"/>
+  <rect x="51" y="619" width="996" height="34" rx="4" fill="#f2f6fa"/>
+  <text x="67" y="642" class="small">순서</text>
+  <text x="123" y="642" class="small">작업</text>
+  <text x="343" y="642" class="small">입력</text>
+  <text x="692" y="642" class="small">예상 결과</text>
+  <text x="78" y="682" class="body">1</text>
+  <text x="123" y="682" class="body">빈 폴더 정리</text>
+  <text x="343" y="682" class="body">D:\자료\정리할 자료</text>
+  <text x="692" y="682" class="body">빈 폴더 3개 휴지통 이동</text>
+  <text x="123" y="714" class="small">선택 루트 보존 · 확정한 후보만 처리 · 휴지통 이동</text>
+  <rect x="50" y="757" width="818" height="44" rx="5" fill="#f5f8fb"/>
+  <text x="67" y="785" class="small">변경 작업은 기존 플랜 실행으로 연결 · 파일 목록은 저장 · 조건 수집은 대상 추가</text>
+  <rect x="890" y="757" width="158" height="44" rx="5" fill="#256b51"/>
+  <text x="969" y="785" class="label" style="fill:white;text-anchor:middle">계획 실행</text>
+  <text x="36" y="849" class="small">예시 데이터와 예정 기능으로 구성한 개념도입니다. 구현 완료 상태를 나타내지 않습니다.</text>
+</svg>

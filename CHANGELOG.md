@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.5.0.0 - Unreleased (2026-09-19)
+
+### Added
+
+- Empty-folder cleanup with candidate review, selected-root preservation,
+  Recycle Bin handling, execution-time checks and partial-failure retry.
+- Batch filename editing with literal replacement, prefix/suffix edits,
+  name patterns, ordered numbering, extension preservation and conflict review.
+- Planner integration, Korean/English dialogs and usage screenshots for both features.
+
+### Changed
+
+- Synchronize app, ShellExt, installer, bundle, resource and documentation versions
+  to `1.5.0.0` for this minor-version commit.
+- Preserve reviewed batch names and verify source identity/metadata before renaming;
+  update completed target paths, including case-only changes.
+
+### Verification
+
+- Release x64 solution build passed; app and ShellExt binaries both report `1.5.0.0`.
+- Release regression suite: 197 tests, including 40 tests for the new features.
+- Actual local empty-folder recycle/restore and batch rename/planner integration passed.
+- Installation, package publishing and live Explorer verification remain separate checks.
+
 ## 1.4.7.0 - Test build (2026-09-19)
 
 ### Fixed

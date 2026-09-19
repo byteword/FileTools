@@ -148,15 +148,18 @@ internal sealed class WorkPlanExecutor
 
             progress?.Report(Localizer.Format("LogStepStartingFormat", Path.GetFileName(currentPath), step.DisplayName));
             var predictedPath = PredictNextPath(step, currentPath);
-            var result = RunStep(step, currentPath);
+            var result = RunStep(step, currentPath, cancellationToken);
             aggregate.Merge(result);
             ReportStepResult(result, progress);
-            if (IsStepCompleted(result))
+            var stepCompleted = step.Kind == WorkPlanStepKind.EmptyFolderCleanup
+                ? step.EmptyFolderCleanupPlan is { CandidatePaths.Count: 0 } && !result.HasErrors
+                : IsStepCompleted(result);
+            if (stepCompleted)
             {
                 completedSteps.Add(step);
             }
 
-            if (IsStepCompleted(result) && !string.IsNullOrWhiteSpace(predictedPath) &&
+            if (stepCompleted && !string.IsNullOrWhiteSpace(predictedPath) &&
                 (File.Exists(predictedPath) || Directory.Exists(predictedPath)))
             {
                 currentPath = predictedPath;
@@ -232,13 +235,24 @@ internal sealed class WorkPlanExecutor
     /// <summary>
     /// 단일 step을 타입별로 실제 작업 runner/operation에 매핑해 실행한다.
     /// </summary>
-    private OperationResult RunStep(WorkPlanStep step, string path)
+    private OperationResult RunStep(WorkPlanStep step, string path, CancellationToken cancellationToken)
     {
         var settings = _baseSettings.Clone();
         var runner = new FileToolRunner(settings);
 
         switch (step.Kind)
         {
+            case WorkPlanStepKind.BatchRename:
+                if (step.BatchRenameItem is { } rename) return BatchRenameOperations.Apply(rename, path);
+                var invalidRename = new OperationResult();
+                invalidRename.AddError(Localizer.Get("BatchRenameRecheck"));
+                return invalidRename;
+            case WorkPlanStepKind.EmptyFolderCleanup:
+                if (step.EmptyFolderCleanupPlan is { } cleanup && PathComparer.Equals(path, cleanup.RootPath))
+                    return EmptyFolderCleanupOperations.Apply(cleanup, cancellationToken);
+                var invalidCleanup = new OperationResult();
+                invalidCleanup.AddError(Localizer.Get("EmptyFolderRescan"));
+                return invalidCleanup;
             case WorkPlanStepKind.FileNameCorrection:
                 if (!string.IsNullOrWhiteSpace(step.ManualRenameFileName))
                 {
@@ -279,6 +293,7 @@ internal sealed class WorkPlanExecutor
     {
         return step.Kind switch
         {
+            WorkPlanStepKind.BatchRename => step.BatchRenameItem?.TargetPath,
             WorkPlanStepKind.FileNameCorrection => PredictRenamePath(step, path),
             WorkPlanStepKind.FolderWrap => PredictWrapPath(path),
             WorkPlanStepKind.FolderUnwrap => PredictUnwrapPath(

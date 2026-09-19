@@ -27,7 +27,31 @@ Live Explorer latency/installation checks and planner-specific deduplication rem
 
 Reviewed additional features for recurring file organization. See
 [feature expansion proposals](feature-expansion-proposals-2026-09-19.md) for
-ranked candidates and initial scopes. These remain proposals, not approved work.
+the initial review. The user has now requested preparation for the sequence below.
+
+## 1.5.0.0 Feature Progress
+
+Branch: `codex/1.5.0.0`, based on `master` commit `15296b3` (`1.4.7.0`).
+App, ShellExt, installer, bundle and related version sources are synchronized
+to `1.5.0.0` for the requested code-change commit. The release remains unpublished.
+
+Implement and validate one feature at a time in the user-requested order:
+
+1. Empty-folder cleanup — implemented with Recycle Bin only.
+2. Batch filename editing — implemented with review, numbering and conflict checks.
+3. Duplicate-file inspection improvements.
+4. File-list export.
+5. Conditional file collection by kind, name, modified/created date, and related metadata.
+
+See the [implementation plan](v1.5.0.0-implementation-plan.md) for first scopes,
+code connection points, completion criteria, and the proposed UI flow.
+Phases 1 and 2 passed 40 new tests, the complete 197-test Release suite, and
+real-folder recycle/restore verification. Korean dialogs were rendered at their
+default sizes; batch rename was also checked at its minimum size. See
+[file organization](file-organization.md) for behavior and verification limits.
+Next is phase 3, duplicate-file inspection improvements. Conditional collection
+currently defaults to target-list collection; direct copy/move remains optional.
+Work-plan presets and general undo remain outside this sequence.
 
 ## GitHub Issue Status
 
@@ -322,8 +346,10 @@ ranked candidates and initial scopes. These remain proposals, not approved work.
   through deterministic pattern discovery, render-pattern candidates, persisted
   bounded local feedback history, and review UI integration before any neural
   ranker affects candidate order.
-- #6 file comparison: continue with JSON result import/reload and manual UI
-  validation with large mixed file sets and narrow result dialog sizes. The
+- #6 file comparison: the planned 1.5.0.0 phase 3 now covers whole-file duplicate
+  verification, grouped search performance, delete-time revalidation, and JSON
+  result import/reload. Keep manual validation with large mixed file sets and
+  narrow result dialog sizes. The
   `/context FileCompare` route is exposed through Explorer registration,
   settings, and native ShellExt; continue packaged menu smoke testing as part of
   release validation.
@@ -337,11 +363,14 @@ ranked candidates and initial scopes. These remain proposals, not approved work.
   General file-content merge is deferred until overlap/duplicate content policy
   is defined.
 
-## Next Priority
+## Existing Release and Maintenance Priorities
 
-1. Keep post-`v1.4.3.0` release notes current as new work starts.
-   - `docs/release-notes/next.md` is the draft for changes after `v1.4.3.0`
-     and now tracks the ZIP context-menu merge splitter fix.
+New 1.5.0.0 feature work follows the ordered preparation track above.
+The following items retain the existing release and maintenance checks.
+
+1. Keep post-`v1.4.7.0` release notes current as new work starts.
+   - `docs/release-notes/next.md` is the draft for changes after `v1.4.7.0`.
+     It separates the planned 1.5.0.0 scope from implemented changes.
    - For the next tag, use `scripts/prepare_release.ps1 -Tag <tag> -Channel beta`
      to update release-facing README/wiki version references and create
      `docs/release-notes/<tag>.md` when it does not already exist.
@@ -354,8 +383,8 @@ ranked candidates and initial scopes. These remain proposals, not approved work.
      by the generated corpus. Treat those as beta caution items unless a
      concrete failure is found.
 
-2. Continue issue #6 file comparison validation and reload work after the
-   release gate.
+2. Retain issue #6 comparison regression and UI checks alongside the planned
+   1.5.0.0 phase 3 work.
    - Use mixed files and folders to verify pair counts, status filtering, and
      criterion details.
    - Validate hash and byte-to-byte range settings with large files before

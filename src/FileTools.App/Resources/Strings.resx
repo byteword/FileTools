@@ -866,4 +866,61 @@
   <data name="FolderSelectionMissingSource" xml:space="preserve"><value>Some selected items no longer exist. Review the selection.</value></data>
   <data name="FolderSelectionOverlappingSources" xml:space="preserve"><value>Do not select a parent folder and its descendants together.</value></data>
   <data name="FolderMergeUnsafeDirectoryFormat" xml:space="preserve"><value>{0}: cannot recursively merge into itself or through a linked folder.</value></data>
+  <data name="EmptyFolderTitle" xml:space="preserve"><value>Clean empty folders</value></data>
+  <data name="EmptyFolderHelp" xml:space="preserve"><value>Review the checked folders, then send them to the Recycle Bin only. Unreadable folders and links are excluded. Unchecking a child also keeps its parents.</value></data>
+  <data name="EmptyFolderRecursive" xml:space="preserve"><value>Search all subfolders</value></data>
+  <data name="EmptyFolderIncludeRoots" xml:space="preserve"><value>Include selected root folders</value></data>
+  <data name="EmptyFolderScan" xml:space="preserve"><value>Scan / refresh</value></data>
+  <data name="EmptyFolderPath" xml:space="preserve"><value>Folder path</value></data>
+  <data name="EmptyFolderState" xml:space="preserve"><value>State</value></data>
+  <data name="EmptyFolderAfterChildren" xml:space="preserve"><value>Empty after children</value></data>
+  <data name="EmptyFolderEmptyNow" xml:space="preserve"><value>Empty now</value></data>
+  <data name="EmptyFolderSummary" xml:space="preserve"><value>Found {0} · Selected {1} · Scan errors {2}</value></data>
+  <data name="EmptyFolderRescan" xml:space="preserve"><value>The scope has changed. Scan and review the folders again.</value></data>
+  <data name="EmptyFolderScanning" xml:space="preserve"><value>Scanning folders…</value></data>
+  <data name="EmptyFolderOutsideScope" xml:space="preserve"><value>Outside the approved cleanup scope: {0}</value></data>
+  <data name="EmptyFolderMissing" xml:space="preserve"><value>Folder no longer exists: {0}</value></data>
+  <data name="EmptyFolderNotEmpty" xml:space="preserve"><value>Folder is not empty; preserved: {0}</value></data>
+  <data name="EmptyFolderRecycled" xml:space="preserve"><value>Moved empty folder to the Recycle Bin: {0}</value></data>
+  <data name="EmptyFolderRecycleIncomplete" xml:space="preserve"><value>The Recycle Bin operation did not complete. The candidate remains in the plan.</value></data>
+  <data name="EmptyFolderRecycleUnavailable" xml:space="preserve"><value>Windows did not offer a Recycle Bin operation. Permanent deletion was refused.</value></data>
+  <data name="EmptyFolderCancelled" xml:space="preserve"><value>Cleanup was cancelled; pending folders remain in the plan.</value></data>
+  <data name="EmptyFolderPreview" xml:space="preserve"><value>Send {0} empty folders to the Recycle Bin</value></data>
+  <data name="OrganizationAddToPlan" xml:space="preserve"><value>Add to work plan</value></data>
+  <data name="FileOperationLinkedPath" xml:space="preserve"><value>Linked paths are excluded: {0}</value></data>
+  <data name="FileOperationNotDirectory" xml:space="preserve"><value>Not a directory: {0}</value></data>
+  <data name="BatchRenameTitle" xml:space="preserve"><value>Batch rename</value></data>
+  <data name="BatchRenameHelp" xml:space="preserve"><value>Preview file names before adding them to the work plan. Pattern: {Stem} is the edited name; {Index} is the number. Uncheck files to exclude them.</value></data>
+  <data name="BatchRenameFilesOnly" xml:space="preserve"><value>Only regular files are supported. Linked files and folders are excluded.</value></data>
+  <data name="BatchRenameInvalidNumbers" xml:space="preserve"><value>Check the start, increment and number of digits. The sequence must fit within 2,147,483,647.</value></data>
+  <data name="BatchRenameInvalidPattern" xml:space="preserve"><value>Use {Stem}, {Index} or {Index:000} in a non-empty name pattern.</value></data>
+  <data name="BatchRenameRecheck" xml:space="preserve"><value>The rename plan is no longer valid. Open batch rename again.</value></data>
+  <data name="BatchRenameSourceChanged" xml:space="preserve"><value>The source file changed after preview. Review the plan again.</value></data>
+  <data name="BatchRenameFind" xml:space="preserve"><value>Find text</value></data>
+  <data name="BatchRenameReplace" xml:space="preserve"><value>Replace with</value></data>
+  <data name="BatchRenameRemovePrefix" xml:space="preserve"><value>Remove prefix</value></data>
+  <data name="BatchRenameRemoveSuffix" xml:space="preserve"><value>Remove suffix</value></data>
+  <data name="BatchRenamePrefix" xml:space="preserve"><value>Add prefix</value></data>
+  <data name="BatchRenameSuffix" xml:space="preserve"><value>Add suffix</value></data>
+  <data name="BatchRenamePattern" xml:space="preserve"><value>Name pattern</value></data>
+  <data name="BatchRenamePreserveExtension" xml:space="preserve"><value>Preserve extension</value></data>
+  <data name="BatchRenameIgnoreCase" xml:space="preserve"><value>Ignore text case</value></data>
+  <data name="BatchRenameOrder" xml:space="preserve"><value>Number order</value></data>
+  <data name="BatchRenameStart" xml:space="preserve"><value>Start</value></data>
+  <data name="BatchRenameIncrement" xml:space="preserve"><value>Increment</value></data>
+  <data name="BatchRenameDigits" xml:space="preserve"><value>Digits</value></data>
+  <data name="BatchRenameOrderNaturalName" xml:space="preserve"><value>Name (natural order)</value></data>
+  <data name="BatchRenameOrderSelection" xml:space="preserve"><value>Input order</value></data>
+  <data name="BatchRenameOrderModifiedTime" xml:space="preserve"><value>Modified (oldest first)</value></data>
+  <data name="BatchRenameOrderCreatedTime" xml:space="preserve"><value>Created (oldest first)</value></data>
+  <data name="BatchRenameInclude" xml:space="preserve"><value>Include</value></data>
+  <data name="BatchRenameBefore" xml:space="preserve"><value>Current name</value></data>
+  <data name="BatchRenameAfter" xml:space="preserve"><value>New name</value></data>
+  <data name="BatchRenameNumber" xml:space="preserve"><value>Number</value></data>
+  <data name="BatchRenamePath" xml:space="preserve"><value>Folder</value></data>
+  <data name="BatchRenameCalculating" xml:space="preserve"><value>Checking names and conflicts…</value></data>
+  <data name="BatchRenameSummary" xml:space="preserve"><value>Changes: {0}   Blocked: {1}   Unchanged: {2}   Excluded: {3}</value></data>
+  <data name="BatchRenameStatusReady" xml:space="preserve"><value>Ready</value></data>
+  <data name="BatchRenameStatusUnchanged" xml:space="preserve"><value>Unchanged</value></data>
+  <data name="BatchRenameStatusExcluded" xml:space="preserve"><value>Excluded</value></data>
 </root>

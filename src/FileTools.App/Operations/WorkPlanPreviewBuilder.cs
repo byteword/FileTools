@@ -76,6 +76,8 @@ internal sealed class WorkPlanPreviewBuilder
             WorkPlanStepKind.AutoRelocation => BuildRelocationPreview(number, step, state),
             WorkPlanStepKind.ArchiveMerge => BuildArchiveMergePreview(number, step),
             WorkPlanStepKind.DuplicateDelete => BuildDuplicateDeletePreview(number, step, state),
+            WorkPlanStepKind.EmptyFolderCleanup => BuildEmptyFolderPreview(number, step, state),
+            WorkPlanStepKind.BatchRename => BuildBatchRenamePreview(number, step, state),
             _ => CreateWarning(number, step, state, Localizer.Get("PlanPreviewUnavailable"))
         };
     }
@@ -311,6 +313,29 @@ internal sealed class WorkPlanPreviewBuilder
     /// <summary>
     /// 중복 삭제 step 미리보기.
     /// </summary>
+    private PreviewBuildResult BuildBatchRenamePreview(int number, WorkPlanStep step, PreviewPathState state)
+    {
+        if (step.BatchRenameItem is not { Status: BatchRenameStatus.Ready } row ||
+            state.Kind != PreviewPathKind.File || !PathComparer.Equals(state.Path, row.OriginalPath))
+            return CreateWarning(number, step, state, Localizer.Get("BatchRenameRecheck"));
+        return new PreviewBuildResult(new WorkPlanStepPreview(number, step,
+            Path.GetFileName(row.OriginalPath) + " → " + Path.GetFileName(row.TargetPath),
+            CreateToolTip(step, row.OriginalPath, row.TargetPath, warning: ""), false),
+            state with { Path = row.TargetPath });
+    }
+
+    private PreviewBuildResult BuildEmptyFolderPreview(int number, WorkPlanStep step, PreviewPathState state)
+    {
+        var plan = step.EmptyFolderCleanupPlan;
+        if (plan is null || state.Kind != PreviewPathKind.Folder || !PathComparer.Equals(plan.RootPath, state.Path))
+            return CreateWarning(number, step, state, Localizer.Get("EmptyFolderRescan"));
+        var deletesRoot = plan.CandidatePaths.Contains(plan.RootPath, PathComparer);
+        return new PreviewBuildResult(new WorkPlanStepPreview(number, step,
+            Localizer.Format("EmptyFolderPreview", plan.CandidatePaths.Count),
+            Localizer.Get("EmptyFolderHelp") + Environment.NewLine + string.Join(Environment.NewLine, plan.CandidatePaths), false),
+            deletesRoot ? state with { Kind = PreviewPathKind.Deleted } : state);
+    }
+
     private PreviewBuildResult BuildDuplicateDeletePreview(int number, WorkPlanStep step, PreviewPathState state)
     {
         if (state.Kind != PreviewPathKind.File)
