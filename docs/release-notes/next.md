@@ -1,9 +1,11 @@
 # FileTools Next Release Notes Draft
 
-This draft tracks development version v1.5.0.0, following v1.4.7.0. The previous test build is documented in
+This draft tracks development version v1.5.0.0, including the v1.4.7.1 hotfix. The previous test build is documented in
 [v1.4.7.0 release notes](v1.4.7.0.md).
 
 ## Highlights
+
+- Includes the master hotfix for disabled Explorer subcommands: fast-only callbacks remain usable without waiting for detailed analysis.
 
 - Empty-folder cleanup in the app: review empty branches, preserve selected roots
   by default, and send confirmed folders to the Recycle Bin. Recheck emptiness and

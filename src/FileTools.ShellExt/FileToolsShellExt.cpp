@@ -238,7 +238,7 @@ bool SelectionAnyFileSystemItem(const std::vector<std::wstring>& paths)
     });
 }
 
-// 메뉴 수명에만 보관한다. 빠른 GetState 호출에서는 디스크/레지스트리를 읽지 않는다.
+// 메뉴 수명에만 보관한다. 설정은 열거자 생성 시 읽고 빠른 상태 호출에서 폴더를 열거하지 않는다.
 constexpr size_t CommandCount = static_cast<size_t>(CommandKind::OpenApp) + 1;
 struct MenuSettings
 {
@@ -435,12 +435,13 @@ class MenuSelectionCache
 {
 public:
     using Analyzer = std::function<MenuSnapshot(const std::vector<std::wstring>&)>;
-    explicit MenuSelectionCache(Analyzer analyzer = [](const auto& paths) { return AnalyzeSelection(paths, ReadMenuSettings()); })
-        : _analyzer(std::move(analyzer)) {}
+    explicit MenuSelectionCache(Analyzer analyzer = {}, MenuSettings settings = ReadMenuSettings())
+        : _settings(settings), _analyzer(analyzer ? std::move(analyzer) :
+            Analyzer([settings](const auto& paths) { return AnalyzeSelection(paths, settings); })) {}
 
     HRESULT GetState(CommandKind kind, IShellItemArray* selection, BOOL okToBeSlow, EXPCMDSTATE* state)
     {
-        *state = ECS_DISABLED;
+        *state = ECS_HIDDEN;
         if (!selection) { *state = ECS_HIDDEN; return S_OK; }
         Microsoft::WRL::ComPtr<IUnknown> identity;
         const auto identityResult = selection->QueryInterface(IID_PPV_ARGS(&identity));
@@ -448,7 +449,8 @@ public:
         std::unique_lock<std::mutex> lock(_mutex, std::defer_lock);
         if (!okToBeSlow)
         {
-            if (!lock.try_lock() || !_ready || identity.Get() != _identity.Get()) return E_PENDING;
+            if (!lock.try_lock() || !_ready || identity.Get() != _identity.Get())
+                return GetFallbackState(kind, selection, state);
         }
         else
         {
@@ -469,6 +471,46 @@ public:
         return S_OK;
     }
 private:
+    // Explorer 하위 메뉴가 TRUE로 재호출하지 않아도 사용할 수 있는 기본 상태.
+    // 셸 선택의 집계 속성만 사용하고 경로 추출/파일 읽기/폴더 열거는 하지 않는다.
+    HRESULT GetFallbackState(CommandKind kind, IShellItemArray* selection, EXPCMDSTATE* state) const
+    {
+        if (!_settings.Enabled[static_cast<size_t>(kind)]) return S_OK;
+        DWORD count = 0;
+        if (FAILED(selection->GetCount(&count)) || count == 0) return S_OK;
+        SFGAOF attributes = 0;
+        bool known = SUCCEEDED(selection->GetAttributes(SIATTRIBFLAGS_AND,
+            SFGAO_FILESYSTEM | SFGAO_FOLDER, &attributes));
+        if (known && !(attributes & SFGAO_FILESYSTEM)) return S_OK;
+        bool allFolders = (attributes & SFGAO_FOLDER) != 0;
+        if (known && allFolders)
+        {
+            // ZIP도 SFGAO_FOLDER를 가질 수 있다. 파일 스트림을 포함한 선택은 폴더 전용이 아니다.
+            SFGAOF streams = 0;
+            known = SUCCEEDED(selection->GetAttributes(SIATTRIBFLAGS_OR, SFGAO_STREAM, &streams));
+            allFolders = known && !(streams & SFGAO_STREAM);
+        }
+        if (GetUnwrapBit(kind) && known && !allFolders) return S_OK;
+        switch (kind)
+        {
+        case CommandKind::FolderMergeSelectedTargets:
+            if (count < 2 || (known && !allFolders)) return S_OK;
+            break;
+        case CommandKind::ArchiveMergeGroupByArchiveName:
+        case CommandKind::ArchiveMergePreserveInternalPaths:
+            // 확장자를 아직 읽지 않았으므로 파일 선택은 보수적으로 허용한다.
+            if (count < 2 || (known && allFolders)) return S_OK;
+            break;
+        case CommandKind::FileCompare:
+            if (count < 2) return S_OK;
+            break;
+        default: break;
+        }
+        *state = ECS_ENABLED;
+        return S_OK;
+    }
+
+    const MenuSettings _settings;
     std::mutex _mutex;
     Microsoft::WRL::ComPtr<IUnknown> _identity;
     std::vector<std::wstring> _paths;
