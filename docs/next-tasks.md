@@ -1,7 +1,7 @@
 # Next Tasks
 
 Review date: 2026-06-06
-Last updated: 2026-06-20
+Last updated: 2026-09-19
 
 Scope reviewed:
 
@@ -11,6 +11,23 @@ Scope reviewed:
 - GitHub issues #1 through #9 in `byteword/FileTools`.
 - README, `docs/name-template-and-collision-policy.md`, `docs/release.md`, and `docs/release-notes/next.md`.
 - `docs/ux-mainform-review.md` and `docs/mainform-plan-list-layout-proposal.md`.
+
+## 2026-09-19 local follow-up
+
+Implemented locked-item continuation, separate content-merge/selection-wrap
+semantics, collision choices, and matching Explorer/app labels. Details and
+validation are tracked in [folder operations](folder-operations.md).
+Installer installation and live Explorer verification remain release checks.
+
+Implemented selection-based unwrap deduplication in the native Explorer menu,
+with shared analysis, deferred fast calls, bounded enumeration, and conservative
+fallbacks. Cross-checked 1,024 native policy combinations against 960 actual
+command executions. See [unwrap menu rules](unwrap-command-visibility-review.md).
+Live Explorer latency/installation checks and planner-specific deduplication remain open.
+
+Reviewed additional features for recurring file organization. See
+[feature expansion proposals](feature-expansion-proposals-2026-09-19.md) for
+ranked candidates and initial scopes. These remain proposals, not approved work.
 
 ## GitHub Issue Status
 

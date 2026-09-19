@@ -4,13 +4,13 @@
 
 Windows 탐색기 ContextMenu와 독립 실행형 WinForms 유틸리티를 제공하는 작은 파일 관리 도구입니다.
 
-현재 버전: `1.4.6.4`.
+현재 버전: `1.4.7.0`.
 
 ### 개발 및 안정성 안내
 
 FileTools는 취미 개발자가 개인적으로 관리하는 프로젝트이며, Codex를 활용해 제작 및 업데이트하고 있습니다. 따라서 일부 업데이트는 충분히 안정화되지 않았을 수 있고, 버그 테스트도 제한적으로 이루어질 수 있습니다. 중요한 파일에 적용하기 전에는 백업을 권장드리며, 문제가 발견되면 이슈로 알려주시면 가능한 범위에서 확인하겠습니다.
 
-`1.4.6.4`는 설치 확인 후 GitHub 릴리즈 여부를 결정할 예정입니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 파일 비교 ContextMenu 노출, 로컬 이름변경 학습 기반, 릴리스 검증 흐름, 압축 병합 결정 패널 표시 정리, 최종 이름 확인 기반 병합/폴더 씌우기 흐름, 병합 이름 자동 교정, 폴더 병합 옵션 UI 정리, 다중 폴더 선택 시 조건부 단일 파일 폴더 벗기기 표시/실행 필터링, 간단 이름 확인과 고급 이름 편집 흐름, 고급 이름 편집의 기존 이름 토큰 추천 및 야민정음 자동교정 복원, 단일/다중 파일 자동교정 검토창 초기 선택 오류 수정, 폴더 내부 항목 상위 이동의 하위 폴더 승격, 간단 이름 확인의 자동교정 버튼을 포함합니다.
+`1.4.7.0`는 설치 확인 후 GitHub 릴리즈 여부를 결정할 예정입니다. 독립 실행 플래너의 작업 계획 표시, 폴더 병합 옵션 흐름, 파일 비교 ContextMenu 노출, 로컬 이름변경 학습 기반, 릴리스 검증 흐름, 압축 병합 결정 패널 표시 정리, 최종 이름 확인 기반 병합/폴더 씌우기 흐름, 병합 이름 자동 교정, 폴더 병합 옵션 UI 정리, 다중 폴더 선택 시 조건부 단일 파일 폴더 벗기기 표시/실행 필터링, 간단 이름 확인과 고급 이름 편집 흐름, 고급 이름 편집의 기존 이름 토큰 추천 및 야민정음 자동교정 복원, 단일/다중 파일 자동교정 검토창 초기 선택 오류 수정, 폴더 내부 항목 상위 이동의 하위 폴더 승격, 간단 이름 확인의 자동교정 버튼을 포함합니다.
 
 ### 기능
 
@@ -26,7 +26,11 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
    - 선택한 폴더가 단일 파일 폴더이면 풀고, 그렇지 않으면 바로 아래의 자식 항목(파일/폴더)을 상위로 이동합니다.
    - 단일 파일 폴더를 풀 때 기존 파일 이름 유지, 폴더 이름으로 변경, `folder-file` 형식 변경 중 하나를 선택할 수 있습니다.
    - 씌우기/벗기기 이름 계산은 공용 이름 템플릿 기반을 사용하며, 설정에서 씌우기 폴더명, 벗기기 불일치 파일명, 충돌 번호 규칙을 조정할 수 있습니다.
-   - 선택한 여러 파일/폴더를 생성된 하나의 폴더로 병합할 수 있습니다. 폴더는 원본 폴더명을 유지한 하위 폴더로 이동합니다.
+   - **폴더 씌우기**는 선택한 파일과 폴더를 통째로 하나의 새 폴더에 담습니다. 폴더/혼합 선택도 지원합니다.
+   - **폴더 병합**은 선택한 여러 폴더의 내용을 하나의 새 폴더로 합칩니다. 동명 하위 폴더도 재귀적으로 합칩니다.
+   - 파일명 및 파일/폴더 이름 충돌은 기본적으로 번호를 붙여 보존하며, 확인창에서 건너뛰기를 선택할 수 있습니다.
+   - **파일별 폴더 씌우기**는 기존 개별 씌우기 동작으로 작업 메뉴와 기존 개별 플랜에서 구분합니다.
+   - **폴더 벗기기 — 전체 내용**은 직접 하위 파일/폴더를 한 단계 위로 꺼냅니다. 잠긴 항목은 원위치에 남기고 다른 항목을 계속 처리합니다.
    - 기존 대상 파일은 덮어쓰지 않습니다.
 
 3. **폴더 자동 재배치**
@@ -52,7 +56,7 @@ FileTools는 선택한 파일과 폴더에 대해 현재 사용자용 ContextMen
 - 드롭되거나 새로 추가된 대상은 자동으로 선택됩니다. 작업 버튼은 설정된 단계를 선택된 모든 대상에 추가하므로, 여러 폴더의 unwrap 작업 흐름을 한 번에 준비할 수 있습니다.
 - 파일/폴더를 수동으로 선택합니다.
 - 파일을 변경하기 전에 각 대상에 여러 계획 작업을 추가합니다.
-- 파일명 교정, 폴더 씌우기, 폴더 벗기기, AutoRelocation 작업을 체인으로 연결합니다.
+- 파일명 교정, 파일별 폴더 씌우기, 폴더 벗기기, AutoRelocation 작업을 체인으로 연결합니다. 선택 묶음의 폴더 씌우기/병합은 최종 이름 확인 후 즉시 실행하며, 기존 플랜이 있으면 먼저 비워야 합니다.
 - 메뉴 모음에서 파일, 작업, 설정 명령에 접근하고, 설정 하위 메뉴에서 동작 설정과 프로그램 정보를 엽니다. 자주 쓰는 작업 명령은 오른쪽 위 작업/로그 패널의 고정 도구 모음에 유지하며, 설정에서 아이콘 크기를 작게/중간/크게로 바꿀 수 있습니다. 툴바 아이콘은 선택한 크기에 맞춰 다시 렌더링해 확대 흐림을 피합니다.
 - 파일 비교 전용 창에서 파일/폴더 대상을 모으고 이름/메타데이터/내용/압축 해제 옵션을 조정한 뒤, modeless 진행률 창과 결과 창에서 중복 후보, JSON 저장, 중복 삭제 step 추가를 처리합니다.
 - ZIP 압축 병합 작업은 `A 01.zip`, `A 02.zip` 같은 번호 붙은 압축 묶음을 `A.zip`으로 제안하고, 옵션 창 하단에서 압축 내부 엔트리의 원래 경로와 충돌 처리 후 대상 경로를 미리 보여줍니다.
@@ -241,7 +245,7 @@ MSI는 네이티브 `FileTools.ShellExt.dll`을 현재 사용자 COM ExplorerCom
 
 GitHub Releases는 setup bootstrapper, MSI, sparse MSIX identity package를 빌드하고 서명하며, `checksums.txt`를 생성하고, 릴리스 자산에 대한 GitHub artifact attestation을 만드는 수동 workflow를 사용합니다.
 
-`1.4.6.4`는 설치 검증이 끝난 뒤 GitHub 릴리즈 여부를 결정합니다. 현재는 tag나 draft release를 만들지 않고 로컬 설치 확인만 진행합니다.
+`1.4.7.0`는 설치 검증이 끝난 뒤 GitHub 릴리즈 여부를 결정합니다. 현재는 tag나 draft release를 만들지 않고 로컬 설치 확인만 진행합니다.
 
 릴리스는 GitHub Secrets에 base64 PFX와 비밀번호로 저장된 self-signed FileTools 인증서를 사용합니다. 이는 무료 GitHub 배포와 CER 신뢰 후 MSIX identity 등록에는 적합하지만, 공개 CA 코드 서명 인증서는 아닙니다. Windows는 첫 사용 사용자에게 SmartScreen 또는 신뢰 경고를 계속 표시할 수 있습니다.
 
@@ -357,7 +361,9 @@ FileTools.exe /context ArchiveMergePreserveInternalPaths "%1"
 FileTools.exe /context FileCompare "%1"
 ```
 
-처음 세 `/context` 명령은 하위 호환성을 위해 유지됩니다. 네이티브 ShellExt는 선택 항목 종류에 따라 표시할 하위 메뉴 항목을 결정합니다. 여러 폴더 선택 시 같은 이름 단일 파일 폴더가 하나라도 있으면 같은 이름 벗기기 명령을 표시하고, 단일 파일 폴더가 하나라도 있으면 파일명 유지/폴더명 변경 벗기기 명령을 표시합니다. 컨텍스트 메뉴 실행은 선택 항목 전체를 큐에 모은 뒤 해당 명령 조건에 맞는 폴더만 처리합니다. 파일 비교 명령은 선택한 파일/폴더를 독립 실행 UI에 전달하고 파일 비교 설정 창을 미리 엽니다.
+처음 세 `/context` 명령은 하위 호환성을 위해 유지됩니다. 네이티브 ShellExt는 선택 항목 종류에 따라 표시할 하위 메뉴 항목을 결정합니다. 벗기기는 실제 처리 대상·이름·충돌 정책이 같은 활성 명령을 하나로 줄입니다. 모든 폴더가 같은 이름의 단일 파일이고 충돌 정책이 건너뛰기라면 같은 이름 명령 하나가 남습니다. 자동 번호 설정에서는 전체 내용 명령을 별도로 유지합니다. 빠른 메뉴 호출은 파일시스템을 검사하지 않으며, 느린 분석 결과를 여러 명령이 공유합니다. 읽기 실패나 제한 초과 시에는 명령을 보수적으로 유지합니다. 자세한 조건표와 성능 제한은 [벗기기 메뉴 규칙](docs/unwrap-command-visibility-review.md)을 참고하세요.
+
+컨텍스트 메뉴 실행은 선택 항목 전체를 큐에 모은 뒤 현재 명령 조건에 맞는 폴더만 처리합니다. 파일 비교 명령은 선택한 파일/폴더를 독립 실행 UI에 전달하고 파일 비교 설정 창을 미리 엽니다.
 
 Explorer는 선택 항목마다 프로세스를 하나씩 시작하는 경우가 많습니다. FileTools는 잠시 기다린 뒤 임시 큐를 통해 선택 경로를 병합하고, 선택된 작업을 실행한 다음 비대화형 명령에서는 자동으로 종료합니다. Open FileTools 명령도 선택한 모든 경로를 받아 큐에 넣기 때문에 독립 실행형 플래너가 전체 선택 항목으로 시작됩니다. 파일명 교정은 구성된 검토 모드에 따라 적용 전에 이름 바꾸기 검토 창을 엽니다. 예외가 발생하면 오류 요약이 표시됩니다.
 파일 비교 명령은 선택 경로를 큐로 병합한 뒤 FileTools를 열고 파일 비교 설정창을 미리 채워서 표시합니다.
@@ -367,12 +373,13 @@ Explorer는 선택 항목마다 프로세스를 하나씩 시작하는 경우가
 - 기존 대상 파일/폴더는 덮어쓰지 않습니다.
 - 파일명 교정은 기본적으로 변경 적용 전에 검토되며, 해당 검토 모드를 선택한 경우 생성 행에 검토가 필요하거나 충돌이 있을 때만 검토됩니다.
 - AutoRelocation은 대상이 이미 있으면 `(2)`, `(3)` 접미사를 적용합니다.
-- 선택 항목 병합은 실행 전 대상 폴더를 확인받고, 충돌하는 파일/폴더명에는 자동 번호를 붙입니다.
+- 폴더 병합과 씌우기는 실행 전 최종 대상 폴더와 충돌 정책을 확인합니다. 확인 후 대상 경로가 점유되면 실행을 중단합니다.
 - 폴더는 벗기기 또는 자식 항목 이동 후 비어 있을 때만 삭제됩니다.
 - 폴더 벗기기는 바로 아래의 자식 항목만 이동하며, 중첩 폴더 내용은 평탄화하지 않습니다.
 - `FolderMergeSelectedTargets`는 선택 항목 수, 대상 폴더 경로, 부모 경로, 소스 목록을 확인한 뒤 병합 실행 전 확인 창을 표시합니다.
-- `FolderMergeSelectedTargets` 다이얼로그에서 병합 대상 폴더명을 수정하거나, 다중 폴더 선택 시
-  `폴더 단위 병합` / `폴더 내용만 병합` 모드를 선택할 수 있습니다.
+- `FolderMergeSelectedTargets`는 폴더만 2개 이상 선택했을 때 내용 병합을 수행하며, `FolderWrapFiles`는 파일/폴더/혼합 선택을 하나의 새 폴더로 감쌉니다. 기존 명령 식별자는 호환성을 위해 유지합니다.
+- 잠긴 항목의 경로와 오류는 결과에 기록합니다. 부분 실패한 플랜은 완료로 제거하지 않고 후속 단계를 멈춥니다. 벗기기는 잠금을 해제한 뒤 남은 원본에서 재실행할 수 있습니다.
+- 자세한 동작과 현재 화면은 [폴더 작업 동작](docs/folder-operations.md)을 참고하세요.
 - folder wrap/unwrap 이름 템플릿과 충돌 정책의 내부 설계는 `docs/name-template-and-collision-policy.md`에 정리되어 있습니다.
 
 ### 로그
@@ -391,13 +398,13 @@ FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE` 또�
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
-Current version: `1.4.6.4`.
+Current version: `1.4.7.0`.
 
 ### Development and Stability Notice
 
 FileTools is maintained as a personal hobby project and is built and updated with the help of Codex. As a result, some updates may not be fully stable, and bug testing may be limited. Please consider backing up important files before using FileTools on them, and feel free to report issues so they can be reviewed as time permits.
 
-`1.4.6.4` is awaiting local installation verification before deciding whether to publish a GitHub release. It includes the standalone planner work-plan display, folder-merge options flow, file-compare ContextMenu exposure, local rename-learning foundation, release verification flow, archive-merge decision panel display cleanup, final-name review flows for merge and folder wrapping operations, merge-name correction, the revised folder merge options UI, filtered single-file folder unwrap visibility/execution for multi-folder selections, simple/advanced name editing flows, original-name token recommendations in the advanced editor, Yaminjeongeum automatic-correction restoration, the rename review initial-selection fix for single and multi-file correction, child-folder promotion for moving folder contents upward, and an automatic-correction button in the simple rename confirmation.
+`1.4.7.0` is awaiting local installation verification before deciding whether to publish a GitHub release. It includes the standalone planner work-plan display, folder-merge options flow, file-compare ContextMenu exposure, local rename-learning foundation, release verification flow, archive-merge decision panel display cleanup, final-name review flows for merge and folder wrapping operations, merge-name correction, the revised folder merge options UI, filtered single-file folder unwrap visibility/execution for multi-folder selections, simple/advanced name editing flows, original-name token recommendations in the advanced editor, Yaminjeongeum automatic-correction restoration, the rename review initial-selection fix for single and multi-file correction, child-folder promotion for moving folder contents upward, and an automatic-correction button in the simple rename confirmation.
 
 ### Features
 
@@ -413,7 +420,11 @@ FileTools provides current-user ContextMenu actions for selected files and folde
    - Selected folders are unwrapped when they are single-file folders, otherwise direct child items (files/folders) are moved up.
    - Single-file folder unwrapping can keep the original filename, rename to the folder name, rename to `folder-file`, or use a custom template.
    - Wrapping/unwrapping name generation uses a shared name-template foundation, and settings can adjust wrap folder names, unwrap mismatch names, and conflict numbering rules.
-   - Multiple selected files and folders can be merged into one generated folder. Source folders are moved as named child folders.
+   - **Wrap in one folder** places selected files and whole folders inside one new folder, including mixed selections.
+   - **Merge folder contents** combines two or more selected folders, recursively combining matching subfolders.
+   - File/file and file/folder name collisions use numbering by default; the confirmation dialog also offers skipping.
+   - **Wrap each file separately** retains the original per-file behavior in the task menu and existing individual plans.
+   - **Unwrap folder — all contents** moves direct children up one level. Locked items remain in place while other items continue.
    - Existing destination files are not overwritten.
 
 3. **폴더 자동 재배치**
@@ -439,7 +450,7 @@ The standalone window supports:
 - Dropped or newly added targets are selected automatically. Action buttons add the configured step to every selected target, so multi-folder unwrap workflows can be prepared in one pass.
 - Manual file/folder selection.
 - Adding multiple planned actions to each target before changing files.
-- Chaining filename correction, folder wrapping, folder unwrapping, and AutoRelocation actions.
+- Chaining filename correction, per-file wrapping, folder unwrapping, and AutoRelocation actions. Selection wrapping/merging runs immediately after name confirmation and requires clearing existing plans first.
 - Accessing file, task, and settings commands from the menu bar. The settings submenu opens operational settings and program info, while common task commands stay on the fixed toolbar in the top-right task/log panel and can be scaled to small, medium, or large icon sizes. Toolbar icons are rendered at the selected size to avoid blurred bitmap scaling.
 - Opening the dedicated file-compare dialog to collect files/folders, adjust name, metadata, content, and archive-extraction options, then use the modeless progress dialog and result dialog for duplicate candidates, JSON saving, and duplicate-delete step handoff.
 - Adding ZIP archive merge steps that suggest common logical output names such as `A.zip` for `A 01.zip` and `A 02.zip`, with an options-dialog detail grid showing each internal entry's original path and collision-resolved target path.
@@ -629,7 +640,7 @@ GitHub Releases use a manual workflow that builds and signs the setup
 bootstrapper, MSI, and sparse MSIX identity package, generates `checksums.txt`,
 and creates GitHub artifact attestations for the release assets.
 
-`1.4.6.4` is awaiting local installation verification. Do not create a tag or
+`1.4.7.0` is awaiting local installation verification. Do not create a tag or
 draft release until the release decision, release asset verification, and
 install smoke testing are complete.
 
@@ -762,9 +773,10 @@ The file-compare command merges selected paths through the same queue, opens Fil
 - Existing destination files/folders are not overwritten.
 - Filename correction is reviewed before applying changes by default, or only when generated rows need review or have conflicts if that review mode is selected.
 - AutoRelocation applies `(2)`, `(3)` suffixes when a target already exists.
-- Selected-target merge asks for confirmation before moving items and auto-numbers colliding file or folder names.
-- `FolderMergeSelectedTargets` supports editing the target folder name before execution and
-  allows selecting `Merge folders` or `Merge folder contents only` when multiple folders are selected.
+- Folder merge and selection wrapping confirm the final destination and collision policy. If the confirmed destination becomes occupied, execution stops.
+- `FolderMergeSelectedTargets` requires two or more folders and combines their contents. `FolderWrapFiles` wraps files, folders, or a mixed selection together; command identifiers remain compatible.
+- Partial failures retain their plan step and stop dependent steps. After unlocking, an unwrap operation can be rerun on the remaining source contents.
+- See [folder operation behavior and current dialogs](docs/folder-operations.md).
 - `FolderMergeSelectedTargets` shows the proposed target folder, normalized source list, and parent-path behavior before execution.
 - Folders are deleted only when empty after unwrapping/moving child items.
 - Folder unwrapping only moves direct child items; nested folder contents are not flattened.

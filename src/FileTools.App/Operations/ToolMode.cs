@@ -96,7 +96,7 @@ internal static class ToolModeText
     public static string GetDisplayName(FolderStructureOperation operation) => operation switch
     {
         FolderStructureOperation.Auto => Localizer.Get("FolderOperationAuto"),
-        FolderStructureOperation.WrapFiles => Localizer.Get("FolderOperationWrapFiles"),
+        FolderStructureOperation.WrapFiles => Localizer.Get("FolderOperationWrapFilesIndividually"),
         FolderStructureOperation.UnwrapSameNameSingleFile => Localizer.Get("FolderOperationUnwrapSameName"),
         FolderStructureOperation.UnwrapSingleFileFolder => Localizer.Get("FolderOperationUnwrapSingleFile"),
         FolderStructureOperation.MoveInnerFilesUp => Localizer.Get("FolderOperationMoveInnerFilesUp"),
@@ -154,7 +154,7 @@ internal static class ToolModeText
         ContextMenuCommand.OpenApp => OpenAppDisplayName,
         ContextMenuCommand.FileNameCorrection => GetDisplayName(ToolMode.FileNameCorrection),
         ContextMenuCommand.FolderStructure => GetDisplayName(ToolMode.FolderStructure),
-        ContextMenuCommand.FolderWrapFiles => GetDisplayName(FolderStructureOperation.WrapFiles),
+        ContextMenuCommand.FolderWrapFiles => Localizer.Get("FolderOperationWrapFiles"),
         ContextMenuCommand.FolderUnwrapSameNameSingleFile => GetDisplayName(FolderStructureOperation.UnwrapSameNameSingleFile),
         ContextMenuCommand.FolderUnwrapSingleFile => GetDisplayName(FolderStructureOperation.UnwrapSingleFileFolder),
         ContextMenuCommand.FolderUnwrapUseFolderName => Localizer.Get("ContextCommandFolderUnwrapUseFolderName"),

@@ -1,6 +1,7 @@
 # MainForm UX Review
 
 Review date: 2026-06-12
+Latest folder-action update: 2026-09-19
 
 Scope:
 
@@ -48,9 +49,13 @@ The next layout proposal is tracked in `docs/mainform-plan-list-layout-proposal.
 - Added right-click context menus on the target and plan grids, wired to the same command handlers as menu/toolbar actions.
 - Context-menu selection behavior now preserves multi-row selections and updates command availability through the existing `UpdateCommandStates` flow.
 - The "Merge selected into folder" split button moved into the action toolbar on the right panel.
-- Added folder-merge option flow with target-name preview/edit and split-button mode support.
-- For folder merges, multiple-folder selections expose a "merge folder contents only" mode and the current plan/confirmation now reflects the selected merge mode.
-- Fixed the folder-merge option dialog layout so the merge-mode radio buttons and confirmation preview no longer overlap the OK/Cancel button row on Korean localized text.
+- Folder merge always combines the contents of two or more folders; its split
+  menu links to the distinct selection-wrap action instead of remembering a mode.
+- Wrapping accepts file/folder/mixed selections and preserves selected folder
+  units. The task menu keeps per-file wrapping under a separate name.
+- The confirmation dialog fixes the chosen operation and shows a destination name,
+  collision policy, and source list. See [current folder dialogs](folder-operations.md).
+- Partial execution leaves failed plan steps available and stops dependent steps.
 - File compare request, progress, and result dialogs now share a fixed right-aligned bottom button layout; the progress dialog also has enough minimum height for the Cancel/Hide row.
 - Added a program information dialog under Settings that shows the assembly informational version and the bundled MIT license text.
 

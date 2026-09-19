@@ -1,40 +1,14 @@
 # FileTools Next Release Notes Draft
 
-This draft is for changes after `v1.4.6.4`. Add future changes here during
-development, then copy or regenerate it into `docs/release-notes/<tag>.md` for
-the next release tag.
+This draft tracks changes after v1.4.7.0. The current test build is documented in
+[v1.4.7.0 release notes](v1.4.7.0.md).
 
 ## Highlights
 
-- No unreleased changes yet.
-
-## Support Scope
-
-- No runtime support scope change after `v1.4.6.4` yet.
+No additional changes yet.
 
 ## Verification Before Publishing
 
-- Run `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj`.
-- Run `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj -c Release`.
-- Build `FileTools.sln` with Visual Studio MSBuild in `Release|x64`.
-- Build or dry-run `build_msi.ps1` before tagging to confirm the project
-  `FileToolsVersion` metadata is accepted and propagated into the installer
-  build.
-- Confirm `src\FileTools.ShellExt\x64\Release\FileTools.ShellExt.dll` has the
-  expected file/product version and an Authenticode signature after the
-  installer build.
-- Verify release assets, checksums, signatures, and GitHub artifact attestations
-  before publishing the draft release.
-
-Latest release baseline:
-
-- `dotnet test tests\FileTools.Tests\FileTools.Tests.csproj -c Release`
-  passed 144/144 on 2026-07-20 after the `1.4.6.4` simple rename
-  automatic-correction addition.
-- `MSBuild.exe FileTools.sln /p:Configuration=Debug /p:Platform=x64 /m`
-  passed with 0 warnings and 0 errors on 2026-06-24 using VS 18 MSBuild.
-- `.\build_msi.ps1 -Configuration Release` completed on 2026-07-20. The
-  generated `FileTools.exe` and `FileTools.ShellExt.dll` report file/product
-  version `1.4.6.4`; MSI and MSIX use the temporary `CN=FileTools Self-Signed`
-  certificate. Local trust reports an untrusted-root status until the CER is
-  trusted, and the setup EXE is not signed.
+- Run the Release regression suite and scripts/test_unwrap_menu.ps1.
+- Build the Release x64 solution and build_msi.ps1 with synchronized versions.
+- Verify installation, live Explorer behavior, package signatures and checksums.

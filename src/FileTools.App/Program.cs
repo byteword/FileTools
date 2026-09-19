@@ -154,7 +154,8 @@ internal static class Program
         }
     }
 
-    private static OperationResult? ExecuteContextCommand(ContextMenuCommand command, IReadOnlyList<string> paths)
+    internal static OperationResult? ExecuteContextCommand(ContextMenuCommand command, IReadOnlyList<string> paths,
+        FileToolsSettings? settings = null)
     {
         if (command == ContextMenuCommand.OpenApp)
         {
@@ -168,32 +169,33 @@ internal static class Program
             return null;
         }
 
-        var settings = SettingsStore.Load();
+        settings ??= SettingsStore.Load();
         if (command == ContextMenuCommand.FileNameCorrection)
         {
             return RenameReviewDialog.ShowAndApply(paths, settings);
         }
 
-        if (command == ContextMenuCommand.FolderMergeSelectedTargets)
+        if (command is ContextMenuCommand.FolderMergeSelectedTargets or ContextMenuCommand.FolderWrapFiles)
         {
-            var preview = FolderMergeOperations.CreateMergePlanPreview(paths, settings);
+            var defaults = command == ContextMenuCommand.FolderWrapFiles
+                ? FolderMergeOptionDefaults.WrapSelection
+                : FolderMergeOptionDefaults.MergeFolders;
+            var preview = FolderMergeOperations.CreateMergePlanPreview(paths, settings, defaults);
             if (!preview.IsReady)
             {
                 var result = new OperationResult();
                 if (!string.IsNullOrWhiteSpace(preview.FailureReason))
                 {
-                    result.AddSkipped(preview.FailureReason);
+                    result.AddError(preview.FailureReason);
                 }
 
                 return result;
             }
 
-            var allowFolderContentsMode = paths.Any(path => Directory.Exists(path));
             using var optionsDialog = new FolderMergeOptionsDialog(
                 paths,
                 settings,
-                new FolderMergeOptions(preview.TargetFolderName, FolderMergeMode.MergeFolderUnits),
-                allowFolderContentsMode);
+                defaults with { TargetFolderName = preview.TargetFolderName });
             if (optionsDialog.ShowDialog() != DialogResult.OK)
             {
                 var canceled = new OperationResult();
@@ -208,34 +210,13 @@ internal static class Program
                 var unavailable = new OperationResult();
                 if (!string.IsNullOrWhiteSpace(preview.FailureReason))
                 {
-                    unavailable.AddSkipped(preview.FailureReason);
+                    unavailable.AddError(preview.FailureReason);
                 }
 
                 return unavailable;
             }
 
             return FolderMergeOperations.MergeIntoFolder(paths, settings, options).OperationResult;
-        }
-
-        if (command == ContextMenuCommand.FolderWrapFiles)
-        {
-            var filePaths = paths.Where(File.Exists).ToArray();
-            if (filePaths.Length == 0)
-            {
-                var result = new OperationResult();
-                result.AddSkipped(Localizer.Get("PlanPreviewNotFile"));
-                return result;
-            }
-
-            using var optionsDialog = new FolderWrapOptionsDialog(filePaths, settings);
-            if (optionsDialog.ShowDialog() != DialogResult.OK)
-            {
-                var result = new OperationResult();
-                result.AddSkipped(Localizer.Get("FolderWrapCanceled"));
-                return result;
-            }
-
-            return FolderWrapOperations.WrapFiles(filePaths, settings, optionsDialog.ResultFolderNames);
         }
 
         if (command is ContextMenuCommand.ArchiveMergeGroupByArchiveName or ContextMenuCommand.ArchiveMergePreserveInternalPaths)

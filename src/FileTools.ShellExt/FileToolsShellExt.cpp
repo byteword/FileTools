@@ -8,6 +8,13 @@
 #include <new>
 #include <string>
 #include <vector>
+#include <array>
+#include <chrono>
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <wrl/client.h>
+#include "UnwrapMenuPolicy.h"
 
 namespace
 {
@@ -63,7 +70,7 @@ constexpr CommandDefinition SubCommands[] =
     { CommandKind::FolderUnwrapUseFolderName, L"폴더명으로 벗기기", L"FolderUnwrapUseFolderName", L"ContextMenuFolderUnwrapSingleFile" },
     { CommandKind::FolderUnwrapKeepFileName, L"파일명으로 벗기기", L"FolderUnwrapKeepFileName", L"ContextMenuFolderUnwrapSingleFile" },
     { CommandKind::FolderUnwrapPrefixFolderName, L"폴더명-파일명으로 벗기기", L"FolderUnwrapPrefixFolderName", L"ContextMenuFolderUnwrapSingleFile" },
-    { CommandKind::FolderMoveInnerFilesUp, L"폴더 내부 항목 상위로 이동", L"FolderMoveInnerFilesUp", L"ContextMenuFolderMoveInnerFilesUp" },
+    { CommandKind::FolderMoveInnerFilesUp, L"폴더 벗기기 — 전체 내용", L"FolderMoveInnerFilesUp", L"ContextMenuFolderMoveInnerFilesUp" },
     { CommandKind::FolderMergeSelectedTargets, L"폴더 병합", L"FolderMergeSelectedTargets", L"ContextMenuFolderMergeSelectedTargets" },
     { CommandKind::AutoRelocationCurrentFolder, L"현재 폴더에서 자동 재배치", L"AutoRelocationCurrentFolder", L"ContextMenuAutoRelocationCurrentFolder" },
     { CommandKind::AutoRelocationChooseTarget, L"선택한 폴더로 자동 재배치", L"AutoRelocationChooseTarget", L"ContextMenuAutoRelocationChooseTarget" },
@@ -134,60 +141,7 @@ std::wstring JoinPath(const std::wstring& left, const std::wstring& right)
 
 bool EqualsIgnoreCase(const std::wstring& left, const std::wstring& right)
 {
-    return _wcsicmp(left.c_str(), right.c_str()) == 0;
-}
-
-enum class SingleFileFolderState
-{
-    NotSingleFileFolder,
-    SameName,
-    DifferentName
-};
-
-SingleFileFolderState GetSingleFileFolderState(const std::wstring& folderPath)
-{
-    // 폴더를 대상으로 "파일 하나만 있고 디렉토리는 없는" 상태인지 판별한 뒤
-    // 폴더명과 파일명 스템을 비교해 분기 상태를 반환한다.
-    WIN32_FIND_DATAW data{};
-    HANDLE find = FindFirstFileW(JoinPath(folderPath, L"*").c_str(), &data);
-    if (find == INVALID_HANDLE_VALUE)
-    {
-        return SingleFileFolderState::NotSingleFileFolder;
-    }
-
-    std::wstring onlyFileName;
-    int fileCount = 0;
-    int directoryCount = 0;
-    // ., .. 항목은 대상 폴더 자체/부모 디렉토리이므로 상태 판단에서 제외한다.
-    do
-    {
-        const std::wstring name = data.cFileName;
-        if (name == L"." || name == L"..")
-        {
-            continue;
-        }
-
-        if ((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0)
-        {
-            directoryCount++;
-            continue;
-        }
-
-        fileCount++;
-        onlyFileName = name;
-    }
-    while (FindNextFileW(find, &data));
-
-    FindClose(find);
-    if (fileCount != 1 || directoryCount != 0)
-    {
-        return SingleFileFolderState::NotSingleFileFolder;
-    }
-
-    const std::wstring folderName = GetFileName(folderPath);
-    return EqualsIgnoreCase(folderName, GetStem(onlyFileName))
-        ? SingleFileFolderState::SameName
-        : SingleFileFolderState::DifferentName;
+    return CompareStringOrdinal(left.c_str(), -1, right.c_str(), -1, TRUE) == CSTR_EQUAL;
 }
 
 std::vector<std::wstring> GetSelectionPaths(IShellItemArray* selection)
@@ -211,7 +165,7 @@ std::vector<std::wstring> GetSelectionPaths(IShellItemArray* selection)
         IShellItem* item = nullptr;
         if (FAILED(selection->GetItemAt(index, &item)) || !item)
         {
-            continue;
+            return {};
         }
 
         PWSTR rawPath = nullptr;
@@ -222,6 +176,10 @@ std::vector<std::wstring> GetSelectionPaths(IShellItemArray* selection)
         }
 
         item->Release();
+        if (paths.size() != index + 1)
+        {
+            return {};
+        }
     }
 
     return paths;
@@ -245,11 +203,6 @@ bool IsSettingEnabled(const wchar_t* valueName, bool defaultValue)
         &value,
         &valueSize);
     return status == ERROR_SUCCESS ? value != 0 : defaultValue;
-}
-
-bool SelectionAllFiles(const std::vector<std::wstring>& paths)
-{
-    return !paths.empty() && std::all_of(paths.begin(), paths.end(), IsPathFile);
 }
 
 bool HasZipExtension(const std::wstring& path)
@@ -285,83 +238,257 @@ bool SelectionAnyFileSystemItem(const std::vector<std::wstring>& paths)
     });
 }
 
-bool SelectionHasSingleFileFolderState(
-    const std::vector<std::wstring>& paths,
-    SingleFileFolderState expected)
+// 메뉴 수명에만 보관한다. 빠른 GetState 호출에서는 디스크/레지스트리를 읽지 않는다.
+constexpr size_t CommandCount = static_cast<size_t>(CommandKind::OpenApp) + 1;
+struct MenuSettings
 {
-    // 선택한 모든 경로가 디렉토리인지 선행 검사 후,
-    // expected 상태인 단일 파일 폴더가 하나라도 있는지 확인한다.
-    if (!SelectionAllDirectories(paths))
+    std::array<bool, CommandCount> Enabled{};
+    bool SingleFileSkipsCollisions = false; // 값이 없으면 전체 내용과 합치지 않는다.
+
+    MenuSettings() { Enabled.fill(true); }
+};
+
+MenuSettings ReadMenuSettings()
+{
+    MenuSettings settings;
+    HKEY key = nullptr;
+    if (RegOpenKeyExW(HKEY_CURRENT_USER, L"Software\\FileTools\\ContextMenu", 0, KEY_QUERY_VALUE, &key) != ERROR_SUCCESS)
     {
-        return false;
+        return settings;
     }
 
-    for (const auto& path : paths)
+    for (const auto& command : SubCommands)
     {
-        if (GetSingleFileFolderState(path) == expected)
+        DWORD value = 1, size = sizeof(value);
+        if (RegGetValueW(key, nullptr, command.SettingName, RRF_RT_REG_DWORD, nullptr, &value, &size) == ERROR_SUCCESS)
         {
-            return true;
+            settings.Enabled[static_cast<size_t>(command.Kind)] = value != 0;
         }
     }
-
-    return false;
+    DWORD policy = MAXDWORD, size = sizeof(policy);
+    if (RegGetValueW(key, nullptr, L"FolderUnwrapCollisionPolicy", RRF_RT_REG_DWORD,
+        nullptr, &policy, &size) == ERROR_SUCCESS)
+    {
+        settings.SingleFileSkipsCollisions = policy == 0;
+    }
+    RegCloseKey(key);
+    return settings;
 }
 
-bool SelectionHasSingleFileFolder(const std::vector<std::wstring>& paths)
+unsigned GetUnwrapBit(CommandKind kind)
 {
-    // 파일명 유지/폴더명 변경 벗기기는 같은 이름/다른 이름 단일 파일 폴더를 모두 대상으로 한다.
-    if (!SelectionAllDirectories(paths))
+    using namespace FileToolsMenu;
+    switch (kind)
     {
-        return false;
+    case CommandKind::FolderUnwrapSameName: return SameName;
+    case CommandKind::FolderUnwrapKeepFileName: return KeepName;
+    case CommandKind::FolderUnwrapUseFolderName: return UseFolderName;
+    case CommandKind::FolderUnwrapPrefixFolderName: return PrefixName;
+    case CommandKind::FolderMoveInnerFilesUp: return AllContents;
+    default: return 0;
     }
+}
 
-    return std::any_of(paths.begin(), paths.end(), [](const std::wstring& path)
+struct AnalysisStatistics
+{
+    size_t AttributeReads = 0;
+    size_t FolderOpens = 0;
+    size_t EntryReads = 0;
+};
+struct MenuSnapshot
+{
+    std::array<bool, CommandCount> Visible{};
+    AnalysisStatistics Statistics;
+};
+using AnalysisClock = std::chrono::steady_clock;
+
+/// <summary>단일 파일 여부만 검사한다. 대형 폴더도 두 번째 파일/첫 폴더에서 끝낸다.</summary>
+unsigned ReadFolderKind(const std::wstring& path, AnalysisStatistics& statistics, AnalysisClock::time_point deadline)
+{
+    using namespace FileToolsMenu;
+    WIN32_FIND_DATAW data{};
+    ++statistics.FolderOpens;
+    HANDLE handle = FindFirstFileExW(JoinPath(path, L"*").c_str(), FindExInfoBasic, &data,
+        FindExSearchNameMatch, nullptr, 0);
+    if (handle == INVALID_HANDLE_VALUE)
     {
-        return GetSingleFileFolderState(path) != SingleFileFolderState::NotSingleFileFolder;
+        return GetLastError() == ERROR_FILE_NOT_FOUND ? Empty : FileToolsMenu::Unknown;
+    }
+    struct FindCloser { HANDLE Value; ~FindCloser() { FindClose(Value); } } closer{ handle };
+    bool first = true;
+    return ClassifyFolderEntries([&](bool& sameName)
+    {
+        if (AnalysisClock::now() >= deadline) return EntryKind::Error;
+        ++statistics.EntryReads;
+        if (!first && !FindNextFileW(handle, &data))
+        {
+            return GetLastError() == ERROR_NO_MORE_FILES ? EntryKind::End : EntryKind::Error;
+        }
+        first = false;
+        const std::wstring name = data.cFileName;
+        if (name == L"." || name == L"..") return EntryKind::Ignored;
+        if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) return EntryKind::Directory;
+        sameName = EqualsIgnoreCase(GetFileName(path), GetStem(name));
+        return EntryKind::File;
     });
 }
 
-bool IsCommandVisible(CommandKind kind, const std::vector<std::wstring>& paths)
+/// <summary>UNC/네트워크 드라이브는 메뉴에서 폴더 열거를 시도하지 않는다.</summary>
+bool IsRemotePath(const std::wstring& path, std::array<int, 26>& driveTypes)
 {
-    // 메뉴 노출 여부 판단은
-    // 1) 설정에서 해당 항목이 켜져 있는지
-    // 2) 선택 항목 특성이 메뉴 요구 조건을 만족하는지
-    // 두 조건을 모두 통과할 때만 true.
-    const auto definition = GetDefinition(kind);
-    if (!IsSettingEnabled(definition.SettingName, true))
+    if (path.rfind(L"\\\\", 0) == 0) return true;
+    if (path.size() < 3 || path[1] != L':') return true;
+    const wchar_t letter = static_cast<wchar_t>(towupper(path[0]));
+    if (letter < L'A' || letter > L'Z') return true;
+    const size_t index = letter - L'A';
+    if (driveTypes[index] == -1)
     {
-        return false;
+        const wchar_t root[]{ letter, L':', L'\\', L'\0' };
+        driveTypes[index] = static_cast<int>(GetDriveTypeW(root));
+    }
+    return driveTypes[index] == DRIVE_REMOTE || driveTypes[index] == DRIVE_UNKNOWN || driveTypes[index] == DRIVE_NO_ROOT_DIR;
+}
+
+/// <summary>형식 속성은 경로마다 한 번, 내용은 폴더마다 한 번만 읽어 모든 메뉴를 계산한다.</summary>
+MenuSnapshot AnalyzeSelection(const std::vector<std::wstring>& paths, const MenuSettings& settings)
+{
+    using namespace FileToolsMenu;
+    MenuSnapshot snapshot;
+    if (paths.empty()) return snapshot;
+    const auto deadline = AnalysisClock::now() + std::chrono::milliseconds(50);
+    constexpr size_t MaxAttributeReads = 256, MaxFolderReads = 128;
+    std::array<int, 26> driveTypes;
+    driveTypes.fill(-1);
+    bool allFileSystem = true, allDirectories = true, allZipFiles = true;
+    unsigned kinds = 0;
+    unsigned enabledUnwrap = 0;
+    for (const auto& command : SubCommands)
+        if (settings.Enabled[static_cast<size_t>(command.Kind)]) enabledUnwrap |= GetUnwrapBit(command.Kind);
+    std::vector<std::wstring> folders;
+    for (const auto& path : paths)
+    {
+        if (!HasZipExtension(path)) allZipFiles = false;
+        if (snapshot.Statistics.AttributeReads >= MaxAttributeReads || AnalysisClock::now() >= deadline || IsRemotePath(path, driveTypes))
+        {
+            kinds |= FileToolsMenu::Unknown;
+            continue;
+        }
+        ++snapshot.Statistics.AttributeReads;
+        const DWORD attributes = GetFileAttributesW(path.c_str());
+        if (attributes == INVALID_FILE_ATTRIBUTES)
+        {
+            // 소실/권한 오류를 단일 파일 폴더로 확정하지 않는다.
+            kinds |= FileToolsMenu::Unknown;
+            allZipFiles = false;
+            if (GetLastError() == ERROR_FILE_NOT_FOUND || GetLastError() == ERROR_PATH_NOT_FOUND)
+                allFileSystem = allDirectories = false;
+        }
+        else if (attributes & FILE_ATTRIBUTE_DIRECTORY)
+        {
+            allZipFiles = false;
+            if (attributes & FILE_ATTRIBUTE_REPARSE_POINT) kinds |= FileToolsMenu::Unknown;
+            else folders.push_back(path);
+        }
+        else
+        {
+            allDirectories = false;
+        }
     }
 
+    // 파일 혼합/명령 비활성/판정 불가 선택에는 추가 열거가 표시 결과를 바꾸지 않는다.
+    if (enabledUnwrap && allDirectories && allFileSystem && !(kinds & FileToolsMenu::Unknown))
+    {
+        for (const auto& folder : folders)
+        {
+            if (snapshot.Statistics.FolderOpens >= MaxFolderReads || AnalysisClock::now() >= deadline)
+            {
+                kinds |= FileToolsMenu::Unknown;
+                break;
+            }
+            kinds |= ReadFolderKind(folder, snapshot.Statistics, deadline);
+            if ((kinds & FileToolsMenu::Unknown) || (kinds & (Same | Different | Multiple)) == (Same | Different | Multiple))
+                break;
+        }
+    }
+
+    const auto unwrap = allDirectories && allFileSystem
+        ? VisibleUnwrapCommands(kinds, enabledUnwrap, settings.SingleFileSkipsCollisions) : 0;
+    for (const auto& command : SubCommands)
+    {
+        const auto index = static_cast<size_t>(command.Kind);
+        if (!settings.Enabled[index]) continue;
+        if (const auto bit = GetUnwrapBit(command.Kind)) snapshot.Visible[index] = (unwrap & bit) != 0;
+        else switch (command.Kind)
+        {
+        case CommandKind::FolderMergeSelectedTargets: snapshot.Visible[index] = allDirectories && allFileSystem && paths.size() >= 2; break;
+        case CommandKind::ArchiveMergeGroupByArchiveName:
+        case CommandKind::ArchiveMergePreserveInternalPaths: snapshot.Visible[index] = allZipFiles && allFileSystem && paths.size() >= 2; break;
+        case CommandKind::FileCompare: snapshot.Visible[index] = allFileSystem && paths.size() >= 2; break;
+        default: snapshot.Visible[index] = allFileSystem; break;
+        }
+    }
+    return snapshot;
+}
+
+/// <summary>형제 명령이 같은 선택 스냅샷을 공유한다. 빠른 호출은 검사나 잠금 대기를 하지 않는다.</summary>
+class MenuSelectionCache
+{
+public:
+    using Analyzer = std::function<MenuSnapshot(const std::vector<std::wstring>&)>;
+    explicit MenuSelectionCache(Analyzer analyzer = [](const auto& paths) { return AnalyzeSelection(paths, ReadMenuSettings()); })
+        : _analyzer(std::move(analyzer)) {}
+
+    HRESULT GetState(CommandKind kind, IShellItemArray* selection, BOOL okToBeSlow, EXPCMDSTATE* state)
+    {
+        *state = ECS_DISABLED;
+        if (!selection) { *state = ECS_HIDDEN; return S_OK; }
+        Microsoft::WRL::ComPtr<IUnknown> identity;
+        const auto identityResult = selection->QueryInterface(IID_PPV_ARGS(&identity));
+        if (FAILED(identityResult)) return identityResult;
+        std::unique_lock<std::mutex> lock(_mutex, std::defer_lock);
+        if (!okToBeSlow)
+        {
+            if (!lock.try_lock() || !_ready || identity.Get() != _identity.Get()) return E_PENDING;
+        }
+        else
+        {
+            lock.lock();
+            if (!_ready || identity.Get() != _identity.Get())
+            {
+                auto paths = GetSelectionPaths(selection);
+                if (!_ready || paths != _paths)
+                {
+                    _snapshot = _analyzer(paths);
+                    _paths = std::move(paths);
+                    _ready = true;
+                }
+                _identity = std::move(identity);
+            }
+        }
+        *state = _snapshot.Visible[static_cast<size_t>(kind)] ? ECS_ENABLED : ECS_HIDDEN;
+        return S_OK;
+    }
+private:
+    std::mutex _mutex;
+    Microsoft::WRL::ComPtr<IUnknown> _identity;
+    std::vector<std::wstring> _paths;
+    MenuSnapshot _snapshot;
+    bool _ready = false;
+    Analyzer _analyzer;
+};
+
+/// <summary>클릭 시에는 중복 대표 여부가 아닌 현재 설정/선택 종류만 확인한다. 내용은 앱이 재검증한다.</summary>
+bool CanInvokeCommand(CommandKind kind, const std::vector<std::wstring>& paths)
+{
+    if (!IsSettingEnabled(GetDefinition(kind).SettingName, true)) return false;
+    if (GetUnwrapBit(kind)) return SelectionAllDirectories(paths);
     switch (kind)
     {
-    case CommandKind::Rename:
-        return SelectionAnyFileSystemItem(paths);
-    case CommandKind::FolderWrapFiles:
-        return SelectionAllFiles(paths);
-    case CommandKind::FolderUnwrapSameName:
-        return SelectionHasSingleFileFolderState(paths, SingleFileFolderState::SameName);
-    case CommandKind::FolderUnwrapUseFolderName:
-    case CommandKind::FolderUnwrapKeepFileName:
-        return SelectionHasSingleFileFolder(paths);
-    case CommandKind::FolderUnwrapPrefixFolderName:
-        return SelectionHasSingleFileFolderState(paths, SingleFileFolderState::DifferentName);
-    case CommandKind::FolderMoveInnerFilesUp:
-        return SelectionAllDirectories(paths);
-    case CommandKind::FolderMergeSelectedTargets:
-        return paths.size() >= 2 && SelectionAnyFileSystemItem(paths);
-    case CommandKind::AutoRelocationCurrentFolder:
-    case CommandKind::AutoRelocationChooseTarget:
-        return SelectionAnyFileSystemItem(paths);
+    case CommandKind::FolderMergeSelectedTargets: return paths.size() >= 2 && SelectionAllDirectories(paths);
     case CommandKind::ArchiveMergeGroupByArchiveName:
-    case CommandKind::ArchiveMergePreserveInternalPaths:
-        return SelectionAllZipFiles(paths);
-    case CommandKind::FileCompare:
-        return paths.size() >= 2 && SelectionAnyFileSystemItem(paths);
-    case CommandKind::OpenApp:
-        return SelectionAnyFileSystemItem(paths);
-    default:
-        return false;
+    case CommandKind::ArchiveMergePreserveInternalPaths: return SelectionAllZipFiles(paths);
+    case CommandKind::FileCompare: return paths.size() >= 2 && SelectionAnyFileSystemItem(paths);
+    default: return SelectionAnyFileSystemItem(paths);
     }
 }
 
@@ -547,7 +674,8 @@ class ExplorerCommand final : public IExplorerCommand
 {
 public:
     // 각 메뉴 항목을 나타내는 COM 객체. kind로 동작을 분기한다.
-    explicit ExplorerCommand(CommandKind kind) : _kind(kind)
+    explicit ExplorerCommand(CommandKind kind, std::shared_ptr<MenuSelectionCache> cache = nullptr)
+        : _kind(kind), _cache(std::move(cache))
     {
         InterlockedIncrement(&g_objectCount);
     }
@@ -665,24 +793,22 @@ public:
         return S_OK;
     }
 
-    IFACEMETHODIMP GetState(IShellItemArray* selection, BOOL, EXPCMDSTATE* commandState) override
+    IFACEMETHODIMP GetState(IShellItemArray* selection, BOOL okToBeSlow, EXPCMDSTATE* commandState) override
     {
-        if (!commandState)
-        {
-            return E_POINTER;
-        }
-
-        // Root 메뉴는 선택 항목 존재 시에만 보여주고,
-        // 하위 메뉴는 커맨드 가시성 규칙에 따라 enabled/hidden로 처리한다.
-        const auto paths = GetSelectionPaths(selection);
+        if (!commandState) return E_POINTER;
+        *commandState = ECS_HIDDEN;
         if (_kind == CommandKind::Root)
         {
-            *commandState = SelectionAnyFileSystemItem(paths) ? ECS_ENABLED : ECS_HIDDEN;
+            DWORD count = 0;
+            if (selection && SUCCEEDED(selection->GetCount(&count)) && count > 0) *commandState = ECS_ENABLED;
             return S_OK;
         }
-
-        *commandState = IsCommandVisible(_kind, paths) ? ECS_ENABLED : ECS_HIDDEN;
-        return S_OK;
+        try
+        {
+            return _cache ? _cache->GetState(_kind, selection, okToBeSlow, commandState) : E_UNEXPECTED;
+        }
+        catch (const std::bad_alloc&) { return E_OUTOFMEMORY; }
+        catch (...) { return E_FAIL; }
     }
 
     IFACEMETHODIMP Invoke(IShellItemArray* selection, IBindCtx*) override
@@ -694,7 +820,7 @@ public:
         }
 
         const auto paths = GetSelectionPaths(selection);
-        if (!IsCommandVisible(_kind, paths))
+        if (!CanInvokeCommand(_kind, paths))
         {
             return S_OK;
         }
@@ -727,8 +853,13 @@ public:
             return E_NOTIMPL;
         }
 
-        *enumCommands = new (std::nothrow) ExplorerCommandEnum();
-        return *enumCommands ? S_OK : E_OUTOFMEMORY;
+        try
+        {
+            *enumCommands = new (std::nothrow) ExplorerCommandEnum();
+            return *enumCommands ? S_OK : E_OUTOFMEMORY;
+        }
+        catch (const std::bad_alloc&) { return E_OUTOFMEMORY; }
+        catch (...) { return E_FAIL; }
     }
 
 private:
@@ -736,14 +867,17 @@ private:
     long _ref = 1;
     // 이 객체가 담당하는 커맨드 타입.
     CommandKind _kind;
+    std::shared_ptr<MenuSelectionCache> _cache;
 };
 
 ExplorerCommandEnum::ExplorerCommandEnum()
 {
-    // 메뉴 정의 순서대로 ExplorerCommand를 생성해 열거자 버퍼에 쌓는다.
+    // 새 열거자는 새 캐시를 소유하므로 이전 메뉴의 파일 상태가 남지 않는다.
+    const auto cache = std::make_shared<MenuSelectionCache>();
+    _commands.reserve(std::size(SubCommands));
     for (const auto& command : SubCommands)
     {
-        auto* item = new (std::nothrow) ExplorerCommand(command.Kind);
+        auto* item = new (std::nothrow) ExplorerCommand(command.Kind, cache);
         if (item)
         {
             _commands.push_back(item);

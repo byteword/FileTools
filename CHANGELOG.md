@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.4.7.0 - Test build (2026-09-19)
+
+### Fixed
+
+- Continue folder unwrapping and recursive content merges after a locked item;
+  retain successful move counts and stop dependent plan steps after partial failure.
+- Reject overlapping parent/child selections before moving any item and reject
+  destination changes after confirmation.
+
+### Changed
+
+- Set app, ShellExt, installer, bundle, and documentation versions to `1.4.7.0`
+  using the major.minor.patch.build convention.
+- Folder merge now combines contents of multiple folders, including matching
+  subfolders. Selection wrapping moves files and whole folders into one new folder.
+- Default collision handling keeps both entries with a numbered name; skipping
+  is selectable. Existing per-file wrapping remains a separately named action.
+- Align Explorer visibility, installer fallback entries, Korean/English labels,
+  and confirmation dialogs; rename move-up to “Unwrap folder — all contents”.
+- Reduce equivalent native Explorer unwrap commands using selection scope, names,
+  enabled settings, and collision policy. Share one bounded analysis per menu;
+  fast state callbacks defer I/O and uncertain selections preserve commands.
+
+
+### Verification
+
+- Built the `1.4.7.0` test EXE/MSI/MSIX on 2026-09-19. Checked embedded versions,
+  SHA-256 checksums, signer presence, and signed Burn payload extraction.
+  Temporary self-signed certificates are not trusted locally; installation remains untested.
+- Release tests passed 157/157 on 2026-09-19, including real Windows file locks.
+- Release x64 solution build passed, including ShellExt. Korean dialogs and
+  selection-dependent command states were checked; installation verification remains pending.
+- Cross-checked 1,024 native menu policy combinations against 960 real command
+  executions, plus native cache/early-exit/error tests. A 1,000-file folder required
+  four enumeration callbacks (including dot entries), not a full listing.
+
 ## 1.4.6.4 - Unreleased
 
 ### Fixed

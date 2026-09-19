@@ -27,7 +27,7 @@ internal static class ContextMenuRegistrar
         new(
             "FileTools_02_FolderWrapFiles",
             ContextMenuCommand.FolderWrapFiles,
-            ContextMenuTargetKind.File,
+            ContextMenuTargetKind.File | ContextMenuTargetKind.Directory,
             settings => settings.ContextMenuFolderStructure && settings.ContextMenuFolderWrapFiles),
         new(
             "FileTools_03_FolderUnwrapSameName",
@@ -62,7 +62,7 @@ internal static class ContextMenuRegistrar
         new(
             "FileTools_05b_FolderMergeSelectedTargets",
             ContextMenuCommand.FolderMergeSelectedTargets,
-            ContextMenuTargetKind.File | ContextMenuTargetKind.Directory,
+            ContextMenuTargetKind.Directory,
             settings => settings.ContextMenuFolderStructure && settings.ContextMenuFolderMergeSelectedTargets),
         new(
             "FileTools_06_AutoRelocationCurrentFolder",
@@ -330,6 +330,10 @@ internal static class ContextMenuRegistrar
         {
             if (options is not null)
             {
+                // 셸의 중복 판정도 실제 벗기기 실행에서 정규화한 충돌 정책을 사용한다.
+                options.SetValue("FolderUnwrapCollisionPolicy",
+                    (int)FolderStructureCollisionOptions.Create(settings, NameCollisionTargetKind.File).Policy,
+                    RegistryValueKind.DWord);
                 options.SetValue(nameof(FileToolsSettings.ContextMenuOpenApp), settings.ContextMenuOpenApp ? 1 : 0, RegistryValueKind.DWord);
                 options.SetValue(nameof(FileToolsSettings.ContextMenuFileNameCorrection), settings.ContextMenuFileNameCorrection ? 1 : 0, RegistryValueKind.DWord);
                 options.SetValue(nameof(FileToolsSettings.ContextMenuFileCompare), settings.ContextMenuFileCompare ? 1 : 0, RegistryValueKind.DWord);

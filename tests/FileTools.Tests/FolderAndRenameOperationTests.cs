@@ -47,7 +47,7 @@ public sealed class FolderAndRenameOperationTests
         File.WriteAllText(first, "one");
         File.WriteAllText(second, "two");
 
-        var result = FolderMergeOperations.MergeIntoFolder([first, second], new FileToolsSettings());
+        var result = FolderMergeOperations.MergeIntoFolder([first, second], new FileToolsSettings(), FolderMergeOptionDefaults.WrapSelection);
 
         var targetFolder = temp.GetPath("Series 01~02");
         Assert.Equal(targetFolder, result.TargetFolderPath);
@@ -168,7 +168,7 @@ public sealed class FolderAndRenameOperationTests
         File.WriteAllText(first, "one");
         File.WriteAllText(second, "two");
 
-        var preview = FolderMergeOperations.CreateMergePlanPreview([first, second], new FileToolsSettings());
+        var preview = FolderMergeOperations.CreateMergePlanPreview([first, second], new FileToolsSettings(), FolderMergeOptionDefaults.WrapSelection);
 
         Assert.True(preview.IsReady);
         Assert.Null(preview.FailureReason);
@@ -235,7 +235,7 @@ public sealed class FolderAndRenameOperationTests
         File.WriteAllText(Path.Combine(sourceFolder, "Nested", "inner.txt"), "nested");
         File.WriteAllText(sourceFile, "file");
 
-        var result = FolderMergeOperations.MergeIntoFolder([sourceFolder, sourceFile], new FileToolsSettings());
+        var result = FolderMergeOperations.MergeIntoFolder([sourceFolder, sourceFile], new FileToolsSettings(), FolderMergeOptionDefaults.WrapSelection);
 
         var targetFolder = result.TargetFolderPath;
         Assert.NotNull(targetFolder);
@@ -259,7 +259,7 @@ public sealed class FolderAndRenameOperationTests
         File.WriteAllText(first, "one");
         File.WriteAllText(second, "two");
 
-        var preview = FolderMergeOperations.CreateMergePlanPreview([first, second], new FileToolsSettings());
+        var preview = FolderMergeOperations.CreateMergePlanPreview([first, second], new FileToolsSettings(), FolderMergeOptionDefaults.WrapSelection);
 
         Assert.True(preview.IsReady);
         Assert.True(preview.HasMultipleParents);
@@ -276,14 +276,14 @@ public sealed class FolderAndRenameOperationTests
         Directory.CreateDirectory(sourceFolder);
         File.WriteAllText(sourceFile, "file");
 
-        var result = FolderMergeOperations.MergeIntoFolder([sourceFile, sourceFolder], new FileToolsSettings());
+        var result = FolderMergeOperations.MergeIntoFolder([sourceFile, sourceFolder], new FileToolsSettings(), FolderMergeOptionDefaults.WrapSelection);
 
-        Assert.Equal(Path.Combine(sourceFolder, "Merged"), result.TargetFolderPath);
-        Assert.True(result.OperationResult.AppliedCount > 0);
+        Assert.Null(result.TargetFolderPath);
+        Assert.Equal(0, result.OperationResult.AppliedCount);
         Assert.True(result.OperationResult.SkippedCount > 0);
         Assert.True(Directory.Exists(sourceFolder));
-        Assert.False(File.Exists(sourceFile));
-        Assert.True(File.Exists(Path.Combine(sourceFolder, "Merged", "Anchor.txt")));
+        Assert.Equal("file", File.ReadAllText(sourceFile));
+        Assert.False(Directory.Exists(Path.Combine(sourceFolder, "Merged")));
     }
 
     [Fact]
@@ -296,7 +296,8 @@ public sealed class FolderAndRenameOperationTests
         File.WriteAllText(first, "one");
         File.WriteAllText(second, "two");
 
-        var target = FolderMergeOperations.PreviewTargetFolderPath([first, second], new FileToolsSettings());
+        var target = FolderMergeOperations.CreateMergePlanPreview(
+            [first, second], new FileToolsSettings(), FolderMergeOptionDefaults.WrapSelection).TargetFolderPath;
 
         Assert.Equal(temp.GetPath("Series 01~02 (2)"), target);
     }

@@ -178,13 +178,13 @@ internal sealed class FileToolRunner
 
         var targetPath = fileCollision.TargetPath;
         File.Move(file.FullName, targetPath);
+        result.AddApplied(dir.Name + "\\" + file.Name + " -> " + targetFileName);
+        FileToolsEnvironment.Log("UNWRAP", file.FullName + " -> " + targetPath);
         if (!Directory.EnumerateFileSystemEntries(dir.FullName).Any())
         {
             Directory.Delete(dir.FullName, recursive: false);
         }
 
-        result.AddApplied(dir.Name + "\\" + file.Name + " -> " + targetFileName);
-        FileToolsEnvironment.Log("UNWRAP", file.FullName + " -> " + targetPath);
         return true;
     }
 
@@ -293,8 +293,17 @@ internal sealed class FileToolRunner
         var moved = 0;
         foreach (var move in moves)
         {
-            MoveFileSystemEntry(move);
-            moved++;
+            try
+            {
+                MoveFileSystemEntry(move);
+                result.AddApplied(move.SourcePath + " -> " + move.TargetPath);
+                moved++;
+            }
+            catch (Exception ex)
+            {
+                hasBlockingSkip = true;
+                result.AddError(move.SourcePath + " | " + ex.Message);
+            }
         }
 
         var promotedSameNameDirectory = false;
@@ -304,10 +313,21 @@ internal sealed class FileToolRunner
             {
                 result.AddSkipped(sameNameDirectoryMove.Name + " 선택 폴더에 남은 항목이 있어 이동 불가");
             }
-            else if (MoveSameNameDirectoryUp(sameNameDirectoryMove, dir, result))
+            else
             {
-                moved++;
-                promotedSameNameDirectory = true;
+                try
+                {
+                    if (MoveSameNameDirectoryUp(sameNameDirectoryMove, dir, result))
+                    {
+                        result.AddApplied(sameNameDirectoryMove.SourcePath + " -> " + sameNameDirectoryMove.TargetPath);
+                        moved++;
+                        promotedSameNameDirectory = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    result.AddError(sameNameDirectoryMove.SourcePath + " | " + ex.Message);
+                }
             }
         }
 
@@ -324,7 +344,7 @@ internal sealed class FileToolRunner
             return;
         }
 
-        result.AddApplied($"{dir.Name} 직접 하위 항목 {moved}개 상위 이동");
+        result.Messages.Add($"{dir.Name} 폴더 벗기기: 직접 하위 항목 {moved}개 처리");
     }
 
     private static void MoveFileSystemEntry(MoveUpEntry entry)

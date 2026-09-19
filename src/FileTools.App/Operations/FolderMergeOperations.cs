@@ -1,7 +1,7 @@
 namespace FileTools;
 
 /// <summary>
-/// 병합 대상 폴더/파일의 미리보기 없이 이동 경로 계산부터 적용까지 처리하는 유틸리티.
+/// 폴더 병합 또는 선택 항목 씌우기의 대상 경로와 실행 결과.
 /// </summary>
 internal sealed record FolderMergeResult(string? TargetFolderPath, OperationResult OperationResult);
 
@@ -18,11 +18,19 @@ internal enum FolderMergeMode
     MergeFolderContentsOnly
 }
 
-internal sealed record FolderMergeOptions(string? TargetFolderName, FolderMergeMode Mode);
+internal sealed record FolderMergeOptions(
+    string? TargetFolderName,
+    FolderMergeMode Mode,
+    NameCollisionPolicy CollisionPolicy = NameCollisionPolicy.AutoNumber)
+{
+    // 확인창을 닫은 뒤 목적지가 달라지면 새 경로로 임의 실행하지 않는다.
+    public string? ConfirmedTargetFolderPath { get; init; }
+}
 
 internal static class FolderMergeOptionDefaults
 {
-    public static readonly FolderMergeOptions MergeFolders = new(null, FolderMergeMode.MergeFolderUnits);
+    public static readonly FolderMergeOptions MergeFolders = new(null, FolderMergeMode.MergeFolderContentsOnly);
+    public static readonly FolderMergeOptions WrapSelection = new(null, FolderMergeMode.MergeFolderUnits);
 }
 
 internal enum FolderMergePlanPreviewFailureKind
@@ -30,7 +38,8 @@ internal enum FolderMergePlanPreviewFailureKind
     None,
     InsufficientTargets,
     MissingParent,
-    TargetFolderCollision
+    TargetFolderCollision,
+    InvalidSources
 }
 
 /// <summary>
@@ -68,17 +77,33 @@ internal static class FolderMergeOperations
     {
         var mergeOptions = options ?? FolderMergeOptionDefaults.MergeFolders;
         var normalizedPaths = NormalizePaths(paths);
-        if (normalizedPaths.Length < 2)
+        var contentsOnly = mergeOptions.Mode == FolderMergeMode.MergeFolderContentsOnly;
+        if (normalizedPaths.Length < (contentsOnly ? 2 : 1))
         {
             return new FolderMergePlanPreview(
                 IsReady: false,
                 FailureKind: FolderMergePlanPreviewFailureKind.InsufficientTargets,
-                FailureReason: Localizer.Get("FolderMergeNeedsMultipleTargets"),
+                FailureReason: Localizer.Get(contentsOnly ? "FolderMergeNeedsMultipleTargets" : "NoSelectedTargetMessage"),
                 SourcePaths: normalizedPaths,
                 TargetParentPath: null,
                 TargetFolderName: string.Empty,
                 TargetFolderPath: null,
                 HasMultipleParents: false);
+        }
+
+        // 폴더 병합은 폴더만 허용하고, 부모/자식 동시 선택은 이동 전에 전체 거부한다.
+        var invalidReason = contentsOnly && normalizedPaths.Any(path => !Directory.Exists(path))
+            ? Localizer.Get("FolderMergeNeedsMultipleTargets")
+            : normalizedPaths.Any(path => !File.Exists(path) && !Directory.Exists(path))
+                ? Localizer.Get("FolderSelectionMissingSource")
+                : normalizedPaths.Any(parent => Directory.Exists(parent) &&
+                    normalizedPaths.Any(child => !PathComparer.Equals(parent, child) && IsSubPathOf(child, parent)))
+                    ? Localizer.Get("FolderSelectionOverlappingSources")
+                    : null;
+        if (invalidReason is not null)
+        {
+            return new FolderMergePlanPreview(false, FolderMergePlanPreviewFailureKind.InvalidSources,
+                invalidReason, normalizedPaths, null, "", null, false);
         }
 
         var targetParent = ResolveTargetParent(normalizedPaths);
@@ -100,7 +125,9 @@ internal static class FolderMergeOperations
             targetParent,
             targetName,
             CreateMergeCollisionOptions(settings, NameCollisionTargetKind.Folder));
-        if (!targetCollision.IsReady)
+        if (!targetCollision.IsReady ||
+            (mergeOptions.ConfirmedTargetFolderPath is not null &&
+             !PathComparer.Equals(targetCollision.TargetPath, mergeOptions.ConfirmedTargetFolderPath)))
         {
             return new FolderMergePlanPreview(
                 IsReady: false,
@@ -166,7 +193,21 @@ internal static class FolderMergeOperations
         }
 
         var createdTargetFolder = !Directory.Exists(targetFolder);
-        Directory.CreateDirectory(targetFolder);
+        try
+        {
+            if (!createdTargetFolder)
+            {
+                result.AddError(Localizer.Format("PlanPreviewTargetExistsFormat", targetFolder));
+                return new FolderMergeResult(null, result);
+            }
+
+            Directory.CreateDirectory(targetFolder);
+        }
+        catch (Exception ex)
+        {
+            result.AddError(targetFolder + " | " + ex.Message);
+            return new FolderMergeResult(null, result);
+        }
 
         foreach (var path in sourcePaths)
         {
@@ -181,7 +222,7 @@ internal static class FolderMergeOperations
 
                 if (File.Exists(path))
                 {
-                    MoveFile(path, targetFolder, settings, result);
+                    MoveFile(path, targetFolder, settings, mergeOptions, result);
                     continue;
                 }
 
@@ -189,11 +230,11 @@ internal static class FolderMergeOperations
                 {
                     if (mergeOptions.Mode == FolderMergeMode.MergeFolderContentsOnly)
                     {
-                        MoveDirectoryContents(path, targetFolder, settings, result);
+                        MoveDirectoryContents(path, targetFolder, settings, mergeOptions, result);
                     }
                     else
                     {
-                        MoveDirectory(path, targetFolder, settings, result);
+                        MoveDirectory(path, targetFolder, settings, mergeOptions, result);
                     }
 
                     continue;
@@ -207,16 +248,12 @@ internal static class FolderMergeOperations
             }
         }
 
-        if (createdTargetFolder &&
-            result.AppliedCount == 0 &&
-            Directory.Exists(targetFolder) &&
-            !Directory.EnumerateFileSystemEntries(targetFolder).Any())
+        if (createdTargetFolder && result.AppliedCount == 0)
         {
-            Directory.Delete(targetFolder, recursive: false);
-            return new FolderMergeResult(null, result);
+            TryRemoveEmptyDirectory(targetFolder, result);
         }
 
-        return new FolderMergeResult(targetFolder, result);
+        return new FolderMergeResult(Directory.Exists(targetFolder) ? targetFolder : null, result);
     }
 
     /// <summary>
@@ -226,12 +263,13 @@ internal static class FolderMergeOperations
         string sourcePath,
         string targetFolder,
         FileToolsSettings settings,
+        FolderMergeOptions options,
         OperationResult result)
     {
         var collision = NameCollisionResolver.Resolve(
             targetFolder,
             Path.GetFileName(sourcePath),
-            CreateMergeCollisionOptions(settings, NameCollisionTargetKind.File));
+            CreateMergeCollisionOptions(settings, NameCollisionTargetKind.File, options.CollisionPolicy));
         if (!collision.IsReady)
         {
             result.AddSkipped(Localizer.Format("FolderMergeFileNameCollisionFormat", Path.GetFileName(sourcePath)));
@@ -250,6 +288,7 @@ internal static class FolderMergeOperations
         string sourcePath,
         string targetFolder,
         FileToolsSettings settings,
+        FolderMergeOptions options,
         OperationResult result)
     {
         if (IsSubPathOf(targetFolder, sourcePath))
@@ -261,7 +300,7 @@ internal static class FolderMergeOperations
         var collision = NameCollisionResolver.Resolve(
             targetFolder,
             Path.GetFileName(sourcePath),
-            CreateMergeCollisionOptions(settings, NameCollisionTargetKind.Folder));
+            CreateMergeCollisionOptions(settings, NameCollisionTargetKind.Folder, options.CollisionPolicy));
         if (!collision.IsReady)
         {
             result.AddSkipped(Localizer.Format("FolderMergeFolderNameCollisionFormat", Path.GetFileName(sourcePath)));
@@ -274,12 +313,13 @@ internal static class FolderMergeOperations
     }
 
     /// <summary>
-    /// 폴더의 상위 내용을 병합 대상 폴더로 이동한 뒤 빈 원본 폴더를 정리합니다.
+    /// 동명 하위 폴더를 재귀적으로 합치고, 항목별 실패를 격리한 뒤 빈 원본만 정리한다.
     /// </summary>
     private static void MoveDirectoryContents(
         string sourcePath,
         string targetFolder,
         FileToolsSettings settings,
+        FolderMergeOptions options,
         OperationResult result)
     {
         if (!Directory.Exists(sourcePath))
@@ -288,23 +328,87 @@ internal static class FolderMergeOperations
             return;
         }
 
-        foreach (var sourceEntry in Directory.EnumerateFileSystemEntries(sourcePath))
+        // 재귀 병합은 링크를 따라가지 않으며, 이동 중 열거 대상이 바뀌지 않도록 스냅샷을 만든다.
+        if (IsSubPathOf(targetFolder, sourcePath) ||
+            (File.GetAttributes(sourcePath) & FileAttributes.ReparsePoint) != 0 ||
+            (File.GetAttributes(targetFolder) & FileAttributes.ReparsePoint) != 0)
         {
-            if (File.Exists(sourceEntry))
-            {
-                MoveFile(sourceEntry, targetFolder, settings, result);
-                continue;
-            }
+            result.AddSkipped(Localizer.Format("FolderMergeUnsafeDirectoryFormat", sourcePath));
+            return;
+        }
 
-            if (Directory.Exists(sourceEntry))
+        var entries = Directory.GetFileSystemEntries(sourcePath);
+        foreach (var sourceEntry in entries)
+        {
+            try
             {
-                MoveDirectory(sourceEntry, targetFolder, settings, result);
+                if (File.Exists(sourceEntry))
+                {
+                    MoveFile(sourceEntry, targetFolder, settings, options, result);
+                }
+                else if (Directory.Exists(sourceEntry))
+                {
+                    var matchingFolder = Path.Combine(targetFolder, Path.GetFileName(sourceEntry));
+                    if (Directory.Exists(matchingFolder))
+                    {
+                        MoveDirectoryContents(sourceEntry, matchingFolder, settings, options, result);
+                    }
+                    else
+                    {
+                        // 새 하위 폴더도 항목별로 처리해 잠긴 파일이 형제 파일을 막지 않게 한다.
+                        var collision = NameCollisionResolver.Resolve(targetFolder, Path.GetFileName(sourceEntry),
+                            CreateMergeCollisionOptions(settings, NameCollisionTargetKind.Folder, options.CollisionPolicy));
+                        if (!collision.IsReady)
+                        {
+                            result.AddSkipped(Localizer.Format("FolderMergeFolderNameCollisionFormat", sourceEntry));
+                            continue;
+                        }
+
+                        if ((File.GetAttributes(sourceEntry) & FileAttributes.ReparsePoint) != 0)
+                        {
+                            result.AddSkipped(Localizer.Format("FolderMergeUnsafeDirectoryFormat", sourceEntry));
+                            continue;
+                        }
+
+                        Directory.CreateDirectory(collision.TargetPath);
+                        MoveDirectoryContents(sourceEntry, collision.TargetPath, settings, options, result);
+                        if (Directory.Exists(sourceEntry))
+                        {
+                            TryRemoveEmptyDirectory(collision.TargetPath, result);
+                        }
+                    }
+                }
+                else
+                {
+                    result.AddError(Localizer.Format("FolderMergeSourceMissingFormat", sourceEntry));
+                }
+            }
+            catch (Exception ex)
+            {
+                result.AddError(sourceEntry + " | " + ex.Message);
             }
         }
 
-        if (!Directory.EnumerateFileSystemEntries(sourcePath).Any())
+        TryRemoveEmptyDirectory(sourcePath, result);
+        if (entries.Length == 0 && !Directory.Exists(sourcePath))
         {
-            Directory.Delete(sourcePath);
+            result.AddApplied(sourcePath + " -> " + targetFolder);
+        }
+    }
+
+    /// <summary>이동 후 빈 폴더만 삭제하고, 정리 실패도 결과에 기록한다.</summary>
+    private static void TryRemoveEmptyDirectory(string path, OperationResult result)
+    {
+        try
+        {
+            if (Directory.Exists(path) && !Directory.EnumerateFileSystemEntries(path).Any())
+            {
+                Directory.Delete(path, recursive: false);
+            }
+        }
+        catch (Exception ex)
+        {
+            result.AddError(path + " | " + ex.Message);
         }
     }
 
@@ -313,11 +417,12 @@ internal static class FolderMergeOperations
     /// </summary>
     private static NameCollisionOptions CreateMergeCollisionOptions(
         FileToolsSettings settings,
-        NameCollisionTargetKind targetKind)
+        NameCollisionTargetKind targetKind,
+        NameCollisionPolicy policy = NameCollisionPolicy.AutoNumber)
     {
         return new NameCollisionOptions
         {
-            Policy = NameCollisionPolicy.AutoNumber,
+            Policy = policy == NameCollisionPolicy.Skip ? NameCollisionPolicy.Skip : NameCollisionPolicy.AutoNumber,
             TargetKind = targetKind,
             ConflictNameTemplate = settings.FolderStructureConflictNameTemplate,
             IndexStyle = settings.FolderStructureConflictIndexStyle
@@ -361,16 +466,6 @@ internal static class FolderMergeOperations
     }
 
     /// <summary>
-    /// 폴더/파일 구분에 따라 원본 stem 문자열을 추출한다.
-    /// </summary>
-    private static string GetPathStem(string path)
-    {
-        return Directory.Exists(path)
-            ? Path.GetFileName(path)
-            : Path.GetFileNameWithoutExtension(path);
-    }
-
-    /// <summary>
     /// 병합 타겟의 상위 폴더를 계산한다.
     /// </summary>
     private static string? ResolveTargetParent(IReadOnlyList<string> paths)
@@ -385,14 +480,14 @@ internal static class FolderMergeOperations
     }
 
     /// <summary>
-    /// 입력 경로를 중복 제거 및 실제 존재 경로로 정규화한다.
+    /// 입력 경로를 정규화하고 중복을 제거한다. 존재 여부는 선택 검증에서 확인한다.
     /// </summary>
     private static string[] NormalizePaths(IEnumerable<string> paths)
     {
         return paths
             .Select(static path => path.Trim().Trim('"'))
-            .Where(static path => path.Length > 0 && (File.Exists(path) || Directory.Exists(path)))
-            .Select(Path.GetFullPath)
+            .Where(static path => path.Length > 0)
+            .Select(static path => Path.TrimEndingDirectorySeparator(Path.GetFullPath(path)))
             .Distinct(PathComparer)
             .ToArray();
     }

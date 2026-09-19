@@ -161,6 +161,12 @@ internal sealed class WorkPlanExecutor
             {
                 currentPath = predictedPath;
             }
+
+            // 부분 실패 후 남은 원본에 후속 단계를 적용하지 않고, 이 단계를 재시도 가능하게 남긴다.
+            if (result.HasErrors || result.SkippedCount > 0)
+            {
+                break;
+            }
         }
 
         return new TargetRunResult(

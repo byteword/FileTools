@@ -257,7 +257,7 @@ partial class MainForm
         _exitMenuItem.Text = "Exit";
 
         _mergeSelectedMenuItem.Name = "_mergeSelectedMenuItem";
-        _mergeSelectedMenuItem.Text = "Merge selected into folder";
+        _mergeSelectedMenuItem.Text = "Merge folder contents";
 
         _taskMenuItem.DropDownItems.AddRange(new ToolStripItem[]
         {
@@ -307,7 +307,7 @@ partial class MainForm
         _addPrefixFolderNameUnwrapMenuItem.Text = "Unwrap single-file folders - folder-file name";
 
         _addMoveInnerFilesUpMenuItem.Name = "_addMoveInnerFilesUpMenuItem";
-        _addMoveInnerFilesUpMenuItem.Text = "Move inner items up";
+        _addMoveInnerFilesUpMenuItem.Text = "Unwrap folder — all contents";
 
         _addArchiveMergeGroupMenuItem.Name = "_addArchiveMergeGroupMenuItem";
         _addArchiveMergeGroupMenuItem.Text = "Merge ZIPs by archive name";
@@ -355,7 +355,7 @@ partial class MainForm
         _targetContextAddFilesMenuItem.Text = "Add files";
         _targetContextAddFolderMenuItem.Text = "Add folder";
         _targetContextRemoveTargetMenuItem.Text = "Remove selected";
-        _targetContextMergeSelectedTargetsMenuItem.Text = "Merge selected into folder";
+        _targetContextMergeSelectedTargetsMenuItem.Text = "Merge folder contents";
         _targetContextClearTargetsMenuItem.Text = "Clear";
 
         _mergeSelectedFolderUnitsMenuItem.Name = "_mergeSelectedFolderUnitsMenuItem";
@@ -554,7 +554,7 @@ partial class MainForm
         _addPrefixFolderNameUnwrapToolItem.Text = "Unwrap single-file folders - folder-file name";
 
         _addMoveInnerFilesUpToolItem.Name = "_addMoveInnerFilesUpToolItem";
-        _addMoveInnerFilesUpToolItem.Text = "Move inner items up";
+        _addMoveInnerFilesUpToolItem.Text = "Unwrap folder — all contents";
 
         _addArchiveMergeToolButton.DisplayStyle = ToolStripItemDisplayStyle.Image;
         _addArchiveMergeToolButton.DropDownItems.AddRange(new ToolStripItem[]

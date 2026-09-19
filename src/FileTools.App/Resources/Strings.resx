@@ -63,18 +63,18 @@
   <data name="ToolFileNameCorrection" xml:space="preserve"><value>Correct file names</value></data>
   <data name="ToolFolderStructure" xml:space="preserve"><value>Folder wrapping / unwrapping</value></data>
   <data name="ToolAutoRelocation" xml:space="preserve"><value>Auto relocate folders</value></data>
-  <data name="FolderOperationAuto" xml:space="preserve"><value>Auto: wrap files, unwrap folders</value></data>
-  <data name="FolderOperationWrapFiles" xml:space="preserve"><value>Wrap files</value></data>
+  <data name="FolderOperationAuto" xml:space="preserve"><value>Auto: wrap each file separately, unwrap folders</value></data>
+  <data name="FolderOperationWrapFiles" xml:space="preserve"><value>Wrap in one folder</value></data>
   <data name="FolderOperationUnwrapSameName" xml:space="preserve"><value>Unwrap same-name single-file folders</value></data>
   <data name="FolderOperationUnwrapSingleFile" xml:space="preserve"><value>Unwrap single-file folders</value></data>
-  <data name="FolderOperationMoveInnerFilesUp" xml:space="preserve"><value>Move inner items up</value></data>
+  <data name="FolderOperationMoveInnerFilesUp" xml:space="preserve"><value>Unwrap folder — all contents</value></data>
   <data name="FolderUnwrapMismatchKeepFileName" xml:space="preserve"><value>Keep file name</value></data>
   <data name="FolderUnwrapMismatchUseFolderName" xml:space="preserve"><value>Rename to folder name</value></data>
   <data name="FolderUnwrapMismatchPrefixFolderName" xml:space="preserve"><value>Rename to folder-file name</value></data>
   <data name="FolderUnwrapMismatchCustomTemplate" xml:space="preserve"><value>Use custom template</value></data>
   <data name="ContextCommandAutoRelocationCurrentFolder" xml:space="preserve"><value>Auto relocate in current folder</value></data>
   <data name="ContextCommandAutoRelocationChooseTarget" xml:space="preserve"><value>Auto relocate to selected folder</value></data>
-  <data name="ContextCommandFolderMergeSelectedTargets" xml:space="preserve"><value>Merge selected targets</value></data>
+  <data name="ContextCommandFolderMergeSelectedTargets" xml:space="preserve"><value>Merge folder contents</value></data>
   <data name="ContextMenuLayoutGrouped" xml:space="preserve"><value>Grouped: FileTools submenu</value></data>
   <data name="ContextMenuLayoutExpanded" xml:space="preserve"><value>Expanded: show each command directly</value></data>
   <data name="ActionToolbarSizeSmall" xml:space="preserve"><value>Small</value></data>
@@ -91,9 +91,9 @@
   <data name="ButtonAddFolder" xml:space="preserve"><value>Add folder</value></data>
   <data name="ButtonRemoveSelected" xml:space="preserve"><value>Remove selected</value></data>
   <data name="ButtonClear" xml:space="preserve"><value>Clear</value></data>
-  <data name="ButtonMergeSelectedTargets" xml:space="preserve"><value>Merge selected into folder</value></data>
-  <data name="ButtonMergeFoldersMode" xml:space="preserve"><value>Merge folders as folders</value></data>
-  <data name="ButtonMergeFolderContentsMode" xml:space="preserve"><value>Move folder contents only</value></data>
+  <data name="ButtonMergeSelectedTargets" xml:space="preserve"><value>Merge folder contents</value></data>
+  <data name="ButtonMergeFoldersMode" xml:space="preserve"><value>Wrap in one folder</value></data>
+  <data name="ButtonMergeFolderContentsMode" xml:space="preserve"><value>Merge folder contents</value></data>
   <data name="GroupFolderStructure" xml:space="preserve"><value>Folder wrapping / unwrapping</value></data>
   <data name="GroupContextMenu" xml:space="preserve"><value>ContextMenu</value></data>
   <data name="CheckRegisterContextMenu" xml:space="preserve"><value>Register Explorer ContextMenu</value></data>
@@ -151,7 +151,7 @@
   <data name="ProgramInfoLicenseUnavailable" xml:space="preserve"><value>License information is unavailable.</value></data>
   <data name="ProgramInfoUnknownVersion" xml:space="preserve"><value>Unknown</value></data>
   <data name="ButtonAddRenameStep" xml:space="preserve"><value>Add rename</value></data>
-  <data name="ButtonAddWrapStep" xml:space="preserve"><value>Add wrap</value></data>
+  <data name="ButtonAddWrapStep" xml:space="preserve"><value>Wrap in one folder</value></data>
   <data name="ButtonAddUnwrapStep" xml:space="preserve"><value>Add unwrap</value></data>
   <data name="ButtonAddRelocationStep" xml:space="preserve"><value>Add relocation</value></data>
   <data name="ButtonEditStep" xml:space="preserve"><value>Edit step</value></data>
@@ -168,7 +168,7 @@
   <data name="PlanScopeWarningsFormat" xml:space="preserve"><value>Showing warnings · {0} warning operations · {1} planned steps</value></data>
   <data name="PlanExecutionTitle" xml:space="preserve"><value>Plan execution</value></data>
   <data name="DialogRenameTitle" xml:space="preserve"><value>Rename action</value></data>
-  <data name="DialogFolderWrapTitle" xml:space="preserve"><value>Folder wrap action</value></data>
+  <data name="DialogFolderWrapTitle" xml:space="preserve"><value>Wrap each file separately</value></data>
   <data name="DialogFolderUnwrapTitle" xml:space="preserve"><value>Folder unwrap action</value></data>
   <data name="DialogAutoRelocationTitle" xml:space="preserve"><value>Auto relocation action</value></data>
   <data name="LabelFolderOperation" xml:space="preserve"><value>Folder operation</value></data>
@@ -176,7 +176,7 @@
   <data name="ButtonBrowse" xml:space="preserve"><value>Browse...</value></data>
   <data name="ButtonCancel" xml:space="preserve"><value>Cancel</value></data>
   <data name="RenameStepDescription" xml:space="preserve"><value>Review and edit the target filename before the plan runs.</value></data>
-  <data name="FolderWrapStepDescription" xml:space="preserve"><value>Creates a folder wrapping action for files.</value></data>
+  <data name="FolderWrapStepDescription" xml:space="preserve"><value>Creates a separate wrapping folder for each file.</value></data>
   <data name="FolderUnwrapStepDescription" xml:space="preserve"><value>Select how folder contents are moved upward.</value></data>
   <data name="AutoRelocationStepDescription" xml:space="preserve"><value>Select the relocation template and optional target root for this action.</value></data>
   <data name="ManualTargetRootDialogDescription" xml:space="preserve"><value>Select a manual target root folder</value></data>
@@ -364,7 +364,7 @@
   <data name="ColumnPlanOutput" xml:space="preserve"><value>Output / expected result</value></data>
   <data name="ColumnPlanPreview" xml:space="preserve"><value>Expected result</value></data>
   <data name="PlanActionRename" xml:space="preserve"><value>Rename</value></data>
-  <data name="PlanActionWrap" xml:space="preserve"><value>Wrap</value></data>
+  <data name="PlanActionWrap" xml:space="preserve"><value>Wrap each file</value></data>
   <data name="PlanActionUnwrap" xml:space="preserve"><value>Unwrap</value></data>
   <data name="PlanActionRelocate" xml:space="preserve"><value>Relocate</value></data>
   <data name="ColumnOriginalName" xml:space="preserve"><value>Original name</value></data>
@@ -423,9 +423,9 @@
   <data name="ToolTipClearTargets" xml:space="preserve"><value>Clear the target list.</value></data>
   <data name="ToolTipMoveTargetUp" xml:space="preserve"><value>Move selected targets up.</value></data>
   <data name="ToolTipMoveTargetDown" xml:space="preserve"><value>Move selected targets down.</value></data>
-  <data name="ToolTipMergeSelectedTargets" xml:space="preserve"><value>Move selected files and folders into one generated folder.</value></data>
+  <data name="ToolTipMergeSelectedTargets" xml:space="preserve"><value>Combine the contents of selected folders into one new folder.</value></data>
   <data name="ToolTipAddRename" xml:space="preserve"><value>Add a rename action to selected targets.</value></data>
-  <data name="ToolTipAddWrap" xml:space="preserve"><value>Add a folder wrapping action to selected file targets.</value></data>
+  <data name="ToolTipAddWrap" xml:space="preserve"><value>Place selected files and whole folders together inside one new folder.</value></data>
   <data name="ToolTipAddUnwrap" xml:space="preserve"><value>Add a folder unwrapping action to selected folder targets.</value></data>
   <data name="ToolTipAddRelocation" xml:space="preserve"><value>Add an auto relocation action to selected targets.</value></data>
   <data name="ToolTipEditStep" xml:space="preserve"><value>Edit the selected plan step.</value></data>
@@ -501,8 +501,8 @@
   <data name="NameTemplatePreviewConflictFormat" xml:space="preserve"><value>Conflict ({0}): Book.zip -> {1}</value></data>
   <data name="NameTemplateValidationFailedFormat" xml:space="preserve"><value>{0} is invalid: {1}</value></data>
   <data name="DefaultMergeFolderName" xml:space="preserve"><value>Merged</value></data>
-  <data name="FolderWrapOptionsDialogTitle" xml:space="preserve"><value>Folder wrap destination names</value></data>
-  <data name="FolderWrapDialogHeader" xml:space="preserve"><value>Review the destination folder names before wrapping files.</value></data>
+  <data name="FolderWrapOptionsDialogTitle" xml:space="preserve"><value>Wrap each file separately</value></data>
+  <data name="FolderWrapDialogHeader" xml:space="preserve"><value>Review the individual folder names for each file.</value></data>
   <data name="FolderWrapTargetFolderName" xml:space="preserve"><value>Destination folder name</value></data>
   <data name="FolderWrapTargetPath" xml:space="preserve"><value>Destination folder path</value></data>
   <data name="FolderWrapPlannedStepsMessage" xml:space="preserve"><value>Wrap selected files only after clearing their planned steps.</value></data>
@@ -519,30 +519,30 @@
   <data name="AdvancedNameArchiveMergeHeader" xml:space="preserve"><value>Edit the final output ZIP filename.</value></data>
   <data name="ButtonRestoreOriginalName" xml:space="preserve"><value>Restore original</value></data>
   <data name="ButtonUseAutomaticCorrection" xml:space="preserve"><value>Auto correction</value></data>
-  <data name="FolderMergeNeedsMultipleTargets" xml:space="preserve"><value>Select two or more existing targets to merge.</value></data>
-  <data name="FolderMergePlannedStepsMessage" xml:space="preserve"><value>Merge selected targets only after clearing their planned steps.</value></data>
+  <data name="FolderMergeNeedsMultipleTargets" xml:space="preserve"><value>Select at least two folders only. For files or a mixed selection, use Wrap in one folder.</value></data>
+  <data name="FolderMergePlannedStepsMessage" xml:space="preserve"><value>Clear the selected targets' planned steps before this folder operation.</value></data>
   <data name="FolderMergeCanceled" xml:space="preserve"><value>Folder merge was canceled by user.</value></data>
   <data name="FolderMergeOptionsDialogTitle" xml:space="preserve"><value>Folder merge options</value></data>
   <data name="FolderMergeDialogHeader" xml:space="preserve"><value>Merge destination options</value></data>
-  <data name="FolderMergeTargetName" xml:space="preserve"><value>Target folder name</value></data>
-  <data name="FolderMergeTargetPath" xml:space="preserve"><value>Target folder path</value></data>
+  <data name="FolderMergeTargetName" xml:space="preserve"><value>New folder name</value></data>
+  <data name="FolderMergeTargetPath" xml:space="preserve"><value>Final destination</value></data>
   <data name="FolderMergeModeGroup" xml:space="preserve"><value>Merge mode</value></data>
-  <data name="FolderMergeModeMergeFolders" xml:space="preserve"><value>Merge folders as folders</value></data>
-  <data name="FolderMergeModeMergeContentsOnly" xml:space="preserve"><value>Move folder contents only</value></data>
+  <data name="FolderMergeModeMergeFolders" xml:space="preserve"><value>Wrap in one folder</value></data>
+  <data name="FolderMergeModeMergeContentsOnly" xml:space="preserve"><value>Merge folder contents</value></data>
   <data name="FolderMergeModeLabelFormat" xml:space="preserve"><value>Mode: {0}</value></data>
-  <data name="FolderMergeModeContentsHelp" xml:space="preserve"><value>Contents-only mode moves direct child items from selected folders into the destination.</value></data>
+  <data name="FolderMergeModeContentsHelp" xml:space="preserve"><value>Combine contents, including matching subfolders. Files are never overwritten. Locked items remain in place while others continue.</value></data>
   <data name="FolderMergeModeContentsDisabledHelp" xml:space="preserve"><value>Contents-only mode is available when the selection includes at least one folder.</value></data>
-  <data name="FolderMergeStatusReadyFormat" xml:space="preserve"><value>{0} selected items will be merged.</value></data>
+  <data name="FolderMergeStatusReadyFormat" xml:space="preserve"><value>{0} selected items will be processed.</value></data>
   <data name="FolderMergeColumnSourceName" xml:space="preserve"><value>Source name</value></data>
   <data name="FolderMergeColumnKind" xml:space="preserve"><value>Kind</value></data>
-  <data name="FolderMergeColumnTargetName" xml:space="preserve"><value>Merged location</value></data>
+  <data name="FolderMergeColumnTargetName" xml:space="preserve"><value>Planned location (collision policy applies)</value></data>
   <data name="FolderMergeSourceKindFile" xml:space="preserve"><value>File</value></data>
   <data name="FolderMergeSourceKindFolder" xml:space="preserve"><value>Folder</value></data>
   <data name="FolderMergeConfirmFormat" xml:space="preserve"><value>Merge {0} selected targets into:&#x0D;&#x0A;{1}</value></data>
   <data name="FolderMergeTargetParentFormat" xml:space="preserve"><value>Target parent: {0}</value></data>
-  <data name="FolderMergeMultiParentWarning" xml:space="preserve"><value>Selected targets are in different parents. All items will be merged into a folder under the first selected target's parent path.</value></data>
+  <data name="FolderMergeMultiParentWarning" xml:space="preserve"><value>Different parents: the new folder will be created under the first selected item's parent.</value></data>
   <data name="FolderMergeSelectedSourcesHeader" xml:space="preserve"><value>Selected sources:</value></data>
-  <data name="FolderMergeCompletedFormat" xml:space="preserve"><value>Merge completed: {0} | applied {1}, skipped {2}, errors {3}.</value></data>
+  <data name="FolderMergeCompletedFormat" xml:space="preserve"><value>Folder operation: {0} | applied {1}, skipped {2}, errors {3}.</value></data>
   <data name="FolderMergeSameAsTargetFolderFormat" xml:space="preserve"><value>{0} is the target folder</value></data>
   <data name="FolderMergeSourceMissingFormat" xml:space="preserve"><value>{0} source does not exist</value></data>
   <data name="FolderMergeFileNameCollisionFormat" xml:space="preserve"><value>{0} target file name collision</value></data>
@@ -858,4 +858,12 @@
   <data name="FileComparePrefilterHelp" xml:space="preserve"><value>Percent of the selected range hashed before byte-to-byte comparison starts.</value></data>
   <data name="FileCompareSummaryContentOff" xml:space="preserve"><value>Content off</value></data>
   <data name="SettingsInvalidNumberFormat" xml:space="preserve"><value>Invalid numeric value: {0}</value></data>
+  <data name="FolderOperationWrapFilesIndividually" xml:space="preserve"><value>Wrap each file separately</value></data>
+  <data name="FolderSelectionWrapTitle" xml:space="preserve"><value>Wrap in one folder</value></data>
+  <data name="FolderSelectionWrapHelp" xml:space="preserve"><value>Place selected files and whole folders inside one new folder. The structure inside each selected folder is preserved.</value></data>
+  <data name="FolderSelectionCollisionPolicy" xml:space="preserve"><value>Name collisions</value></data>
+  <data name="FolderSelectionCollisionAutoNumber" xml:space="preserve"><value>Add a number and keep both (default)</value></data>
+  <data name="FolderSelectionMissingSource" xml:space="preserve"><value>Some selected items no longer exist. Review the selection.</value></data>
+  <data name="FolderSelectionOverlappingSources" xml:space="preserve"><value>Do not select a parent folder and its descendants together.</value></data>
+  <data name="FolderMergeUnsafeDirectoryFormat" xml:space="preserve"><value>{0}: cannot recursively merge into itself or through a linked folder.</value></data>
 </root>

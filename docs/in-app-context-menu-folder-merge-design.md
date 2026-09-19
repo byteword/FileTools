@@ -2,6 +2,19 @@
 
 Review date: 2026-06-11
 
+## 2026-09-19 behavior update
+
+The current implementation is documented in [folder operations](folder-operations.md).
+“Folder merge” now means recursive content merge for two or more folders;
+“Wrap in one folder” means moving files and whole folders into one new folder.
+The confirmation dialog fixes the operation chosen at entry and offers name
+collision numbering or skipping. Earlier merge-mode radio-button descriptions
+below are historical and superseded by this update.
+
+![Current folder merge dialog](images/folder-merge-current.png)
+![Current folder wrap dialog](images/folder-wrap-current.png)
+
+
 This document prepares the implementation pass for two related items:
 
 - add context menus inside the standalone WinForms application;
