@@ -20,6 +20,8 @@ internal sealed record FileCompareDuplicateGroup(
     int Number,
     IReadOnlyList<string> Paths)
 {
+    public IReadOnlyDictionary<string, RenameFileSnapshot> Snapshots { get; init; } =
+        new Dictionary<string, RenameFileSnapshot>(StringComparer.OrdinalIgnoreCase);
     public string KeepPath => Paths.Count == 0 ? "" : Paths[0];
 
     public IReadOnlyList<string> DeleteCandidates => Paths.Skip(1).ToArray();
@@ -38,7 +40,11 @@ internal sealed record FileCompareDuplicateDeleteHandoff(
 /// </summary>
 internal sealed record FileCompareDuplicateDeleteGroupHandoff(
     IReadOnlyList<string> Paths,
-    IReadOnlyList<string> DeletePaths);
+    IReadOnlyList<string> DeletePaths)
+{
+    public IReadOnlyDictionary<string, RenameFileSnapshot> Snapshots { get; init; } =
+        new Dictionary<string, RenameFileSnapshot>(StringComparer.OrdinalIgnoreCase);
+}
 
 /// <summary>
 /// 중복 판정, 우선순위 규칙, 인덱스 기반 삭제 후보 추출의 집약점.
@@ -73,7 +79,12 @@ internal static class FileCompareResultActions
         return orderedPaths
             .GroupBy(path => Find(parent, path), GetPathComparer())
             .Where(static group => group.Count() > 1)
-            .Select((group, index) => new FileCompareDuplicateGroup(index + 1, ApplyKeepMode(group.ToArray(), keepMode)))
+            .Select((group, index) => new FileCompareDuplicateGroup(index + 1, ApplyKeepMode(group.ToArray(), keepMode))
+            {
+                Snapshots = report.Targets.Where(target => group.Contains(target.Path, GetPathComparer()) && target.Snapshot is not null)
+                    .DistinctBy(target => target.Path, GetPathComparer())
+                    .ToDictionary(target => target.Path, target => target.Snapshot!, GetPathComparer())
+            })
             .ToArray();
     }
 
@@ -113,7 +124,7 @@ internal static class FileCompareResultActions
         var groupHandoffs = selectedGroups
             .Select(static group => new FileCompareDuplicateDeleteGroupHandoff(
                 group.Paths,
-                group.DeleteCandidates))
+                group.DeleteCandidates) { Snapshots = group.Snapshots })
             .ToArray();
         return new FileCompareDuplicateDeleteHandoff(
             groupHandoffs
@@ -132,19 +143,10 @@ internal static class FileCompareResultActions
     /// </summary>
     private static bool IsSameContentPair(FileComparePairResult pair)
     {
-        return pair.Status == FileCompareStatus.Same &&
-               pair.Criteria.Any(static criterion =>
-                   criterion.Status == FileCompareStatus.Same &&
-                   IsContentCriterionName(criterion.Name));
-    }
-
-    /// <summary>
-    /// 파일명 판정 기준이 아닌 “content” 기반 비교 기준인지 판별한다.
-    /// </summary>
-    private static bool IsContentCriterionName(string name)
-    {
-        return string.Equals(name, "Content", StringComparison.OrdinalIgnoreCase) ||
-               name.EndsWith(" content", StringComparison.OrdinalIgnoreCase);
+        return pair.Scope == FileCompareScope.WholeFile && pair.WholeContentEqual &&
+               pair.Status != FileCompareStatus.Failed &&
+               pair.Left.Snapshot is { LinkCount: 1 } left && pair.Right.Snapshot is { LinkCount: 1 } right &&
+               (left.Volume != right.Volume || left.FileId != right.FileId);
     }
 
     /// <summary>

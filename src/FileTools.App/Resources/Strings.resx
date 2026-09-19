@@ -923,4 +923,94 @@
   <data name="BatchRenameStatusReady" xml:space="preserve"><value>Ready</value></data>
   <data name="BatchRenameStatusUnchanged" xml:space="preserve"><value>Unchanged</value></data>
   <data name="BatchRenameStatusExcluded" xml:space="preserve"><value>Excluded</value></data>
+  <data name="FileListTitle" xml:space="preserve"><value>Create file list</value></data>
+  <data name="FileListHelp" xml:space="preserve"><value>Review files, choose columns and sort order, then save as CSV or TXT. Source files are not changed.</value></data>
+  <data name="CatalogRecursive" xml:space="preserve"><value>Include subfolders</value></data>
+  <data name="CatalogHidden" xml:space="preserve"><value>Include hidden items</value></data>
+  <data name="CatalogSystem" xml:space="preserve"><value>Include system items</value></data>
+  <data name="CatalogScan" xml:space="preserve"><value>Search again</value></data>
+  <data name="CatalogStop" xml:space="preserve"><value>Stop</value></data>
+  <data name="CatalogClose" xml:space="preserve"><value>Close</value></data>
+  <data name="CatalogErrors" xml:space="preserve"><value>Paths that could not be read</value></data>
+  <data name="CatalogDescending" xml:space="preserve"><value>Descending</value></data>
+  <data name="CatalogSortLabel" xml:space="preserve"><value>Sort by</value></data>
+  <data name="CatalogSortName" xml:space="preserve"><value>Name (natural)</value></data>
+  <data name="CatalogSortFullPath" xml:space="preserve"><value>Full path</value></data>
+  <data name="CatalogSortKind" xml:space="preserve"><value>File kind</value></data>
+  <data name="CatalogSortSize" xml:space="preserve"><value>Size</value></data>
+  <data name="CatalogSortCreated" xml:space="preserve"><value>Created</value></data>
+  <data name="CatalogSortModified" xml:space="preserve"><value>Modified</value></data>
+  <data name="CatalogColumnName" xml:space="preserve"><value>Name</value></data>
+  <data name="CatalogColumnExtension" xml:space="preserve"><value>Extension</value></data>
+  <data name="CatalogColumnKind" xml:space="preserve"><value>Kind</value></data>
+  <data name="CatalogColumnFullPath" xml:space="preserve"><value>Full path</value></data>
+  <data name="CatalogColumnRootPath" xml:space="preserve"><value>Root path</value></data>
+  <data name="CatalogColumnRelativePath" xml:space="preserve"><value>Relative path</value></data>
+  <data name="CatalogColumnSize" xml:space="preserve"><value>Size (bytes)</value></data>
+  <data name="CatalogColumnCreated" xml:space="preserve"><value>Created (UTC)</value></data>
+  <data name="CatalogColumnModified" xml:space="preserve"><value>Modified (UTC)</value></data>
+  <data name="CatalogMissingFile" xml:space="preserve"><value>The file no longer exists.</value></data>
+  <data name="CatalogRescan" xml:space="preserve"><value>Options changed. Search again to update the results.</value></data>
+  <data name="CatalogScanning" xml:space="preserve"><value>Searching files…</value></data>
+  <data name="CatalogScanProgress" xml:space="preserve"><value>Searching: {0} files, {1} read errors, {2} skipped</value></data>
+  <data name="CatalogSummary" xml:space="preserve"><value>{0} files · {1} read errors · {2} skipped items</value></data>
+  <data name="CatalogCancelled" xml:space="preserve"><value>Cancelled. Search again to refresh the results.</value></data>
+  <data name="CatalogErrorsTruncated" xml:space="preserve"><value>Only the first 200 errors are displayed.</value></data>
+  <data name="FileListFormatLabel" xml:space="preserve"><value>Format</value></data>
+  <data name="FileListFormatCsv" xml:space="preserve"><value>CSV</value></data>
+  <data name="FileListFormatText" xml:space="preserve"><value>TXT</value></data>
+  <data name="FileListTextLabel" xml:space="preserve"><value>TXT content</value></data>
+  <data name="FileListTextFullPath" xml:space="preserve"><value>Full path</value></data>
+  <data name="FileListTextRelativePath" xml:space="preserve"><value>Relative path</value></data>
+  <data name="FileListTextName" xml:space="preserve"><value>Name only</value></data>
+  <data name="FileListSave" xml:space="preserve"><value>Save list…</value></data>
+  <data name="FileListSaving" xml:space="preserve"><value>Saving list…</value></data>
+  <data name="FileListSaved" xml:space="preserve"><value>Saved {0} files (output excluded: {1}): {2}</value></data>
+  <data name="FileListChooseColumns" xml:space="preserve"><value>Select at least one CSV column.</value></data>
+  <data name="FileListOutputExists" xml:space="preserve"><value>The output file already exists. Confirm replacement before saving.</value></data>
+  <data name="FileListOutputChanged" xml:space="preserve"><value>The output file changed. Choose the destination again.</value></data>
+  <data name="CollectionTitle" xml:space="preserve"><value>Collect files by conditions</value></data>
+  <data name="CollectionHelp" xml:space="preserve"><value>Choose conditions, then search again. Checked matches are added to the app's target list. No files are moved or copied.</value></data>
+  <data name="CollectionKinds" xml:space="preserve"><value>Kinds (OR)</value></data>
+  <data name="CollectionExtensions" xml:space="preserve"><value>Extensions</value></data>
+  <data name="CollectionNameLabel" xml:space="preserve"><value>Name</value></data>
+  <data name="CollectionNameContains" xml:space="preserve"><value>Contains</value></data>
+  <data name="CollectionNameEquals" xml:space="preserve"><value>Equals</value></data>
+  <data name="CollectionNameStartsWith" xml:space="preserve"><value>Starts with</value></data>
+  <data name="CollectionNameEndsWith" xml:space="preserve"><value>Ends with</value></data>
+  <data name="CollectionNameWildcard" xml:space="preserve"><value>Wildcard (* ?)</value></data>
+  <data name="CollectionIgnoreCase" xml:space="preserve"><value>Ignore case</value></data>
+  <data name="CollectionDates" xml:space="preserve"><value>Local dates</value></data>
+  <data name="CollectionModified" xml:space="preserve"><value>Modified from</value></data>
+  <data name="CollectionCreated" xml:space="preserve"><value>Created from</value></data>
+  <data name="CollectionThrough" xml:space="preserve"><value>through</value></data>
+  <data name="CollectionSize" xml:space="preserve"><value>File size</value></data>
+  <data name="CollectionMinimum" xml:space="preserve"><value>Minimum</value></data>
+  <data name="CollectionMaximum" xml:space="preserve"><value>Maximum</value></data>
+  <data name="CollectionSizeUnit" xml:space="preserve"><value>MiB (1 MiB = 1,048,576 bytes)</value></data>
+  <data name="CollectionExclude" xml:space="preserve"><value>Excluded paths</value></data>
+  <data name="CollectionExcludeHelp" xml:space="preserve"><value>One absolute file/folder path per line</value></data>
+  <data name="CollectionExcludeFolder" xml:space="preserve"><value>Add folder…</value></data>
+  <data name="CollectionSelection" xml:space="preserve"><value>Results</value></data>
+  <data name="CollectionSelectAll" xml:space="preserve"><value>Check all</value></data>
+  <data name="CollectionSelectNone" xml:space="preserve"><value>Uncheck all</value></data>
+  <data name="CollectionInclude" xml:space="preserve"><value>Include</value></data>
+  <data name="CollectionAdd" xml:space="preserve"><value>Add to target list</value></data>
+  <data name="CollectionSummary" xml:space="preserve"><value>Matched {0}/{1} files · Checked {2} · Read errors {3} · Skipped {4}</value></data>
+  <data name="CollectionAdded" xml:space="preserve"><value>Added {0} new targets from {1} checked files. Existing targets and unavailable paths were skipped.</value></data>
+  <data name="CollectionInvalidDates" xml:space="preserve"><value>The start date must not be later than the end date.</value></data>
+  <data name="CollectionInvalidSize" xml:space="preserve"><value>Check the size range. The minimum must not exceed the maximum.</value></data>
+  <data name="CollectionInvalidExtension" xml:space="preserve"><value>Invalid extension: {0}</value></data>
+  <data name="CatalogAbsoluteExclude" xml:space="preserve"><value>Excluded paths must be absolute file or folder paths.</value></data>
+  <data name="DuplicateKeepRequired" xml:space="preserve"><value>Keep at least one file in the group.</value></data>
+  <data name="DuplicateRecheckRequired" xml:space="preserve"><value>Cleanup was held: a file changed, a keeper or verification is missing, or another operation conflicts. Compare the files again.</value></data>
+  <data name="FileCompareContentOnlyPreset" xml:space="preserve"><value>Use content-only comparison</value></data>
+  <data name="FileCompareRangeEqual" xml:space="preserve"><value>Selected range equal</value></data>
+  <data name="FileCompareScopeArchiveEntries" xml:space="preserve"><value>Archive entries</value></data>
+  <data name="FileCompareScopeColumn" xml:space="preserve"><value>Comparison scope</value></data>
+  <data name="FileCompareScopeMetadataOnly" xml:space="preserve"><value>Name / metadata only</value></data>
+  <data name="FileCompareScopeNotCompared" xml:space="preserve"><value>Not verified</value></data>
+  <data name="FileCompareScopeSelectedRange" xml:space="preserve"><value>Selected range</value></data>
+  <data name="FileCompareScopeWholeFile" xml:space="preserve"><value>Whole file</value></data>
+  <data name="FileCompareWholeEqual" xml:space="preserve"><value>Whole content equal</value></data>
 </root>

@@ -4,14 +4,15 @@
 
 Windows 탐색기 ContextMenu와 독립 실행형 WinForms 유틸리티를 제공하는 작은 파일 관리 도구입니다.
 
-현재 버전: `1.5.0.0` (개발 중, 미배포).
+현재 버전: `1.5.0.1` (개발 중, 미배포).
 
 마이너 버전 `1.5.0.0`은 빈 폴더 정리, 일괄 이름 편집, 중복파일 확인 고도화,
-파일 목록 작성, 조건별 파일 모으기 순서로 진행합니다.
-현재 개발 브랜치에는 **빈 폴더 휴지통 정리와 일괄 이름 편집**이 구현되어 있습니다.
-앱의 대상 목록에서 폴더 또는 파일을 선택하고 작업 메뉴에서 열어 결과를 확인한 뒤,
-작업 계획에 추가해 실행합니다. [사용 방법과 실제 화면](docs/file-organization.md),
-[남은 구현 계획](docs/v1.5.0.0-implementation-plan.md)을 참고하세요. 아직 배포되지 않은 변경입니다.
+파일 목록 작성, 조건별 파일 모으기를 계획했으며, 후속 요청에 따라 4·5번을 우선 구현했습니다.
+현재 **빈 폴더 휴지통 정리, 일괄 이름 편집, CSV/TXT 파일 목록 작성, 조건별 파일 모으기**를 지원합니다. 기존 파일 비교에는 내용 비교 설정, 비교 범위 구분, 휴지통 실행 전 재검증을 보완했습니다.
+앱 대상 목록에서 파일/폴더를 선택하고 작업 메뉴를 엽니다. 정리·이름 편집은 계획에 추가해 실행하고,
+파일 목록은 저장하며, 조건별 모으기는 검토한 파일을 대상 목록에 추가합니다.
+[정리·이름 편집](docs/file-organization.md), [목록·조건 검색 사용 방법과 실제 화면](docs/file-catalog.md),
+[파일 비교 사용 방법](docs/file-compare.md), [구현 범위](docs/v1.5.0.0-implementation-plan.md)을 참고하세요. 아직 배포되지 않은 변경입니다.
 
 ### 개발 및 안정성 안내
 
@@ -405,15 +406,17 @@ FileTools는 MIT License로 제공됩니다. 자세한 내용은 `LICENSE` 또�
 
 Windows Explorer ContextMenu and standalone WinForms utility for small file-management operations.
 
-Current version: `1.5.0.0` (development, unreleased).
+Current version: `1.5.0.1` (development, unreleased).
 
 Work for minor version `1.5.0.0` follows this order: empty-folder cleanup,
 batch filename editing, duplicate-file inspection improvements, file-list export,
 and conditional file collection. See the [implementation plan](docs/v1.5.0.0-implementation-plan.md)
-for scope and completion criteria. Empty-folder recycling and batch filename editing
-are implemented on the development branch and available from the app's Tasks menu.
-Review candidates, add them to the work plan, then run the plan. These changes are
-not released yet. See [usage and screenshots](docs/file-organization.md).
+for scope and completion criteria. Phases 4 and 5 were prioritized by a follow-up request.
+The app's Tasks menu now provides empty-folder recycling, batch filename editing,
+CSV/TXT file-list export and conditional collection into the target list.
+Cleanup/rename use the work plan; export saves a list and collection adds reviewed files.
+These changes are not released yet. See [cleanup and rename](docs/file-organization.md)
+and [file lists and collection](docs/file-catalog.md) for usage and screenshots. Existing file comparison now offers a content-only preset, explicit comparison scope and verified Recycle Bin execution; see [file comparison](docs/file-compare.md). Further enhancements remain deferred.
 
 ### Development and Stability Notice
 

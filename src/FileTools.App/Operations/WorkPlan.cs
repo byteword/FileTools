@@ -102,6 +102,7 @@ internal sealed class WorkPlanStep
     /// 중복 삭제 단계에서 함께 삭제될 경로 목록.
     /// </summary>
     public IReadOnlyList<string> DuplicateDeleteGroupPaths { get; set; } = [];
+    public DuplicateDeleteVerification? DuplicateDeleteVerification { get; set; }
 
     public EmptyFolderCleanupPlan? EmptyFolderCleanupPlan { get; set; }
     public BatchRenamePlan? BatchRenamePlan { get; set; }
@@ -138,6 +139,7 @@ internal sealed class WorkPlanStep
             ManualTargetRootPath = ManualTargetRootPath,
             ArchiveMergeOptions = ArchiveMergeOptions?.Clone(),
             DuplicateDeleteGroupPaths = DuplicateDeleteGroupPaths.ToArray(),
+            DuplicateDeleteVerification = DuplicateDeleteVerification,
             EmptyFolderCleanupPlan = EmptyFolderCleanupPlan?.Clone(),
             BatchRenamePlan = BatchRenamePlan,
             BatchRenameItem = BatchRenameItem

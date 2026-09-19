@@ -7,6 +7,7 @@ namespace FileTools;
 /// <summary>확정 뒤 같은 경로에 다른 파일이 생기는 경우도 확인하기 위한 Windows 파일 식별 정보.</summary>
 internal sealed record RenameFileSnapshot(uint Volume, ulong FileId, ulong Length, ulong CreationTime, ulong LastWriteTime)
 {
+    public uint LinkCount { get; init; } = 1;
     public static RenameFileSnapshot Capture(string path)
     {
         var attributes = File.GetAttributes(path);
@@ -18,7 +19,7 @@ internal sealed record RenameFileSnapshot(uint Volume, ulong FileId, ulong Lengt
             throw new IOException(new Win32Exception(Marshal.GetLastWin32Error()).Message);
         return new(info.Volume, Join(info.IndexHigh, info.IndexLow), Join(info.SizeHigh, info.SizeLow),
             Join((uint)info.Created.dwHighDateTime, (uint)info.Created.dwLowDateTime),
-            Join((uint)info.Written.dwHighDateTime, (uint)info.Written.dwLowDateTime));
+            Join((uint)info.Written.dwHighDateTime, (uint)info.Written.dwLowDateTime)) { LinkCount = info.Links };
     }
     private static ulong Join(uint high, uint low) => ((ulong)high << 32) | low;
     [DllImport("kernel32.dll", SetLastError = true)]

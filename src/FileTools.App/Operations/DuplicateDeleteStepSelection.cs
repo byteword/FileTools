@@ -41,11 +41,14 @@ internal static class DuplicateDeleteStepSelection
     public static int Apply(
         IEnumerable<WorkTargetPlan> targets,
         IEnumerable<string> deletePaths,
-        IEnumerable<string>? scopePaths = null)
+        IEnumerable<string>? scopePaths = null,
+        IReadOnlyDictionary<string, RenameFileSnapshot>? snapshots = null)
     {
         var deleteSet = CreatePathSet(deletePaths) ?? new HashSet<string>(PathComparer);
         var scopeSet = CreatePathSet(scopePaths);
         IReadOnlyList<string> groupPaths = scopeSet is null ? [] : scopeSet.ToArray();
+        var verification = deleteSet.Count == 0 ? null :
+            DuplicateDeleteVerification.Create(groupPaths, deleteSet, snapshots);
         var changedTargets = 0;
 
         foreach (var target in targets
@@ -67,7 +70,8 @@ internal static class DuplicateDeleteStepSelection
                 target.Steps.Add(new WorkPlanStep
                 {
                     Kind = WorkPlanStepKind.DuplicateDelete,
-                    DuplicateDeleteGroupPaths = groupPaths
+                    DuplicateDeleteGroupPaths = groupPaths,
+                    DuplicateDeleteVerification = verification
                 });
             }
 

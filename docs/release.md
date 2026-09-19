@@ -23,12 +23,12 @@ reputation.
 
 Versions use major.minor.patch.build. A patch increment from 1.4.6.4 becomes 1.4.7.0; the build component resets to zero.
 
-The current development version is `1.5.0.0`, a minor increment from `1.4.7.0`
-with patch and build reset to zero. The [implementation plan](v1.5.0.0-implementation-plan.md)
-tracks work on `codex/1.5.0.0`. Empty-folder recycling and batch rename are
-implemented. App, ShellExt, installer, bundle, resources and release-facing
-documents are synchronized for the requested commit and push. No tag or package
-release was requested. See the [unreleased notes](release-notes/v1.5.0.0.md).
+The current development version is `1.5.0.1`, a build increment from `1.5.0.0`
+for the catalog and comparison checkpoint commit. The [implementation plan](v1.5.0.0-implementation-plan.md)
+tracks work on `codex/1.5.0.0`. Empty-folder recycling, batch rename, file-list
+export, conditional target collection and existing-comparison improvements are implemented. App, ShellExt, installer, bundle, resources and release-facing
+documents are synchronized for the requested checkpoint commit. No tag or package
+release was requested. See the [unreleased notes](release-notes/v1.5.0.1.md).
 
 ## Release Workflow
 
@@ -52,7 +52,7 @@ Repository prerequisites:
 
 Before running it, update repository docs, wiki docs, and the tag-specific
 release notes, then create and push a four-part version tag such as
-`v1.5.0.0`. Then run the `Release` workflow from GitHub Actions and provide
+`v1.5.0.1`. Then run the `Release` workflow from GitHub Actions and provide
 that existing tag. The workflow strips the leading `v` and passes that value to
 `build_msi.ps1 -Version`, so the app binary, generated app manifest, MSI, Burn
 bundle, and sparse MSIX identity use the same release version.
@@ -101,7 +101,7 @@ git status --short
 - Prepare release-facing repository docs and local wiki files:
 
 ```powershell
-.\scripts\prepare_release.ps1 -Tag v1.5.0.0 -Channel stable
+.\scripts\prepare_release.ps1 -Tag v1.5.0.1 -Channel stable
 ```
 
 Use `-WhatIf` to preview file changes, and use `-Force` only when the
@@ -118,7 +118,7 @@ by default.
 
 For a full release build, `build_msi.ps1` reads `FileToolsVersion` from the app,
 installer, bundle, and ShellExt project files when `-Version` is omitted. It
-fails before building if those defaults disagree. Passing `-Version v1.5.0.0` is
+fails before building if those defaults disagree. Passing `-Version v1.5.0.1` is
 still supported, but the explicit version must match the project metadata. The
 script then passes the resolved value through `FileToolsVersion`/`ProductVersion`
 MSBuild properties. The app project generates its application manifest under
@@ -146,7 +146,7 @@ MSBuild.exe FileTools.sln /p:Configuration=Release /p:Platform=x64
 ```powershell
 git -C .wiki status --short
 git -C .wiki add .
-git -C .wiki commit -m "Update wiki for FileTools 1.5.0.0 stable"
+git -C .wiki commit -m "Update wiki for FileTools 1.5.0.1 stable"
 git -C .wiki push origin master
 ```
 
@@ -154,9 +154,9 @@ git -C .wiki push origin master
   push the tag:
 
 ```powershell
-git tag v1.5.0.0
+git tag v1.5.0.1
 git push origin master
-git push origin v1.5.0.0
+git push origin v1.5.0.1
 ```
 
 ### After The Release Workflow Finishes
@@ -280,7 +280,7 @@ make Windows trust the self-signed certificate.
 After downloading a release asset, verify its SHA256 hash:
 
 ```powershell
-Get-FileHash .\FileTools-1.5.0.0-win-x64-setup.exe -Algorithm SHA256
+Get-FileHash .\FileTools-1.5.0.1-win-x64-setup.exe -Algorithm SHA256
 ```
 
 Compare the result with `checksums.txt`.
@@ -288,19 +288,19 @@ Compare the result with `checksums.txt`.
 Users with GitHub CLI can also verify artifact attestations:
 
 ```powershell
-gh attestation verify .\FileTools-1.5.0.0-win-x64-setup.exe -R byteword/FileTools
-gh attestation verify .\FileTools-1.5.0.0-win-x64.msi -R byteword/FileTools
-gh attestation verify .\FileTools-1.5.0.0-win-x64-identity.msix -R byteword/FileTools
-gh attestation verify .\FileTools-1.5.0.0-msix-self-signed.cer -R byteword/FileTools
+gh attestation verify .\FileTools-1.5.0.1-win-x64-setup.exe -R byteword/FileTools
+gh attestation verify .\FileTools-1.5.0.1-win-x64.msi -R byteword/FileTools
+gh attestation verify .\FileTools-1.5.0.1-win-x64-identity.msix -R byteword/FileTools
+gh attestation verify .\FileTools-1.5.0.1-msix-self-signed.cer -R byteword/FileTools
 gh attestation verify .\checksums.txt -R byteword/FileTools
 ```
 
 On Windows, the self-signed Authenticode/MSIX signatures can also be inspected:
 
 ```powershell
-Get-AuthenticodeSignature .\FileTools-1.5.0.0-win-x64-setup.exe
-Get-AuthenticodeSignature .\FileTools-1.5.0.0-win-x64.msi
-Get-AuthenticodeSignature .\FileTools-1.5.0.0-win-x64-identity.msix
+Get-AuthenticodeSignature .\FileTools-1.5.0.1-win-x64-setup.exe
+Get-AuthenticodeSignature .\FileTools-1.5.0.1-win-x64.msi
+Get-AuthenticodeSignature .\FileTools-1.5.0.1-win-x64-identity.msix
 ```
 
 Before the self-signed CER is trusted, `Get-AuthenticodeSignature` may report an

@@ -99,7 +99,9 @@ public sealed class WorkPlanPreviewBuilderTests
         keepTarget.Steps.Add(new WorkPlanStep { Kind = WorkPlanStepKind.DuplicateDelete });
         keepTarget.Steps.Add(new WorkPlanStep { Kind = WorkPlanStepKind.DuplicateDelete });
 
-        var changed = DuplicateDeleteStepSelection.Apply([deleteTarget, keepTarget], [deletePath]);
+        var paths = new[] { deletePath, keepPath };
+        var changed = DuplicateDeleteStepSelection.Apply([deleteTarget, keepTarget], [deletePath], paths,
+            paths.ToDictionary(path => path, RenameFileSnapshot.Capture, StringComparer.OrdinalIgnoreCase));
 
         Assert.Equal(2, changed);
         Assert.Single(deleteTarget.Steps.Where(static step => step.Kind == WorkPlanStepKind.DuplicateDelete));
@@ -136,7 +138,8 @@ public sealed class WorkPlanPreviewBuilderTests
         var changed = DuplicateDeleteStepSelection.Apply(
             [oldDeleteTarget, newDeleteTarget, unrelatedTarget],
             [newDeletePath],
-            scopePaths);
+            scopePaths,
+            scopePaths.ToDictionary(path => path, RenameFileSnapshot.Capture, StringComparer.OrdinalIgnoreCase));
 
         Assert.Equal(2, changed);
         Assert.Empty(oldDeleteTarget.Steps.Where(static step => step.Kind == WorkPlanStepKind.DuplicateDelete));

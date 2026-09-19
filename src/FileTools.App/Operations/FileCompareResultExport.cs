@@ -61,6 +61,8 @@ internal sealed record FileCompareExportPair(
     string Status,
     double MatchRatio,
     string Reason,
+    string Scope,
+    bool WholeContentEqual,
     IReadOnlyList<FileCompareExportCriterion> Criteria);
 
 /// <summary>
@@ -87,7 +89,7 @@ internal sealed record FileCompareExportDuplicateGroup(
 internal static class FileCompareResultExport
 {
     public const string DocumentType = "FileTools.FileCompareResult";
-    public const int SchemaVersion = 2;
+    public const int SchemaVersion = 3;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -135,6 +137,8 @@ internal static class FileCompareResultExport
                 pair.Status.ToString(),
                 pair.MatchRatio,
                 pair.Reason,
+                pair.Scope.ToString(),
+                pair.WholeContentEqual,
                 pair.Criteria.Select(static criterion => new FileCompareExportCriterion(
                     criterion.Name,
                     criterion.Status.ToString(),

@@ -1,5 +1,3 @@
-using Microsoft.VisualBasic.FileIO;
-
 namespace FileTools;
 
 /// <summary>
@@ -11,7 +9,8 @@ internal static class DuplicateDeleteOperations
     /// 단일 경로를 휴지통으로 이동한다.
     /// 경로가 없으면 스킵 처리한다.
     /// </summary>
-    public static OperationResult MoveFileToRecycleBin(string path)
+    public static OperationResult MoveFileToRecycleBin(string path, DuplicateDeleteVerification? verification = null,
+        CancellationToken cancellationToken = default, Action<string, Action>? recycle = null)
     {
         var result = new OperationResult();
         result.AddCandidate();
@@ -24,11 +23,9 @@ internal static class DuplicateDeleteOperations
 
         try
         {
-            FileSystem.DeleteFile(
-                path,
-                UIOption.OnlyErrorDialogs,
-                RecycleOption.SendToRecycleBin,
-                UICancelOption.ThrowException);
+            if (verification is null) throw new IOException(Localizer.Get("DuplicateRecheckRequired"));
+            verification.WithVerifiedFiles(path, cancellationToken,
+                verify => (recycle ?? WindowsRecycleBin.RecycleFile)(path, verify));
             result.AddApplied(Localizer.Format("DuplicateDeleteMovedToRecycleBinFormat", path));
         }
         catch (OperationCanceledException)

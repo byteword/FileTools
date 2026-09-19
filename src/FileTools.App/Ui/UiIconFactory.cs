@@ -23,7 +23,9 @@ internal enum UiIconKind
     Info,
     Exit,
     Play,
-    Stop
+    Stop,
+    FileList,
+    CollectFiles
 }
 
 internal static class UiIconFactory
@@ -35,6 +37,8 @@ internal static class UiIconFactory
     private static readonly Dictionary<(UiIconKind Kind, int Size), Image> IconCache = [];
     private static readonly Dictionary<UiIconKind, IconDefinition> Definitions = new()
     {
+        [UiIconKind.FileList] = new(DrawFileList, Color.FromArgb(39, 99, 164)),
+        [UiIconKind.CollectFiles] = new(DrawCollectFiles, Color.FromArgb(32, 123, 67)),
         [UiIconKind.Add] = new(DrawAdd, Color.FromArgb(32, 123, 67)),
         [UiIconKind.FolderAdd] = new(DrawFolderAdd, Color.FromArgb(39, 99, 164)),
         [UiIconKind.Remove] = new(DrawRemove, Color.FromArgb(170, 59, 48)),
@@ -87,6 +91,22 @@ internal static class UiIconFactory
         var icon = CreateIcon(definition.Draw, definition.Color, normalizedSize);
         IconCache[key] = icon;
         return icon;
+    }
+
+    private static void DrawFileList(Graphics graphics, Rectangle bounds, Color color)
+    {
+        using var pen = new Pen(color, Math.Max(1.2f, bounds.Width / 14f));
+        graphics.DrawRectangle(pen, bounds.X + bounds.Width * .2f, bounds.Y + bounds.Height * .08f, bounds.Width * .6f, bounds.Height * .84f);
+        for (var i = 0; i < 3; i++)
+            graphics.DrawLine(pen, bounds.X + bounds.Width * .32f, bounds.Y + bounds.Height * (.3f + i * .2f),
+                bounds.X + bounds.Width * .68f, bounds.Y + bounds.Height * (.3f + i * .2f));
+    }
+
+    private static void DrawCollectFiles(Graphics graphics, Rectangle bounds, Color color)
+    {
+        using var pen = new Pen(color, Math.Max(1.2f, bounds.Width / 14f));
+        PointF Point(float x, float y) => new(bounds.X + bounds.Width * x, bounds.Y + bounds.Height * y);
+        graphics.DrawLines(pen, [Point(.12f, .15f), Point(.88f, .15f), Point(.6f, .53f), Point(.6f, .84f), Point(.4f, .95f), Point(.4f, .53f), Point(.12f, .15f)]);
     }
 
     private static Bitmap CreateIcon(Action<Graphics, Rectangle, Color> draw, Color color, int imageSize)

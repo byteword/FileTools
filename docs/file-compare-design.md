@@ -1,6 +1,11 @@
 # File Compare Design
 
-Review date: 2026-06-07
+Review date: 2026-06-07; implementation update: 2026-09-19.
+
+The approved maintenance slice is implemented: content-only preset, explicit comparison
+scope, whole-content evidence for cleanup, protected keepers and execution-time verification.
+JSON export is schema 3. See [current usage and validation](file-compare.md).
+The SVGs below document the earlier layout; current screenshots are in the usage guide.
 
 This document tracks GitHub issue #6. The first implementation slice added the
 comparison option model and engine. Later slices wire a dedicated comparison
@@ -112,8 +117,8 @@ the dialog apply only to that comparison run and do not overwrite saved settings
 The result dialog is the handoff point for follow-up work:
 
 - Status-filtered pair results remain the primary inspection surface.
-- A duplicate group panel is built only from `Same` pairs that include a
-  same-content criterion. Metadata-only matches are not treated as delete
+- A duplicate group panel now requires explicit whole-file equality and stable file identities; the former `Same`/criterion-name rule is replaced. Earlier behavior used a
+  same-content criterion. Partial ranges, archive-entry matches and metadata-only matches are not treated as delete
   candidates.
 - Duplicate groups can keep the first comparison-order item, newest modified
   item, oldest modified item, shortest path, or longest path. The remaining

@@ -33,15 +33,15 @@ the initial review. The user has now requested preparation for the sequence belo
 
 Branch: `codex/1.5.0.0`, based on `master` commit `15296b3` (`1.4.7.0`).
 App, ShellExt, installer, bundle and related version sources are synchronized
-to `1.5.0.0` for the requested code-change commit. The release remains unpublished.
+to `1.5.0.1` for the new catalog/comparison checkpoint commit. The earlier minor-version commit used `1.5.0.0`. The release remains unpublished.
 
 Implement and validate one feature at a time in the user-requested order:
 
 1. Empty-folder cleanup — implemented with Recycle Bin only.
 2. Batch filename editing — implemented with review, numbering and conflict checks.
-3. Duplicate-file inspection improvements.
-4. File-list export.
-5. Conditional file collection by kind, name, modified/created date, and related metadata.
+3. Existing file-compare improvements — implemented within the reduced scope.
+4. File-list export — implemented, CSV/TXT with selected columns and ordering.
+5. Conditional file collection — implemented, reviewed matches added to the target list.
 
 See the [implementation plan](v1.5.0.0-implementation-plan.md) for first scopes,
 code connection points, completion criteria, and the proposed UI flow.
@@ -49,8 +49,16 @@ Phases 1 and 2 passed 40 new tests, the complete 197-test Release suite, and
 real-folder recycle/restore verification. Korean dialogs were rendered at their
 default sizes; batch rename was also checked at its minimum size. See
 [file organization](file-organization.md) for behavior and verification limits.
-Next is phase 3, duplicate-file inspection improvements. Conditional collection
-currently defaults to target-list collection; direct copy/move remains optional.
+The user prioritized phases 4 and 5 next; both are now implemented. The latest
+managed Release suite passed 240 tests, including 43 new catalog/collection tests.
+Both dialogs passed Korean layout and target-list handoff checks. See
+[file catalog](file-catalog.md). Phase 3 now implements the approved, reduced comparison improvements.
+Following user feedback, the [revised phase 3 review](duplicate-inspection-review-2026-09-19.md)
+narrows the proposal to easier content-only comparison, explicit comparison-scope
+results, and guarded execution of existing Recycle Bin steps. Dedicated duplicate
+search/management, reference folders, reports, and JSON reload are outside this slice.
+The approved slice is implemented: 279 Release tests passed, including 39 new checks, plus actual dialog/planner and Recycle Bin move/restore verification. See [file comparison](file-compare.md). Further enhancements await a separate review.
+Conditional collection adds targets; direct copy/move remains a future extension.
 Work-plan presets and general undo remain outside this sequence.
 
 ## GitHub Issue Status
@@ -346,10 +354,7 @@ Work-plan presets and general undo remain outside this sequence.
   through deterministic pattern discovery, render-pattern candidates, persisted
   bounded local feedback history, and review UI integration before any neural
   ranker affects candidate order.
-- #6 file comparison: the planned 1.5.0.0 phase 3 now covers whole-file duplicate
-  verification, grouped search performance, delete-time revalidation, and JSON
-  result import/reload. Keep manual validation with large mixed file sets and
-  narrow result dialog sizes. The
+- #6 file comparison: the approved maintenance slice is implemented and verified: content-only preset, explicit comparison scope and guarded recycling. Grouped search and JSON import/reload remain deferred. The
   `/context FileCompare` route is exposed through Explorer registration,
   settings, and native ShellExt; continue packaged menu smoke testing as part of
   release validation.
@@ -383,7 +388,7 @@ The following items retain the existing release and maintenance checks.
      by the generated corpus. Treat those as beta caution items unless a
      concrete failure is found.
 
-2. Retain issue #6 comparison regression and UI checks alongside the planned
+2. Retain issue #6 comparison regression and UI checks after the completed
    1.5.0.0 phase 3 work.
    - Use mixed files and folders to verify pair counts, status filtering, and
      criterion details.

@@ -768,7 +768,7 @@ public sealed partial class MainForm : Form
         AddPaths(handoff.AllPaths);
         foreach (var group in handoff.Groups)
         {
-            DuplicateDeleteStepSelection.Apply(_targets, group.DeletePaths, group.Paths);
+            DuplicateDeleteStepSelection.Apply(_targets, group.DeletePaths, group.Paths, group.Snapshots);
         }
 
         RefreshTargetGridRows();
@@ -1100,7 +1100,17 @@ public sealed partial class MainForm : Form
         }
 
         var deletePaths = dialog.DeletePaths;
-        var changedTargets = DuplicateDeleteStepSelection.Apply(_targets, deletePaths, scopePaths);
+        int changedTargets;
+        try
+        {
+            changedTargets = DuplicateDeleteStepSelection.Apply(_targets, deletePaths, scopePaths,
+                step.DuplicateDeleteVerification?.Snapshots);
+        }
+        catch (InvalidOperationException ex)
+        {
+            MessageBox.Show(this, ex.Message, FileToolsEnvironment.AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
         RefreshTargetGridRows();
         RefreshPlanList();
         UpdateCommandStates();
@@ -1740,6 +1750,8 @@ public sealed partial class MainForm : Form
     {
         _emptyFolderToolButton.Image = UiIconFactory.GetIcon(UiIconKind.Clear, imageSize);
         _batchRenameToolButton.Image = UiIconFactory.GetIcon(UiIconKind.Rename, imageSize);
+        _fileListToolButton.Image = UiIconFactory.GetIcon(UiIconKind.FileList, imageSize);
+        _collectFilesToolButton.Image = UiIconFactory.GetIcon(UiIconKind.CollectFiles, imageSize);
         _mergeSelectedToolButton.Image = UiIconFactory.GetIcon(UiIconKind.FolderAdd, imageSize);
         _addRenameToolButton.Image = UiIconFactory.GetIcon(UiIconKind.Rename, imageSize);
         _addWrapToolButton.Image = UiIconFactory.GetIcon(UiIconKind.Wrap, imageSize);

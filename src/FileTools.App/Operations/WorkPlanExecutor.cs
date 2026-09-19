@@ -71,8 +71,24 @@ internal sealed class WorkPlanExecutor
         var aggregate = new OperationResult();
         var executedArchiveMergePlanIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var targetResults = new List<WorkPlanTargetExecutionResult>();
+        var targetList = targets.ToArray();
+        var blocked = new HashSet<DuplicateDeleteVerification>();
+        foreach (var verification in targetList.SelectMany(target => target.Steps)
+            .Select(step => step.DuplicateDeleteVerification).OfType<DuplicateDeleteVerification>().Distinct())
+        {
+            if (cancellationToken.IsCancellationRequested) break;
+            try
+            {
+                if (verification.ConflictsWith(targetList, PredictNextPath)) { blocked.Add(verification); continue; }
+                // Validate all remaining candidates before starting this execution.
+                foreach (var path in verification.KeepPaths.Concat(targetList
+                    .Where(target => target.Steps.Any(step => ReferenceEquals(step.DuplicateDeleteVerification, verification)))
+                    .Select(target => target.Path))) verification.CheckSnapshot(path);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { blocked.Add(verification); }
+        }
 
-        foreach (var target in targets)
+        foreach (var target in targetList)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -80,6 +96,15 @@ internal sealed class WorkPlanExecutor
             }
 
             progress?.Report(Localizer.Format("LogTargetStartingFormat", Path.GetFileName(target.Path)));
+            if (target.Steps.Any(step => step.DuplicateDeleteVerification is { } verification && blocked.Contains(verification)))
+            {
+                var held = new OperationResult();
+                held.AddError(Localizer.Get("DuplicateRecheckRequired"));
+                aggregate.Merge(held);
+                ReportStepResult(held, progress);
+                targetResults.Add(new WorkPlanTargetExecutionResult(target, target.Path, target.Path, []));
+                continue;
+            }
             var targetResult = RunTarget(target, aggregate, executedArchiveMergePlanIds, cancellationToken, progress);
             targetResults.Add(targetResult.Result);
             if (!targetResult.ContinueExecution)
@@ -280,7 +305,7 @@ internal sealed class WorkPlanExecutor
                     : step.ManualTargetRootPath;
                 return runner.Run(ToolMode.AutoRelocation, [path]);
             case WorkPlanStepKind.DuplicateDelete:
-                return DuplicateDeleteOperations.MoveFileToRecycleBin(path);
+                return DuplicateDeleteOperations.MoveFileToRecycleBin(path, step.DuplicateDeleteVerification, cancellationToken);
             default:
                 return new OperationResult();
         }

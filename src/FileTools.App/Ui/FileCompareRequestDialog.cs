@@ -119,12 +119,14 @@ internal sealed class FileCompareRequestDialog : Form
         _targetList.SelectedIndexChanged += (_, _) => UpdateTargetSummary();
         layout.Controls.Add(_targetList, 0, 0);
 
-        var buttons = new FlowLayoutPanel
+        var buttons = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,
-            WrapContents = false,
+            ColumnCount = 3,
+            RowCount = 1,
             Padding = new Padding(0, 6, 0, 0)
         };
+        for (var index = 0; index < 3; index++) buttons.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / 3));
         _addFilesButton.Text = Localizer.Get("ButtonAddFiles");
         _addFilesButton.Width = 110;
         _addFilesButton.Click += (_, _) => AddFiles();
@@ -134,6 +136,11 @@ internal sealed class FileCompareRequestDialog : Form
         _removeTargetsButton.Text = Localizer.Get("ButtonRemoveSelected");
         _removeTargetsButton.Width = 130;
         _removeTargetsButton.Click += (_, _) => RemoveSelectedTargets();
+        foreach (var button in new[] { _addFilesButton, _addFolderButton, _removeTargetsButton })
+        {
+            button.Dock = DockStyle.Fill;
+            button.Margin = new Padding(0, 0, 4, 0);
+        }
         buttons.Controls.Add(_addFilesButton);
         buttons.Controls.Add(_addFolderButton);
         buttons.Controls.Add(_removeTargetsButton);
@@ -164,15 +171,23 @@ internal sealed class FileCompareRequestDialog : Form
             Dock = DockStyle.Top,
             AutoSize = true,
             ColumnCount = 1,
-            RowCount = 4
+            RowCount = 5
         };
         scroll.Controls.Add(stack);
         group.Controls.Add(scroll);
 
-        stack.Controls.Add(CreateFileNameGroup(), 0, 0);
-        stack.Controls.Add(CreateMetadataGroup(), 0, 1);
-        stack.Controls.Add(CreateContentGroup(), 0, 2);
-        stack.Controls.Add(CreateOtherGroup(), 0, 3);
+        var contentOnly = new Button { Text = Localizer.Get("FileCompareContentOnlyPreset"), AutoSize = true, Margin = new Padding(3, 3, 3, 8) };
+        contentOnly.Click += (_, _) =>
+        {
+            _options.ApplyContentOnlyPreset();
+            LoadOptions();
+            UpdateOptionControlState();
+        };
+        stack.Controls.Add(contentOnly, 0, 0);
+        stack.Controls.Add(CreateFileNameGroup(), 0, 1);
+        stack.Controls.Add(CreateMetadataGroup(), 0, 2);
+        stack.Controls.Add(CreateContentGroup(), 0, 3);
+        stack.Controls.Add(CreateOtherGroup(), 0, 4);
         return group;
     }
 

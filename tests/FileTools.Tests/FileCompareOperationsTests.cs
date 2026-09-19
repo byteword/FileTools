@@ -407,7 +407,8 @@ public sealed class FileCompareOperationsTests
 
     private static FileCompareTarget CreateTarget(string path)
     {
-        return new FileCompareTarget(path, Path.GetFileName(path), Path.GetDirectoryName(path));
+        return new FileCompareTarget(path, Path.GetFileName(path), Path.GetDirectoryName(path))
+        { Snapshot = new RenameFileSnapshot(1, (uint)path.GetHashCode(), 0, 0, 0) };
     }
 
     private static FileComparePairResult CreatePair(
@@ -423,6 +424,8 @@ public sealed class FileCompareOperationsTests
             status,
             ratio,
             "test",
-            [new FileCompareCriterionResult(criterionName, status, ratio, "test")]);
+            [new FileCompareCriterionResult(criterionName, status, ratio, "test")])
+        { Scope = criterionName == "Content" ? FileCompareScope.WholeFile : FileCompareScope.MetadataOnly,
+          WholeContentEqual = criterionName == "Content" && status == FileCompareStatus.Same };
     }
 }

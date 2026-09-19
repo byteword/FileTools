@@ -290,7 +290,8 @@ internal sealed class FileCompareResultDialog : Form
     private void ConfigureGrids()
     {
         ConfigureBaseGrid(_pairGrid);
-        _pairGrid.Columns.Add(CreateTextColumn("Status", Localizer.Get("FileCompareColumnStatus"), width: 110));
+        _pairGrid.Columns.Add(CreateTextColumn("Status", Localizer.Get("FileCompareColumnStatus"), width: 150));
+        _pairGrid.Columns.Add(CreateTextColumn("Scope", Localizer.Get("FileCompareScopeColumn"), width: 120));
         _pairGrid.Columns.Add(CreateTextColumn("Ratio", Localizer.Get("FileCompareColumnMatchRatio"), width: 96));
         _pairGrid.Columns.Add(CreateTextColumn("Left", Localizer.Get("FileCompareColumnLeft"), fillWeight: 34));
         _pairGrid.Columns.Add(CreateTextColumn("Right", Localizer.Get("FileCompareColumnRight"), fillWeight: 34));
@@ -390,7 +391,8 @@ internal sealed class FileCompareResultDialog : Form
         foreach (var pair in pairs)
         {
             var rowIndex = _pairGrid.Rows.Add(
-                FileCompareText.GetDisplayName(pair.Status),
+                FileCompareText.GetResultName(pair),
+                FileCompareText.GetScopeName(pair.Scope),
                 FormatRatio(pair.MatchRatio),
                 pair.Left.Path,
                 pair.Right.Path,

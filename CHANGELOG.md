@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.5.0.1 - Unreleased (2026-09-19)
+
+- Add CSV/TXT file-list export and conditional file collection into the target list.
+- Add a content-only comparison preset and explicit whole/range/archive/metadata scope.
+- Require whole-file evidence for duplicate cleanup, protect keepers, and recheck identity
+  and full content before Recycle Bin execution. Export comparison scope in JSON schema 3.
+- Add 39 comparison/cleanup checks; the managed Release suite passes 279 tests.
+  Actual dialogs, planner handoff and temporary-file recycle/restore are verified.
+- Increment app, ShellExt, installer, bundle and build/documentation version metadata
+  from 1.5.0.0 to 1.5.0.1 for this checkpoint. No installation package is produced.
+- Explorer menu visibility is being investigated separately after the checkpoint.
 ## 1.5.0.0 - Unreleased (2026-09-19)
 
 ### Added

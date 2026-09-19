@@ -8,11 +8,23 @@ internal static class WindowsRecycleBin
 {
     public static void RecycleEmptyDirectory(string path)
     {
-        if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA) { RecycleOnSta(path); return; }
+        Recycle(path, () =>
+        {
+            FileOperationPathGuard.EnsureNoLinkedDirectory(path);
+            if (Directory.EnumerateFileSystemEntries(path).Any())
+                throw new IOException(Localizer.Format("EmptyFolderNotEmpty", path));
+        });
+    }
+
+    public static void RecycleFile(string path, Action verify) => Recycle(path, verify);
+
+    private static void Recycle(string path, Action verify)
+    {
+        if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA) { RecycleOnSta(path, verify); return; }
         Exception? failure = null;
         var thread = new Thread(() =>
         {
-            try { RecycleOnSta(path); }
+            try { RecycleOnSta(path, verify); }
             catch (Exception ex) { failure = ex; }
         }) { IsBackground = true, Name = "FileTools recycle" };
         thread.SetApartmentState(ApartmentState.STA);
@@ -21,14 +33,12 @@ internal static class WindowsRecycleBin
         if (failure is not null) ExceptionDispatchInfo.Capture(failure).Throw();
     }
 
-    private static void RecycleOnSta(string path)
+    private static void RecycleOnSta(string path, Action verify)
     {
-        FileOperationPathGuard.EnsureNoLinkedDirectory(path);
-        if (Directory.EnumerateFileSystemEntries(path).Any())
-            throw new IOException(Localizer.Format("EmptyFolderNotEmpty", path));
+        verify();
         IFileOperation? operation = null;
         IShellItem? item = null;
-        var sink = new RecycleSink(path);
+        var sink = new RecycleSink(verify);
         try
         {
             var operationType = Type.GetTypeFromCLSID(new Guid("3AD05575-8857-4850-9277-11B85BDB8E09"), throwOnError: true)!;
@@ -115,7 +125,7 @@ internal static class WindowsRecycleBin
     }
 
     [ComVisible(true), ClassInterface(ClassInterfaceType.None)]
-    private sealed class RecycleSink(string path) : IFileOperationProgressSink
+    private sealed class RecycleSink(Action verify) : IFileOperationProgressSink
     {
         public Exception? Failure { get; private set; }
         public bool Recycled { get; private set; }
@@ -124,9 +134,7 @@ internal static class WindowsRecycleBin
             try
             {
                 if ((flags & 0x80) == 0) throw new IOException(Localizer.Get("EmptyFolderRecycleUnavailable"));
-                FileOperationPathGuard.EnsureNoLinkedDirectory(path);
-                if (Directory.EnumerateFileSystemEntries(path).Any())
-                    throw new IOException(Localizer.Format("EmptyFolderNotEmpty", path));
+                verify();
                 return 0;
             }
             catch (Exception ex) { Failure = ex; return unchecked((int)0x80004004); }

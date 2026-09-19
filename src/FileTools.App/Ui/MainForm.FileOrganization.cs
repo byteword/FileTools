@@ -10,6 +10,10 @@ public sealed partial class MainForm
         _emptyFolderToolButton.Click += (_, _) => AddEmptyFolderCleanupSteps();
         _batchRenameMenuItem.Click += (_, _) => AddBatchRenameSteps();
         _batchRenameToolButton.Click += (_, _) => AddBatchRenameSteps();
+        _fileListMenuItem.Click += (_, _) => OpenFileList();
+        _fileListToolButton.Click += (_, _) => OpenFileList();
+        _collectFilesMenuItem.Click += (_, _) => OpenFileCollection();
+        _collectFilesToolButton.Click += (_, _) => OpenFileCollection();
     }
 
     private void LocalizeFileOrganizationCommands()
@@ -20,10 +24,18 @@ public sealed partial class MainForm
         _batchRenameMenuItem.Text = _batchRenameToolButton.Text = Localizer.Get("BatchRenameTitle");
         _batchRenameToolButton.ToolTipText = Localizer.Get("BatchRenameHelp");
         _batchRenameMenuItem.Image = UiIconFactory.Rename;
+        _fileListMenuItem.Text = _fileListToolButton.Text = Localizer.Get("FileListTitle");
+        _fileListToolButton.ToolTipText = Localizer.Get("FileListTitle");
+        _fileListMenuItem.Image = UiIconFactory.GetIcon(UiIconKind.FileList);
+        _collectFilesMenuItem.Text = _collectFilesToolButton.Text = Localizer.Get("CollectionTitle");
+        _collectFilesToolButton.ToolTipText = Localizer.Get("CollectionTitle");
+        _collectFilesMenuItem.Image = UiIconFactory.GetIcon(UiIconKind.CollectFiles);
     }
 
     private void UpdateFileOrganizationCommands(bool canModify, WorkTargetPlan[] selected)
     {
+        _fileListMenuItem.Enabled = _fileListToolButton.Enabled = canModify && selected.Length > 0;
+        _collectFilesMenuItem.Enabled = _collectFilesToolButton.Enabled = canModify && selected.Length > 0;
         _emptyFolderMenuItem.Enabled = _emptyFolderToolButton.Enabled = canModify && selected.Length > 0 &&
             selected.All(static target => Directory.Exists(target.Path) && target.Steps.Count == 0);
         _batchRenameMenuItem.Enabled = _batchRenameToolButton.Enabled = canModify && selected.Length > 0 &&
@@ -31,6 +43,30 @@ public sealed partial class MainForm
     }
 
     private static bool HasBatchRename(WorkTargetPlan target) => target.Steps.Any(static step => step.Kind == WorkPlanStepKind.BatchRename);
+
+    private void OpenFileList()
+    {
+        var paths = GetSelectedTargets().Select(static target => target.Path).ToArray();
+        if (paths.Length == 0) return;
+        using var dialog = new FileCatalogDialog(paths, _settings);
+        dialog.ShowDialog(this);
+    }
+
+    private void OpenFileCollection()
+    {
+        var paths = GetSelectedTargets().Select(static target => target.Path).ToArray();
+        if (paths.Length == 0) return;
+        using var dialog = new FileCatalogDialog(paths, _settings, collect: true);
+        if (dialog.ShowDialog(this) != DialogResult.OK) return;
+        AddCollectedFiles(dialog.CollectedPaths);
+    }
+
+    private void AddCollectedFiles(IReadOnlyList<string> paths)
+    {
+        var before = _targets.Count;
+        AddPaths(paths.Where(FileCatalog.IsRegularFile));
+        AppendLog(Localizer.Format("CollectionAdded", _targets.Count - before, paths.Count));
+    }
 
     private void AddBatchRenameSteps()
     {

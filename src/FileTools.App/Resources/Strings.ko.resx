@@ -923,4 +923,94 @@
   <data name="BatchRenameStatusReady" xml:space="preserve"><value>변경 가능</value></data>
   <data name="BatchRenameStatusUnchanged" xml:space="preserve"><value>변경 없음</value></data>
   <data name="BatchRenameStatusExcluded" xml:space="preserve"><value>제외</value></data>
+  <data name="FileListTitle" xml:space="preserve"><value>파일 목록 작성</value></data>
+  <data name="FileListHelp" xml:space="preserve"><value>파일을 확인하고 열과 정렬 순서를 선택해 CSV 또는 TXT로 저장합니다. 원본 파일은 변경하지 않습니다.</value></data>
+  <data name="CatalogRecursive" xml:space="preserve"><value>하위 폴더 포함</value></data>
+  <data name="CatalogHidden" xml:space="preserve"><value>숨김 항목 포함</value></data>
+  <data name="CatalogSystem" xml:space="preserve"><value>시스템 항목 포함</value></data>
+  <data name="CatalogScan" xml:space="preserve"><value>다시 검색</value></data>
+  <data name="CatalogStop" xml:space="preserve"><value>중지</value></data>
+  <data name="CatalogClose" xml:space="preserve"><value>닫기</value></data>
+  <data name="CatalogErrors" xml:space="preserve"><value>읽지 못한 경로</value></data>
+  <data name="CatalogDescending" xml:space="preserve"><value>내림차순</value></data>
+  <data name="CatalogSortLabel" xml:space="preserve"><value>정렬 기준</value></data>
+  <data name="CatalogSortName" xml:space="preserve"><value>이름 자연순</value></data>
+  <data name="CatalogSortFullPath" xml:space="preserve"><value>전체 경로</value></data>
+  <data name="CatalogSortKind" xml:space="preserve"><value>파일 종류</value></data>
+  <data name="CatalogSortSize" xml:space="preserve"><value>크기</value></data>
+  <data name="CatalogSortCreated" xml:space="preserve"><value>작성일</value></data>
+  <data name="CatalogSortModified" xml:space="preserve"><value>수정일</value></data>
+  <data name="CatalogColumnName" xml:space="preserve"><value>파일명</value></data>
+  <data name="CatalogColumnExtension" xml:space="preserve"><value>확장자</value></data>
+  <data name="CatalogColumnKind" xml:space="preserve"><value>파일 종류</value></data>
+  <data name="CatalogColumnFullPath" xml:space="preserve"><value>전체 경로</value></data>
+  <data name="CatalogColumnRootPath" xml:space="preserve"><value>선택 루트</value></data>
+  <data name="CatalogColumnRelativePath" xml:space="preserve"><value>상대 경로</value></data>
+  <data name="CatalogColumnSize" xml:space="preserve"><value>크기 (byte)</value></data>
+  <data name="CatalogColumnCreated" xml:space="preserve"><value>작성일 (UTC)</value></data>
+  <data name="CatalogColumnModified" xml:space="preserve"><value>수정일 (UTC)</value></data>
+  <data name="CatalogMissingFile" xml:space="preserve"><value>파일이 더 이상 존재하지 않습니다.</value></data>
+  <data name="CatalogRescan" xml:space="preserve"><value>조건이 변경되었습니다. 다시 검색해 결과를 갱신하세요.</value></data>
+  <data name="CatalogScanning" xml:space="preserve"><value>파일을 검색하고 있습니다…</value></data>
+  <data name="CatalogScanProgress" xml:space="preserve"><value>검색 중: 파일 {0}개 · 읽기 오류 {1}개 · 제외 {2}개</value></data>
+  <data name="CatalogSummary" xml:space="preserve"><value>파일 {0}개 · 읽기 오류 {1}개 · 제외 항목 {2}개</value></data>
+  <data name="CatalogCancelled" xml:space="preserve"><value>중지했습니다. 다시 검색하면 결과를 갱신합니다.</value></data>
+  <data name="CatalogErrorsTruncated" xml:space="preserve"><value>오류는 처음 200개까지만 표시합니다.</value></data>
+  <data name="FileListFormatLabel" xml:space="preserve"><value>저장 형식</value></data>
+  <data name="FileListFormatCsv" xml:space="preserve"><value>CSV</value></data>
+  <data name="FileListFormatText" xml:space="preserve"><value>TXT</value></data>
+  <data name="FileListTextLabel" xml:space="preserve"><value>TXT 내용</value></data>
+  <data name="FileListTextFullPath" xml:space="preserve"><value>전체 경로</value></data>
+  <data name="FileListTextRelativePath" xml:space="preserve"><value>상대 경로</value></data>
+  <data name="FileListTextName" xml:space="preserve"><value>파일명</value></data>
+  <data name="FileListSave" xml:space="preserve"><value>목록 저장…</value></data>
+  <data name="FileListSaving" xml:space="preserve"><value>목록을 저장하고 있습니다…</value></data>
+  <data name="FileListSaved" xml:space="preserve"><value>파일 {0}개 저장 (출력 파일 제외 {1}개): {2}</value></data>
+  <data name="FileListChooseColumns" xml:space="preserve"><value>CSV에 저장할 열을 하나 이상 선택하세요.</value></data>
+  <data name="FileListOutputExists" xml:space="preserve"><value>출력 파일이 이미 있습니다. 교체를 확인한 뒤 저장하세요.</value></data>
+  <data name="FileListOutputChanged" xml:space="preserve"><value>출력 파일이 변경되었습니다. 저장 위치를 다시 선택하세요.</value></data>
+  <data name="CollectionTitle" xml:space="preserve"><value>조건별 파일 모으기</value></data>
+  <data name="CollectionHelp" xml:space="preserve"><value>조건을 지정하고 다시 검색하세요. 체크한 결과를 앱의 대상 목록에 추가합니다. 파일을 이동하거나 복사하지 않습니다.</value></data>
+  <data name="CollectionKinds" xml:space="preserve"><value>종류 (복수 선택)</value></data>
+  <data name="CollectionExtensions" xml:space="preserve"><value>확장자</value></data>
+  <data name="CollectionNameLabel" xml:space="preserve"><value>이름</value></data>
+  <data name="CollectionNameContains" xml:space="preserve"><value>포함</value></data>
+  <data name="CollectionNameEquals" xml:space="preserve"><value>일치</value></data>
+  <data name="CollectionNameStartsWith" xml:space="preserve"><value>시작</value></data>
+  <data name="CollectionNameEndsWith" xml:space="preserve"><value>끝</value></data>
+  <data name="CollectionNameWildcard" xml:space="preserve"><value>와일드카드 (* ?)</value></data>
+  <data name="CollectionIgnoreCase" xml:space="preserve"><value>대소문자 무시</value></data>
+  <data name="CollectionDates" xml:space="preserve"><value>현지 날짜</value></data>
+  <data name="CollectionModified" xml:space="preserve"><value>수정일 시작</value></data>
+  <data name="CollectionCreated" xml:space="preserve"><value>작성일 시작</value></data>
+  <data name="CollectionThrough" xml:space="preserve"><value>종료</value></data>
+  <data name="CollectionSize" xml:space="preserve"><value>파일 크기</value></data>
+  <data name="CollectionMinimum" xml:space="preserve"><value>최소</value></data>
+  <data name="CollectionMaximum" xml:space="preserve"><value>최대</value></data>
+  <data name="CollectionSizeUnit" xml:space="preserve"><value>MiB (1 MiB = 1,048,576 byte)</value></data>
+  <data name="CollectionExclude" xml:space="preserve"><value>제외 경로</value></data>
+  <data name="CollectionExcludeHelp" xml:space="preserve"><value>한 줄에 하나씩 파일/폴더의 전체 경로를 입력</value></data>
+  <data name="CollectionExcludeFolder" xml:space="preserve"><value>폴더 추가…</value></data>
+  <data name="CollectionSelection" xml:space="preserve"><value>검색 결과</value></data>
+  <data name="CollectionSelectAll" xml:space="preserve"><value>모두 선택</value></data>
+  <data name="CollectionSelectNone" xml:space="preserve"><value>모두 해제</value></data>
+  <data name="CollectionInclude" xml:space="preserve"><value>포함</value></data>
+  <data name="CollectionAdd" xml:space="preserve"><value>대상 목록에 추가</value></data>
+  <data name="CollectionSummary" xml:space="preserve"><value>일치 {0}/{1}개 · 선택 {2}개 · 읽기 오류 {3}개 · 제외 {4}개</value></data>
+  <data name="CollectionAdded" xml:space="preserve"><value>선택한 파일 {1}개 중 새 대상 {0}개를 추가했습니다. 기존 대상과 사용할 수 없는 경로는 건너뜁니다.</value></data>
+  <data name="CollectionInvalidDates" xml:space="preserve"><value>시작일은 종료일보다 늦을 수 없습니다.</value></data>
+  <data name="CollectionInvalidSize" xml:space="preserve"><value>크기 범위를 확인하세요. 최소값은 최대값보다 클 수 없습니다.</value></data>
+  <data name="CollectionInvalidExtension" xml:space="preserve"><value>올바르지 않은 확장자: {0}</value></data>
+  <data name="CatalogAbsoluteExclude" xml:space="preserve"><value>제외 경로에는 파일 또는 폴더의 전체 경로를 입력하세요.</value></data>
+  <data name="DuplicateKeepRequired" xml:space="preserve"><value>같은 파일 중 최소 하나는 보존해야 합니다.</value></data>
+  <data name="DuplicateRecheckRequired" xml:space="preserve"><value>정리를 보류했습니다. 비교 이후 파일이 바뀌었거나, 보존본 또는 검증 정보가 없거나, 다른 작업과 충돌합니다. 파일을 다시 비교해 주세요.</value></data>
+  <data name="FileCompareContentOnlyPreset" xml:space="preserve"><value>내용만 비교 설정</value></data>
+  <data name="FileCompareRangeEqual" xml:space="preserve"><value>선택 구간 같음</value></data>
+  <data name="FileCompareScopeArchiveEntries" xml:space="preserve"><value>압축 내부</value></data>
+  <data name="FileCompareScopeColumn" xml:space="preserve"><value>비교 범위</value></data>
+  <data name="FileCompareScopeMetadataOnly" xml:space="preserve"><value>이름·속성만</value></data>
+  <data name="FileCompareScopeNotCompared" xml:space="preserve"><value>확인 못 함</value></data>
+  <data name="FileCompareScopeSelectedRange" xml:space="preserve"><value>선택 구간</value></data>
+  <data name="FileCompareScopeWholeFile" xml:space="preserve"><value>파일 전체</value></data>
+  <data name="FileCompareWholeEqual" xml:space="preserve"><value>전체 내용 같음</value></data>
 </root>

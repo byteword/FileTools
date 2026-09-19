@@ -68,6 +68,16 @@ internal enum FileCompareStatus
 
 internal sealed class FileCompareOptions
 {
+    public void ApplyContentOnlyPreset()
+    {
+        CompareFileName = CompareCreatedTime = CompareModifiedTime = false;
+        CompareFileSize = CompareContent = true;
+        ContentMode = FileCompareContentMode.Hash;
+        RangeMode = FileCompareRangeMode.Full;
+        ArchiveMode = FileCompareArchiveMode.AsFile;
+        EnableEarlyExit = UseHashCache = true;
+    }
+
     public bool CompareFileName { get; set; } = true;
 
     public FileCompareNameMatchMode NameMatchMode { get; set; } = FileCompareNameMatchMode.ExactFileName;
@@ -150,7 +160,12 @@ internal sealed class FileCompareOptions
 internal sealed record FileCompareTarget(
     string Path,
     string RelativePath,
-    string? RootPath);
+    string? RootPath)
+{
+    public RenameFileSnapshot? Snapshot { get; init; }
+}
+
+internal enum FileCompareScope { NotCompared, MetadataOnly, WholeFile, SelectedRange, ArchiveEntries }
 
 internal sealed record FileCompareReport(
     IReadOnlyList<FileCompareTarget> Targets,
@@ -164,7 +179,11 @@ internal sealed record FileComparePairResult(
     FileCompareStatus Status,
     double MatchRatio,
     string Reason,
-    IReadOnlyList<FileCompareCriterionResult> Criteria);
+    IReadOnlyList<FileCompareCriterionResult> Criteria)
+{
+    public FileCompareScope Scope { get; init; }
+    public bool WholeContentEqual { get; init; }
+}
 
 internal sealed record FileCompareCriterionResult(
     string Name,
@@ -205,7 +224,8 @@ internal static class FileCompareOperations
         CancellationToken cancellationToken = default)
     {
         var normalizedOptions = NormalizeOptions(options);
-        var targets = CollectTargets(paths);
+        cancellationToken.ThrowIfCancellationRequested();
+        var targets = CollectTargets(paths, cancellationToken);
         var cache = new FileCompareHashCache(normalizedOptions.UseHashCache);
         var results = new List<FileComparePairResult>();
         var totalPairs = targets.Count * Math.Max(0, targets.Count - 1) / 2;
@@ -228,12 +248,13 @@ internal static class FileCompareOperations
     /// <summary>
     /// 입력 경로를 정규화해 대상 파일 목록을 수집한다.
     /// </summary>
-    public static IReadOnlyList<FileCompareTarget> CollectTargets(IEnumerable<string> paths)
+    public static IReadOnlyList<FileCompareTarget> CollectTargets(IEnumerable<string> paths, CancellationToken cancellationToken = default)
     {
         var targets = new List<FileCompareTarget>();
         var seen = new HashSet<string>(PathComparer);
         foreach (var rawPath in paths)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var path = rawPath.Trim().Trim('"');
             if (string.IsNullOrWhiteSpace(path))
             {
@@ -252,7 +273,12 @@ internal static class FileCompareOperations
             }
 
             var root = Path.GetFullPath(path);
-            foreach (var file in Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories).Order(PathComparer))
+            FileOperationPathGuard.EnsureNoLinkedDirectory(root);
+            foreach (var file in Directory.EnumerateFiles(root, "*", new EnumerationOptions
+            {
+                RecurseSubdirectories = true, AttributesToSkip = FileAttributes.ReparsePoint,
+                IgnoreInaccessible = false
+            }).Select(file => { cancellationToken.ThrowIfCancellationRequested(); return file; }).Order(PathComparer))
             {
                 AddFile(Path.GetFullPath(file), root);
             }
@@ -262,6 +288,7 @@ internal static class FileCompareOperations
 
         void AddFile(string filePath, string? rootPath)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (!seen.Add(filePath))
             {
                 return;
@@ -270,7 +297,10 @@ internal static class FileCompareOperations
             var relativePath = rootPath is null
                 ? Path.GetFileName(filePath)
                 : Path.GetRelativePath(rootPath, filePath);
-            targets.Add(new FileCompareTarget(filePath, relativePath, rootPath));
+            RenameFileSnapshot? snapshot = null;
+            try { snapshot = RenameFileSnapshot.Capture(filePath); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+            targets.Add(new FileCompareTarget(filePath, relativePath, rootPath) { Snapshot = snapshot });
         }
     }
 
@@ -287,11 +317,16 @@ internal static class FileCompareOperations
         var criteria = new List<FileCompareCriterionResult>();
         try
         {
+            CheckSnapshot(left);
+            CheckSnapshot(right);
             if (options.ArchiveMode == FileCompareArchiveMode.ExtractEntries &&
                 IsSupportedArchiveContentPath(left.Path) &&
                 IsSupportedArchiveContentPath(right.Path))
             {
-                return CompareArchives(left, right, options, criteria, cancellationToken);
+                var archiveResult = CompareArchives(left, right, options, criteria, cancellationToken);
+                CheckSnapshot(left);
+                CheckSnapshot(right);
+                return archiveResult with { Scope = FileCompareScope.ArchiveEntries };
             }
 
             var leftInfo = new FileInfo(left.Path);
@@ -299,7 +334,7 @@ internal static class FileCompareOperations
             var earlyResult = CompareFileIdentityAndMetadata(left, right, leftInfo, rightInfo, options, criteria);
             if (earlyResult is not null)
             {
-                return earlyResult;
+                return earlyResult with { Scope = FileCompareScope.MetadataOnly };
             }
 
             if (options.CompareContent)
@@ -316,13 +351,26 @@ internal static class FileCompareOperations
                     cancellationToken));
             }
 
-            return CreatePairResult(left, right, criteria, options.PartialMatchThreshold);
+            var scope = !options.CompareContent ? FileCompareScope.MetadataOnly :
+                options.RangeMode == FileCompareRangeMode.Full ? FileCompareScope.WholeFile : FileCompareScope.SelectedRange;
+            var wholeEqual = scope == FileCompareScope.WholeFile &&
+                criteria.Last().Status == FileCompareStatus.Same;
+            CheckSnapshot(left);
+            CheckSnapshot(right);
+            return CreatePairResult(left, right, criteria, options.PartialMatchThreshold) with
+            { Scope = scope, WholeContentEqual = wholeEqual };
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             criteria.Add(new FileCompareCriterionResult("Failure", FileCompareStatus.Failed, 0, ex.Message));
             return new FileComparePairResult(left, right, FileCompareStatus.Failed, 0, ex.Message, criteria);
         }
+    }
+
+    private static void CheckSnapshot(FileCompareTarget target)
+    {
+        if (target.Snapshot is not null && RenameFileSnapshot.Capture(target.Path) != target.Snapshot)
+            throw new IOException(Localizer.Get("DuplicateRecheckRequired"));
     }
 
     /// <summary>
@@ -763,7 +811,7 @@ internal static class FileCompareOperations
         return new FileCompareCriterionResult("Content", status, ratio, detail);
     }
 
-    private static byte[] GetHash(
+    internal static byte[] GetHash(
         Func<Stream> openStream,
         string? cacheKeyBase,
         IReadOnlyList<ContentRange> ranges,
@@ -793,7 +841,7 @@ internal static class FileCompareOperations
                 var read = stream.Read(buffer, 0, readLength);
                 if (read == 0)
                 {
-                    break;
+                    throw new EndOfStreamException();
                 }
 
                 sha.AppendData(buffer.AsSpan(0, read));
@@ -1229,9 +1277,9 @@ internal static class FileCompareOperations
         return $"{leftCount} entries <-> {rightCount} entries ({options.ArchiveEntryOrder}{limit}{pairMode})";
     }
 
-    private readonly record struct ContentRange(long Offset, long Length);
+    internal readonly record struct ContentRange(long Offset, long Length);
 
-    private sealed class FileCompareHashCache
+    internal sealed class FileCompareHashCache
     {
         private readonly bool _enabled;
         private readonly Dictionary<string, byte[]> _hashes = new(StringComparer.Ordinal);
@@ -1275,6 +1323,16 @@ internal static class FileCompareOperations
 /// </summary>
 internal static class FileCompareText
 {
+    public static string GetScopeName(FileCompareScope scope) => Localizer.Get("FileCompareScope" + scope);
+
+    public static string GetResultName(FileComparePairResult pair)
+    {
+        if (pair.WholeContentEqual) return Localizer.Get("FileCompareWholeEqual");
+        if (pair.Status == FileCompareStatus.Same && pair.Scope == FileCompareScope.SelectedRange)
+            return Localizer.Get("FileCompareRangeEqual");
+        return GetDisplayName(pair.Status);
+    }
+
     /// <summary>
     /// 이름 비교 모드의 사용자 표기 문자열을 반환한다.
     /// </summary>

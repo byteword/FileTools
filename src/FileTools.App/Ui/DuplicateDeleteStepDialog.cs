@@ -276,6 +276,12 @@ internal sealed class DuplicateDeleteStepDialog : Form
             return;
         }
 
+        if (delete && _rows.Count(row => !row.Delete) <= selectedRows.Length)
+        {
+            MessageBox.Show(this, Localizer.Get("DuplicateKeepRequired"), Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
         foreach (var row in selectedRows)
         {
             row.Delete = delete;
@@ -298,6 +304,7 @@ internal sealed class DuplicateDeleteStepDialog : Form
 
     private void UpdateCommandState()
     {
+        _okButton.Enabled = _rows.Any(row => !row.Delete);
         _moveToDeleteButton.Enabled = _keepGrid.SelectedRows.Count > 0;
         _moveToKeepButton.Enabled = _deleteGrid.SelectedRows.Count > 0;
     }
